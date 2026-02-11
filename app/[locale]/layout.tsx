@@ -3,7 +3,7 @@ import { Geist } from "next/font/google"
 import { NextIntlClientProvider, hasLocale } from "next-intl"
 import { getMessages } from "next-intl/server"
 import { notFound } from "next/navigation"
-import { routing } from "@/shared/i18n/routing"
+import { routing } from "@/shared/i18n"
 import "../globals.css"
 
 const geist = Geist({
