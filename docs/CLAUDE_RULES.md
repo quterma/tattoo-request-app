@@ -13,6 +13,7 @@
 ## Reports
 
 - In the end of every todo — short report (what has been done) but briefly and without metrics and reports about testing and build checks. If tests or build fail, just fix them, so the report can't have fails — no need to report about success tests and builds.
+- At the end of every task — short list of files/folders changed/deleted/added.
 
 ## Token Economy
 
@@ -22,14 +23,31 @@
 
 - Don't add comments in code — maximum one per module or if necessary (todo, complicated logic etc). Code must be as self-explanatory as possible.
 
-## Update
+## Scope & Safety
 
-Scope-guard: “В рамках текущего Step нельзя делать ничего сверх TODO; если нужно — остановиться и спросить.”
+- Stay within the current Step's TODO; if something extra is needed — stop and ask.
+- Do not add dependencies, scripts, or configs unless explicitly listed in the TODO.
+- If changes affect project structure or aliases — cross-check with FRONTEND_ARCHITECTURE; on conflict — ask.
+- Never commit .env\*, keys, or URLs with tokens; only .env.example.
 
-No new deps by default: “Не добавлять зависимости/скрипты/конфиги, если это не явно в TODO.”
+## Import Policy
 
-Docs alignment: “Если изменения затрагивают структуру/алиасы — сверяться с FRONTEND_ARCHITECTURE; при конфликте — спросить.”
+All modules expose a public API through their `index.ts` re-export files. Imports must go through these re-export entry points, not directly into internal module files.
 
-Secrets rule: “Никогда не коммитить .env\*, ключи, URL с токенами; только .env.example.”
+Re-exports must be explicit and named (no `export *`).
 
-Output format: “В конце: короткий список файлов/папок, которые изменены/удалены/добавлены.”
+Allowed import directions:
+
+- `app/` → `src/features`, `src/shared`, `src/config`, `src/types`
+- `src/features/*` → `src/shared`, `src/services`, `src/config`, `src/types`
+- `src/services` → `src/config`, `src/types`
+- `src/shared` → `src/config`, `src/types`
+- `src/config` → (nothing)
+- `src/types` → (nothing)
+
+Forbidden:
+
+- feature → feature
+- shared → services
+- services → features
+- Any circular dependency
