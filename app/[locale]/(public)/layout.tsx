@@ -8,7 +8,7 @@ export default function PublicLayout({
   return (
     <>
       <AppNav />
-      <div className="pb-16 sm:pb-0">{children}</div>
+      <div className="pb-(--nav-height) sm:pb-0">{children}</div>
     </>
   )
 }
