@@ -23,7 +23,19 @@ tattoo-request-app/
 │   ├── not-found.tsx
 │   └── [locale]/
 │       ├── layout.tsx
-│       └── page.tsx
+│       ├── page.tsx
+│       ├── (admin)/
+│       │   └── admin/
+│       │       └── page.tsx
+│       └── (public)/
+│           ├── layout.tsx
+│           ├── page.tsx
+│           ├── location/
+│           │   └── page.tsx
+│           ├── request/
+│           │   └── page.tsx
+│           └── rules/
+│               └── page.tsx
 ├── docs/
 │   ├── ARCHITECTURE.md
 │   ├── files-structure.md
@@ -50,6 +62,7 @@ tattoo-request-app/
     │   ├── i18n/
     │   │   ├── config.ts
     │   │   ├── index.ts
+    │   │   ├── navigation.ts
     │   │   ├── request.ts
     │   │   ├── routing.ts
     │   │   └── messages/
@@ -61,6 +74,7 @@ tattoo-request-app/
     │   │   ├── index.ts
     │   │   └── setup.ts
     │   ├── ui/
+    │   │   ├── app-nav.tsx
     │   │   ├── container.tsx
     │   │   ├── index.ts
     │   │   ├── page.tsx

@@ -2,5 +2,11 @@
   "app": {
     "title": "Tattoo Request App",
     "description": "MVP scaffold"
+  },
+  "nav": {
+    "home": "Home",
+    "request": "Request",
+    "rules": "Rules",
+    "location": "Location"
   }
 }
