@@ -35,6 +35,8 @@ tattoo-request-app/
 ├── scripts/
 │   └── update-structure.mjs
 └── src/
+    ├── bff/
+    │   └── index.ts
     ├── config/
     │   └── index.ts
     ├── features/

@@ -43,7 +43,22 @@ Routes:
 
 ---
 
-### 3.2 Backend Platform (Supabase)
+### 3.2 BFF Layer (src/bff)
+
+Next.js Route Handlers orchestration layer.
+
+Responsibilities:
+
+- aggregate/transform data between frontend and Supabase
+- handle server-side validation before persistence
+- orchestrate multi-step operations (e.g. save request + upload files + trigger notification)
+
+The BFF is NOT a standalone server — it lives inside Next.js Route Handlers.
+Used when direct client→Supabase calls are insufficient (authorization, orchestration, data shaping).
+
+---
+
+### 3.3 Backend Platform (Supabase)
 
 Used as a managed backend.
 
@@ -58,7 +73,7 @@ Supabase is treated as an external system, not as application code.
 
 ---
 
-### 3.3 Notification Layer (Telegram)
+### 3.4 Notification Layer (Telegram)
 
 Responsibilities:
 

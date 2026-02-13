@@ -18,21 +18,28 @@ This plan is intentionally high-level and may be refined during development.
 
 ---
 
-## 3. Stage 0 — Project Baseline
+## 3. Stage 0 — Full Technical Foundation
 
-Goal: runnable project with documentation in place.
+Goal: complete technical baseline — tooling, architecture scaffolding, testing, validation, and BFF structure.
 
 Steps:
 
 - Initialize Next.js project (App Router, TS, Tailwind)
 - Verify local dev environment works
 - Add docs folder and MVP/Architecture documents
-- Prepare placeholder folders (e.g. supabase)
+- Scaffold frontend architecture (features, shared, services, config, types)
+- Configure tooling (ESLint, Prettier, TS strict)
+- Set up UI foundation (Tailwind, shadcn, design tokens)
+- Add i18n infrastructure (next-intl)
+- Add form + validation deps (react-hook-form, zod)
+- Set up testing baseline (Vitest, React Testing Library)
+- Add BFF layer scaffold (structure only, implementation in Stage 4)
 
 Exit criteria:
 
-- Project runs locally
-- Docs stored in repo
+- Project runs locally (dev, build, lint, typecheck, test)
+- Architecture scaffolded and documented
+- All tooling configured and passing
 
 ---
 

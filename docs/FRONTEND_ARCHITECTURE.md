@@ -18,6 +18,7 @@ layout.tsx
 providers.tsx
 
 /src
+/bff
 /features
 /shared
 /services
@@ -83,6 +84,24 @@ Rules:
 
 - shared MUST NOT import from features
 - shared MUST NOT import from services
+
+---
+
+### src/bff/
+
+Backend-for-Frontend orchestration layer using Next.js Route Handlers.
+
+Used when:
+
+- Client needs server-side validation before persistence
+- Multiple backend calls need orchestration
+- Data needs transformation between client and Supabase
+
+Rules:
+
+- bff MAY import from services, config, types
+- bff MUST NOT import from features or shared
+- bff exposes Route Handler functions, not React components
 
 ---
 
@@ -168,6 +187,7 @@ Allowed imports:
 
 - app → features, shared, config, types
 - features → shared, services, config, types
+- bff → services, config, types
 - services → config, types
 - shared → config, types
 - config → (none)
