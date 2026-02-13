@@ -61,7 +61,11 @@ tattoo-request-app/
     │   │   ├── index.ts
     │   │   └── setup.ts
     │   ├── ui/
-    │   │   └── index.ts
+    │   │   ├── container.tsx
+    │   │   ├── index.ts
+    │   │   ├── page.tsx
+    │   │   ├── section.tsx
+    │   │   └── stack.tsx
     │   └── utils/
     │       ├── cn.ts
     │       ├── index.ts

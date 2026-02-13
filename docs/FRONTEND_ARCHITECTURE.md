@@ -66,7 +66,7 @@ Reusable, generic building blocks.
 
 Contains:
 
-- ui (buttons, inputs, layout primitives)
+- ui (buttons, inputs, layout primitives — mobile-first, RTL-ready)
 - hooks (generic hooks)
 - utils (pure helpers)
 - i18n (dictionaries, helpers)
