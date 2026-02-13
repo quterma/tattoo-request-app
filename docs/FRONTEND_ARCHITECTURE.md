@@ -173,7 +173,24 @@ Rules:
 
 ---
 
-## 5. Import Rules (Strict)
+## 5. Mobile-first, Desktop Secondary
+
+- Base styles target mobile viewport.
+- Breakpoints add desktop enhancements only.
+- Desktop must remain functional but is not the primary design target.
+
+---
+
+## 6. RTL-ready from Stage 1
+
+- Direction (`dir`) is controlled at `app/[locale]/layout` level.
+- Layout primitives must avoid left/right-specific CSS where possible.
+- Prefer logical properties (`inline-start`/`inline-end`, `margin-inline`, etc.).
+- Full RTL verification is deferred to a later stage.
+
+---
+
+## 7. Import Rules (Strict)
 
 Allowed imports:
 

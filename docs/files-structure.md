@@ -55,7 +55,8 @@ tattoo-request-app/
     │   │   └── messages/
     │   │       └── en.json
     │   ├── styles/
-    │   │   └── index.ts
+    │   │   ├── index.ts
+    │   │   └── tokens.css
     │   ├── test/
     │   │   ├── index.ts
     │   │   └── setup.ts
