@@ -1,24 +1,10 @@
-# Tattoo Artist Request App — Implementation Plan
+# Implementation Plan
 
-## 1. Purpose
-
-Define a staged implementation plan for the MVP described in MVP_SCOPE.md,
-with clear goals per stage and minimal coupling between stages.
-
-This plan is intentionally high-level and may be refined during development.
+Staged plan for MVP (see MVP_SCOPE.md). One stage = one coherent goal.
 
 ---
 
-## 2. Guiding Principles
-
-- One stage = one coherent goal
-- Stages can be paused, reordered, or expanded
-- No premature optimization
-- Scope strictly follows MVP_SCOPE.md
-
----
-
-## 3. Stage 0 — Full Technical Foundation
+## Stage 0 — Full Technical Foundation [DONE]
 
 Goal: complete technical baseline — tooling, architecture scaffolding, testing, validation, and BFF structure.
 
@@ -43,7 +29,7 @@ Exit criteria:
 
 ---
 
-## 4. Stage 1 — Design Kit & Layout Foundation
+## Stage 1 — Design Kit & Layout Foundation
 
 Goal: establish visual and layout baseline before feature work.
 
@@ -61,7 +47,7 @@ Exit criteria:
 
 ---
 
-## 5. Stage 2 — Public Pages
+## Stage 2 — Public Pages
 
 Goal: static informational surface of the app.
 
@@ -79,7 +65,7 @@ Exit criteria:
 
 ---
 
-## 6. Stage 3 — Request Form (UI + UX)
+## Stage 3 — Request Form (UI + UX)
 
 Goal: collect structured request data on the client side.
 
@@ -98,7 +84,7 @@ Exit criteria:
 
 ---
 
-## 7. Stage 4 — Backend Integration (Supabase)
+## Stage 4 — Backend Integration (Supabase)
 
 Goal: persist data and files.
 
@@ -117,7 +103,7 @@ Exit criteria:
 
 ---
 
-## 8. Stage 5 — Notifications
+## Stage 5 — Notifications
 
 Goal: notify artist about new requests and unread items.
 
@@ -134,7 +120,7 @@ Exit criteria:
 
 ---
 
-## 9. Stage 6 — Admin Interface
+## Stage 6 — Admin Interface
 
 Goal: internal tool for processing requests.
 
@@ -152,7 +138,7 @@ Exit criteria:
 
 ---
 
-## 10. Stage 7 — Localization & RTL Validation
+## Stage 7 — Localization & RTL Validation
 
 Goal: ensure multi-language readiness.
 
@@ -170,7 +156,7 @@ Exit criteria:
 
 ---
 
-## 11. Stage 8 — QA & MVP Validation
+## Stage 8 — QA & MVP Validation
 
 Goal: verify MVP completeness and readiness for real use.
 
@@ -188,22 +174,6 @@ Exit criteria:
 
 ---
 
-## 12. Post-MVP (Out of Scope)
+## Post-MVP (Out of Scope)
 
-Potential future stages (not part of this plan):
-
-- CMS integration
-- Calendar sync
-- Payments
-- Analytics
-- Multi-artist support
-
----
-
-## 13. Plan Flexibility
-
-- Stages may be split or merged
-- Technical decisions may evolve
-- Scope changes require MVP_SCOPE.md update
-
-This plan is the single reference for implementation sequencing.
+CMS, calendar sync, payments, analytics, multi-artist — not part of this plan.

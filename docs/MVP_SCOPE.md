@@ -2,15 +2,13 @@
 
 ## 1. Purpose
 
-Web application for a tattoo artist to:
+Web app for a tattoo artist to:
 
-- reduce unstructured chat communication (Instagram / WhatsApp)
-- collect structured first requests with references and photos
+- collect structured first requests with references and photos (instead of Instagram/WhatsApp chats)
 - centralize all requests in a single admin interface
-- notify the artist about new requests and unread items
+- notify the artist about new requests
 
-This is a **real production-oriented MVP** for a single real user.
-Not a startup, not SaaS at this stage.
+Production MVP for a single real user. Not SaaS.
 
 ---
 
@@ -28,21 +26,9 @@ Potential tattoo client, mostly mobile, coming from Instagram link.
 
 ---
 
-## 3. Core Value
+## 3. In-Scope Features (MVP)
 
-Replace “Hi, I want something but don’t know what” chats with:
-
-- structured request form
-- required visual references
-- clear expectations before manual communication starts
-
-Manual booking, deposits, and calendar control remain outside the app.
-
----
-
-## 4. In-Scope Features (MVP)
-
-### 4.1 Public Pages
+### 3.1 Public Pages
 
 - Home page
   - short intro
@@ -58,7 +44,7 @@ Manual booking, deposits, and calendar control remain outside the app.
   - map
   - contact info
 
-### 4.2 Request Form
+### 3.2 Request Form
 
 Fields:
 
@@ -91,7 +77,7 @@ Submit result:
 
 ---
 
-## 5. Admin Interface
+## 4. Admin Interface
 
 Mobile-first, private.
 
@@ -112,22 +98,15 @@ Features:
 
 ---
 
-## 6. Notifications
+## 5. Notifications
 
-Telegram-based.
-
-Types:
-
+- Telegram bot → personal chat of the artist
 - New request notification
-- Reminder notification (if request not opened within defined time)
-
-Delivery:
-
-- Telegram bot → personal Telegram chat of the artist
+- Reminder if request not opened within threshold
 
 ---
 
-## 7. Localization & Direction
+## 6. Localization & Direction
 
 - i18n infrastructure enabled from start
 - EN used as primary language in MVP
@@ -137,7 +116,7 @@ Delivery:
 
 ---
 
-## 8. Non-Goals (Explicitly Out of Scope)
+## 7. Non-Goals (Out of Scope)
 
 - automatic booking
 - calendar synchronization
@@ -151,78 +130,24 @@ Delivery:
 
 ---
 
-## 9. Tech Stack
+## 8. Tech Stack
 
-Frontend:
-
-- Next.js (App Router)
-- TypeScript
-- Tailwind CSS
-- shadcn/ui
-- mobile-first responsive layout
-
-Backend / Services:
-
-- Supabase
-  - Postgres (requests data)
-  - Storage (images)
-  - Auth (admin access)
-  - Edge Functions (Telegram notifications, reminders)
-
-Infrastructure:
-
-- single repository
-- Supabase as managed backend
-- no separate backend service
-- no AWS at MVP stage
+- **Frontend:** Next.js (App Router), TypeScript, Tailwind CSS, shadcn/ui, mobile-first
+- **Backend:** Supabase (Postgres, Storage, Auth, Edge Functions)
+- **Notifications:** Telegram Bot API
+- **Infra:** single repo, no separate backend, no AWS
 
 ---
 
-## 10. High-Level Architecture (Surface Only)
-
-- Next.js app (public + admin routes)
-- Supabase client used from frontend
-- Supabase Edge Functions:
-  - send Telegram notifications
-  - scheduled reminder checks
-- Storage access controlled via Supabase policies
-
-(Detailed architecture to be defined separately.)
-
----
-
-## 11. Development Plan (High-Level)
-
-1. Repo setup + environment configuration
-2. Design kit (colors, typography, base UI atoms)
-3. Public layout + static pages
-4. Request form UI + validation
-5. File upload integration
-6. Supabase schema + storage setup
-7. Submit flow + success UX
-8. Telegram notifications
-9. Admin list & details views
-10. Status management + notes
-11. Reminder logic
-12. QA, demo scenarios, polish
-
----
-
-## 12. Acceptance Criteria
+## 9. Acceptance Criteria / Definition of Done
 
 - Client can submit a request with required data and images
 - Artist receives Telegram notification
 - Request visible in admin interface
-- Images are viewable without external services
+- Images viewable without external services
 - Admin can change status and add notes
 - App usable on mobile without friction
+- Deployed web app, real requests can be submitted
 - No booking/payment functionality present
 
----
-
-## 13. MVP Definition of Done
-
-- Deployed web app
-- Real requests can be submitted
-- Artist can process requests without using Instagram DMs
-- Scope strictly respected
+See: ARCHITECTURE.md (system design), IMPLEMENTATION_PLAN.md (staged plan).

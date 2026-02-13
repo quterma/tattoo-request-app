@@ -1,15 +1,10 @@
 # Frontend Architecture
 
-## 1. Architectural Model
-
-Feature-oriented architecture inspired by FSD, simplified for MVP.
-Strict import rules to prevent cyclic and unclear dependencies.
-
-Framework: Next.js (App Router).
+Feature-oriented architecture (FSD-inspired, simplified). Next.js App Router.
 
 ---
 
-## 2. Top-Level Structure
+## 1. Top-Level Structure
 
 /app
 /(public)
@@ -27,7 +22,7 @@ providers.tsx
 
 ---
 
-## 3. Layers and Responsibilities
+## 2. Layers and Responsibilities
 
 ### app/
 
@@ -38,9 +33,6 @@ providers.tsx
   - src/features
   - src/shared
   - src/config
-
-`app` replaces the traditional `pages` layer.
-There is NO separate `pages` folder.
 
 ---
 
@@ -154,7 +146,7 @@ Rules:
 
 ---
 
-## 4. Providers and Contexts
+## 3. Providers and Contexts
 
 ### app/providers.tsx
 
@@ -171,7 +163,7 @@ Rules:
 
 ---
 
-## 5. State Management
+## 4. State Management
 
 - Local component state by default
 - Feature-level state via hooks in `features/*/model`
@@ -181,7 +173,7 @@ Rules:
 
 ---
 
-## 6. Import Rules (Strict)
+## 5. Import Rules (Strict)
 
 Allowed imports:
 
@@ -199,14 +191,3 @@ Forbidden:
 - shared → services
 - services → features
 - any circular dependency
-
----
-
-## 7. What Is Explicitly Out of Scope
-
-- widgets layer
-- entities layer
-- global state manager
-- architectural abstractions without usage
-
-This architecture is fixed for MVP and may evolve later.

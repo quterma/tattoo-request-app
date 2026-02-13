@@ -11,7 +11,6 @@ tattoo-request-app/
 ├── next.config.ts
 ├── package.json
 ├── pnpm-lock.yaml
-├── pnpm-workspace.yaml
 ├── postcss.config.mjs
 ├── proxy.ts
 ├── README.md
@@ -31,6 +30,7 @@ tattoo-request-app/
 │   ├── FRONTEND_ARCHITECTURE.md
 │   ├── IMPLEMENTATION_PLAN.md
 │   ├── MVP_SCOPE.md
+│   ├── stage-0-report.md
 │   └── TESTING_STRATEGY.md
 ├── scripts/
 │   └── update-structure.mjs
