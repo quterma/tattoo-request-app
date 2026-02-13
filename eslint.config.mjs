@@ -24,6 +24,7 @@ const eslintConfig = defineConfig([
             "eslint/*",
             "eslint-config-next/*",
             "**/shared/i18n/*",
+            "@hookform/resolvers/*",
           ],
         },
       ],

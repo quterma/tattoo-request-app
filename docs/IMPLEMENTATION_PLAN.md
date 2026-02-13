@@ -83,6 +83,7 @@ Steps:
 - Upload UI (previews, replace before submit)
 - Consent checkbox and basic privacy note
 - Success state UX
+  “Implement explicit submission state flow (FSM-style) using useReducer (no XState) to manage: editing → validating → uploading → submitting → success/error.”
 
 Exit criteria:
 

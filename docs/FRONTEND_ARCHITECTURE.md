@@ -158,6 +158,7 @@ Rules:
 - Feature-level state via hooks in `features/*/model`
 - No global state manager in MVP
 - Server state handled via services (Supabase client)
+- Complex feature flows (e.g., request form submission/upload) use useReducer as explicit finite-state flow inside features/\*/model.
 
 ---
 
