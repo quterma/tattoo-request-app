@@ -33,10 +33,15 @@ Exit criteria:
 
 Goal: establish visual and layout baseline before feature work.
 
+Constraints:
+
+- Light-only (no dark mode setup, no theme providers)
+- Mobile-first, RTL-ready from the start
+
 Steps:
 
-- Define design tokens (colors, typography, spacing)
-- Implement basic layout primitives (page wrapper, header, footer)
+- Define design tokens (colors, typography, spacing) in src/shared/styles
+- Implement layout primitives (Container, Page, Section, Stack) in src/shared/ui
 - Implement base UI atoms (button, input, textarea, select, badge)
 - Verify mobile-first behavior
 
@@ -44,6 +49,7 @@ Exit criteria:
 
 - Consistent UI baseline
 - No feature-specific styling yet
+- No dark mode scaffolding present
 
 ---
 
