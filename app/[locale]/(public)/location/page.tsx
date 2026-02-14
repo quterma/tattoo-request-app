@@ -16,15 +16,15 @@ export default function LocationPage() {
   const t = useTranslations("location")
 
   return (
-    <Page>
-      <Section>
+    <Page className="py-4 sm:py-8">
+      <Section className="py-2 sm:py-3">
         <h1>{t("title")}</h1>
       </Section>
 
-      <Section>
+      <Section className="py-2 sm:py-3">
         <p className="text-muted-foreground">{t("address")}</p>
 
-        <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
+        <div className="mt-3 grid grid-cols-3 gap-2 sm:gap-3">
           {MAP_LINKS.map(({ labelKey, href }) => (
             <a
               key={labelKey}
@@ -37,20 +37,20 @@ export default function LocationPage() {
         </div>
       </Section>
 
-      <Section>
+      <Section className="py-2 sm:py-3">
         <div className="aspect-video w-full rounded-md bg-muted" />
       </Section>
 
-      <Section>
-        <Stack gap="gap-2">
-          <h2>{t("howToFindUs")}</h2>
+      <Section className="py-2 sm:py-3">
+        <Stack gap="gap-1.5">
+          <h2 className="mb-1">{t("howToFindUs")}</h2>
           <p className="text-muted-foreground">{t("howToFindUsText")}</p>
         </Stack>
       </Section>
 
-      <Section>
-        <h2>{t("studioPhotos")}</h2>
-        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <Section className="py-2 sm:py-3">
+        <h2 className="mb-1">{t("studioPhotos")}</h2>
+        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
           {Array.from({ length: 4 }, (_, i) => (
             <div key={i} className="aspect-video rounded-md bg-muted" />
           ))}
