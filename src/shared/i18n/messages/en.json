@@ -42,13 +42,13 @@
     "title": "Tattoo Day & Aftercare",
     "backToPolicies": "Back to Policies",
     "beforeAppointment": "Before Your Appointment",
-    "beforeAppointmentText": "How to prepare for your tattoo session — what to do, what to avoid, and what to bring.",
+    "beforeAppointmentItems": "Get a good night of sleep\nEat a proper meal before you arrive\nAvoid alcohol the day before\nWear comfortable clothes that make the tattoo area easy to access\nIf needed, shave the area in advance (or I can help at the studio)",
     "tattooDay": "What Happens on Tattoo Day",
-    "tattooDayText": "What to expect when you arrive at the studio, the tattooing process, and how long it takes.",
+    "tattooDayItems": "Bring a valid ID\nWe confirm size and placement together\nI prepare the stencil and transfer it until you're happy with the placement\nPlease try to stay still during the session (tell me if you need a break)\nAfter the tattoo, we'll take photos, then I'll apply aftercare protection and explain next steps",
     "aftercareInstructions": "Aftercare Instructions",
-    "aftercareInstructionsText": "Step-by-step care for your new tattoo during the first days and weeks of healing.",
+    "aftercareInstructionsItems": "You'll leave with a protective film (Second Skin)\nKeep it on for 3–7 days (minimum 3 days)\nAfter removal: wash gently with warm water\nApply a thin layer of unscented moisturizer (e.g. Bepanthen Plus, or similar)\nKeep the area clean and dry\nAvoid soaking (sea, pool, hot springs) for at least 3 weeks\nAvoid direct sunlight; use sunscreen once fully healed\nDo not scratch or pick flaking skin (pat gently if itchy)",
     "healingTouchUps": "Healing & Touch-Ups",
-    "healingTouchUpsText": "What to expect during the healing process and when to schedule a touch-up if needed."
+    "healingTouchUpsItems": "Healing time varies: small tattoos may take ~2 weeks, larger pieces longer\nIf you notice unusual redness, heat, swelling, or persistent bleeding, contact a doctor\nTouch-ups are free within 3 months after your tattoo\nAfter 3 months, touch-ups are charged depending on what's needed"
   },
   "footer": {
     "studio": "Studio Name",

@@ -5,46 +5,66 @@ import { Page, Section, Stack } from "@/shared/ui"
 export default function AftercarePage() {
   const t = useTranslations("aftercare")
 
+  const bullets = (key: string) =>
+    t(key)
+      .split("\n")
+      .map((item, i) => (
+        <li key={i} className="text-muted-foreground">
+          {item}
+        </li>
+      ))
+
   return (
-    <Page>
-      <Section>
+    <Page className="py-4 sm:py-8">
+      <Section className="py-2 sm:py-3">
         <Link
           href="/policies"
           className="text-sm text-muted-foreground underline transition-colors hover:text-foreground"
         >
           {t("backToPolicies")}
         </Link>
-        <h1 className="mt-4">{t("title")}</h1>
+        <h1 className="mt-3">{t("title")}</h1>
       </Section>
 
-      <Section>
-        <Stack gap="gap-2">
-          <h2>{t("beforeAppointment")}</h2>
-          <p className="text-muted-foreground">{t("beforeAppointmentText")}</p>
+      <Section className="py-2 sm:py-3">
+        <Stack gap="gap-1.5">
+          <h2 className="mb-1">{t("beforeAppointment")}</h2>
+          <ul className="list-disc ps-5">
+            {bullets("beforeAppointmentItems")}
+          </ul>
         </Stack>
       </Section>
 
-      <Section>
-        <Stack gap="gap-2">
-          <h2>{t("tattooDay")}</h2>
-          <p className="text-muted-foreground">{t("tattooDayText")}</p>
+      <Section className="py-2 sm:py-3">
+        <Stack gap="gap-1.5">
+          <h2 className="mb-1">{t("tattooDay")}</h2>
+          <ul className="list-disc ps-5">{bullets("tattooDayItems")}</ul>
         </Stack>
       </Section>
 
-      <Section>
-        <Stack gap="gap-2">
-          <h2>{t("aftercareInstructions")}</h2>
-          <p className="text-muted-foreground">
-            {t("aftercareInstructionsText")}
-          </p>
+      <Section className="py-2 sm:py-3">
+        <Stack gap="gap-1.5">
+          <h2 className="mb-1">{t("aftercareInstructions")}</h2>
+          <ul className="list-disc ps-5">
+            {bullets("aftercareInstructionsItems")}
+          </ul>
         </Stack>
       </Section>
 
-      <Section>
-        <Stack gap="gap-2">
-          <h2>{t("healingTouchUps")}</h2>
-          <p className="text-muted-foreground">{t("healingTouchUpsText")}</p>
+      <Section className="py-2 sm:py-3">
+        <Stack gap="gap-1.5">
+          <h2 className="mb-1">{t("healingTouchUps")}</h2>
+          <ul className="list-disc ps-5">{bullets("healingTouchUpsItems")}</ul>
         </Stack>
+      </Section>
+
+      <Section className="py-2 sm:py-3">
+        <Link
+          href="/policies"
+          className="text-sm text-muted-foreground underline transition-colors hover:text-foreground"
+        >
+          {t("backToPolicies")}
+        </Link>
       </Section>
     </Page>
   )

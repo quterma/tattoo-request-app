@@ -7,32 +7,32 @@ export default function PoliciesPage() {
 
   return (
     <Page className="py-4 sm:py-8">
-      <Section className="py-1 sm:py-3">
+      <Section className="py-2 sm:py-3">
         <h1>{t("title")}</h1>
       </Section>
 
-      <Section className="py-1 sm:py-3">
+      <Section className="py-2 sm:py-3">
         <Stack gap="gap-1.5">
-          <h2>{t("fees")}</h2>
-          <p className="whitespace-pre-line text-muted-foreground">
+          <h2 className="mb-1">{t("fees")}</h2>
+          <p className="whitespace-pre-line text-muted-foreground mb-0">
             {t("feesText")}
           </p>
         </Stack>
       </Section>
 
-      <Section className="py-1 sm:py-3">
+      <Section className="py-2 sm:py-3">
         <Stack gap="gap-1.5">
-          <h2>{t("tipping")}</h2>
-          <p className="whitespace-pre-line text-muted-foreground">
+          <h2 className="mb-1">{t("tipping")}</h2>
+          <p className="whitespace-pre-line text-muted-foreground mb-0">
             {t("tippingText")}
           </p>
         </Stack>
       </Section>
 
-      <Section className="py-1 sm:py-3">
+      <Section className="py-2 sm:py-3">
         <Stack gap="gap-1.5">
-          <h2>{t("deposits")}</h2>
-          <p className="whitespace-pre-line text-muted-foreground">
+          <h2 className="mb-1">{t("deposits")}</h2>
+          <p className="whitespace-pre-line text-muted-foreground mb-0">
             {t.rich("depositsText", {
               b: (chunks) => <strong>{chunks}</strong>,
             })}
@@ -40,37 +40,37 @@ export default function PoliciesPage() {
         </Stack>
       </Section>
 
-      <Section className="py-1 sm:py-3">
+      <Section className="py-2 sm:py-3">
         <Stack gap="gap-1.5">
-          <h2>{t("designPolicy")}</h2>
-          <p className="whitespace-pre-line text-muted-foreground">
+          <h2 className="mb-1">{t("designPolicy")}</h2>
+          <p className="whitespace-pre-line text-muted-foreground mb-0">
             {t("designPolicyText")}
           </p>
         </Stack>
       </Section>
 
-      <Section className="py-1 sm:py-3">
+      <Section className="py-2 sm:py-3">
         <Stack gap="gap-1.5">
-          <h2>{t("touchUps")}</h2>
-          <p className="whitespace-pre-line text-muted-foreground">
+          <h2 className="mb-1">{t("touchUps")}</h2>
+          <p className="whitespace-pre-line text-muted-foreground mb-0">
             {t("touchUpsText")}
           </p>
         </Stack>
       </Section>
 
-      <Section className="py-1 sm:py-3">
+      <Section className="py-2 sm:py-3">
         <Stack gap="gap-1.5">
-          <h2>{t("agePolicy")}</h2>
-          <p className="whitespace-pre-line text-muted-foreground">
+          <h2 className="mb-1">{t("agePolicy")}</h2>
+          <p className="whitespace-pre-line text-muted-foreground mb-0">
             {t("agePolicyText")}
           </p>
         </Stack>
       </Section>
 
-      <Section className="py-1 sm:py-3">
+      <Section className="py-2 sm:py-3">
         <Stack gap="gap-1.5">
-          <h2>{t("faq")}</h2>
-          <p className="whitespace-pre-line text-muted-foreground">
+          <h2 className="mb-1">{t("faq")}</h2>
+          <p className="whitespace-pre-line text-muted-foreground mb-0">
             {t("faqText")}
           </p>
         </Stack>
