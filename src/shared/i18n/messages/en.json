@@ -34,7 +34,19 @@
     "faq": "FAQ",
     "faqText": "Common questions about the process, timing, and preparation will be answered here.",
     "ctaButton": "Request a Tattoo",
-    "aftercareButton": "Tattoo Day & Aftercare"
+    "aftercareLink": "Read about Tattoo Day & Aftercare"
+  },
+  "aftercare": {
+    "title": "Tattoo Day & Aftercare",
+    "backToPolicies": "Back to Policies",
+    "beforeAppointment": "Before Your Appointment",
+    "beforeAppointmentText": "How to prepare for your tattoo session — what to do, what to avoid, and what to bring.",
+    "tattooDay": "What Happens on Tattoo Day",
+    "tattooDayText": "What to expect when you arrive at the studio, the tattooing process, and how long it takes.",
+    "aftercareInstructions": "Aftercare Instructions",
+    "aftercareInstructionsText": "Step-by-step care for your new tattoo during the first days and weeks of healing.",
+    "healingTouchUps": "Healing & Touch-Ups",
+    "healingTouchUpsText": "What to expect during the healing process and when to schedule a touch-up if needed."
   },
   "footer": {
     "studio": "Studio Name",

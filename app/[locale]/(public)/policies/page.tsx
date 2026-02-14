@@ -63,9 +63,9 @@ export default function PoliciesPage() {
           </Link>
           <Link
             href="/aftercare"
-            className="inline-block rounded-md bg-foreground px-6 py-3 text-sm font-semibold text-background transition-colors hover:bg-foreground/90"
+            className="text-sm text-muted-foreground underline transition-colors hover:text-foreground"
           >
-            {t("aftercareButton")}
+            {t("aftercareLink")}
           </Link>
         </Stack>
       </Section>

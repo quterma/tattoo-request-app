@@ -29,13 +29,13 @@ tattoo-request-app/
 │       └── (public)/
 │           ├── layout.tsx
 │           ├── page.tsx
+│           ├── aftercare/
+│           │   └── page.tsx
 │           ├── location/
 │           │   └── page.tsx
 │           ├── policies/
 │           │   └── page.tsx
-│           ├── request/
-│           │   └── page.tsx
-│           └── rules/
+│           └── request/
 │               └── page.tsx
 ├── docs/
 │   ├── ARCHITECTURE.md
