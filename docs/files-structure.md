@@ -23,7 +23,6 @@ tattoo-request-app/
 │   ├── not-found.tsx
 │   └── [locale]/
 │       ├── layout.tsx
-│       ├── page.tsx
 │       ├── (admin)/
 │       │   └── admin/
 │       │       └── page.tsx
@@ -43,6 +42,7 @@ tattoo-request-app/
 │   ├── IMPLEMENTATION_PLAN.md
 │   ├── MVP_SCOPE.md
 │   ├── stage-0-report.md
+│   ├── stage-1-report.md
 │   └── TESTING_STRATEGY.md
 ├── scripts/
 │   └── update-structure.mjs
@@ -78,6 +78,7 @@ tattoo-request-app/
     │   │   ├── container.tsx
     │   │   ├── index.ts
     │   │   ├── page.tsx
+    │   │   ├── public-footer.tsx
     │   │   ├── section.tsx
     │   │   └── stack.tsx
     │   └── utils/

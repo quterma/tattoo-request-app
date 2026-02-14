@@ -1,5 +1,6 @@
 export { AppNav } from "./app-nav"
 export { Container } from "./container"
 export { Page } from "./page"
+export { PublicFooter } from "./public-footer"
 export { Section } from "./section"
 export { Stack } from "./stack"

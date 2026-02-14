@@ -8,5 +8,12 @@
     "request": "Request",
     "rules": "Rules",
     "location": "Location"
+  },
+  "footer": {
+    "studio": "Studio Name",
+    "address": "Herzl 100, Tel Aviv, Israel",
+    "email": "masha.karda@gmail.com",
+    "phone": "054-918-3435",
+    "copyright": "\u00a9 {year} All rights reserved"
   }
 }
