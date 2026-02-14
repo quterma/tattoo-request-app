@@ -6,55 +6,78 @@ export default function PoliciesPage() {
   const t = useTranslations("policies")
 
   return (
-    <Page>
-      <Section>
+    <Page className="py-4 sm:py-8">
+      <Section className="py-1 sm:py-3">
         <h1>{t("title")}</h1>
       </Section>
 
-      <Section>
-        <Stack gap="gap-2">
+      <Section className="py-1 sm:py-3">
+        <Stack gap="gap-1.5">
           <h2>{t("fees")}</h2>
-          <p className="text-muted-foreground">{t("feesText")}</p>
+          <p className="whitespace-pre-line text-muted-foreground">
+            {t("feesText")}
+          </p>
         </Stack>
       </Section>
 
-      <Section>
-        <Stack gap="gap-2">
-          <h2>{t("pricingStandards")}</h2>
-          <p className="text-muted-foreground">{t("pricingStandardsText")}</p>
+      <Section className="py-1 sm:py-3">
+        <Stack gap="gap-1.5">
+          <h2>{t("tipping")}</h2>
+          <p className="whitespace-pre-line text-muted-foreground">
+            {t("tippingText")}
+          </p>
         </Stack>
       </Section>
 
-      <Section>
-        <Stack gap="gap-2">
+      <Section className="py-1 sm:py-3">
+        <Stack gap="gap-1.5">
           <h2>{t("deposits")}</h2>
-          <p className="text-muted-foreground">{t("depositsText")}</p>
+          <p className="whitespace-pre-line text-muted-foreground">
+            {t.rich("depositsText", {
+              b: (chunks) => <strong>{chunks}</strong>,
+            })}
+          </p>
         </Stack>
       </Section>
 
-      <Section>
-        <Stack gap="gap-2">
+      <Section className="py-1 sm:py-3">
+        <Stack gap="gap-1.5">
           <h2>{t("designPolicy")}</h2>
-          <p className="text-muted-foreground">{t("designPolicyText")}</p>
+          <p className="whitespace-pre-line text-muted-foreground">
+            {t("designPolicyText")}
+          </p>
         </Stack>
       </Section>
 
-      <Section>
-        <Stack gap="gap-2">
+      <Section className="py-1 sm:py-3">
+        <Stack gap="gap-1.5">
           <h2>{t("touchUps")}</h2>
-          <p className="text-muted-foreground">{t("touchUpsText")}</p>
+          <p className="whitespace-pre-line text-muted-foreground">
+            {t("touchUpsText")}
+          </p>
         </Stack>
       </Section>
 
-      <Section>
-        <Stack gap="gap-2">
+      <Section className="py-1 sm:py-3">
+        <Stack gap="gap-1.5">
+          <h2>{t("agePolicy")}</h2>
+          <p className="whitespace-pre-line text-muted-foreground">
+            {t("agePolicyText")}
+          </p>
+        </Stack>
+      </Section>
+
+      <Section className="py-1 sm:py-3">
+        <Stack gap="gap-1.5">
           <h2>{t("faq")}</h2>
-          <p className="text-muted-foreground">{t("faqText")}</p>
+          <p className="whitespace-pre-line text-muted-foreground">
+            {t("faqText")}
+          </p>
         </Stack>
       </Section>
 
-      <Section className="text-center">
-        <Stack gap="gap-4" className="items-center">
+      <Section className="py-3 sm:py-3 text-center">
+        <Stack gap="gap-5" className="items-center">
           <Link
             href="/request"
             className="inline-block rounded-md bg-foreground px-6 py-3 text-sm font-semibold text-background transition-colors hover:bg-foreground/90"
