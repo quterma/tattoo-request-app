@@ -50,12 +50,21 @@
     "healingTouchUps": "Healing & Touch-Ups",
     "healingTouchUpsItems": "Healing time varies: small tattoos may take ~2 weeks, larger pieces longer\nIf you notice unusual redness, heat, swelling, or persistent bleeding, contact a doctor\nTouch-ups are free within 3 months after your tattoo\nAfter 3 months, touch-ups are charged depending on what's needed"
   },
+  "home": {
+    "title": "Studio Name",
+    "tagline": "Custom tattoos in Tel Aviv",
+    "requestButton": "Request a Tattoo",
+    "policiesLink": "Pricing & Policies",
+    "instagramLabel": "Follow me on Instagram",
+    "instagramHandle": "@mashakarda_tattoo"
+  },
   "footer": {
     "studio": "Studio Name",
     "address": "Herzl 100, Tel Aviv, Israel",
     "email": "masha.karda@gmail.com",
     "phone": "054-918-3435",
     "phoneHref": "+972549183435",
+    "instagramUrl": "https://www.instagram.com/mashakarda_tattoo/",
     "copyright": "\u00a9 {year} All rights reserved"
   }
 }

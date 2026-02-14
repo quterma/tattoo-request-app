@@ -1,5 +1,6 @@
 export { AppNav } from "./app-nav"
 export { Container } from "./container"
+export { InstagramIcon } from "./icons"
 export { Page } from "./page"
 export { PublicFooter } from "./public-footer"
 export { Section } from "./section"

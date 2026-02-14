@@ -79,6 +79,7 @@ tattoo-request-app/
     │   ├── ui/
     │   │   ├── app-nav.tsx
     │   │   ├── container.tsx
+    │   │   ├── icons.tsx
     │   │   ├── index.ts
     │   │   ├── page.tsx
     │   │   ├── public-footer.tsx
