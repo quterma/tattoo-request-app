@@ -19,6 +19,23 @@
     "howToFindUsText": "We are located on Herzl Street in the heart of Tel Aviv. The studio is easily accessible by public transport and there is street parking available nearby.",
     "studioPhotos": "Studio photos"
   },
+  "policies": {
+    "title": "Pricing & Policies",
+    "fees": "Fees",
+    "feesText": "Tattoo pricing depends on the size, detail, and placement of the design. Every project is unique — final pricing is confirmed after reviewing your request.",
+    "pricingStandards": "Pricing Standards",
+    "pricingStandardsText": "Rates are based on complexity, time, and materials. Minimum session rates apply. Detailed quotes are provided after consultation.",
+    "deposits": "Deposits & Rescheduling",
+    "depositsText": "A non-refundable deposit is required to secure your appointment. Rescheduling is possible with at least 48 hours notice. No-shows forfeit the deposit.",
+    "designPolicy": "Design Policy",
+    "designPolicyText": "Custom designs are created specifically for you and are not reused. Minor revisions are included. Major changes may require an additional fee.",
+    "touchUps": "Touch-Ups",
+    "touchUpsText": "One complimentary touch-up session is included within 3 months of the original appointment, provided aftercare instructions were followed.",
+    "faq": "FAQ",
+    "faqText": "Common questions about the process, timing, and preparation will be answered here.",
+    "ctaButton": "Request a Tattoo",
+    "aftercareButton": "Tattoo Day & Aftercare"
+  },
   "footer": {
     "studio": "Studio Name",
     "address": "Herzl 100, Tel Aviv, Israel",
