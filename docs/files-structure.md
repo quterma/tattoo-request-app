@@ -31,6 +31,8 @@ tattoo-request-app/
 │           ├── page.tsx
 │           ├── location/
 │           │   └── page.tsx
+│           ├── policies/
+│           │   └── page.tsx
 │           ├── request/
 │           │   └── page.tsx
 │           └── rules/
@@ -41,6 +43,7 @@ tattoo-request-app/
 │   ├── FRONTEND_ARCHITECTURE.md
 │   ├── IMPLEMENTATION_PLAN.md
 │   ├── MVP_SCOPE.md
+│   ├── OPEN_IDEAS.md
 │   ├── stage-0-report.md
 │   ├── stage-1-report.md
 │   └── TESTING_STRATEGY.md

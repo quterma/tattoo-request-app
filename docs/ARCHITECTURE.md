@@ -13,7 +13,7 @@
 
 ### Web Application (Next.js)
 
-- Public routes: home, rules, request form, location
+- Public routes: home, policies, request form, location
 - Admin routes: request list, request details
 - BFF layer via Route Handlers — optional, used only for server-side validation, orchestration, or secure logic (webhooks, auth). Initial Supabase calls may be client-side in MVP. See FRONTEND_ARCHITECTURE.md
 

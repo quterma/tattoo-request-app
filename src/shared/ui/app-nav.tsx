@@ -7,7 +7,7 @@ import { cn } from "../utils"
 const NAV_ITEMS = [
   { href: "/", labelKey: "home" },
   { href: "/request", labelKey: "request" },
-  { href: "/rules", labelKey: "rules" },
+  { href: "/policies", labelKey: "policies" },
   { href: "/location", labelKey: "location" },
 ] as const
 

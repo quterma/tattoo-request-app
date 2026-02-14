@@ -32,7 +32,7 @@ Potential tattoo client, mostly mobile, coming from Instagram link.
 
 - Home page
   - short intro
-  - navigation to request form, rules, location
+  - navigation to request form, policies, location
 - Rules / Process / Pricing
   - static content
   - how to request
