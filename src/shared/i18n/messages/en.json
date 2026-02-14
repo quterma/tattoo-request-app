@@ -56,7 +56,17 @@
     "requestButton": "Request a Tattoo",
     "policiesLink": "Pricing & Policies",
     "instagramLabel": "Follow me on Instagram",
-    "instagramHandle": "@mashakarda_tattoo"
+    "instagramHandle": "@mashakarda_tattoo",
+    "seeMoreOnInstagram": "See more on Instagram",
+    "howItWorksTitle": "How It Works",
+    "step1Title": "Submit a Request",
+    "step1Text": "Fill out a short form with your idea, references, and placement. It takes just a few minutes.",
+    "step2Title": "Review & Booking",
+    "step2Text": "I review your request, confirm details, and schedule your appointment. Check <policies>Pricing & Policies</policies> for rates and deposit info.",
+    "step3Title": "Get Your Tattoo",
+    "step3Text": "We meet at the studio, finalize the design together, and bring your idea to life.",
+    "aboutLine1": "20+ years of experience in painting, calligraphy, and tattoo art.",
+    "aboutLine2": "Every piece is custom — designed from scratch, just for you."
   },
   "footer": {
     "studio": "Studio Name",

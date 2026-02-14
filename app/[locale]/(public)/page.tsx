@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl"
 import { Link } from "@/shared/i18n"
-import { Container, InstagramIcon } from "@/shared/ui"
+import { Container, InstagramIcon, Section, Stack } from "@/shared/ui"
 
 export default function Home() {
   const t = useTranslations("home")
@@ -47,6 +47,73 @@ export default function Home() {
           </a>
         </Container>
       </section>
+
+      <Container>
+        <Section className="py-4 sm:py-6">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="aspect-[4/5] rounded-lg bg-muted" />
+            <div className="aspect-[4/5] rounded-lg bg-muted" />
+            <div className="aspect-[4/5] rounded-lg bg-muted" />
+          </div>
+          <a
+            href={footer("instagramUrl")}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <InstagramIcon className="size-4" />
+            <span>{t("seeMoreOnInstagram")}</span>
+          </a>
+        </Section>
+
+        <Section className="py-4 sm:py-6">
+          <Stack gap="gap-6">
+            <h2 className="mb-1">{t("howItWorksTitle")}</h2>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+              <div>
+                <p className="mb-1 font-semibold">1. {t("step1Title")}</p>
+                <p className="mb-0 text-sm text-muted-foreground">
+                  {t("step1Text")}
+                </p>
+              </div>
+              <div>
+                <p className="mb-1 font-semibold">2. {t("step2Title")}</p>
+                <p className="mb-0 text-sm text-muted-foreground">
+                  {t.rich("step2Text", {
+                    policies: (chunks) => (
+                      <Link
+                        href="/policies"
+                        className="underline underline-offset-2 transition-colors hover:text-foreground"
+                      >
+                        {chunks}
+                      </Link>
+                    ),
+                  })}
+                </p>
+              </div>
+              <div>
+                <p className="mb-1 font-semibold">3. {t("step3Title")}</p>
+                <p className="mb-0 text-sm text-muted-foreground">
+                  {t("step3Text")}
+                </p>
+              </div>
+            </div>
+            <div className="text-center">
+              <Link
+                href="/request"
+                className="inline-block rounded-md bg-foreground px-6 py-3 text-sm font-semibold text-background transition-colors hover:bg-foreground/90"
+              >
+                {t("requestButton")}
+              </Link>
+            </div>
+          </Stack>
+        </Section>
+
+        <Section className="py-4 sm:py-6 text-center">
+          <p className="mb-1 text-muted-foreground">{t("aboutLine1")}</p>
+          <p className="mb-0 text-muted-foreground">{t("aboutLine2")}</p>
+        </Section>
+      </Container>
     </main>
   )
 }
