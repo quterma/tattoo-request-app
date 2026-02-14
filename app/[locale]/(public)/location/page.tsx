@@ -1,16 +1,15 @@
 import { useTranslations } from "next-intl"
 import { Page, Section, Stack } from "@/shared/ui"
 
+const addressQuery = encodeURIComponent("Herzl 100, Tel Aviv, Israel")
+
 const MAP_LINKS = [
   {
     labelKey: "googleMaps",
-    href: "https://maps.google.com/?q=Herzl+100+Tel+Aviv",
+    href: `https://maps.google.com/?q=${addressQuery}`,
   },
-  {
-    labelKey: "appleMaps",
-    href: "https://maps.apple.com/?q=Herzl+100+Tel+Aviv",
-  },
-  { labelKey: "waze", href: "https://waze.com/ul?q=Herzl+100+Tel+Aviv" },
+  { labelKey: "appleMaps", href: `https://maps.apple.com/?q=${addressQuery}` },
+  { labelKey: "waze", href: `https://waze.com/ul?q=${addressQuery}` },
 ] as const
 
 export default function LocationPage() {
@@ -25,14 +24,12 @@ export default function LocationPage() {
       <Section>
         <p className="text-muted-foreground">{t("address")}</p>
 
-        <div className="mt-4 grid grid-cols-3 gap-3">
+        <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
           {MAP_LINKS.map(({ labelKey, href }) => (
             <a
               key={labelKey}
               href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-md border border-border px-3 py-2 text-center text-sm transition-colors hover:bg-muted"
+              className="rounded-md border border-border px-2 py-2 text-center text-sm leading-tight break-words transition-colors hover:bg-muted sm:px-3"
             >
               {t(labelKey)}
             </a>
