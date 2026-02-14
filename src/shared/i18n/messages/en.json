@@ -9,11 +9,22 @@
     "rules": "Rules",
     "location": "Location"
   },
+  "location": {
+    "title": "Location",
+    "address": "Herzl 100, Tel Aviv, Israel",
+    "googleMaps": "Google Maps",
+    "appleMaps": "Apple Maps",
+    "waze": "Waze Maps",
+    "howToFindUs": "How to find us",
+    "howToFindUsText": "We are located on Herzl Street in the heart of Tel Aviv. The studio is easily accessible by public transport and there is street parking available nearby.",
+    "studioPhotos": "Studio photos"
+  },
   "footer": {
     "studio": "Studio Name",
     "address": "Herzl 100, Tel Aviv, Israel",
     "email": "masha.karda@gmail.com",
     "phone": "054-918-3435",
+    "phoneHref": "+972549183435",
     "copyright": "\u00a9 {year} All rights reserved"
   }
 }

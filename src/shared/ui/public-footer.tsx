@@ -15,7 +15,7 @@ export function PublicFooter() {
           <a href={`mailto:${t("email")}`} className="text-sm">
             {t("email")}
           </a>
-          <a href={`tel:${t("phone")}`} className="text-sm">
+          <a href={`tel:${t("phoneHref")}`} className="text-sm">
             {t("phone")}
           </a>
           <p className="mb-0 mt-3 text-xs">
