@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm format:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm ls:*)",
+      "Bash(pnpm typecheck:*)",
+      "Bash(npx next lint)",
+      "Bash(npx next lint -- --dir .)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run typecheck:*)",
+      "Bash(pnpm run build:*)",
+      "Bash(pnpm run format:check:*)",
+      "Bash(pnpm run lint:*)",
+      "Bash(pnpm run typecheck:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm format:check:*)",
+      "Bash(pnpm structure:*)",
+      "Bash(pnpm tsc:*)",
+      "Bash(pnpm prettier:*)"
+    ]
+  }
+}
