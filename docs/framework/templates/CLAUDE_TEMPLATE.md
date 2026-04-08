@@ -18,14 +18,14 @@ If something is unclear or missing:
 
 ## Pre-task Sync
 
-Before any non-trivial task:
+Before any task except clarifying questions:
 
 - Re-read docs/project/PROJECT_STAGE_LOG.md
 - Re-read docs/project/PROJECT_CONTEXT.md
 - Re-read docs/project/PROJECT_ARCHITECTURE.md
 - Re-read docs/project/PROJECT_DECISIONS.md (if needed)
 
-Confirm understanding in 3–5 lines.
+Confirm understanding in 3–5 lines before proceeding.
 
 ---
 
