@@ -13,15 +13,23 @@ AI agents and developers working on the project.
 ## Current Stage
 
 Stage: Stage 3 — Request Flow
-Status: Not Started
+Status: In Progress
 
 Current focus:
 
-- Begin request form UI implementation
+- Request form UI implementation
+
+Completed in Stage 3:
+
+- form config (SIZE_OPTIONS, COLOR_OPTIONS, PLACEMENT_OPTIONS, MAX_FILES_PER_FIELD)
+- zod validation schema with all fields and cross-field contact rule
+- RequestFormData type inferred from schema
 
 Next expected step:
 
-- Implement request form UI (Stage 3, first task)
+- Add i18n namespace `request` to en.json
+- Build shared UI primitives (Input, Textarea, Label, Button, Checkbox)
+- Build RequestForm UI with field components
 
 ---
 

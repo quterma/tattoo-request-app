@@ -46,6 +46,14 @@ The project follows a feature-oriented structure with shared modules and clear b
 - isolated by domain (e.g. request, admin)
 - feature UI, logic, and local state
 
+Current features:
+
+#### features/request/
+
+- config/ — form constants (field options, file limits)
+- types/ — RequestFormData type inferred from zod schema
+- validation/ — zod schema with all form fields and cross-field rules
+
 ---
 
 ### shared/
