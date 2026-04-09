@@ -68,6 +68,83 @@
     "aboutLine1": "20+ years of experience in painting, calligraphy, and tattoo art.",
     "aboutLine2": "Every piece is custom — designed from scratch, just for you."
   },
+  "request": {
+    "title": "Request a Tattoo",
+
+    "ideaDescriptionLabel": "Describe your idea",
+    "ideaDescriptionPlaceholder": "Tell me about your tattoo idea — style, motif, mood, anything that inspires you",
+    "ideaDescriptionHint": "Minimum 10 characters",
+
+    "referenceImagesLabel": "Reference images",
+    "referenceImagesHint": "Up to 3 images. Photos of tattoos, artwork, or anything that captures the style or feel you want.",
+
+    "placementLabel": "Placement",
+    "placementPlaceholder": "Select placement",
+
+    "placementImagesLabel": "Placement photos",
+    "placementImagesHint": "Up to 3 photos of the area where you want the tattoo.",
+
+    "sizeLabel": "Size",
+    "sizePlaceholder": "Select size",
+
+    "colorLabel": "Color",
+    "colorPlaceholder": "Select color style",
+
+    "budgetLabel": "Budget (optional)",
+    "budgetPlaceholder": "e.g. ₪2,000–₪3,000",
+    "budgetHint": "Helps me understand your expectations. Not binding.",
+
+    "contactSectionTitle": "How to reach you",
+    "contactSectionHint": "At least one contact method is required.",
+    "emailLabel": "Email (optional)",
+    "emailPlaceholder": "your@email.com",
+    "phoneLabel": "Phone (optional)",
+    "phonePlaceholder": "e.g. 054-000-0000",
+    "contactOtherLabel": "Other (optional)",
+    "contactOtherPlaceholder": "Telegram, Instagram handle, etc.",
+
+    "consentLabel": "I have read and agree to the Pricing & Policies",
+
+    "submitButton": "Send Request",
+
+    "sizeOptions": {
+      "small": "Small (up to 5 cm)",
+      "medium": "Medium (5–10 cm)",
+      "large": "Large (10–20 cm)",
+      "extra-large": "Extra large (20 cm+)"
+    },
+
+    "colorOptions": {
+      "black": "Black & grey",
+      "color": "Color",
+      "mixed": "Mixed"
+    },
+
+    "placementOptions": {
+      "arm": "Arm",
+      "leg": "Leg",
+      "back": "Back",
+      "chest": "Chest",
+      "ribs": "Ribs",
+      "neck": "Neck",
+      "hand": "Hand",
+      "foot": "Foot",
+      "other": "Other"
+    },
+
+    "errors": {
+      "ideaDescriptionRequired": "Please describe your idea",
+      "ideaDescriptionTooShort": "Please write at least 10 characters",
+      "referenceImagesRequired": "Please add at least one reference image",
+      "placementRequired": "Please select a placement",
+      "placementImagesRequired": "Please add at least one placement photo",
+      "sizeRequired": "Please select a size",
+      "colorRequired": "Please select a color style",
+      "emailInvalid": "Please enter a valid email address",
+      "consentRequired": "You must agree to the policies to proceed",
+      "atLeastOneContactRequired": "Please provide at least one way to reach you"
+    }
+  },
   "footer": {
     "studio": "Studio Name",
     "address": "Herzl 100, Tel Aviv, Israel",

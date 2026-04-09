@@ -24,10 +24,10 @@ Completed in Stage 3:
 - form config (SIZE_OPTIONS, COLOR_OPTIONS, PLACEMENT_OPTIONS, MAX_FILES_PER_FIELD)
 - zod validation schema with all fields and cross-field contact rule
 - RequestFormData type inferred from schema
+- i18n namespace `request` added to en.json (labels, placeholders, hints, errors, options)
 
 Next expected step:
 
-- Add i18n namespace `request` to en.json
 - Build shared UI primitives (Input, Textarea, Label, Button, Checkbox)
 - Build RequestForm UI with field components
 
