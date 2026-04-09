@@ -25,6 +25,7 @@ const eslintConfig = defineConfig([
             "eslint-config-next/*",
             "**/shared/i18n/*",
             "**/shared/ui",
+            "**/features/*/ui",
             "@hookform/resolvers/*",
             "@testing-library/jest-dom/*",
             "@vitejs/plugin-react",

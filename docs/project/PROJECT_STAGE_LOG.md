@@ -25,6 +25,9 @@ Completed in Stage 3:
 - zod validation schema with all fields and cross-field contact rule
 - RequestFormData type inferred from schema
 - i18n namespace `request` added to en.json (labels, placeholders, hints, errors, options)
+- request page route wired (`app/[locale]/(public)/request/page.tsx`)
+- RequestForm placeholder component created (`src/features/request/ui/RequestForm.tsx`)
+- page renders `request.title` from i18n and mounts RequestForm
 
 Next expected step:
 

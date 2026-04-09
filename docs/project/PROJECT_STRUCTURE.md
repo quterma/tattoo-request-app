@@ -53,6 +53,7 @@ Current features:
 - config/ — form constants (field options, file limits)
 - types/ — RequestFormData type inferred from zod schema
 - validation/ — zod schema with all form fields and cross-field rules
+- ui/ — RequestForm component (placeholder, no logic yet)
 
 ---
 
