@@ -18,6 +18,19 @@
 - Curated gallery:
   - 5–8 strong works instead of full feed
 
+## File Upload UX (deferred from Stage 3A)
+
+Current behavior: local file selection only, files listed by name below trigger.
+
+Deferred improvements:
+
+- remove individual selected file (per-file delete)
+- replace individual selected file
+- accumulate files across multiple selections (currently replaced on each pick)
+- image previews (thumbnails) for selected files
+- richer upload UI (drag-and-drop, progress indicator)
+- real upload flow to storage (Stage 3 backend work)
+
 ## Request Form Improvements
 
 - Required form fields are defined in PROJECT_CONTEXT.md (Request Form section).

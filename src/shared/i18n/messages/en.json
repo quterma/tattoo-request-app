@@ -84,6 +84,8 @@
     "placementImagesLabel": "Placement photos",
     "placementImagesHint": "Up to 3 photos of the area where you want the tattoo.",
 
+    "uploadButtonText": "Choose up to {maxFiles} images.",
+
     "sizeLabel": "Size",
     "sizePlaceholder": "Select size",
 
@@ -115,7 +117,7 @@
     },
 
     "colorOptions": {
-      "black": "Black & grey",
+      "black": "Black",
       "color": "Color",
       "mixed": "Mixed"
     },

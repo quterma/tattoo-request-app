@@ -18,7 +18,9 @@
       "Bash(pnpm format:check:*)",
       "Bash(pnpm structure:*)",
       "Bash(pnpm tsc:*)",
-      "Bash(pnpm prettier:*)"
+      "Bash(pnpm prettier:*)",
+      "Bash(node -e 'const z4 = require\\('\\\\''zod/v4/core'\\\\''\\); const {z} = require\\('\\\\''zod/v4'\\\\''\\); const s = z.object\\({a: z.string\\(\\)}\\); console.log\\(s instanceof z4.$ZodType\\)')",
+      "Bash(node -e \"const z = require\\('zod/v3'\\); console.log\\(z.object\\({a: z.string\\(\\)}\\)._def.typeName\\)\")"
     ]
   }
 }

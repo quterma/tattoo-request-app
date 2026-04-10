@@ -41,6 +41,7 @@ tattoo-request-app/
 │           └── request/
 │               └── page.tsx
 ├── docs/
+│   ├── files-structure.md
 │   ├── framework/
 │   │   ├── AI_DEVELOPMENT_RULES.md
 │   │   ├── AI_DEVELOPMENT_WORKFLOW.md
@@ -73,7 +74,32 @@ tattoo-request-app/
     ├── config/
     │   └── index.ts
     ├── features/
-    │   └── index.ts
+    │   ├── index.ts
+    │   └── request/
+    │       ├── config/
+    │       │   ├── form.ts
+    │       │   └── index.ts
+    │       ├── lib/
+    │       │   └── errors.ts
+    │       ├── types/
+    │       │   └── index.ts
+    │       ├── ui/
+    │       │   ├── Button.tsx
+    │       │   ├── CheckboxInput.tsx
+    │       │   ├── FileUploadInput.tsx
+    │       │   ├── index.ts
+    │       │   ├── RequestForm.tsx
+    │       │   ├── SelectInput.tsx
+    │       │   ├── TextareaInput.tsx
+    │       │   ├── TextInput.tsx
+    │       │   └── field/
+    │       │       ├── FieldError.tsx
+    │       │       ├── FieldHint.tsx
+    │       │       ├── FieldLabel.tsx
+    │       │       └── FormFieldLayout.tsx
+    │       └── validation/
+    │           ├── index.ts
+    │           └── schema.ts
     ├── services/
     │   └── index.ts
     ├── shared/
