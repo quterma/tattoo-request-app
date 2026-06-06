@@ -168,14 +168,32 @@ Goal: implement request submission.
 - full flow: form → API → storage → database
 - verify request is stored correctly with file references
 
-## Stage 3D — Notifications and Stabilization
+## Stage 3D — Request Identity & Idempotency
 
-### 3D.1 — Telegram notifications
+**Production Requirement.**
+
+Goal: prevent duplicate requests from reaching the artist.
+
+### 3D.0 — clientSubmissionId
+
+- generate `clientSubmissionId` (UUID v4) on the client before form submission
+- include it in the request payload sent to the API
+- store it in the database as a unique constraint on the requests table
+- implement server-side deduplication: if `clientSubmissionId` already exists, return existing request info without creating a duplicate
+- include the request reference ID in the success response, Telegram notification, and success UX
+
+Must be complete before public production launch and before broad user testing.
+
+---
+
+## Stage 3E — Notifications and Stabilization
+
+### 3E.1 — Telegram notifications
 
 - trigger Telegram notification after successful request creation
 - notification must not block or break submission on failure
 
-### 3D.2 — Stage 3 stabilization
+### 3E.2 — Stage 3 stabilization
 
 - smoke test full submission flow
 - fix any integration issues

@@ -108,6 +108,56 @@ This is the data-shape direction for persistence. Implementation is part of Stag
 
 ---
 
+# Request Identity & Idempotency Decisions
+
+**Production Requirement — not Nice-to-Have.**
+
+## Problem
+
+Without authentication, users may accidentally submit the same request multiple times due to:
+
+- page refresh
+- network issues
+- repeated submit attempts
+- browser or app interruptions
+
+Duplicate requests reaching the artist are unacceptable for production.
+
+## Decision
+
+Introduce a client-generated submission identifier: `clientSubmissionId` (UUID).
+
+- generated on the client before submission
+- sent with every request attempt
+- stored with the request record in the database
+
+## Server Behavior
+
+When a request arrives:
+
+- if `clientSubmissionId` is new → create the request
+- if `clientSubmissionId` already exists → do not create a duplicate; return existing request information
+
+Goal: idempotent request creation.
+
+## User Experience
+
+After successful submission:
+
+- user receives a request reference ID
+- artist receives the same ID in the Telegram notification
+- future support and communication can reference this ID
+
+## Planning
+
+This is a dedicated implementation story: **Request Identity & Idempotency**.
+
+- Not assigned to Stage 3B.2.
+- Must be implemented before public production launch and before broad user testing.
+- Recommended placement: late Stage 3C or a dedicated pre-launch stabilization stage.
+
+---
+
 # Rule for Future Changes
 
 All architectural, product, or behavioral decisions MUST be recorded in this document.

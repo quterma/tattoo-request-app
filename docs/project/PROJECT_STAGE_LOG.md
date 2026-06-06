@@ -42,6 +42,22 @@ Next expected step:
 
 ## Log Entries (reverse chronological)
 
+### 2026-06-06 — Documentation — Request Identity & Idempotency decision recorded
+
+Status: Documentation only
+
+Notes:
+
+- Production requirement identified during Stage 3 review: without a deduplication mechanism, users can accidentally submit duplicate requests (refresh, network retry, repeated taps).
+- Decision recorded in PROJECT_DECISIONS.md: introduce `clientSubmissionId` (UUID), generated on the client before submission, stored in the database with a unique constraint.
+- Server behavior defined: idempotent — if `clientSubmissionId` already exists, return existing request info without creating a duplicate.
+- UX goal added: user and artist both receive the same request reference ID; Telegram notifications include it.
+- Stage 3D added to PROJECT_IMPLEMENTATION_PLAN.md as the dedicated implementation stage for this story.
+- Former Stage 3D (Notifications and Stabilization) renamed to Stage 3E; sub-stage labels updated accordingly.
+- Not assigned to Stage 3B.2.
+
+---
+
 ### 2026-06-06 — Stage 3B.1 — Payload contract + API route + first end-to-end submit
 
 Status: Completed
