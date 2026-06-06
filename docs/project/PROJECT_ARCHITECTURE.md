@@ -111,14 +111,22 @@ The database is treated as an external managed system, not application code.
 
 ### File Storage
 
-Stores uploaded images:
+Supabase Storage is used for uploaded images.
 
-- reference images
-- placement photos
-- additional files
+Stores:
 
-Files are linked to requests via IDs or URLs.  
+- reference images (uploaded via the reference images input on the request form)
+- placement photos (uploaded via the placement images input on the request form)
+
+Storage bucket is private. Files are not publicly accessible.
 Files are immutable after submission.
+
+Each uploaded file is recorded as a typed file record linked to its request:
+type ("reference" | "placement"), storagePath, originalName, mimeType, size.
+See PROJECT_DECISIONS.md — File Data Model Decisions.
+
+Admin file access is served through an Image Proxy via BFF (Next.js Route Handler).
+This avoids exposing storage credentials or signed URLs directly to the client.
 
 ---
 
@@ -166,11 +174,22 @@ Used for storing all structured data.
 
 ### Storage
 
-Used for image uploads and retrieval.
+Used for image uploads and retrieval. Accessed only through the service layer.
 
 ### Telegram Bot
 
 Used for notifications.
+
+---
+
+# Service Layer
+
+All external systems (database, storage, Telegram) are accessed only through the service layer.
+
+The service layer is implemented as plain service modules — no provider abstractions,
+DI containers, factory patterns, or interface hierarchies unless a second real provider is added.
+
+See PROJECT_DECISIONS.md — Service Layer Decisions.
 
 ---
 

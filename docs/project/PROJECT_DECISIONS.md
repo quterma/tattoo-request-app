@@ -49,9 +49,51 @@ AI agents and developers working on the project.
 - No standalone custom backend service is planned for MVP.
 - Backend-for-frontend (BFF) may be used via Next.js Route Handlers where needed.
 - Supabase (PostgreSQL) is the chosen database, treated as an external managed system.
+- Supabase Storage is the chosen file storage. Storage bucket must be private.
 - Telegram is the notification channel for MVP.
 - Global state management is not used in MVP.
 - Feature-oriented frontend structure is used.
+
+---
+
+# Service Layer Decisions
+
+- External systems (database, storage, Telegram) must be accessed through the service layer only.
+- Do not introduce provider abstractions, DI containers, factory patterns, or interface hierarchies unless a second real provider is added.
+- Keep service layer simple and YAGNI-compliant.
+
+---
+
+# File Access Decisions
+
+- Preferred file access mechanism for admin: Image Proxy through BFF.
+- Before implementation, perform a short technical review of feasibility and limitations with Next.js + Supabase Storage. Scheduled for start of Stage 3C.2.
+- If no blocking issues are found, implement Image Proxy for admin image access.
+- Architecture must allow this without UI changes on the admin side.
+
+---
+
+# File Data Model Decisions
+
+Request files are modeled as a typed collection. Each file record contains:
+
+- type: "reference" | "placement"
+- storagePath
+- originalName
+- mimeType
+- size
+
+The current request form has two upload inputs: reference images and placement images.
+These map directly to the two type values above.
+
+This is the data-shape direction for persistence. Implementation is part of Stage 3C.3.
+
+---
+
+# Upload UX Decisions
+
+- File input must support mobile users selecting images from phone gallery, files, or camera where the browser and OS support it.
+- Native file input behavior is used for MVP. No drag-and-drop, thumbnails, or advanced upload UI required.
 
 ---
 

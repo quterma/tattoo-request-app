@@ -109,15 +109,77 @@ Result:
 
 Goal: implement request submission.
 
-Tasks:
+## Stage 3A — Form UI (completed)
 
 - request form UI
-- form validation (client)
-- file upload handling
-- API endpoint (BFF via Route Handlers)
-- server validation
-- data storage
-- success state
+- form validation (client-side, Zod + RHF)
+- file selection (client-side only)
+
+## Stage 3B — API Layer
+
+### 3B.1 — Payload contract + API route + first end-to-end submit
+
+- define request payload contract (FormData shape)
+- implement POST /api/requests Route Handler
+- wire form submit to API route
+- verify first end-to-end round trip (no storage or DB yet)
+
+### 3B.2 — Success / Error UX
+
+- implement success state after submission
+- implement error state on API failure
+- handle loading state in form
+
+### 3B.3 — Server validation
+
+- validate incoming payload server-side
+- return structured validation errors
+- handle errors in form UI
+
+### 3B.4 — File transport
+
+- transport files from client to BFF via FormData
+- validate file count and type server-side
+
+## Stage 3C — Data Layer
+
+### 3C.1 — Supabase foundation
+
+- configure Supabase client (server-side)
+- set up environment variables
+- document required env vars in .env.example
+- verify connection
+
+### 3C.2 — Storage upload
+
+- perform short technical review: Image Proxy feasibility with Next.js + Supabase Storage
+- upload files to Supabase Storage (private bucket)
+- store each file as a typed record: type, storagePath, originalName, mimeType, size
+- return file records for linking to request
+
+### 3C.3 — Request persistence
+
+- define requests table schema
+- implement request insert via service layer
+- link uploaded file references to request record
+
+### 3C.4 — End-to-end submission
+
+- full flow: form → API → storage → database
+- verify request is stored correctly with file references
+
+## Stage 3D — Notifications and Stabilization
+
+### 3D.1 — Telegram notifications
+
+- trigger Telegram notification after successful request creation
+- notification must not block or break submission on failure
+
+### 3D.2 — Stage 3 stabilization
+
+- smoke test full submission flow
+- fix any integration issues
+- verify exit criteria
 
 Exit Criteria:
 
