@@ -1,3 +1,8 @@
 // BFF (Backend-for-Frontend): Next.js Route Handlers orchestration layer
-export { parseRequestFormData } from "./request"
-export type { ParsedRequestPayload } from "./request"
+export { parseRequestFormData, validateRequestPayload } from "./request"
+export type {
+  ParsedRequestPayload,
+  ValidationResult,
+  ValidationErrorResult,
+  ValidationSuccessResult,
+} from "./request"

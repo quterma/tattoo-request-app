@@ -136,7 +136,15 @@ Goal: implement request submission.
 - return structured validation errors
 - handle errors in form UI
 
-### 3B.4 — File transport
+### 3B.4 — Server Validation UX
+
+- consume server `fieldErrors` response on the client
+- map `fieldErrors` → RHF `setError()` to display server-side messages per field
+- map `formErrors` → contact group error display
+- preserve existing client-side validation UX
+- no persistence, no storage, no Supabase, no Telegram
+
+### 3B.5 — File transport
 
 - transport files from client to BFF via FormData
 - validate file count and type server-side

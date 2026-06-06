@@ -1,17 +1,22 @@
 import { NextResponse } from "next/server"
-import { parseRequestFormData } from "@/bff"
+import { parseRequestFormData, validateRequestPayload } from "@/bff"
 
 export async function POST(req: Request) {
-  const formData = await req.formData()
-  const payload = parseRequestFormData(formData)
+  try {
+    const formData = await req.formData()
+    const payload = parseRequestFormData(formData)
+    const validation = validateRequestPayload(payload)
 
-  console.log("[POST /api/request] received payload:", {
-    ...payload,
-    referenceImages: payload.referenceImages.map((f) => f.name),
-    placementImages: payload.placementImages.map((f) => f.name),
-  })
+    if (!validation.ok) {
+      return NextResponse.json(validation, { status: 400 })
+    }
 
-  const requestId = crypto.randomUUID()
-
-  return NextResponse.json({ ok: true, requestId })
+    const requestId = crypto.randomUUID()
+    return NextResponse.json({ ok: true, requestId })
+  } catch {
+    return NextResponse.json(
+      { ok: false, error: { code: "SERVER_ERROR" } },
+      { status: 500 },
+    )
+  }
 }

@@ -29,7 +29,7 @@ describe("parseRequestFormData", () => {
     expect(result.placement).toBe("arm")
     expect(result.size).toBe("medium")
     expect(result.color).toBe("black")
-    expect(result.consent).toBe("true")
+    expect(result.consent).toBe(true)
   })
 
   it("returns undefined for absent optional fields", () => {
@@ -108,5 +108,34 @@ describe("parseRequestFormData", () => {
     expect(result.referenceImages[1].name).toBe("ref2.png")
     expect(result.placementImages).toHaveLength(1)
     expect(result.placementImages[0].name).toBe("place1.png")
+  })
+})
+
+describe("parseRequestFormData – consent conversion", () => {
+  it('converts consent "true" string to boolean true', () => {
+    const fd = makeFormData({
+      ideaDescription: "test",
+      placement: "arm",
+      size: "small",
+      color: "black",
+      consent: "true",
+    })
+
+    const result = parseRequestFormData(fd)
+
+    expect(result.consent).toBe(true)
+  })
+
+  it("returns undefined-like value when consent is absent", () => {
+    const fd = makeFormData({
+      ideaDescription: "test",
+      placement: "arm",
+      size: "small",
+      color: "black",
+    })
+
+    const result = parseRequestFormData(fd)
+
+    expect(result.consent).not.toBe(true)
   })
 })

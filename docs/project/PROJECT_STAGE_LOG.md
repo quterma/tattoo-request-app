@@ -17,7 +17,7 @@ Status: In Progress
 
 Current focus:
 
-- Stage 3B.3 — Server validation
+- Stage 3B.4 — Server Validation UX
 
 Completed in Stage 3:
 
@@ -33,14 +33,47 @@ Completed in Stage 3:
 - select UX fixed: defaultValues for placement/size/color set to "" + z.preprocess in schema so placeholder is shown initially and "" is treated as missing value
 - upload trigger text updated to i18n key with maxFiles interpolation ("Choose up to {maxFiles} images.")
 - deferred file-upload UX documented in PROJECT_BACKLOG.md
+- server validation: validateRequestPayload() in BFF reuses requestFormSchema; POST /api/request returns 400 + structured errors or 500 on exception; consent "true" → boolean true conversion in parseRequestFormData
 
 Next expected step:
 
-- Stage 3B.2: success / error UX
+- Stage 3B.4 — Server Validation UX
 
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-06-06 — Stage 3B.3 — Server validation
+
+Status: Completed
+
+Completed:
+
+- `validateRequestPayload()` added to `src/bff/request.ts`: reuses `requestFormSchema.safeParse()`, returns typed `ValidationResult`
+- `parseRequestFormData()` updated: consent `"true"` string converted to boolean `true`
+- `ParsedRequestPayload` updated: `consent: true` (boolean literal)
+- `POST /api/request` route handler updated: validates payload, returns 400 + structured error or 500 on exception
+- Error contract: `{ ok: false, error: { code: "VALIDATION_ERROR", fieldErrors, formErrors } }` for validation failures
+- `src/bff/index.ts` updated: exports `validateRequestPayload` and new types
+- `eslint.config.mjs`: added `features/*/validation` to allow-list for BFF import
+- `PROJECT_STRUCTURE.md`: dependency rule updated — `bff → features/*/validation` explicitly allowed
+- 10 new tests in `src/bff/__tests__/validateRequestPayload.test.ts`; 2 existing tests updated in `request.test.ts`
+- all 42 tests pass; lint, typecheck, build — PASS
+
+---
+
+### 2026-06-06 — Documentation — Stage 3B.4 Server Validation UX added to plan
+
+Status: Documentation only
+
+Notes:
+
+- Added Stage 3B.4 — Server Validation UX to PROJECT_IMPLEMENTATION_PLAN.md immediately after Stage 3B.3.
+- Scope: consume server `fieldErrors` response, map to RHF `setError()`, display per-field server errors, preserve existing client-side UX.
+- Former Stage 3B.4 (File transport) renumbered to Stage 3B.5.
+- No code changes.
+
+---
 
 ### 2026-06-06 — Stage 3B.2 — Success / Error UX
 

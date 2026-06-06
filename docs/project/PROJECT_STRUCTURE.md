@@ -122,7 +122,7 @@ Allowed:
 
 - app → features, shared, config, types
 - features → shared, services, config, types
-- bff → services, config, types
+- bff → services, config, types, features/*/validation
 - services → config, types
 - shared → config, types
 - config → none
@@ -133,7 +133,7 @@ Restricted:
 - shared must not depend on services or features
 - features must not depend on other features directly
 - services must not depend on features or shared UI
-- bff must not import from UI layers
+- bff must not import from UI layers (ui/, components)
 - UI must not depend on BFF
 - no circular dependencies allowed
 
