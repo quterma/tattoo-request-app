@@ -151,11 +151,20 @@ Framework documentation may only be modified after developer review and approval
 
 AI may prepare commits.
 
-Before a commit is finalized:
+Before a commit is finalized, when production or source code was changed:
 
-- AI must perform a self-check
-- AI must summarize the change
-- the developer must review and approve the commit
+- AI must run the Review Pipeline — see AI_REVIEW_PIPELINE.md
+- Test Agent determines coverage, writes missing tests, runs test suite
+- Quality Gates run: pnpm lint, pnpm typecheck, pnpm build, pnpm test
+- Review Agent inspects changed files (read-only, subagent_type: "Explore")
+- AI must fix all issues reported by the pipeline
+- pipeline status must be READY FOR DEVELOPER REVIEW before proposing a commit
+- AI must summarize the change and present pipeline results to the developer
+- the developer must review and approve before the commit is created
+
+When only documentation or configuration files changed:
+
+- self-check is sufficient before proposing a commit
 
 Commits should remain small, focused and logically grouped.
 

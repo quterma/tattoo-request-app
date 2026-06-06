@@ -64,14 +64,27 @@ If improvement is possible:
 ## Workflow
 
 - After each TODO: short summary
-- Propose commit
-- Create commit
+- Run Review Pipeline (see AI_REVIEW_PIPELINE.md)
+- Propose commit only after pipeline status is READY FOR DEVELOPER REVIEW
+- Create commit after developer approval
 
 ---
 
 ## Pre-Commit Checklist (MANDATORY)
 
 Before every commit, verify:
+
+### Review Pipeline (when source code changed)
+
+Run all three stages in order — see AI_REVIEW_PIPELINE.md:
+
+1. Test Agent — determine coverage per PROJECT_TESTING_STRATEGY.md, write missing tests, run test suite
+2. Quality Gates — run in order: lint / typecheck / build / test
+   Report PASS / FAIL / NOT CONFIGURED for each. Do not skip.
+3. Review Agent — subagent_type: "Explore", read-only inspection of changed files
+
+Re-run pipeline if any fix touches source code.
+Do NOT propose commit unless pipeline status is READY FOR DEVELOPER REVIEW.
 
 ### Architecture
 
@@ -82,12 +95,6 @@ Before every commit, verify:
 ### Scope
 
 - Only current TODO implemented
-
-### Code
-
-- Required project checks pass
-- Tests follow PROJECT_TESTING_STRATEGY.md (if applicable)
-- No unnecessary dependencies
 
 ### Structure
 

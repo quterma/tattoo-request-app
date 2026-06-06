@@ -19,7 +19,7 @@ AI development follows a structured cycle:
 2 Propose change (when required)
 3 Define change intent
 4 Implement change
-5 Perform self-check
+5 Run Review Pipeline (Test Agent + Review Agent) — see AI_REVIEW_PIPELINE.md
 6 Prepare commit
 7 Developer review
 
@@ -104,22 +104,24 @@ Changes should remain focused on the intended task.
 
 ---
 
-# Step 5 — Self-Check
+# Step 5 — Review Pipeline
 
-Before preparing a commit, AI must verify the change.
+Before preparing a commit, AI must run the Review Pipeline defined in AI_REVIEW_PIPELINE.md.
 
-Self-check should include:
+When production or source code was changed:
 
-- compliance with AI development rules
-- respect for architectural boundaries
-- absence of unnecessary modifications
-- consistency with project documentation
-- project builds successfully
-- no lint or type errors
-- tests pass (if tests exist)
+- run Test Agent (determine coverage, write missing tests, run test suite)
+- run Quality Gates (pnpm lint, pnpm typecheck, pnpm build, pnpm test)
+- run Review Agent (read-only inspection of changed files, subagent_type: "Explore")
+- fix all reported issues before proceeding
+- re-run pipeline if fixes touched production or source code
+- pipeline status must be READY FOR DEVELOPER REVIEW before proposing a commit
 
-If problems are detected, AI must correct them before proceeding.
-If correction requires architectural changes or developer decisions,
+When only documentation or configuration files changed:
+
+- self-check is sufficient (architecture compliance, scope, consistency)
+
+If pipeline detects issues requiring architectural changes or developer decisions,
 AI must stop and request clarification.
 
 ---

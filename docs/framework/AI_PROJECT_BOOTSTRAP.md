@@ -84,6 +84,7 @@ When an AI agent starts working on a project:
 4. If project documentation is incomplete or unclear, request clarification
 
 5. MUST read ALL framework and project documentation before starting development
+   — includes AI_REVIEW_PIPELINE.md, which defines the mandatory pre-commit pipeline
 
 AI is NOT allowed to proceed without full context.
 
