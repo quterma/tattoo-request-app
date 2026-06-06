@@ -1,0 +1,116 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
+import { render, screen, cleanup } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
+import { RequestForm } from "../ui/RequestForm"
+import messages from "@/shared/i18n/messages/en.json"
+
+// Mock next-intl
+vi.mock("next-intl", () => ({
+  useTranslations: (ns: string) => {
+    return (key: string, params?: Record<string, unknown>) => {
+      const parts = key.split(".")
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let value: any = ns === "request" ? messages.request : messages
+      for (const part of parts) {
+        value = value?.[part]
+      }
+      if (typeof value === "string" && params) {
+        return value.replace(/\{(\w+)\}/g, (_: string, k: string) =>
+          String(params[k] ?? `{${k}}`),
+        )
+      }
+      return typeof value === "string" ? value : key
+    }
+  },
+}))
+
+function fillRequiredFields(user: ReturnType<typeof userEvent.setup>) {
+  return {
+    async fill() {
+      await user.type(
+        screen.getByRole("textbox", { name: /describe your idea/i }),
+        "A dragon on my arm, very detailed and colorful",
+      )
+
+      const refFile = new File(["ref"], "ref.png", { type: "image/png" })
+      const placeFile = new File(["place"], "place.png", { type: "image/png" })
+
+      const [refInput, placeInput] = document.querySelectorAll('input[type="file"]')
+      await user.upload(refInput as HTMLElement, refFile)
+      await user.upload(placeInput as HTMLElement, placeFile)
+
+      await user.selectOptions(screen.getByRole("combobox", { name: /placement/i }), "arm")
+      await user.selectOptions(screen.getByRole("combobox", { name: /size/i }), "medium")
+      await user.selectOptions(screen.getByRole("combobox", { name: /color/i }), "black")
+
+      await user.type(screen.getByRole("textbox", { name: /email/i }), "user@example.com")
+
+      await user.click(screen.getByRole("checkbox", { name: /pricing/i }))
+    },
+  }
+}
+
+describe("RequestForm – submission flow", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  afterEach(() => {
+    cleanup()
+  })
+
+  it("calls fetch with POST and FormData on valid submission", async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      json: () => Promise.resolve({ ok: true, requestId: "abc-123" }),
+    })
+    vi.stubGlobal("fetch", mockFetch)
+
+    const user = userEvent.setup()
+    render(<RequestForm />)
+
+    await fillRequiredFields(user).fill()
+    await user.click(screen.getByRole("button", { name: /send request/i }))
+
+    expect(mockFetch).toHaveBeenCalledOnce()
+    const [url, options] = mockFetch.mock.calls[0] as [string, RequestInit]
+    expect(url).toBe("/api/request")
+    expect(options.method).toBe("POST")
+    expect(options.body).toBeInstanceOf(FormData)
+  })
+
+  it("includes required fields in the submitted FormData", async () => {
+    let capturedFormData: FormData | undefined
+
+    const mockFetch = vi.fn().mockImplementation((_url: string, options: RequestInit) => {
+      capturedFormData = options.body as FormData
+      return Promise.resolve({ json: () => Promise.resolve({ ok: true, requestId: "xyz" }) })
+    })
+    vi.stubGlobal("fetch", mockFetch)
+
+    const user = userEvent.setup()
+    render(<RequestForm />)
+
+    await fillRequiredFields(user).fill()
+    await user.click(screen.getByRole("button", { name: /send request/i }))
+
+    expect(capturedFormData).toBeDefined()
+    expect(capturedFormData!.get("ideaDescription")).toContain("dragon")
+    expect(capturedFormData!.get("placement")).toBe("arm")
+    expect(capturedFormData!.get("size")).toBe("medium")
+    expect(capturedFormData!.get("color")).toBe("black")
+    expect(capturedFormData!.get("email")).toBe("user@example.com")
+    expect(capturedFormData!.get("consent")).toBe("true")
+  })
+
+  it("does not submit when required fields are missing", async () => {
+    const mockFetch = vi.fn()
+    vi.stubGlobal("fetch", mockFetch)
+
+    const user = userEvent.setup()
+    render(<RequestForm />)
+
+    await user.click(screen.getByRole("button", { name: /send request/i }))
+
+    expect(mockFetch).not.toHaveBeenCalled()
+  })
+})

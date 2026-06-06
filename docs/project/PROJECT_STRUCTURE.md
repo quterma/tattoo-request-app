@@ -37,6 +37,7 @@ The project follows a feature-oriented structure with shared modules and clear b
 - route groups (public, admin)
 - layouts and pages
 - route composition only
+- api/ — Next.js Route Handlers (BFF endpoints)
 
 ---
 
@@ -82,6 +83,13 @@ Current features:
 - request handling
 - server-side logic
 - Route Handlers and orchestration
+
+Current modules:
+
+#### bff/request.ts
+
+- ParsedRequestPayload interface
+- parseRequestFormData() — parses multipart/form-data from POST /api/request
 
 ---
 

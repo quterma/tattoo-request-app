@@ -24,6 +24,7 @@ const eslintConfig = defineConfig([
             "eslint/*",
             "eslint-config-next/*",
             "**/shared/i18n/*",
+            "**/shared/i18n/messages/*",
             "**/shared/ui",
             "**/features/*/ui",
             "**/features/*/ui/**",

@@ -42,8 +42,30 @@ export function RequestForm() {
   const referenceImages = useController({ name: "referenceImages", control })
   const placementImages = useController({ name: "placementImages", control })
 
-  function onSubmit(data: RequestFormData) {
-    console.log("RequestForm submitted:", data)
+  async function onSubmit(data: RequestFormData) {
+    const formData = new FormData()
+
+    formData.append("ideaDescription", data.ideaDescription)
+    formData.append("placement", data.placement)
+    formData.append("size", data.size)
+    formData.append("color", data.color)
+    formData.append("consent", String(data.consent))
+
+    if (data.budget) formData.append("budget", data.budget)
+    if (data.email) formData.append("email", data.email)
+    if (data.phone) formData.append("phone", data.phone)
+    if (data.contactOther) formData.append("contactOther", data.contactOther)
+
+    for (const file of data.referenceImages) {
+      formData.append("referenceImages", file)
+    }
+    for (const file of data.placementImages) {
+      formData.append("placementImages", file)
+    }
+
+    const res = await fetch("/api/request", { method: "POST", body: formData })
+    const response = await res.json()
+    console.log("[RequestForm] submit response:", response)
   }
 
   const placementOptions = PLACEMENT_OPTIONS.map((v) => ({

@@ -17,7 +17,7 @@ Status: In Progress
 
 Current focus:
 
-- Request form UI implementation
+- Stage 3B.2 — Success / Error UX
 
 Completed in Stage 3:
 
@@ -36,12 +36,57 @@ Completed in Stage 3:
 
 Next expected step:
 
-- Success state / error state after submission
-- Backend integration (API route handler)
+- Stage 3B.2: success / error UX
 
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-06-06 — Stage 3B.1 — Payload contract + API route + first end-to-end submit
+
+Status: Completed
+
+Completed:
+
+- FormData contract defined: text fields + repeated file keys (referenceImages, placementImages), optional fields omitted when empty, consent as string "true"
+- src/bff/request.ts: ParsedRequestPayload interface + parseRequestFormData()
+- src/bff/index.ts: exports parseRequestFormData and ParsedRequestPayload as public API
+- app/api/request/route.ts: POST handler, parses FormData via BFF, returns { ok: true, requestId: uuid }
+- RequestForm.tsx: onSubmit replaced with real fetch to /api/request, console.log on response
+
+---
+
+### 2026-06-06 — Stage 3 — Planning sync (round 2)
+
+Status: Planning completed
+
+Notes:
+
+- File data model direction confirmed: typed file collection (type, storagePath, originalName, mimeType, size)
+- Two upload inputs on current form confirmed: reference images and placement images — map to type values
+- Mobile upload requirement clarified: native file input for MVP (gallery/camera/files); no advanced upload UI needed now
+- Image Proxy technical review scheduled for start of Stage 3C.2
+- .env.example / env var documentation scheduled for Stage 3C.1
+- Stale backlog item removed: "real upload flow to storage" (now Stage 3C task, not backlog)
+- PROJECT_DECISIONS.md, PROJECT_ARCHITECTURE.md, PROJECT_IMPLEMENTATION_PLAN.md, PROJECT_BACKLOG.md updated
+
+---
+
+### 2026-06-06 — Stage 3 — Planning sync
+
+Status: Planning completed
+
+Notes:
+
+- Stage 3A (form UI) confirmed complete via codebase audit
+- Backend slice (API, storage, database) not yet started — confirmed
+- Stage 3 execution plan approved: sub-stages 3B → 3C → 3D defined in PROJECT_IMPLEMENTATION_PLAN.md
+- Storage direction approved: Supabase Storage, private bucket
+- Service layer rule documented: no provider abstractions, YAGNI-compliant
+- File access decision documented: Image Proxy through BFF (pending short technical review before implementation)
+- PROJECT_DECISIONS.md, PROJECT_ARCHITECTURE.md, PROJECT_IMPLEMENTATION_PLAN.md updated to reflect all decisions
+
+---
 
 ### 2026-04-08 — Stage 2 — Public Pages
 
