@@ -17,7 +17,7 @@ Status: In Progress
 
 Current focus:
 
-- Stage 3B.2 — Success / Error UX
+- Stage 3B.3 — Server validation
 
 Completed in Stage 3:
 
@@ -41,6 +41,22 @@ Next expected step:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-06-06 — Stage 3B.2 — Success / Error UX
+
+Status: Completed
+
+Completed:
+
+- local submit state machine: idle → submitting → success | error
+- success: form replaced with inline success block showing requestId from API response
+- error (API failure or network error): inline alert banner, form remains visible for retry
+- loading: button disabled, text switches to "Sending…" key
+- 5 new i18n keys added to `request` namespace: submitButtonLoading, successTitle, successMessage, successRequestId, errorMessage
+- 4 new tests added: success state, error (API), error (network), retry flow
+- all 30 tests pass; lint, typecheck, build — PASS
+
+---
 
 ### 2026-06-06 — Documentation — Request Identity & Idempotency decision recorded
 

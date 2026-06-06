@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useTranslations } from "next-intl"
 import { useController, useForm } from "react-hook-form"
@@ -14,14 +15,19 @@ import { SelectInput } from "./SelectInput"
 import { TextInput } from "./TextInput"
 import { TextareaInput } from "./TextareaInput"
 
+type SubmitStatus = "idle" | "submitting" | "success" | "error"
+
 export function RequestForm() {
   const t = useTranslations("request")
+
+  const [status, setStatus] = useState<SubmitStatus>("idle")
+  const [requestId, setRequestId] = useState<string | null>(null)
 
   const {
     register,
     control,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<RequestFormInput, unknown, RequestFormData>({
     resolver: zodResolver(requestFormSchema),
     defaultValues: {
@@ -43,29 +49,41 @@ export function RequestForm() {
   const placementImages = useController({ name: "placementImages", control })
 
   async function onSubmit(data: RequestFormData) {
-    const formData = new FormData()
+    setStatus("submitting")
 
-    formData.append("ideaDescription", data.ideaDescription)
-    formData.append("placement", data.placement)
-    formData.append("size", data.size)
-    formData.append("color", data.color)
-    formData.append("consent", String(data.consent))
+    try {
+      const formData = new FormData()
 
-    if (data.budget) formData.append("budget", data.budget)
-    if (data.email) formData.append("email", data.email)
-    if (data.phone) formData.append("phone", data.phone)
-    if (data.contactOther) formData.append("contactOther", data.contactOther)
+      formData.append("ideaDescription", data.ideaDescription)
+      formData.append("placement", data.placement)
+      formData.append("size", data.size)
+      formData.append("color", data.color)
+      formData.append("consent", String(data.consent))
 
-    for (const file of data.referenceImages) {
-      formData.append("referenceImages", file)
+      if (data.budget) formData.append("budget", data.budget)
+      if (data.email) formData.append("email", data.email)
+      if (data.phone) formData.append("phone", data.phone)
+      if (data.contactOther) formData.append("contactOther", data.contactOther)
+
+      for (const file of data.referenceImages) {
+        formData.append("referenceImages", file)
+      }
+      for (const file of data.placementImages) {
+        formData.append("placementImages", file)
+      }
+
+      const res = await fetch("/api/request", { method: "POST", body: formData })
+      const response = await res.json()
+
+      if (response.ok && response.requestId) {
+        setRequestId(response.requestId)
+        setStatus("success")
+      } else {
+        setStatus("error")
+      }
+    } catch {
+      setStatus("error")
     }
-    for (const file of data.placementImages) {
-      formData.append("placementImages", file)
-    }
-
-    const res = await fetch("/api/request", { method: "POST", body: formData })
-    const response = await res.json()
-    console.log("[RequestForm] submit response:", response)
   }
 
   const placementOptions = PLACEMENT_OPTIONS.map((v) => ({
@@ -85,6 +103,22 @@ export function RequestForm() {
 
   const err = (field: keyof RequestFormInput) => getFieldError(field, errors, t)
   const contactGroupError = getContactGroupError(errors, t)
+
+  if (status === "success") {
+    return (
+      <div className="flex flex-col gap-3 rounded-md border border-border p-6">
+        <p className="text-lg font-semibold text-foreground">{t("successTitle")}</p>
+        <p className="text-sm text-muted-foreground">{t("successMessage")}</p>
+        {requestId && (
+          <p className="text-sm font-mono text-foreground">
+            {t("successRequestId", { requestId })}
+          </p>
+        )}
+      </div>
+    )
+  }
+
+  const isSubmitting = status === "submitting"
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-6">
@@ -201,8 +235,14 @@ export function RequestForm() {
         {...register("consent")}
       />
 
+      {status === "error" && (
+        <p role="alert" className="text-sm text-destructive">
+          {t("errorMessage")}
+        </p>
+      )}
+
       <Button type="submit" disabled={isSubmitting}>
-        {t("submitButton")}
+        {isSubmitting ? t("submitButtonLoading") : t("submitButton")}
       </Button>
     </form>
   )

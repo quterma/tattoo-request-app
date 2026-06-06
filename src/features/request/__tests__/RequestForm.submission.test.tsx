@@ -113,4 +113,68 @@ describe("RequestForm – submission flow", () => {
 
     expect(mockFetch).not.toHaveBeenCalled()
   })
+
+  it("shows success block and hides form after successful submission", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+      json: () => Promise.resolve({ ok: true, requestId: "req-999" }),
+    }))
+
+    const user = userEvent.setup()
+    render(<RequestForm />)
+
+    await fillRequiredFields(user).fill()
+    await user.click(screen.getByRole("button", { name: /send request/i }))
+
+    expect(screen.getByText(/request sent/i)).toBeInTheDocument()
+    expect(screen.getByText(/req-999/)).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: /send request/i })).not.toBeInTheDocument()
+  })
+
+  it("shows error message and keeps form visible on API failure", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+      json: () => Promise.resolve({ ok: false }),
+    }))
+
+    const user = userEvent.setup()
+    render(<RequestForm />)
+
+    await fillRequiredFields(user).fill()
+    await user.click(screen.getByRole("button", { name: /send request/i }))
+
+    expect(screen.getByRole("alert")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /send request/i })).toBeInTheDocument()
+  })
+
+  it("shows error message and keeps form visible on network error", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("Network failure")))
+
+    const user = userEvent.setup()
+    render(<RequestForm />)
+
+    await fillRequiredFields(user).fill()
+    await user.click(screen.getByRole("button", { name: /send request/i }))
+
+    expect(screen.getByRole("alert")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /send request/i })).toBeInTheDocument()
+  })
+
+  it("clears error message and re-enables retry on subsequent submission", async () => {
+    const mockFetch = vi.fn()
+      .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: false }) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true, requestId: "req-retry" }) })
+    vi.stubGlobal("fetch", mockFetch)
+
+    const user = userEvent.setup()
+    render(<RequestForm />)
+
+    await fillRequiredFields(user).fill()
+    await user.click(screen.getByRole("button", { name: /send request/i }))
+
+    expect(screen.getByRole("alert")).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: /send request/i }))
+
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument()
+    expect(screen.getByText(/request sent/i)).toBeInTheDocument()
+  })
 })

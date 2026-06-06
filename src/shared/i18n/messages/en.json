@@ -108,6 +108,11 @@
     "consentLabel": "I have read and agree to the Pricing & Policies",
 
     "submitButton": "Send Request",
+    "submitButtonLoading": "Sending…",
+    "successTitle": "Request sent",
+    "successMessage": "We received your request. We'll be in touch soon.",
+    "successRequestId": "Your request ID: {requestId}",
+    "errorMessage": "Something went wrong. Please try again.",
 
     "sizeOptions": {
       "small": "Small (up to 5 cm)",
