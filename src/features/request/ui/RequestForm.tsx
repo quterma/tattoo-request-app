@@ -149,7 +149,7 @@ export function RequestForm() {
       <FileUploadInput
         id="referenceImages"
         label={t("referenceImagesLabel")}
-        hint={t("referenceImagesHint")}
+        hint={`${t("referenceImagesHint")} ${t("uploadFormatsHint")}`}
         buttonText={t("uploadButtonText", { maxFiles: MAX_FILES_PER_FIELD })}
         error={err("referenceImages")}
         value={referenceImages.field.value ?? []}
@@ -171,7 +171,7 @@ export function RequestForm() {
       <FileUploadInput
         id="placementImages"
         label={t("placementImagesLabel")}
-        hint={t("placementImagesHint")}
+        hint={`${t("placementImagesHint")} ${t("uploadFormatsHint")}`}
         buttonText={t("uploadButtonText", { maxFiles: MAX_FILES_PER_FIELD })}
         error={err("placementImages")}
         value={placementImages.field.value ?? []}

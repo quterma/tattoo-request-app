@@ -15,6 +15,8 @@ const MESSAGE_TO_I18N_KEY: Record<string, string> = {
   email_invalid: "errors.emailInvalid",
   consent_required: "errors.consentRequired",
   contact_required: "errors.atLeastOneContactRequired",
+  file_type_invalid: "errors.fileTypeInvalid",
+  file_too_large: "errors.fileTooLarge",
 }
 
 export function getFieldError(

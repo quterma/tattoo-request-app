@@ -77,6 +77,7 @@
 
     "referenceImagesLabel": "Reference images",
     "referenceImagesHint": "Up to 3 images. Photos of tattoos, artwork, or anything that captures the style or feel you want.",
+    "uploadFormatsHint": "JPG, PNG, WEBP, HEIC/HEIF · max 10 MB per image",
 
     "placementLabel": "Placement",
     "placementPlaceholder": "Select placement",
@@ -149,7 +150,9 @@
       "colorRequired": "Please select a color style",
       "emailInvalid": "Please enter a valid email address",
       "consentRequired": "You must agree to the policies to proceed",
-      "atLeastOneContactRequired": "Please provide at least one way to reach you"
+      "atLeastOneContactRequired": "Please provide at least one way to reach you",
+      "fileTypeInvalid": "Only JPG, PNG, WEBP, HEIC/HEIF images are allowed",
+      "fileTooLarge": "Each image must be 10 MB or less"
     }
   },
   "footer": {

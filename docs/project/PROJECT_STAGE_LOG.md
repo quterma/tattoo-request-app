@@ -17,7 +17,7 @@ Status: In Progress
 
 Current focus:
 
-- Stage 3B.5 — File transport
+- Stage 3C — Data Layer
 
 Completed in Stage 3:
 
@@ -35,14 +35,33 @@ Completed in Stage 3:
 - deferred file-upload UX documented in PROJECT_BACKLOG.md
 - server validation: validateRequestPayload() in BFF reuses requestFormSchema; POST /api/request returns 400 + structured errors or 500 on exception; consent "true" → boolean true conversion in parseRequestFormData
 - server validation UX: VALIDATION_ERROR fieldErrors mapped to RHF setError(); status reset to "idle" after field errors; empty fieldErrors falls back to generic error; 3 new tests added
+- file transport validation: validateFiles() in BFF checks MIME type (jpeg/png/webp/heic/heif) and size (≤10 MB per file); integrated into route after validateRequestPayload; errors flow through existing fieldErrors contract; upload format hints added to FileUploadInput fields; 9 new tests
 
 Next expected step:
 
-- Stage 3B.5 — File transport
+- Stage 3C — Data Layer
 
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-06-20 — Stage 3B.5 — File Transport Validation
+
+Status: Completed
+
+Completed:
+
+- `validateFiles()` added to `src/bff/validateFiles.ts`: checks MIME type and file size per field, returns `FileValidationResult`
+- allowed MIME types: `image/jpeg`, `image/png`, `image/webp`, `image/heic`, `image/heif`
+- max file size: 10 MB per file; first failing file per field stops further checks on that field
+- `ValidationErrorResult` reused — errors surface through existing `fieldErrors` contract
+- `src/bff/index.ts` updated: exports `validateFiles` and `FileValidationResult`
+- `app/api/request/route.ts` updated: sequential flow — `validateRequestPayload` first, then `validateFiles`
+- `file_type_invalid` and `file_too_large` keys added to `MESSAGE_TO_I18N_KEY` and `en.json`
+- upload format hint (`uploadFormatsHint`) added to `en.json`; both `FileUploadInput` fields in `RequestForm` show combined hint
+- 9 new tests in `src/bff/__tests__/validateFiles.test.ts`; all 54 tests pass; lint, typecheck, build — PASS
+
+---
 
 ### 2026-06-20 — Stage 3B.4 — Server Validation UX
 

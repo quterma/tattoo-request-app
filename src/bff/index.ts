@@ -6,3 +6,5 @@ export type {
   ValidationErrorResult,
   ValidationSuccessResult,
 } from "./request"
+export { validateFiles } from "./validateFiles"
+export type { FileValidationResult } from "./validateFiles"

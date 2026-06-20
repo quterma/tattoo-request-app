@@ -1,14 +1,19 @@
 import { NextResponse } from "next/server"
-import { parseRequestFormData, validateRequestPayload } from "@/bff"
+import { parseRequestFormData, validateFiles, validateRequestPayload } from "@/bff"
 
 export async function POST(req: Request) {
   try {
     const formData = await req.formData()
     const payload = parseRequestFormData(formData)
-    const validation = validateRequestPayload(payload)
 
+    const validation = validateRequestPayload(payload)
     if (!validation.ok) {
       return NextResponse.json(validation, { status: 400 })
+    }
+
+    const fileValidation = validateFiles(payload)
+    if (!fileValidation.ok) {
+      return NextResponse.json(fileValidation, { status: 400 })
     }
 
     const requestId = crypto.randomUUID()
