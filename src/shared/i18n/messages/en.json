@@ -99,11 +99,11 @@
 
     "contactSectionTitle": "How to reach you",
     "contactSectionHint": "At least one contact method is required.",
-    "emailLabel": "Email (optional)",
+    "emailLabel": "Email",
     "emailPlaceholder": "your@email.com",
-    "phoneLabel": "Phone (optional)",
+    "phoneLabel": "Phone",
     "phonePlaceholder": "e.g. 054-000-0000",
-    "contactOtherLabel": "Other (optional)",
+    "contactOtherLabel": "Other",
     "contactOtherPlaceholder": "Telegram, Instagram handle, etc.",
 
     "consentLabel": "I have read and agree to the Pricing & Policies",

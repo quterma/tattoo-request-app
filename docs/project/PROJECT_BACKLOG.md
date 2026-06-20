@@ -47,6 +47,16 @@ Deferred improvements (post-MVP):
 
 - Replace split("\n") in i18n with string arrays
 
+## MIME Type Verification (post-MVP)
+
+`validateFiles` in BFF trusts `file.type` from the multipart Content-Type header (browser-provided). No magic-byte verification is done. Acceptable for MVP at low volume with a known artist audience. Add magic-byte MIME checking if abuse is observed post-launch.
+
+## Route-Level Tests
+
+The `POST /api/request` handler currently has no tests — all coverage is on BFF helper functions in isolation. This is acceptable while the route only parses and validates. When 3C adds storage upload and DB insert orchestration, route-level integration tests become worthwhile to catch ordering bugs and error-path gaps.
+
+Revisit at the end of Stage 3C.4 (end-to-end submission).
+
 ## API Route Constants (post-MVP)
 
 Revisit route/path constants when admin routes, image proxy, and additional API endpoints are added.

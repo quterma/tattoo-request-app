@@ -117,6 +117,38 @@ describe("requestFormSchema – contact group validation", () => {
     }
   })
 
+  it("shows contact_required even when consent is missing", () => {
+    const result = requestFormSchema.safeParse({ ...noContact, consent: undefined })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      const messages = result.error.issues.map((i) => i.message)
+      expect(messages).toContain("contact_required")
+      expect(messages).toContain("consent_required")
+    }
+  })
+
+  it("shows contact_required on completely empty form submit", () => {
+    const emptyForm = {
+      ideaDescription: "",
+      referenceImages: [],
+      placement: "",
+      placementImages: [],
+      size: "",
+      color: "",
+      budget: "",
+      email: "",
+      phone: "",
+      contactOther: "",
+      consent: undefined,
+    }
+    const result = requestFormSchema.safeParse(emptyForm)
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      const messages = result.error.issues.map((i) => i.message)
+      expect(messages).toContain("contact_required")
+    }
+  })
+
   it("accepts when only email is provided", () => {
     const result = requestFormSchema.safeParse({ ...noContact, email: "x@example.com" })
     expect(result.success).toBe(true)

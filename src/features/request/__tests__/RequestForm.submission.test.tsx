@@ -256,3 +256,100 @@ describe("RequestForm – submission flow", () => {
     expect(screen.getByText(/request sent/i)).toBeInTheDocument()
   })
 })
+
+describe("RequestForm – contact group error UX", () => {
+  const contactErrorText = /please provide at least one way to reach you/i
+
+  function fillRequiredExceptContact(user: ReturnType<typeof userEvent.setup>) {
+    return {
+      async fill() {
+        await user.type(
+          screen.getByRole("textbox", { name: /describe your idea/i }),
+          "A dragon on my arm, very detailed and colorful",
+        )
+        const refFile = new File(["ref"], "ref.png", { type: "image/png" })
+        const placeFile = new File(["place"], "place.png", { type: "image/png" })
+        const [refInput, placeInput] = document.querySelectorAll('input[type="file"]')
+        await user.upload(refInput as HTMLElement, refFile)
+        await user.upload(placeInput as HTMLElement, placeFile)
+        await user.selectOptions(screen.getByRole("combobox", { name: /placement/i }), "arm")
+        await user.selectOptions(screen.getByRole("combobox", { name: /size/i }), "medium")
+        await user.selectOptions(screen.getByRole("combobox", { name: /color/i }), "black")
+        await user.click(screen.getByRole("checkbox", { name: /pricing/i }))
+      },
+    }
+  }
+
+  beforeEach(() => {
+    vi.restoreAllMocks()
+    vi.stubGlobal("fetch", vi.fn())
+  })
+
+  afterEach(() => {
+    cleanup()
+  })
+
+  it("shows contact error after submitting with all contact fields empty", async () => {
+    const user = userEvent.setup()
+    render(<RequestForm />)
+
+    await fillRequiredExceptContact(user).fill()
+    await user.click(screen.getByRole("button", { name: /send request/i }))
+
+    expect(screen.getByText(contactErrorText)).toBeInTheDocument()
+  })
+
+  it("clears contact error immediately when email is entered", async () => {
+    const user = userEvent.setup()
+    render(<RequestForm />)
+
+    await fillRequiredExceptContact(user).fill()
+    await user.click(screen.getByRole("button", { name: /send request/i }))
+    expect(screen.getByText(contactErrorText)).toBeInTheDocument()
+
+    await user.type(screen.getByRole("textbox", { name: /email/i }), "a@b.com")
+
+    expect(screen.queryByText(contactErrorText)).not.toBeInTheDocument()
+  })
+
+  it("clears contact error immediately when phone is entered", async () => {
+    const user = userEvent.setup()
+    render(<RequestForm />)
+
+    await fillRequiredExceptContact(user).fill()
+    await user.click(screen.getByRole("button", { name: /send request/i }))
+    expect(screen.getByText(contactErrorText)).toBeInTheDocument()
+
+    await user.type(screen.getByRole("textbox", { name: /phone/i }), "+1234")
+
+    expect(screen.queryByText(contactErrorText)).not.toBeInTheDocument()
+  })
+
+  it("clears contact error immediately when other contact is entered", async () => {
+    const user = userEvent.setup()
+    render(<RequestForm />)
+
+    await fillRequiredExceptContact(user).fill()
+    await user.click(screen.getByRole("button", { name: /send request/i }))
+    expect(screen.getByText(contactErrorText)).toBeInTheDocument()
+
+    await user.type(screen.getByRole("textbox", { name: /other/i }), "@telegram")
+
+    expect(screen.queryByText(contactErrorText)).not.toBeInTheDocument()
+  })
+
+  it("restores contact error when all contact fields are cleared and form is resubmitted", async () => {
+    const user = userEvent.setup()
+    render(<RequestForm />)
+
+    await fillRequiredExceptContact(user).fill()
+    await user.type(screen.getByRole("textbox", { name: /email/i }), "a@b.com")
+    await user.click(screen.getByRole("button", { name: /send request/i }))
+    expect(screen.queryByText(contactErrorText)).not.toBeInTheDocument()
+
+    await user.clear(screen.getByRole("textbox", { name: /email/i }))
+    await user.click(screen.getByRole("button", { name: /send request/i }))
+
+    expect(screen.getByText(contactErrorText)).toBeInTheDocument()
+  })
+})

@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useTranslations } from "next-intl"
-import { useController, useForm } from "react-hook-form"
+import { useController, useForm, useWatch } from "react-hook-form"
 import { API_ERROR_CODES, REQUEST_FIELDS } from "@/bff"
 import { getContactGroupError, getFieldError } from "../lib/errors"
 import { COLOR_OPTIONS, MAX_FILES_PER_FIELD, PLACEMENT_OPTIONS, SIZE_OPTIONS } from "../config"
@@ -29,6 +29,7 @@ export function RequestForm() {
     control,
     handleSubmit,
     setError,
+    clearErrors,
     formState: { errors },
   } = useForm<RequestFormInput, unknown, RequestFormData>({
     resolver: zodResolver(requestFormSchema),
@@ -49,6 +50,13 @@ export function RequestForm() {
 
   const referenceImages = useController({ name: "referenceImages", control })
   const placementImages = useController({ name: "placementImages", control })
+
+  const [email, phone, contactOther] = useWatch({ control, name: ["email", "phone", "contactOther"] })
+  useEffect(() => {
+    if (errors.contactOther?.message && (email || phone || contactOther)) {
+      clearErrors("contactOther")
+    }
+  }, [email, phone, contactOther, errors.contactOther?.message, clearErrors])
 
   async function onSubmit(data: RequestFormData) {
     setStatus("submitting")
@@ -78,8 +86,8 @@ export function RequestForm() {
       const res = await fetch("/api/request", { method: "POST", body: formData })
       const response = await res.json()
 
-      if (response.ok && response.requestId) {
-        setRequestId(response.requestId)
+      if (response.ok === true) {
+        setRequestId(response.requestId ?? null)
         setStatus("success")
       } else if (response.error?.code === API_ERROR_CODES.VALIDATION_ERROR) {
         const fieldErrors = response.error.fieldErrors as Record<string, string[]>

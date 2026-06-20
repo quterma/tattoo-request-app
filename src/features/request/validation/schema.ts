@@ -11,22 +11,25 @@ export const requestFormSchema = z
       .array(z.instanceof(File))
       .min(1, { message: K.REFERENCE_IMAGES_REQUIRED })
       .max(MAX_FILES_PER_FIELD),
-    placement: z.preprocess(
-      (v) => (v === "" ? undefined : v),
-      z.enum(PLACEMENT_OPTIONS, { required_error: K.PLACEMENT_REQUIRED }),
-    ),
+    placement: z
+      .string()
+      .refine((v) => (PLACEMENT_OPTIONS as readonly string[]).includes(v) && v !== "", {
+        message: K.PLACEMENT_REQUIRED,
+      }),
     placementImages: z
       .array(z.instanceof(File))
       .min(1, { message: K.PLACEMENT_IMAGES_REQUIRED })
       .max(MAX_FILES_PER_FIELD),
-    size: z.preprocess(
-      (v) => (v === "" ? undefined : v),
-      z.enum(SIZE_OPTIONS, { required_error: K.SIZE_REQUIRED }),
-    ),
-    color: z.preprocess(
-      (v) => (v === "" ? undefined : v),
-      z.enum(COLOR_OPTIONS, { required_error: K.COLOR_REQUIRED }),
-    ),
+    size: z
+      .string()
+      .refine((v) => (SIZE_OPTIONS as readonly string[]).includes(v) && v !== "", {
+        message: K.SIZE_REQUIRED,
+      }),
+    color: z
+      .string()
+      .refine((v) => (COLOR_OPTIONS as readonly string[]).includes(v) && v !== "", {
+        message: K.COLOR_REQUIRED,
+      }),
     budget: z
       .string()
       .optional()
@@ -46,7 +49,7 @@ export const requestFormSchema = z
       .string()
       .optional()
       .transform((v) => v?.trim() || undefined),
-    consent: z.literal(true, { errorMap: () => ({ message: K.CONSENT_REQUIRED }) }),
+    consent: z.custom<true>((v) => v === true, { message: K.CONSENT_REQUIRED, fatal: false }),
   })
   .superRefine((data, ctx) => {
     const hasContact =

@@ -32,7 +32,7 @@ export interface ParsedRequestPayload {
   email: string | undefined
   phone: string | undefined
   contactOther: string | undefined
-  consent: true
+  consent: true | undefined
   referenceImages: File[]
   placementImages: File[]
 }
@@ -64,7 +64,7 @@ export function parseRequestFormData(formData: FormData): ParsedRequestPayload {
     email: (formData.get(f.email) as string | null) ?? undefined,
     phone: (formData.get(f.phone) as string | null) ?? undefined,
     contactOther: (formData.get(f.contactOther) as string | null) ?? undefined,
-    consent: formData.get(f.consent) === "true" ? true : (undefined as unknown as true),
+    consent: formData.get(f.consent) === "true" ? true : undefined,
     referenceImages: formData.getAll(f.referenceImages) as File[],
     placementImages: formData.getAll(f.placementImages) as File[],
   }

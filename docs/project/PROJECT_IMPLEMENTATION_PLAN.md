@@ -165,11 +165,17 @@ Goal: implement request submission.
 - store each file as a typed record: type, storagePath, originalName, mimeType, size
 - return file records for linking to request
 
+Note: file count per field (MAX_FILES_PER_FIELD) is currently enforced by `requestFormSchema` inside `validateRequestPayload`, before `validateFiles` runs. `validateFiles` does not independently cap count — do not decouple validation order without updating both.
+
+Note: MIME type validation in `validateFiles` trusts `file.type` from the multipart header (browser-provided). Magic-byte verification is not implemented. Acceptable for MVP at low volume; revisit if abuse is observed.
+
 ### 3C.3 — Request persistence
 
 - define requests table schema
 - implement request insert via service layer
 - link uploaded file references to request record
+
+Note: the route currently generates a temporary `crypto.randomUUID()` as `requestId` and returns it to the client without storing it. In 3C.3, `requestId` must come from the DB insert result (or the record's primary key). The client success UX already renders `requestId` conditionally and will work once the real value is returned.
 
 ### 3C.4 — End-to-end submission
 
@@ -189,6 +195,8 @@ Goal: prevent duplicate requests from reaching the artist.
 - store it in the database as a unique constraint on the requests table
 - implement server-side deduplication: if `clientSubmissionId` already exists, return existing request info without creating a duplicate
 - include the request reference ID in the success response, Telegram notification, and success UX
+
+Note: adding `clientSubmissionId` requires touching `ParsedRequestPayload`, `REQUEST_FIELDS`, `parseRequestFormData` (BFF), `RequestForm.tsx` (client FormData build), and the route handler. Plan all these touch points together at the start of 3D.
 
 Must be complete before public production launch and before broad user testing.
 
