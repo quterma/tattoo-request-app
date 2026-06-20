@@ -1,10 +1,12 @@
 import type { useTranslations } from "next-intl"
 import type { FieldErrors } from "react-hook-form"
 import type { RequestFormInput } from "../types"
+import { VALIDATION_KEYS } from "../validation"
+import type { ValidationKey } from "../validation"
 
 type T = ReturnType<typeof useTranslations<"request">>
 
-const MESSAGE_TO_I18N_KEY: Record<string, string> = {
+const MESSAGE_TO_I18N_KEY: Record<ValidationKey, string> = {
   idea_required: "errors.ideaDescriptionRequired",
   idea_too_short: "errors.ideaDescriptionTooShort",
   reference_images_required: "errors.referenceImagesRequired",
@@ -26,7 +28,7 @@ export function getFieldError(
 ): string | undefined {
   const message = errors[field]?.message
   if (!message) return undefined
-  const key = MESSAGE_TO_I18N_KEY[message]
+  const key = MESSAGE_TO_I18N_KEY[message as ValidationKey]
   return key ? t(key as Parameters<T>[0]) : undefined
 }
 
@@ -34,6 +36,6 @@ export function getContactGroupError(
   errors: FieldErrors<RequestFormInput>,
   t: T,
 ): string | undefined {
-  if (errors.contactOther?.message !== "contact_required") return undefined
+  if (errors.contactOther?.message !== VALIDATION_KEYS.CONTACT_REQUIRED) return undefined
   return t("errors.atLeastOneContactRequired")
 }

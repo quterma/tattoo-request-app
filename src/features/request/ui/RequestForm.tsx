@@ -4,6 +4,7 @@ import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useTranslations } from "next-intl"
 import { useController, useForm } from "react-hook-form"
+import { API_ERROR_CODES, REQUEST_FIELDS } from "@/bff"
 import { getContactGroupError, getFieldError } from "../lib/errors"
 import { COLOR_OPTIONS, MAX_FILES_PER_FIELD, PLACEMENT_OPTIONS, SIZE_OPTIONS } from "../config"
 import type { RequestFormData, RequestFormInput } from "../types"
@@ -54,23 +55,24 @@ export function RequestForm() {
 
     try {
       const formData = new FormData()
+      const f = REQUEST_FIELDS
 
-      formData.append("ideaDescription", data.ideaDescription)
-      formData.append("placement", data.placement)
-      formData.append("size", data.size)
-      formData.append("color", data.color)
-      formData.append("consent", String(data.consent))
+      formData.append(f.ideaDescription, data.ideaDescription)
+      formData.append(f.placement, data.placement)
+      formData.append(f.size, data.size)
+      formData.append(f.color, data.color)
+      formData.append(f.consent, String(data.consent))
 
-      if (data.budget) formData.append("budget", data.budget)
-      if (data.email) formData.append("email", data.email)
-      if (data.phone) formData.append("phone", data.phone)
-      if (data.contactOther) formData.append("contactOther", data.contactOther)
+      if (data.budget) formData.append(f.budget, data.budget)
+      if (data.email) formData.append(f.email, data.email)
+      if (data.phone) formData.append(f.phone, data.phone)
+      if (data.contactOther) formData.append(f.contactOther, data.contactOther)
 
       for (const file of data.referenceImages) {
-        formData.append("referenceImages", file)
+        formData.append(f.referenceImages, file)
       }
       for (const file of data.placementImages) {
-        formData.append("placementImages", file)
+        formData.append(f.placementImages, file)
       }
 
       const res = await fetch("/api/request", { method: "POST", body: formData })
@@ -79,7 +81,7 @@ export function RequestForm() {
       if (response.ok && response.requestId) {
         setRequestId(response.requestId)
         setStatus("success")
-      } else if (response.error?.code === "VALIDATION_ERROR") {
+      } else if (response.error?.code === API_ERROR_CODES.VALIDATION_ERROR) {
         const fieldErrors = response.error.fieldErrors as Record<string, string[]>
         const fields = Object.keys(fieldErrors) as (keyof RequestFormInput)[]
         if (fields.length > 0) {

@@ -47,6 +47,12 @@ Deferred improvements (post-MVP):
 
 - Replace split("\n") in i18n with string arrays
 
+## API Route Constants (post-MVP)
+
+Revisit route/path constants when admin routes, image proxy, and additional API endpoints are added.
+Currently `/api/request` is the only endpoint and is used in one place — centralizing it now would be premature.
+Introduce a `API_ROUTES` constant in `src/bff` or `src/shared/config` at that point.
+
 ## Observability (post-MVP)
 
 - Add Sentry (error tracking)

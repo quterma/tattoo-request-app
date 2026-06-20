@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest"
+import { API_ERROR_CODES, REQUEST_FIELDS } from "../request"
 import { validateFiles } from "../validateFiles"
 
 const MB = 1024 * 1024
@@ -32,8 +33,8 @@ describe("validateFiles", () => {
     })
     expect(result.ok).toBe(false)
     if (!result.ok) {
-      expect(result.error.fieldErrors["referenceImages"]).toEqual(["file_type_invalid"])
-      expect(result.error.fieldErrors["placementImages"]).toBeUndefined()
+      expect(result.error.fieldErrors[REQUEST_FIELDS.referenceImages]).toEqual(["file_type_invalid"])
+      expect(result.error.fieldErrors[REQUEST_FIELDS.placementImages]).toBeUndefined()
     }
   })
 
@@ -44,8 +45,8 @@ describe("validateFiles", () => {
     })
     expect(result.ok).toBe(false)
     if (!result.ok) {
-      expect(result.error.fieldErrors["placementImages"]).toEqual(["file_type_invalid"])
-      expect(result.error.fieldErrors["referenceImages"]).toBeUndefined()
+      expect(result.error.fieldErrors[REQUEST_FIELDS.placementImages]).toEqual(["file_type_invalid"])
+      expect(result.error.fieldErrors[REQUEST_FIELDS.referenceImages]).toBeUndefined()
     }
   })
 
@@ -56,7 +57,7 @@ describe("validateFiles", () => {
     })
     expect(result.ok).toBe(false)
     if (!result.ok) {
-      expect(result.error.fieldErrors["referenceImages"]).toEqual(["file_too_large"])
+      expect(result.error.fieldErrors[REQUEST_FIELDS.referenceImages]).toEqual(["file_too_large"])
     }
   })
 
@@ -70,7 +71,7 @@ describe("validateFiles", () => {
     })
     expect(result.ok).toBe(false)
     if (!result.ok) {
-      expect(result.error.fieldErrors["referenceImages"]).toEqual(["file_type_invalid"])
+      expect(result.error.fieldErrors[REQUEST_FIELDS.referenceImages]).toEqual(["file_type_invalid"])
     }
   })
 
@@ -81,8 +82,8 @@ describe("validateFiles", () => {
     })
     expect(result.ok).toBe(false)
     if (!result.ok) {
-      expect(result.error.fieldErrors["referenceImages"]).toEqual(["file_type_invalid"])
-      expect(result.error.fieldErrors["placementImages"]).toEqual(["file_too_large"])
+      expect(result.error.fieldErrors[REQUEST_FIELDS.referenceImages]).toEqual(["file_type_invalid"])
+      expect(result.error.fieldErrors[REQUEST_FIELDS.placementImages]).toEqual(["file_too_large"])
     }
   })
 
@@ -109,7 +110,7 @@ describe("validateFiles", () => {
     })
     expect(result.ok).toBe(false)
     if (!result.ok) {
-      expect(result.error.code).toBe("VALIDATION_ERROR")
+      expect(result.error.code).toBe(API_ERROR_CODES.VALIDATION_ERROR)
       expect(result.error.formErrors).toEqual([])
     }
   })

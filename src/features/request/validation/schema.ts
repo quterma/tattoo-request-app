@@ -1,30 +1,31 @@
 import { z } from "zod/v3"
 import { COLOR_OPTIONS, MAX_FILES_PER_FIELD, PLACEMENT_OPTIONS, SIZE_OPTIONS } from "../config"
+import { VALIDATION_KEYS as K } from "./validationKeys"
 
 export const requestFormSchema = z
   .object({
     ideaDescription: z
-      .string({ required_error: "idea_required" })
-      .min(10, { message: "idea_too_short" }),
+      .string({ required_error: K.IDEA_REQUIRED })
+      .min(10, { message: K.IDEA_TOO_SHORT }),
     referenceImages: z
       .array(z.instanceof(File))
-      .min(1, { message: "reference_images_required" })
+      .min(1, { message: K.REFERENCE_IMAGES_REQUIRED })
       .max(MAX_FILES_PER_FIELD),
     placement: z.preprocess(
       (v) => (v === "" ? undefined : v),
-      z.enum(PLACEMENT_OPTIONS, { required_error: "placement_required" }),
+      z.enum(PLACEMENT_OPTIONS, { required_error: K.PLACEMENT_REQUIRED }),
     ),
     placementImages: z
       .array(z.instanceof(File))
-      .min(1, { message: "placement_images_required" })
+      .min(1, { message: K.PLACEMENT_IMAGES_REQUIRED })
       .max(MAX_FILES_PER_FIELD),
     size: z.preprocess(
       (v) => (v === "" ? undefined : v),
-      z.enum(SIZE_OPTIONS, { required_error: "size_required" }),
+      z.enum(SIZE_OPTIONS, { required_error: K.SIZE_REQUIRED }),
     ),
     color: z.preprocess(
       (v) => (v === "" ? undefined : v),
-      z.enum(COLOR_OPTIONS, { required_error: "color_required" }),
+      z.enum(COLOR_OPTIONS, { required_error: K.COLOR_REQUIRED }),
     ),
     budget: z
       .string()
@@ -35,7 +36,7 @@ export const requestFormSchema = z
       .optional()
       .transform((v) => v?.trim() || undefined)
       .refine((v) => v === undefined || z.string().email().safeParse(v).success, {
-        message: "email_invalid",
+        message: K.EMAIL_INVALID,
       }),
     phone: z
       .string()
@@ -45,7 +46,7 @@ export const requestFormSchema = z
       .string()
       .optional()
       .transform((v) => v?.trim() || undefined),
-    consent: z.literal(true, { errorMap: () => ({ message: "consent_required" }) }),
+    consent: z.literal(true, { errorMap: () => ({ message: K.CONSENT_REQUIRED }) }),
   })
   .superRefine((data, ctx) => {
     const hasContact =
@@ -55,7 +56,7 @@ export const requestFormSchema = z
       ctx.addIssue({
         code: "custom",
         path: ["contactOther"],
-        message: "contact_required",
+        message: K.CONTACT_REQUIRED,
       })
     }
   })

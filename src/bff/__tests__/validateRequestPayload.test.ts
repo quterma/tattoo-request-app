@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { validateRequestPayload } from "../request"
+import { API_ERROR_CODES, validateRequestPayload } from "../request"
 import type { ParsedRequestPayload } from "../request"
 
 function makeFile(name = "photo.png"): File {
@@ -45,7 +45,7 @@ describe("validateRequestPayload – validation errors", () => {
 
     expect(result.ok).toBe(false)
     if (!result.ok) {
-      expect(result.error.code).toBe("VALIDATION_ERROR")
+      expect(result.error.code).toBe(API_ERROR_CODES.VALIDATION_ERROR)
       expect(result.error.fieldErrors).toBeDefined()
       expect(result.error.formErrors).toBeDefined()
     }
@@ -118,7 +118,7 @@ describe("validateRequestPayload – error contract shape", () => {
     expect(result).toMatchObject({
       ok: false,
       error: {
-        code: "VALIDATION_ERROR",
+        code: API_ERROR_CODES.VALIDATION_ERROR,
         fieldErrors: expect.any(Object),
         formErrors: expect.any(Array),
       },

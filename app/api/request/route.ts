@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { parseRequestFormData, validateFiles, validateRequestPayload } from "@/bff"
+import { API_ERROR_CODES, parseRequestFormData, validateFiles, validateRequestPayload } from "@/bff"
 
 export async function POST(req: Request) {
   try {
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, requestId })
   } catch {
     return NextResponse.json(
-      { ok: false, error: { code: "SERVER_ERROR" } },
+      { ok: false, error: { code: API_ERROR_CODES.SERVER_ERROR } },
       { status: 500 },
     )
   }

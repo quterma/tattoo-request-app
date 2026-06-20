@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import { render, screen, cleanup } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
+import { API_ERROR_CODES } from "@/bff"
 import { RequestForm } from "../ui/RequestForm"
 import messages from "@/shared/i18n/messages/en.json"
 
@@ -164,7 +165,7 @@ describe("RequestForm – submission flow", () => {
         Promise.resolve({
           ok: false,
           error: {
-            code: "VALIDATION_ERROR",
+            code: API_ERROR_CODES.VALIDATION_ERROR,
             fieldErrors: { ideaDescription: ["idea_too_short"] },
             formErrors: [],
           },
@@ -187,7 +188,7 @@ describe("RequestForm – submission flow", () => {
         Promise.resolve({
           ok: false,
           error: {
-            code: "VALIDATION_ERROR",
+            code: API_ERROR_CODES.VALIDATION_ERROR,
             fieldErrors: {},
             formErrors: ["something went wrong"],
           },
@@ -211,7 +212,7 @@ describe("RequestForm – submission flow", () => {
           Promise.resolve({
             ok: false,
             error: {
-              code: "VALIDATION_ERROR",
+              code: API_ERROR_CODES.VALIDATION_ERROR,
               fieldErrors: { ideaDescription: ["idea_too_short"] },
               formErrors: [],
             },

@@ -1,3 +1,5 @@
+import { VALIDATION_KEYS as K } from "@/features/request/validation"
+import { API_ERROR_CODES, REQUEST_FIELDS } from "./request"
 import type { ValidationErrorResult } from "./request"
 
 const ALLOWED_MIME_TYPES = new Set([
@@ -21,18 +23,18 @@ export function validateFiles(files: {
   const fieldErrors: Record<string, string[]> = {}
 
   const fields = [
-    { name: "referenceImages", files: files.referenceImages },
-    { name: "placementImages", files: files.placementImages },
+    { name: REQUEST_FIELDS.referenceImages, files: files.referenceImages },
+    { name: REQUEST_FIELDS.placementImages, files: files.placementImages },
   ] as const
 
   for (const { name, files: fieldFiles } of fields) {
     for (const file of fieldFiles) {
       if (!ALLOWED_MIME_TYPES.has(file.type)) {
-        fieldErrors[name] = ["file_type_invalid"]
+        fieldErrors[name] = [K.FILE_TYPE_INVALID]
         break
       }
       if (file.size > MAX_FILE_SIZE_BYTES) {
-        fieldErrors[name] = ["file_too_large"]
+        fieldErrors[name] = [K.FILE_TOO_LARGE]
         break
       }
     }
@@ -41,7 +43,7 @@ export function validateFiles(files: {
   if (Object.keys(fieldErrors).length > 0) {
     return {
       ok: false,
-      error: { code: "VALIDATION_ERROR", fieldErrors, formErrors: [] },
+      error: { code: API_ERROR_CODES.VALIDATION_ERROR, fieldErrors, formErrors: [] },
     }
   }
 
