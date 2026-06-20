@@ -27,6 +27,7 @@ export function RequestForm() {
     register,
     control,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm<RequestFormInput, unknown, RequestFormData>({
     resolver: zodResolver(requestFormSchema),
@@ -78,6 +79,18 @@ export function RequestForm() {
       if (response.ok && response.requestId) {
         setRequestId(response.requestId)
         setStatus("success")
+      } else if (response.error?.code === "VALIDATION_ERROR") {
+        const fieldErrors = response.error.fieldErrors as Record<string, string[]>
+        const fields = Object.keys(fieldErrors) as (keyof RequestFormInput)[]
+        if (fields.length > 0) {
+          for (const field of fields) {
+            const message = fieldErrors[field]?.[0]
+            if (message) setError(field, { message })
+          }
+          setStatus("idle")
+        } else {
+          setStatus("error")
+        }
       } else {
         setStatus("error")
       }

@@ -158,6 +158,83 @@ describe("RequestForm – submission flow", () => {
     expect(screen.getByRole("button", { name: /send request/i })).toBeInTheDocument()
   })
 
+  it("maps server fieldErrors to RHF field errors via setError", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+      json: () =>
+        Promise.resolve({
+          ok: false,
+          error: {
+            code: "VALIDATION_ERROR",
+            fieldErrors: { ideaDescription: ["idea_too_short"] },
+            formErrors: [],
+          },
+        }),
+    }))
+
+    const user = userEvent.setup()
+    render(<RequestForm />)
+
+    await fillRequiredFields(user).fill()
+    await user.click(screen.getByRole("button", { name: /send request/i }))
+
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument()
+    expect(await screen.findByText(/at least 10 characters/i)).toBeInTheDocument()
+  })
+
+  it("shows generic error when VALIDATION_ERROR has no fieldErrors", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+      json: () =>
+        Promise.resolve({
+          ok: false,
+          error: {
+            code: "VALIDATION_ERROR",
+            fieldErrors: {},
+            formErrors: ["something went wrong"],
+          },
+        }),
+    }))
+
+    const user = userEvent.setup()
+    render(<RequestForm />)
+
+    await fillRequiredFields(user).fill()
+    await user.click(screen.getByRole("button", { name: /send request/i }))
+
+    expect(screen.getByRole("alert")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /send request/i })).toBeInTheDocument()
+  })
+
+  it("allows retry after validation error with fieldErrors", async () => {
+    const mockFetch = vi.fn()
+      .mockResolvedValueOnce({
+        json: () =>
+          Promise.resolve({
+            ok: false,
+            error: {
+              code: "VALIDATION_ERROR",
+              fieldErrors: { ideaDescription: ["idea_too_short"] },
+              formErrors: [],
+            },
+          }),
+      })
+      .mockResolvedValueOnce({
+        json: () => Promise.resolve({ ok: true, requestId: "req-after-fix" }),
+      })
+    vi.stubGlobal("fetch", mockFetch)
+
+    const user = userEvent.setup()
+    render(<RequestForm />)
+
+    await fillRequiredFields(user).fill()
+    await user.click(screen.getByRole("button", { name: /send request/i }))
+
+    expect(await screen.findByText(/at least 10 characters/i)).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: /send request/i }))
+
+    expect(await screen.findByText(/request sent/i)).toBeInTheDocument()
+  })
+
   it("clears error message and re-enables retry on subsequent submission", async () => {
     const mockFetch = vi.fn()
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: false }) })

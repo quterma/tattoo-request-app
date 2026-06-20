@@ -17,7 +17,7 @@ Status: In Progress
 
 Current focus:
 
-- Stage 3B.4 — Server Validation UX
+- Stage 3B.5 — File transport
 
 Completed in Stage 3:
 
@@ -34,14 +34,31 @@ Completed in Stage 3:
 - upload trigger text updated to i18n key with maxFiles interpolation ("Choose up to {maxFiles} images.")
 - deferred file-upload UX documented in PROJECT_BACKLOG.md
 - server validation: validateRequestPayload() in BFF reuses requestFormSchema; POST /api/request returns 400 + structured errors or 500 on exception; consent "true" → boolean true conversion in parseRequestFormData
+- server validation UX: VALIDATION_ERROR fieldErrors mapped to RHF setError(); status reset to "idle" after field errors; empty fieldErrors falls back to generic error; 3 new tests added
 
 Next expected step:
 
-- Stage 3B.4 — Server Validation UX
+- Stage 3B.5 — File transport
 
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-06-20 — Stage 3B.4 — Server Validation UX
+
+Status: Completed
+
+Completed:
+
+- `setError` extracted from `useForm` in `RequestForm.tsx`
+- `onSubmit` updated: when API returns `ok: false` with `code === "VALIDATION_ERROR"`, maps `fieldErrors` entries to `setError(field, { message })` using first error per field
+- `status` reset to `"idle"` after field errors are set — form stays interactive for retry
+- Empty `fieldErrors` with `VALIDATION_ERROR` falls back to generic `"error"` status
+- Non-validation errors keep existing generic error behavior unchanged
+- 3 new tests: fieldErrors mapped to field UI, empty fieldErrors → generic error banner, retry after validation error
+- all 45 tests pass; lint, typecheck, build — PASS
+
+---
 
 ### 2026-06-06 — Stage 3B.3 — Server validation
 
