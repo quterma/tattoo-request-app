@@ -17,7 +17,7 @@ Status: In Progress
 
 Current focus:
 
-- Stage 3C — Data Layer
+- Stage 3C.2 — File Storage
 
 Completed in Stage 3:
 
@@ -37,14 +37,33 @@ Completed in Stage 3:
 - server validation UX: VALIDATION_ERROR fieldErrors mapped to RHF setError(); status reset to "idle" after field errors; empty fieldErrors falls back to generic error; 3 new tests added
 - file transport validation: validateFiles() in BFF checks MIME type (jpeg/png/webp/heic/heif) and size (≤10 MB per file); integrated into route after validateRequestPayload; errors flow through existing fieldErrors contract; upload format hints added to FileUploadInput fields; 9 new tests
 - pre-3C fixes: consent type made honest (true | undefined), success response gated on response.ok === true, contact field labels cleaned up
+- Supabase foundation: @supabase/supabase-js installed; config layer (src/config/index.ts) reads SUPABASE_URL + SUPABASE_SECRET_KEY with fail-fast validation; server-side Supabase client in src/services/supabase.ts exported through src/services/index.ts; .env.example created
 
 Next expected step:
 
-- Stage 3C — Data Layer
+- Stage 3C.2 — File Storage
 
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-06-21 — Stage 3C.1 — Supabase Foundation
+
+Status: Completed
+
+Completed:
+
+- `@supabase/supabase-js 2.108.2` added as dependency
+- `.env.example` created with `SUPABASE_URL` and `SUPABASE_SECRET_KEY`
+- `src/config/index.ts` populated: `requireEnv()` helper, `config.supabase.url` + `config.supabase.secretKey` — throws at module load if env vars missing
+- `src/services/supabase.ts` created: server-side Supabase client with `persistSession: false`
+- `src/services/index.ts` updated: exports `supabase` through public API
+- `docs/project/PROJECT_DECISIONS.md` updated: MVP Quality Standard, Admin Authentication Requirement, Quality Gates Policy
+- `docs/files-structure.md` updated
+- Connection verification: manual — `pnpm dev` startup throws immediately if env vars are missing; first real DB query in Stage 3C.3 will confirm network connectivity
+- lint / typecheck / tests (61/61) / build — all PASS
+
+---
 
 ### 2026-06-20 — Stage 3B Pre-3C Fixes
 

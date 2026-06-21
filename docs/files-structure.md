@@ -17,29 +17,31 @@ tattoo-request-app/
 ├── tsconfig.json
 ├── vitest.config.ts
 ├── .claude/
-│   ├── CLAUDE.md
-│   └── settings.local.json
+│   └── CLAUDE.md
 ├── app/
 │   ├── favicon.ico
 │   ├── globals.css
 │   ├── layout.tsx
 │   ├── not-found.tsx
-│   └── [locale]/
-│       ├── layout.tsx
-│       ├── (admin)/
-│       │   └── admin/
-│       │       └── page.tsx
-│       └── (public)/
-│           ├── layout.tsx
-│           ├── page.tsx
-│           ├── aftercare/
-│           │   └── page.tsx
-│           ├── location/
-│           │   └── page.tsx
-│           ├── policies/
-│           │   └── page.tsx
-│           └── request/
-│               └── page.tsx
+│   ├── [locale]/
+│   │   ├── layout.tsx
+│   │   ├── (admin)/
+│   │   │   └── admin/
+│   │   │       └── page.tsx
+│   │   └── (public)/
+│   │       ├── layout.tsx
+│   │       ├── page.tsx
+│   │       ├── aftercare/
+│   │       │   └── page.tsx
+│   │       ├── location/
+│   │       │   └── page.tsx
+│   │       ├── policies/
+│   │       │   └── page.tsx
+│   │       └── request/
+│   │           └── page.tsx
+│   └── api/
+│       └── request/
+│           └── route.ts
 ├── docs/
 │   ├── files-structure.md
 │   ├── framework/
@@ -47,6 +49,7 @@ tattoo-request-app/
 │   │   ├── AI_DEVELOPMENT_WORKFLOW.md
 │   │   ├── AI_FRAMEWORK_IDEAS.md
 │   │   ├── AI_PROJECT_BOOTSTRAP.md
+│   │   ├── AI_REVIEW_PIPELINE.md
 │   │   ├── DOCUMENTATION_SYSTEM_RULES.md
 │   │   └── templates/
 │   │       ├── CLAUDE_TEMPLATE.md
@@ -70,12 +73,21 @@ tattoo-request-app/
 │   └── update-structure.mjs
 └── src/
     ├── bff/
-    │   └── index.ts
+    │   ├── index.ts
+    │   ├── request.ts
+    │   ├── validateFiles.ts
+    │   └── __tests__/
+    │       ├── request.test.ts
+    │       ├── validateFiles.test.ts
+    │       └── validateRequestPayload.test.ts
     ├── config/
     │   └── index.ts
     ├── features/
     │   ├── index.ts
     │   └── request/
+    │       ├── __tests__/
+    │       │   ├── RequestForm.submission.test.tsx
+    │       │   └── schema.test.ts
     │       ├── config/
     │       │   ├── form.ts
     │       │   └── index.ts
@@ -99,9 +111,11 @@ tattoo-request-app/
     │       │       └── FormFieldLayout.tsx
     │       └── validation/
     │           ├── index.ts
-    │           └── schema.ts
+    │           ├── schema.ts
+    │           └── validationKeys.ts
     ├── services/
-    │   └── index.ts
+    │   ├── index.ts
+    │   └── supabase.ts
     ├── shared/
     │   ├── index.ts
     │   ├── hooks/

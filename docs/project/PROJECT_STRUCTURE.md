@@ -52,9 +52,10 @@ Current features:
 #### features/request/
 
 - config/ — form constants (field options, file limits)
+- lib/ — error helpers (MESSAGE_TO_I18N_KEY, getFieldError, getContactGroupError)
 - types/ — RequestFormData type inferred from zod schema
-- validation/ — zod schema with all form fields and cross-field rules
-- ui/ — RequestForm component (placeholder, no logic yet)
+- validation/ — zod schema with all form fields, cross-field rules, and VALIDATION_KEYS constants
+- ui/ — RequestForm (RHF + zodResolver, submit state machine, server error mapping) and form primitives
 
 ---
 
@@ -71,9 +72,14 @@ Current features:
 
 ### services/
 
-- API clients
-- external integrations
-- reusable business services
+- external service clients
+- server-side only
+
+Current modules:
+
+#### services/supabase.ts
+
+- `supabase` — server-side Supabase client (service role, no session persistence)
 
 ---
 
@@ -88,8 +94,13 @@ Current modules:
 
 #### bff/request.ts
 
-- ParsedRequestPayload interface
-- parseRequestFormData() — parses multipart/form-data from POST /api/request
+- `ParsedRequestPayload` interface
+- `parseRequestFormData()` — parses multipart/form-data from POST /api/request
+- `validateRequestPayload()` — reuses requestFormSchema, returns typed ValidationResult
+
+#### bff/validateFiles.ts
+
+- `validateFiles()` — checks MIME type and size per file field, returns FileValidationResult
 
 ---
 
@@ -98,6 +109,12 @@ Current modules:
 - environment configuration
 - constants
 - feature flags (if needed)
+
+Current modules:
+
+#### config/index.ts
+
+- `config` — typed config object; reads `SUPABASE_URL` and `SUPABASE_SECRET_KEY` from env; throws at load time if any required var is missing
 
 ---
 

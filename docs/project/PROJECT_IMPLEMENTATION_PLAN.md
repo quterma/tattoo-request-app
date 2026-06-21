@@ -158,7 +158,7 @@ Goal: implement request submission.
 - document required env vars in .env.example
 - verify connection
 
-### 3C.2 — Storage upload
+### 3C.2 — File Storage
 
 - perform short technical review: Image Proxy feasibility with Next.js + Supabase Storage
 - upload files to Supabase Storage (private bucket)
@@ -230,7 +230,33 @@ Result:
 
 ---
 
-# Stage 4 — Admin Panel
+# Stage 4 — Admin
+
+## Stage 4A — Admin Authentication
+
+Goal: protect admin access before public launch.
+
+**Required before public launch.** See PROJECT_DECISIONS.md — Admin Authentication Requirement.
+
+Tasks:
+
+- login / logout
+- protected admin routes
+- authenticated admin session
+
+Exit Criteria:
+
+- admin routes are not publicly accessible
+- unauthenticated requests are rejected or redirected
+- login and logout work correctly
+
+Result:
+
+- admin interface is protected
+
+---
+
+## Stage 4B — Admin Panel
 
 Goal: implement request management.
 

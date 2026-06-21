@@ -70,6 +70,19 @@ If improvement is possible:
 
 ---
 
+## Before Presenting Implementation Results (MANDATORY)
+
+Before presenting results of any implementation task, always run without waiting for user confirmation:
+
+1. `pnpm structure` — update docs/files-structure.md
+2. Review PROJECT_STAGE_LOG.md — update if progress changed
+3. Review PROJECT_DECISIONS.md — update if a decision was made or changed
+4. Quality gates — run in order: pnpm lint / pnpm typecheck / pnpm test / pnpm build
+
+These steps are not optional and do not require user confirmation.
+
+---
+
 ## Pre-Commit Checklist (MANDATORY)
 
 Before every commit, verify:

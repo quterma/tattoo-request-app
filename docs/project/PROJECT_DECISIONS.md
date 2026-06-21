@@ -10,6 +10,42 @@ AI agents and developers working on the project.
 
 ---
 
+# Admin Authentication Requirement
+
+Admin authentication is required before the first public release.
+
+The admin interface must not be publicly accessible in production.
+
+Hidden URLs, unlinked routes, or security through obscurity are not considered sufficient protection.
+
+Authentication may be implemented after the request submission flow is completed, but must be completed before public launch.
+
+---
+
+# Quality Gates Policy
+
+After every implementation task and before presenting results, the following must be run automatically:
+
+- lint
+- typecheck
+- tests
+- build
+
+Do not wait for human confirmation before running quality gates.
+
+Human review is required before commits, not before validation.
+
+---
+
+# MVP Quality Standard
+
+This is a production MVP — not a prototype.
+
+MVP means limited scope, not reduced quality.
+Every feature included in the first public release must be production-ready for real client usage.
+
+---
+
 # Product Decisions
 
 - The product is a production MVP for a single real tattoo artist.
