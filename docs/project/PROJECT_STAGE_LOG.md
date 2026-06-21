@@ -17,7 +17,7 @@ Status: In Progress
 
 Current focus:
 
-- Stage 3C.2.2 — Storage Integration (next)
+- Stage 3C.3 — Database Persistence (next)
 
 Architecture decisions confirmed for Stage 3C.2:
 
@@ -57,6 +57,23 @@ Next expected step:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-06-21 — Stage 3C.2.2 — Storage Integration
+
+Status: Completed
+
+Completed:
+
+- `src/services/storage.ts` created: `uploadRequestFiles(files, clientSubmissionId)` — uploads reference and placement images to `request-images/{clientSubmissionId}/{type}/` with deterministic filenames (`reference-01.jpg`, `placement-01.jpg`, ...)
+- Per-file retry: up to 3 attempts, exponential backoff (200ms base), transient errors only (`isTransientError()` checks network/timeout/5xx keywords)
+- Cleanup on failure: tracks uploaded paths, calls `supabase.storage.remove()` on partial failure — logs attempt and result, does not rethrow cleanup errors
+- `UploadedFile` and `FileType` types exported through `src/services/index.ts`
+- Route handler (`app/api/request/route.ts`) updated: `uploadRequestFiles` called after `validateFiles`; temporary success response unchanged
+- 8 tests in `src/services/__tests__/storage.test.ts`: upload success, empty files, retry success, retry exhaustion, non-transient no-retry, partial cleanup, cleanup failure logging, no cleanup when nothing uploaded
+- Total tests: 74 (was 66) — all pass
+- lint / typecheck / build — all PASS
+
+---
 
 ### 2026-06-21 — Stage 3C.2.1 — Storage Foundation
 

@@ -18,6 +18,8 @@ tattoo-request-app/
 ├── vitest.config.ts
 ├── .claude/
 │   └── CLAUDE.md
+├── .husky/
+│   └── pre-commit
 ├── app/
 │   ├── favicon.ico
 │   ├── globals.css
@@ -115,7 +117,10 @@ tattoo-request-app/
     │           └── validationKeys.ts
     ├── services/
     │   ├── index.ts
-    │   └── supabase.ts
+    │   ├── storage.ts
+    │   ├── supabase.ts
+    │   └── __tests__/
+    │       └── storage.test.ts
     ├── shared/
     │   ├── index.ts
     │   ├── hooks/

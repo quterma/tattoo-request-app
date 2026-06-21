@@ -6,6 +6,7 @@ import {
   validateFiles,
   validateRequestPayload,
 } from "@/bff"
+import { uploadRequestFiles } from "@/services"
 
 export async function POST(req: Request) {
   try {
@@ -21,6 +22,11 @@ export async function POST(req: Request) {
     if (!fileValidation.ok) {
       return NextResponse.json(fileValidation, { status: 400 })
     }
+
+    await uploadRequestFiles(
+      { referenceImages: payload.referenceImages, placementImages: payload.placementImages },
+      payload.clientSubmissionId,
+    )
 
     const requestId = crypto.randomUUID()
     return NextResponse.json({ ok: true, requestId })
