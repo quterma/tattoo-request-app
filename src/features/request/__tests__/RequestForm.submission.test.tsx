@@ -95,6 +95,9 @@ describe("RequestForm – submission flow", () => {
     await user.click(screen.getByRole("button", { name: /send request/i }))
 
     expect(capturedFormData).toBeDefined()
+    expect(capturedFormData!.get("clientSubmissionId")).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+    )
     expect(capturedFormData!.get("ideaDescription")).toContain("dragon")
     expect(capturedFormData!.get("placement")).toBe("arm")
     expect(capturedFormData!.get("size")).toBe("medium")

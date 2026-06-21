@@ -21,6 +21,7 @@ type SubmitStatus = "idle" | "submitting" | "success" | "error"
 export function RequestForm() {
   const t = useTranslations("request")
 
+  const [clientSubmissionId] = useState(() => crypto.randomUUID())
   const [status, setStatus] = useState<SubmitStatus>("idle")
   const [requestId, setRequestId] = useState<string | null>(null)
 
@@ -65,6 +66,7 @@ export function RequestForm() {
       const formData = new FormData()
       const f = REQUEST_FIELDS
 
+      formData.append(f.clientSubmissionId, clientSubmissionId)
       formData.append(f.ideaDescription, data.ideaDescription)
       formData.append(f.placement, data.placement)
       formData.append(f.size, data.size)

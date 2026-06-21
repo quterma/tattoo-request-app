@@ -125,8 +125,9 @@ Each uploaded file is recorded as a typed file record linked to its request:
 type ("reference" | "placement"), storagePath, originalName, mimeType, size.
 See PROJECT_DECISIONS.md — File Data Model Decisions.
 
-Admin file access is served through an Image Proxy via BFF (Next.js Route Handler).
-This avoids exposing storage credentials or signed URLs directly to the client.
+Admin file access uses signed URLs generated server-side in the BFF.
+Signed URLs are short-lived (~1 hour) and scoped to the private bucket.
+Image Proxy through BFF was evaluated and rejected in Stage 3C.2 planning — see PROJECT_DECISIONS.md.
 
 ---
 

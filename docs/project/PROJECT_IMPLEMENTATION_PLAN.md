@@ -160,10 +160,27 @@ Goal: implement request submission.
 
 ### 3C.2 — File Storage
 
-- perform short technical review: Image Proxy feasibility with Next.js + Supabase Storage
-- upload files to Supabase Storage (private bucket)
-- store each file as a typed record: type, storagePath, originalName, mimeType, size
-- return file records for linking to request
+Architecture decisions confirmed in pre-implementation review. See PROJECT_DECISIONS.md: Storage Decisions, Upload Reliability Decisions, Failure Handling Decisions, clientSubmissionId — Storage Foundation.
+
+#### 3C.2.1 — Storage Foundation
+
+- introduce `clientSubmissionId` (UUID v4) on the client: generated before form submission, included in payload
+- wire `clientSubmissionId` through `ParsedRequestPayload`, `parseRequestFormData`, and route handler (storage path use only — full idempotency logic is Stage 3D)
+- document bucket name, folder structure, and filename convention in PROJECT_DECISIONS.md (done)
+- update `.env.example` if any new storage-specific env vars are needed
+- no upload logic yet
+
+#### 3C.2.2 — Storage Integration
+
+- implement `uploadRequestFiles()` in service layer: accepts files + clientSubmissionId, returns typed file records
+- storage path: `request-images/{clientSubmissionId}/{type}/{type}-{index}.{ext}`
+- extension derived from MIME type at upload time; `originalName` stored as metadata only
+- per-file retry: 2–3 attempts with exponential backoff; transient/network failures only; validation failures do not retry
+- track successfully uploaded files as upload proceeds (not the intended list)
+- on final upload failure: delete already-uploaded files, log cleanup attempt and result, return error
+- on DB failure (Stage 3C.3): delete uploaded files, log cleanup attempt and result, return error
+- integrate into route handler after `validateFiles`
+- tests: upload success, per-file retry, partial failure + cleanup, cleanup failure logged
 
 Note: file count per field (MAX_FILES_PER_FIELD) is currently enforced by `requestFormSchema` inside `validateRequestPayload`, before `validateFiles` runs. `validateFiles` does not independently cap count — do not decouple validation order without updating both.
 
@@ -188,15 +205,15 @@ Note: the route currently generates a temporary `crypto.randomUUID()` as `reques
 
 Goal: prevent duplicate requests from reaching the artist.
 
-### 3D.0 — clientSubmissionId
+Note: `clientSubmissionId` client generation and payload wiring is introduced in Stage 3C.2.1 (storage folder use only). Stage 3D completes the full idempotency story.
 
-- generate `clientSubmissionId` (UUID v4) on the client before form submission
-- include it in the request payload sent to the API
-- store it in the database as a unique constraint on the requests table
+### 3D.0 — clientSubmissionId idempotency
+
+- store `clientSubmissionId` in the database with a unique constraint on the requests table
 - implement server-side deduplication: if `clientSubmissionId` already exists, return existing request info without creating a duplicate
 - include the request reference ID in the success response, Telegram notification, and success UX
 
-Note: adding `clientSubmissionId` requires touching `ParsedRequestPayload`, `REQUEST_FIELDS`, `parseRequestFormData` (BFF), `RequestForm.tsx` (client FormData build), and the route handler. Plan all these touch points together at the start of 3D.
+Note: `ParsedRequestPayload`, `parseRequestFormData` (BFF), `RequestForm.tsx` (client FormData build), and the route handler will already include `clientSubmissionId` from 3C.2.1. Stage 3D adds the DB constraint and deduplication logic only.
 
 Must be complete before public production launch and before broad user testing.
 

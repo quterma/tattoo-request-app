@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server"
-import { API_ERROR_CODES, parseRequestFormData, validateFiles, validateRequestPayload } from "@/bff"
+import {
+  API_ERROR_CODES,
+  ClientSubmissionIdError,
+  parseRequestFormData,
+  validateFiles,
+  validateRequestPayload,
+} from "@/bff"
 
 export async function POST(req: Request) {
   try {
@@ -18,7 +24,20 @@ export async function POST(req: Request) {
 
     const requestId = crypto.randomUUID()
     return NextResponse.json({ ok: true, requestId })
-  } catch {
+  } catch (err) {
+    if (err instanceof ClientSubmissionIdError) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: {
+            code: API_ERROR_CODES.VALIDATION_ERROR,
+            fieldErrors: { clientSubmissionId: [err.message] },
+            formErrors: [],
+          },
+        },
+        { status: 400 },
+      )
+    }
     return NextResponse.json(
       { ok: false, error: { code: API_ERROR_CODES.SERVER_ERROR } },
       { status: 500 },

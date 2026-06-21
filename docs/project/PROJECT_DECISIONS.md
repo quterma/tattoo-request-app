@@ -102,10 +102,11 @@ Every feature included in the first public release must be production-ready for 
 
 # File Access Decisions
 
-- Preferred file access mechanism for admin: Image Proxy through BFF.
-- Before implementation, perform a short technical review of feasibility and limitations with Next.js + Supabase Storage. Scheduled for start of Stage 3C.2.
-- If no blocking issues are found, implement Image Proxy for admin image access.
-- Architecture must allow this without UI changes on the admin side.
+- File access mechanism for admin: signed URLs generated server-side in the BFF.
+- Image Proxy through BFF was considered and rejected. Technical review completed in Stage 3C.2 planning.
+- Reasons: signed URLs are simpler, have no streaming overhead, and Supabase enforces private bucket access without a proxy layer.
+- Signed URLs are generated on demand when the admin loads a request. Expiry: ~1 hour.
+- Admin access only. Public users never receive signed URLs or storage paths.
 
 ---
 
@@ -123,6 +124,66 @@ The current request form has two upload inputs: reference images and placement i
 These map directly to the two type values above.
 
 This is the data-shape direction for persistence. Implementation is part of Stage 3C.3.
+
+---
+
+# Storage Decisions
+
+## Bucket
+
+- Single private Supabase Storage bucket: `request-images`
+- Bucket must remain private at all times
+
+## Folder Structure
+
+```
+request-images/{clientSubmissionId}/reference/
+request-images/{clientSubmissionId}/placement/
+```
+
+## Storage Filenames
+
+- Storage filenames do not use original filenames
+- Deterministic naming by type and index:
+  - `reference-01.jpg`, `reference-02.jpg`, ...
+  - `placement-01.jpg`, `placement-02.jpg`, ...
+- `originalName` is retained as metadata in the DB record only
+- Extension is derived from the file's MIME type at upload time
+
+## Images
+
+- Store original files without modification
+- No compression, no resizing
+- Admin can view and download full-quality originals
+
+---
+
+# Upload Reliability Decisions
+
+- Per-file retry on transient/network failures
+- 2–3 automatic retries with exponential backoff
+- No retry for validation failures
+- Only failed files are retried — not the entire batch
+
+---
+
+# Failure Handling Decisions
+
+- All-or-nothing submission: either all files and the DB record are created, or nothing persists
+- If upload process ultimately fails after retries: delete already-uploaded files, return error to client
+- If DB insert fails after successful uploads: delete uploaded files, return error to client
+- All cleanup attempts must be logged
+- All cleanup failures must be logged explicitly
+
+---
+
+# clientSubmissionId — Storage Foundation
+
+- `clientSubmissionId` is introduced in Stage 3C.2 as the storage folder identifier
+- Generated client-side (UUID v4) before form submission
+- Sent with the request payload; used to name the storage folder
+- Full idempotency logic (deduplication, unique constraint, server-side check) remains in Stage 3D
+- Storage folder structure must remain compatible with future resumable-upload support
 
 ---
 

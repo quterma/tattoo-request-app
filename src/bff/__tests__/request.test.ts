@@ -1,5 +1,7 @@
 import { describe, it, expect } from "vitest"
-import { parseRequestFormData } from "../request"
+import { parseRequestFormData, ClientSubmissionIdError } from "../request"
+
+const VALID_UUID = "550e8400-e29b-41d4-a716-446655440000"
 
 function makeFormData(fields: Record<string, string | string[]>): FormData {
   const fd = new FormData()
@@ -13,15 +15,21 @@ function makeFormData(fields: Record<string, string | string[]>): FormData {
   return fd
 }
 
+function baseFields(overrides: Record<string, string> = {}): Record<string, string> {
+  return {
+    clientSubmissionId: VALID_UUID,
+    ideaDescription: "A dragon tattoo",
+    placement: "arm",
+    size: "medium",
+    color: "black",
+    consent: "true",
+    ...overrides,
+  }
+}
+
 describe("parseRequestFormData", () => {
   it("parses required string fields", () => {
-    const fd = makeFormData({
-      ideaDescription: "A dragon tattoo",
-      placement: "arm",
-      size: "medium",
-      color: "black",
-      consent: "true",
-    })
+    const fd = makeFormData(baseFields())
 
     const result = parseRequestFormData(fd)
 
@@ -32,14 +40,16 @@ describe("parseRequestFormData", () => {
     expect(result.consent).toBe(true)
   })
 
+  it("parses clientSubmissionId", () => {
+    const fd = makeFormData(baseFields())
+
+    const result = parseRequestFormData(fd)
+
+    expect(result.clientSubmissionId).toBe(VALID_UUID)
+  })
+
   it("returns undefined for absent optional fields", () => {
-    const fd = makeFormData({
-      ideaDescription: "test",
-      placement: "back",
-      size: "large",
-      color: "color",
-      consent: "true",
-    })
+    const fd = makeFormData(baseFields())
 
     const result = parseRequestFormData(fd)
 
@@ -50,17 +60,14 @@ describe("parseRequestFormData", () => {
   })
 
   it("parses optional fields when present", () => {
-    const fd = makeFormData({
-      ideaDescription: "test",
-      placement: "back",
-      size: "large",
-      color: "color",
-      consent: "true",
-      budget: "500",
-      email: "test@example.com",
-      phone: "+1234567890",
-      contactOther: "telegram",
-    })
+    const fd = makeFormData(
+      baseFields({
+        budget: "500",
+        email: "test@example.com",
+        phone: "+1234567890",
+        contactOther: "telegram",
+      }),
+    )
 
     const result = parseRequestFormData(fd)
 
@@ -71,13 +78,7 @@ describe("parseRequestFormData", () => {
   })
 
   it("returns empty arrays when no file entries are present", () => {
-    const fd = makeFormData({
-      ideaDescription: "test",
-      placement: "arm",
-      size: "small",
-      color: "black",
-      consent: "true",
-    })
+    const fd = makeFormData(baseFields())
 
     const result = parseRequestFormData(fd)
 
@@ -87,11 +88,7 @@ describe("parseRequestFormData", () => {
 
   it("collects multiple file entries into arrays", () => {
     const fd = new FormData()
-    fd.append("ideaDescription", "test")
-    fd.append("placement", "arm")
-    fd.append("size", "small")
-    fd.append("color", "black")
-    fd.append("consent", "true")
+    for (const [k, v] of Object.entries(baseFields())) fd.append(k, v)
 
     const file1 = new File(["a"], "ref1.png", { type: "image/png" })
     const file2 = new File(["b"], "ref2.png", { type: "image/png" })
@@ -113,13 +110,7 @@ describe("parseRequestFormData", () => {
 
 describe("parseRequestFormData – consent conversion", () => {
   it('converts consent "true" string to boolean true', () => {
-    const fd = makeFormData({
-      ideaDescription: "test",
-      placement: "arm",
-      size: "small",
-      color: "black",
-      consent: "true",
-    })
+    const fd = makeFormData(baseFields())
 
     const result = parseRequestFormData(fd)
 
@@ -127,15 +118,45 @@ describe("parseRequestFormData – consent conversion", () => {
   })
 
   it("returns undefined-like value when consent is absent", () => {
-    const fd = makeFormData({
-      ideaDescription: "test",
-      placement: "arm",
-      size: "small",
-      color: "black",
-    })
+    const fd = makeFormData(baseFields({ consent: "false" }))
+    fd.delete("consent")
 
     const result = parseRequestFormData(fd)
 
     expect(result.consent).not.toBe(true)
+  })
+})
+
+describe("parseRequestFormData – clientSubmissionId validation", () => {
+  it("throws ClientSubmissionIdError when clientSubmissionId is missing", () => {
+    const fields = baseFields()
+    delete (fields as Record<string, string>).clientSubmissionId
+    const fd = makeFormData(fields)
+
+    expect(() => parseRequestFormData(fd)).toThrowError(ClientSubmissionIdError)
+    expect(() => parseRequestFormData(fd)).toThrow("missing")
+  })
+
+  it("throws ClientSubmissionIdError when clientSubmissionId is not a valid UUID v4", () => {
+    const fd = makeFormData(baseFields({ clientSubmissionId: "not-a-uuid" }))
+
+    expect(() => parseRequestFormData(fd)).toThrowError(ClientSubmissionIdError)
+    expect(() => parseRequestFormData(fd)).toThrow("not a valid UUID")
+  })
+
+  it("throws ClientSubmissionIdError for UUID v1 (wrong version)", () => {
+    const fd = makeFormData(
+      baseFields({ clientSubmissionId: "550e8400-e29b-11d4-a716-446655440000" }),
+    )
+
+    expect(() => parseRequestFormData(fd)).toThrowError(ClientSubmissionIdError)
+  })
+
+  it("accepts a valid UUID v4", () => {
+    const fd = makeFormData(baseFields({ clientSubmissionId: "f47ac10b-58cc-4372-a567-0e02b2c3d479" }))
+
+    const result = parseRequestFormData(fd)
+
+    expect(result.clientSubmissionId).toBe("f47ac10b-58cc-4372-a567-0e02b2c3d479")
   })
 })

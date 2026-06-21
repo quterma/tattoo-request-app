@@ -17,7 +17,18 @@ Status: In Progress
 
 Current focus:
 
-- Stage 3C.2 — File Storage
+- Stage 3C.2.2 — Storage Integration (next)
+
+Architecture decisions confirmed for Stage 3C.2:
+
+- Private Supabase Storage bucket: `request-images`
+- Folder structure: `request-images/{clientSubmissionId}/{type}/`
+- Storage filenames: deterministic (`reference-01.jpg`, `placement-01.jpg`, ...) — not original filenames
+- Image access: signed URLs generated server-side; Image Proxy rejected
+- Images: originals stored without compression or resizing
+- `clientSubmissionId` introduced in 3C.2.1 for storage use; full idempotency remains Stage 3D
+- Upload reliability: per-file retry, 2–3 attempts, backoff, transient failures only
+- Failure handling: all-or-nothing; cleanup + logging on upload failure and DB failure
 
 Completed in Stage 3:
 
@@ -46,6 +57,44 @@ Next expected step:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-06-21 — Stage 3C.2.1 — Storage Foundation
+
+Status: Completed
+
+Completed:
+
+- `clientSubmissionId` field added to `REQUEST_FIELDS` constant
+- `ParsedRequestPayload` interface updated: `clientSubmissionId: string` added
+- `UUID_REGEX` and `ClientSubmissionIdError` added to `src/bff/request.ts`; `parseRequestFormData` validates presence and UUID v4 format — throws `ClientSubmissionIdError` on failure
+- `ClientSubmissionIdError` exported through `src/bff/index.ts`
+- Route handler updated: catches `ClientSubmissionIdError` and returns 400 with structured `VALIDATION_ERROR` (not 500)
+- `RequestForm.tsx`: `clientSubmissionId` generated once via `useState(() => crypto.randomUUID())`, appended to FormData on every submit
+- Tests updated: `clientSubmissionId` added to all `validPayload` fixtures; 5 new tests added (parses id, missing → throws, invalid → throws, UUID v1 rejected, UUID v4 accepted, FormData includes valid UUID)
+- Total tests: 66 (was 61) — all pass
+- lint / typecheck / build — all PASS
+
+---
+
+### 2026-06-21 — Stage 3C.2 — Architecture Review (documentation only)
+
+Status: Documentation sync completed
+
+Decisions recorded:
+
+- Image Proxy rejected; signed URLs chosen for admin image access (technical review completed)
+- Single private bucket `request-images` confirmed
+- Folder structure: `request-images/{clientSubmissionId}/{type}/`
+- Storage filenames: deterministic by type and index; originalName as DB metadata only
+- `clientSubmissionId` moved forward from Stage 3D into Stage 3C.2.1 (storage use only)
+- Upload reliability: per-file retry, 2–3 attempts, exponential backoff, transient failures only
+- Failure handling: all-or-nothing; cleanup + logging on upload failure and DB failure
+- Stage 3C.2 split into 3C.2.1 (Storage Foundation) and 3C.2.2 (Storage Integration)
+- PROJECT_DECISIONS.md, PROJECT_IMPLEMENTATION_PLAN.md, PROJECT_STAGE_LOG.md updated
+
+No code changes.
+
+---
 
 ### 2026-06-21 — Stage 3C.1 — Supabase Foundation
 
