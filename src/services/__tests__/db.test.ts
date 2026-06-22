@@ -13,7 +13,7 @@ import type { UploadedFile } from "../storage"
 
 const baseParams = {
   clientSubmissionId: "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-  clientName: undefined,
+  clientName: "Alex",
   description: "A wolf on my forearm",
   placement: "forearm",
   size: "medium",
@@ -53,7 +53,7 @@ describe("createRequest", () => {
 
     expect(mockRpc).toHaveBeenCalledWith("create_request", {
       p_client_submission_id: baseParams.clientSubmissionId,
-      p_client_name: null,
+      p_client_name: "Alex",
       p_description: baseParams.description,
       p_placement: baseParams.placement,
       p_size: baseParams.size,
@@ -75,7 +75,7 @@ describe("createRequest", () => {
     })
   })
 
-  it("passes null for optional fields when undefined", async () => {
+  it("passes clientName to rpc and nulls for absent optional fields", async () => {
     mockRpc.mockResolvedValue({
       data: { id: "db-uuid-2", referenceCode: "REQ-2026-0002" },
       error: null,
@@ -83,7 +83,7 @@ describe("createRequest", () => {
 
     await createRequest({
       ...baseParams,
-      clientName: undefined,
+      clientName: "Jordan",
       budget: undefined,
       email: undefined,
       phone: undefined,
@@ -91,7 +91,7 @@ describe("createRequest", () => {
     })
 
     const call = mockRpc.mock.calls[0][1]
-    expect(call.p_client_name).toBeNull()
+    expect(call.p_client_name).toBe("Jordan")
     expect(call.p_budget).toBeNull()
     expect(call.p_email).toBeNull()
     expect(call.p_phone).toBeNull()

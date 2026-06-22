@@ -4,6 +4,11 @@ import { VALIDATION_KEYS as K } from "./validationKeys"
 
 export const requestFormSchema = z
   .object({
+    clientName: z
+      .string({ required_error: K.CLIENT_NAME_REQUIRED })
+      .trim()
+      .min(2, { message: K.CLIENT_NAME_TOO_SHORT })
+      .max(30, { message: K.CLIENT_NAME_TOO_LONG }),
     ideaDescription: z
       .string({ required_error: K.IDEA_REQUIRED })
       .min(10, { message: K.IDEA_TOO_SHORT }),

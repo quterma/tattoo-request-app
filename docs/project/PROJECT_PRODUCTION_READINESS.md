@@ -63,6 +63,30 @@ Complete before public launch:
 
 ---
 
+# Performance Validation
+
+## Observation
+
+End-to-end request submission currently takes roughly 1–2 seconds in local development with two small images and the full flow: validation → storage upload → DB persistence → response.
+
+This is not considered a bug and no optimization work is requested.
+
+## Before Release
+
+Measure submission latency on the deployed environment (Vercel + Supabase):
+
+- 2 small images
+- several large images
+- maximum supported upload set (3 reference + 3 placement)
+
+Determine an acceptable UX target for production.
+
+Only optimize if production measurements indicate a real user experience problem.
+
+This is a release-readiness verification item, not a backlog task and not a performance issue.
+
+---
+
 # AI Review (Optional)
 
 Before major releases or significant feature additions:

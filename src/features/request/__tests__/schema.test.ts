@@ -6,6 +6,7 @@ function makeFile(name = "photo.png"): File {
 }
 
 const validBase = {
+  clientName: "Alex",
   ideaDescription: "A detailed dragon tattoo on the arm",
   referenceImages: [makeFile()],
   placement: "arm",
@@ -18,6 +19,56 @@ const validBase = {
   contactOther: "",
   consent: true as const,
 }
+
+describe("requestFormSchema – clientName", () => {
+  it("rejects when clientName is missing", () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { clientName: _, ...without } = validBase
+    const result = requestFormSchema.safeParse(without)
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      const messages = result.error.issues.map((i) => i.message)
+      expect(messages).toContain("client_name_required")
+    }
+  })
+
+  it("rejects when clientName is too short", () => {
+    const result = requestFormSchema.safeParse({ ...validBase, clientName: "A" })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      const messages = result.error.issues.map((i) => i.message)
+      expect(messages).toContain("client_name_too_short")
+    }
+  })
+
+  it("rejects when clientName is too long", () => {
+    const result = requestFormSchema.safeParse({ ...validBase, clientName: "A".repeat(31) })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      const messages = result.error.issues.map((i) => i.message)
+      expect(messages).toContain("client_name_too_long")
+    }
+  })
+
+  it("trims clientName before validation", () => {
+    const result = requestFormSchema.safeParse({ ...validBase, clientName: "  A  " })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      const messages = result.error.issues.map((i) => i.message)
+      expect(messages).toContain("client_name_too_short")
+    }
+  })
+
+  it("accepts clientName at exactly 2 characters", () => {
+    const result = requestFormSchema.safeParse({ ...validBase, clientName: "Al" })
+    expect(result.success).toBe(true)
+  })
+
+  it("accepts clientName at exactly 30 characters", () => {
+    const result = requestFormSchema.safeParse({ ...validBase, clientName: "A".repeat(30) })
+    expect(result.success).toBe(true)
+  })
+})
 
 describe("requestFormSchema – required fields", () => {
   it("accepts a fully valid input", () => {
@@ -129,6 +180,7 @@ describe("requestFormSchema – contact group validation", () => {
 
   it("shows contact_required on completely empty form submit", () => {
     const emptyForm = {
+      clientName: "",
       ideaDescription: "",
       referenceImages: [],
       placement: "",

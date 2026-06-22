@@ -1,4 +1,7 @@
 export const VALIDATION_KEYS = {
+  CLIENT_NAME_REQUIRED: "client_name_required",
+  CLIENT_NAME_TOO_SHORT: "client_name_too_short",
+  CLIENT_NAME_TOO_LONG: "client_name_too_long",
   IDEA_REQUIRED: "idea_required",
   IDEA_TOO_SHORT: "idea_too_short",
   REFERENCE_IMAGES_REQUIRED: "reference_images_required",

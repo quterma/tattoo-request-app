@@ -8,6 +8,7 @@ function makeFile(name = "photo.png"): File {
 
 const validPayload: ParsedRequestPayload = {
   clientSubmissionId: "550e8400-e29b-41d4-a716-446655440000",
+  clientName: "Alex",
   ideaDescription: "A detailed dragon tattoo on the sleeve",
   placement: "arm",
   size: "medium",

@@ -46,7 +46,7 @@ export async function POST(req: Request) {
     try {
       result = await createRequest({
         clientSubmissionId: payload.clientSubmissionId,
-        clientName: undefined,
+        clientName: payload.clientName,
         description: payload.ideaDescription,
         placement: payload.placement,
         size: payload.size,

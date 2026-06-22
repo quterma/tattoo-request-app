@@ -7,6 +7,9 @@ import type { ValidationKey } from "../validation"
 type T = ReturnType<typeof useTranslations<"request">>
 
 const MESSAGE_TO_I18N_KEY: Record<ValidationKey, string> = {
+  client_name_required: "errors.clientNameRequired",
+  client_name_too_short: "errors.clientNameTooShort",
+  client_name_too_long: "errors.clientNameTooLong",
   idea_required: "errors.ideaDescriptionRequired",
   idea_too_short: "errors.ideaDescriptionTooShort",
   reference_images_required: "errors.referenceImagesRequired",

@@ -17,7 +17,7 @@ Status: In Progress
 
 Current focus:
 
-- Stage 3C.3.5 — Client Name field (next)
+- Stage 3D — Idempotency (next)
 
 Architecture decisions confirmed for Stage 3C.2:
 
@@ -49,14 +49,37 @@ Completed in Stage 3:
 - file transport validation: validateFiles() in BFF checks MIME type (jpeg/png/webp/heic/heif) and size (≤10 MB per file); integrated into route after validateRequestPayload; errors flow through existing fieldErrors contract; upload format hints added to FileUploadInput fields; 9 new tests
 - pre-3C fixes: consent type made honest (true | undefined), success response gated on response.ok === true, contact field labels cleaned up
 - Supabase foundation: @supabase/supabase-js installed; config layer (src/config/index.ts) reads SUPABASE_URL + SUPABASE_SECRET_KEY with fail-fast validation; server-side Supabase client in src/services/supabase.ts exported through src/services/index.ts; .env.example created
+- clientName field: required `clientName` added to form, schema (trim, min 2, max 30), BFF parsing, route handler, db.ts; wired to existing `client_name` DB column via RPC; 8 new tests (schema validation, BFF parsing, form FormData, db persistence mapping)
 
 Next expected step:
 
-- Stage 3C.3.5 — Client Name field
+- Stage 3D — Idempotency
 
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-06-22 — Stage 3C.3.5 — Client Name
+
+Status: Completed
+
+Completed:
+
+- `clientName` field added to `requestFormSchema`: required, `.trim()`, min 2, max 30
+- `CLIENT_NAME_REQUIRED`, `CLIENT_NAME_TOO_SHORT`, `CLIENT_NAME_TOO_LONG` added to `VALIDATION_KEYS`
+- `MESSAGE_TO_I18N_KEY` in `lib/errors.ts` updated with three new mappings
+- `REQUEST_FIELDS.clientName` added to BFF
+- `ParsedRequestPayload.clientName: string` added; `parseRequestFormData` reads the field from FormData
+- `CreateRequestParams.clientName` updated from `string | undefined` to `string`; `?? null` fallback removed from RPC call
+- Route handler wired: `clientName: payload.clientName` replaces the previous `clientName: undefined` placeholder
+- `RequestForm.tsx`: `clientName` TextInput added as first form field; `defaultValues` and `FormData.append` updated
+- i18n: `clientNameLabel`, `clientNamePlaceholder`, `errors.clientNameRequired`, `errors.clientNameTooShort`, `errors.clientNameTooLong` added to `en.json`
+- No DB migration needed — `client_name TEXT` column already exists in `requests` table (added in Stage 3C.3)
+- Tests: 8 new + existing fixtures updated — schema (6 new: required, too-short, too-long, trim, boundary 2, boundary 30), BFF parsing (2 new: parses clientName, absent → empty string), FormData assertion added to submission test, db fixture updated (clientName: undefined → "Alex", p_client_name null assertion → string assertion)
+- Total tests: 89 (was 81) — all pass
+- lint / typecheck / build — all PASS
+
+---
 
 ### 2026-06-22 — Stage 3C.3 — Request Persistence
 

@@ -71,6 +71,9 @@
   "request": {
     "title": "Request a Tattoo",
 
+    "clientNameLabel": "Your name",
+    "clientNamePlaceholder": "How should I call you?",
+
     "ideaDescriptionLabel": "Describe your idea",
     "ideaDescriptionPlaceholder": "Tell me about your tattoo idea — style, motif, mood, anything that inspires you",
     "ideaDescriptionHint": "Minimum 10 characters",
@@ -141,6 +144,9 @@
     },
 
     "errors": {
+      "clientNameRequired": "Please enter your name",
+      "clientNameTooShort": "Name must be at least 2 characters",
+      "clientNameTooLong": "Name must be 30 characters or less",
       "ideaDescriptionRequired": "Please describe your idea",
       "ideaDescriptionTooShort": "Please write at least 10 characters",
       "referenceImagesRequired": "Please add at least one reference image",

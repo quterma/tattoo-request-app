@@ -8,7 +8,7 @@ export interface CreatedRequest {
 
 interface CreateRequestParams {
   clientSubmissionId: string
-  clientName: string | undefined
+  clientName: string
   description: string
   placement: string
   size: string
@@ -24,7 +24,7 @@ interface CreateRequestParams {
 export async function createRequest(params: CreateRequestParams): Promise<CreatedRequest> {
   const { data, error } = await supabase.rpc("create_request", {
     p_client_submission_id: params.clientSubmissionId,
-    p_client_name: params.clientName ?? null,
+    p_client_name: params.clientName,
     p_description: params.description,
     p_placement: params.placement,
     p_size: params.size,

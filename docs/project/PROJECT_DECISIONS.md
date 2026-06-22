@@ -234,9 +234,11 @@ A required `clientName` field is introduced to the request form.
 
 - Purpose: enables the artist to address clients by name in communication and admin workflow
 - Required field — no anonymous submissions
-- Stored with the request record in the database
+- Single field (not first/last name split)
+- Validation: required, trim, min 2, max 30 characters
+- Stored with the request record in the database (`client_name TEXT` column)
 - Shown in the admin panel alongside request details
-- Not part of Stage 3C.3 — implemented as a dedicated small stage before admin panel work begins
+- Implemented in Stage 3C.3.5 (dedicated stage before admin panel work)
 
 ---
 
@@ -287,6 +289,20 @@ This is a dedicated implementation story: **Request Identity & Idempotency**.
 - Not assigned to Stage 3B.2.
 - Must be implemented before public production launch and before broad user testing.
 - Recommended placement: late Stage 3C or a dedicated pre-launch stabilization stage.
+
+---
+
+# Database Stage Completion Criteria
+
+Unit tests, typecheck, and build are insufficient to verify database-related stages.
+
+Stages involving migrations, RLS, RPC functions, permissions, or storage policies are only considered complete when:
+
+- migration applied to the real Supabase project
+- at least one successful end-to-end operation performed against real infrastructure
+- affected database objects verified (tables, functions, permissions, storage, policies)
+
+Reason: runtime permission issues (e.g. sequence grants, table grants) are invisible to unit tests and are only discovered during real Supabase execution. This was observed during Stage 3C.3 debugging.
 
 ---
 

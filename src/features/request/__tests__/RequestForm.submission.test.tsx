@@ -28,6 +28,8 @@ vi.mock("next-intl", () => ({
 function fillRequiredFields(user: ReturnType<typeof userEvent.setup>) {
   return {
     async fill() {
+      await user.type(screen.getByRole("textbox", { name: /your name/i }), "Alex")
+
       await user.type(
         screen.getByRole("textbox", { name: /describe your idea/i }),
         "A dragon on my arm, very detailed and colorful",
@@ -98,6 +100,7 @@ describe("RequestForm – submission flow", () => {
     expect(capturedFormData!.get("clientSubmissionId")).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
     )
+    expect(capturedFormData!.get("clientName")).toBe("Alex")
     expect(capturedFormData!.get("ideaDescription")).toContain("dragon")
     expect(capturedFormData!.get("placement")).toBe("arm")
     expect(capturedFormData!.get("size")).toBe("medium")
@@ -266,6 +269,8 @@ describe("RequestForm – contact group error UX", () => {
   function fillRequiredExceptContact(user: ReturnType<typeof userEvent.setup>) {
     return {
       async fill() {
+        await user.type(screen.getByRole("textbox", { name: /your name/i }), "Alex")
+
         await user.type(
           screen.getByRole("textbox", { name: /describe your idea/i }),
           "A dragon on my arm, very detailed and colorful",

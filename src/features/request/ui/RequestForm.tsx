@@ -35,6 +35,7 @@ export function RequestForm() {
   } = useForm<RequestFormInput, unknown, RequestFormData>({
     resolver: zodResolver(requestFormSchema),
     defaultValues: {
+      clientName: "",
       ideaDescription: "",
       referenceImages: [],
       placement: "",
@@ -67,6 +68,7 @@ export function RequestForm() {
       const f = REQUEST_FIELDS
 
       formData.append(f.clientSubmissionId, clientSubmissionId)
+      formData.append(f.clientName, data.clientName)
       formData.append(f.ideaDescription, data.ideaDescription)
       formData.append(f.placement, data.placement)
       formData.append(f.size, data.size)
@@ -147,6 +149,15 @@ export function RequestForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-6">
+      {/* Client name */}
+      <TextInput
+        id="clientName"
+        label={t("clientNameLabel")}
+        placeholder={t("clientNamePlaceholder")}
+        error={err("clientName")}
+        {...register("clientName")}
+      />
+
       {/* Idea */}
       <TextareaInput
         id="ideaDescription"

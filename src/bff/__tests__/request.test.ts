@@ -18,6 +18,7 @@ function makeFormData(fields: Record<string, string | string[]>): FormData {
 function baseFields(overrides: Record<string, string> = {}): Record<string, string> {
   return {
     clientSubmissionId: VALID_UUID,
+    clientName: "Alex",
     ideaDescription: "A dragon tattoo",
     placement: "arm",
     size: "medium",
@@ -46,6 +47,24 @@ describe("parseRequestFormData", () => {
     const result = parseRequestFormData(fd)
 
     expect(result.clientSubmissionId).toBe(VALID_UUID)
+  })
+
+  it("parses clientName", () => {
+    const fd = makeFormData(baseFields({ clientName: "Jordan" }))
+
+    const result = parseRequestFormData(fd)
+
+    expect(result.clientName).toBe("Jordan")
+  })
+
+  it("returns empty string for absent clientName", () => {
+    const fields = baseFields()
+    delete (fields as Record<string, string>).clientName
+    const fd = makeFormData(fields)
+
+    const result = parseRequestFormData(fd)
+
+    expect(result.clientName).toBe("")
   })
 
   it("returns undefined for absent optional fields", () => {
