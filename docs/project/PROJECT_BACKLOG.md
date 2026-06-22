@@ -47,6 +47,16 @@ Deferred improvements (post-MVP):
 
 - Replace split("\n") in i18n with string arrays
 
+## AI Tattoo Title / Summary (post-MVP idea)
+
+Future optional feature: AI-generated short title or summary for each request.
+
+- Generated from description text + uploaded reference images
+- Used in admin panel to label and scan requests at a glance
+- Optional — not a required field, not shown to the client
+- No architecture work required now; no DB column reserved
+- Consider at Stage 4 or post-MVP, only if the admin workflow shows a clear need
+
 ## MIME Type Verification (post-MVP)
 
 `validateFiles` in BFF trusts `file.type` from the multipart Content-Type header (browser-provided). No magic-byte verification is done. Acceptable for MVP at low volume with a known artist audience. Add magic-byte MIME checking if abuse is observed post-launch.

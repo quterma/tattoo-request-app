@@ -112,7 +112,7 @@
     "submitButtonLoading": "Sending…",
     "successTitle": "Request sent",
     "successMessage": "We received your request. We'll be in touch soon.",
-    "successRequestId": "Your request ID: {requestId}",
+    "successReferenceCode": "Your request reference: {referenceCode}",
     "errorMessage": "Something went wrong. Please try again.",
 
     "sizeOptions": {

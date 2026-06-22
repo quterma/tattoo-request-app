@@ -81,6 +81,16 @@ Current modules:
 
 - `supabase` — server-side Supabase client (service role, no session persistence)
 
+#### services/storage.ts
+
+- `uploadRequestFiles(files, clientSubmissionId)` — uploads reference and placement images to Supabase Storage; per-file retry, cleanup on failure
+- `UploadedFile`, `FileType` — exported types
+
+#### services/db.ts
+
+- `createRequest(params)` — calls `create_request` RPC; atomically inserts request + files, returns `{ id, referenceCode }`
+- `CreatedRequest` — exported type
+
 ---
 
 ### bff/

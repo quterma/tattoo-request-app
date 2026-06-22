@@ -77,7 +77,7 @@ Before presenting results of any implementation task, always run without waiting
 1. `pnpm structure` — update docs/files-structure.md
 2. Review PROJECT_STAGE_LOG.md — update if progress changed
 3. Review PROJECT_DECISIONS.md — update if a decision was made or changed
-4. Quality gates — run in order: pnpm lint / pnpm typecheck / pnpm test / pnpm build
+4. Quality gates — run `pnpm qg` (runs structure + lint + typecheck + test + build in one command)
 
 These steps are not optional and do not require user confirmation.
 
@@ -92,8 +92,8 @@ Before every commit, verify:
 Run all three stages in order — see AI_REVIEW_PIPELINE.md:
 
 1. Test Agent — determine coverage per PROJECT_TESTING_STRATEGY.md, write missing tests, run pnpm test
-2. Quality Gates — run in order: pnpm lint / pnpm typecheck / pnpm build / pnpm test
-   Report PASS / FAIL / NOT CONFIGURED for each. Do not skip.
+2. Quality Gates — run `pnpm qg` (runs structure + lint + typecheck + test + build in one command).
+   Report PASS / FAIL / NOT CONFIGURED for each gate. Do not skip.
 3. Review Agent — subagent_type: "Explore", read-only inspection of changed files
 
 Re-run pipeline if any fix touches source code.

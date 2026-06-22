@@ -17,7 +17,7 @@ Status: In Progress
 
 Current focus:
 
-- Stage 3C.3 — Database Persistence (next)
+- Stage 3C.3.5 — Client Name field (next)
 
 Architecture decisions confirmed for Stage 3C.2:
 
@@ -52,11 +52,82 @@ Completed in Stage 3:
 
 Next expected step:
 
-- Stage 3C.2 — File Storage
+- Stage 3C.3.5 — Client Name field
 
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-06-22 — Stage 3C.3 — Request Persistence
+
+Status: Completed (migration applied, end-to-end verified)
+
+Completed:
+
+- `supabase/migrations/20260622000000_create_requests.sql` created:
+  - `request_seq` sequence (global, no yearly reset)
+  - `requests` table: id (UUID PK), reference_code (UNIQUE), client_submission_id (UNIQUE), description, placement, size, color, email, phone, contact_other, consent, status (default 'new'), read_at (nullable), created_at
+  - `request_files` table: id (UUID PK), request_id (FK → requests, CASCADE), type, storage_path, original_name, mime_type, size, created_at
+  - RLS enabled on both tables; no policies (service_role key bypasses RLS)
+  - `create_request(...)` RPC function: atomically inserts request + files, generates `reference_code` (`REQ-YYYY-NNNN`), returns `{ id, referenceCode }`
+- `src/services/db.ts` created: `createRequest(params)` calls RPC, maps optional fields to null, returns `CreatedRequest`
+- `src/services/index.ts` updated: exports `createRequest` and `CreatedRequest`
+- `app/api/request/route.ts` updated:
+  - calls `uploadRequestFiles` then `createRequest` in sequence
+  - on DB failure: cleanup uploaded storage files, log attempt and result, return 500
+  - returns `{ ok: true, referenceCode }` (replaces temporary UUID placeholder)
+- `src/features/request/ui/RequestForm.tsx` updated: `requestId` → `referenceCode`; reads `response.referenceCode`; renders via `successReferenceCode` i18n key
+- `src/shared/i18n/messages/en.json` updated: `successRequestId` → `successReferenceCode` with `{referenceCode}` interpolation
+- `src/services/__tests__/db.test.ts` created: 5 tests — correct RPC call, null optional fields, empty files, RPC error throws, error message propagated
+- `src/features/request/__tests__/RequestForm.submission.test.tsx` updated: all `requestId` mock values replaced with `referenceCode`
+- Total tests: 81 (was 74) — all pass
+- lint / typecheck / build — all PASS
+
+Post-implementation fixes during migration runtime debugging:
+
+- `GRANT USAGE, SELECT ON SEQUENCE request_seq TO service_role` — sequence not auto-granted to service_role in Supabase SQL migrations
+- `GRANT INSERT, SELECT, UPDATE ON TABLE requests TO service_role` — table permissions not auto-granted either
+- `GRANT INSERT, SELECT ON TABLE request_files TO service_role` — same root cause
+- Root cause documented: Supabase `service_role` has `BYPASSRLS` but does NOT receive table/sequence permissions automatically when schema is created via SQL (unlike dashboard-created tables); all grants must be explicit in migration
+- `UPDATE` on `requests` included proactively for admin panel status/read_at updates (Stage 4B)
+- `SECURITY DEFINER` evaluated and rejected in favour of explicit grants — maintains least privilege, respects RLS model
+
+End-to-end verification (manual, real Supabase):
+
+- Migration applied successfully in Supabase SQL Editor
+- `requests` and `request_files` tables created with RLS enabled
+- `create_request` RPC function verified in Database → Functions
+- `request_seq` sequence created and accessible to `service_role`
+- Real form submission completed end-to-end
+- `referenceCode` generated correctly (`REQ-2026-NNNN` format)
+- Request record persisted in `requests` table
+- File records persisted in `request_files` table
+- Files visible in Supabase Storage under `{clientSubmissionId}/reference/` and `.../placement/`
+- Success screen displays `referenceCode`
+- Cleanup-on-failure path verified during debugging (storage files deleted on DB error)
+
+---
+
+### 2026-06-21 — Documentation sync before Stage 3C.3
+
+Status: Documentation only
+
+Decisions recorded:
+
+- **Reference Code**: human-facing `referenceCode` field (`REQ-YYYY-NNNN`) — server-generated, stored in DB, shown on success screen and in admin panel. DB UUID remains primary key; `clientSubmissionId` remains technical idempotency/storage identifier. See PROJECT_DECISIONS.md — Reference Code Decision.
+- **Client Name**: required `clientName` field added to product scope. Dedicated small stage `3C.3.5` added before admin work. See PROJECT_DECISIONS.md — Client Name Decision.
+- **AI Tattoo Title**: recorded as a post-MVP backlog idea only — no architecture work, no DB column reserved. See PROJECT_BACKLOG.md.
+
+Plan updates:
+
+- `3C.3` updated: `referenceCode` generation added to scope; `clientName` column noted in schema task
+- `3C.3.5` added: dedicated Client Name field stage
+- `3D.0` updated: deduplication returns existing `referenceCode` from DB
+- `requestId` terminology clarified throughout plan: `requestId` in historical log entries preserved as-is (refers to the temporary placeholder value); `referenceCode` used for the permanent human-facing identifier going forward
+
+No code changes.
+
+---
 
 ### 2026-06-21 — Stage 3C.2.2 — Storage Integration
 

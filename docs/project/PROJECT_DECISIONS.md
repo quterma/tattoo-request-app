@@ -205,6 +205,41 @@ request-images/{clientSubmissionId}/placement/
 
 ---
 
+# Reference Code Decision
+
+Every submitted request is assigned a human-readable reference code.
+
+- Format: `REQ-YYYY-NNNN` (e.g., `REQ-2026-0001`)
+- Generated server-side on request creation
+- Stored in the database alongside the DB primary key (UUID)
+- Shown to the client on the success screen after submission
+- Shown in the admin panel for request management
+- Used in communication between the artist and client
+
+## Identifier Roles
+
+| Identifier | Type | Purpose |
+|---|---|---|
+| DB UUID (`id`) | UUID | Primary key, internal DB reference |
+| `clientSubmissionId` | UUID v4 | Technical idempotency identifier, storage folder path |
+| `referenceCode` | `REQ-YYYY-NNNN` | Human-facing identifier, shown to client and admin |
+
+`referenceCode` is the identifier used in all human-facing contexts. DB UUID and `clientSubmissionId` are internal and never shown to users.
+
+---
+
+# Client Name Decision
+
+A required `clientName` field is introduced to the request form.
+
+- Purpose: enables the artist to address clients by name in communication and admin workflow
+- Required field — no anonymous submissions
+- Stored with the request record in the database
+- Shown in the admin panel alongside request details
+- Not part of Stage 3C.3 — implemented as a dedicated small stage before admin panel work begins
+
+---
+
 # Request Identity & Idempotency Decisions
 
 **Production Requirement — not Nice-to-Have.**
@@ -241,9 +276,9 @@ Goal: idempotent request creation.
 
 After successful submission:
 
-- user receives a request reference ID
-- artist receives the same ID in the Telegram notification
-- future support and communication can reference this ID
+- user receives the `referenceCode` (e.g., `REQ-2026-0001`) on the success screen
+- artist receives the same `referenceCode` in the Telegram notification
+- future support and communication use `referenceCode` as the shared identifier
 
 ## Planning
 

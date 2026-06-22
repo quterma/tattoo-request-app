@@ -188,11 +188,22 @@ Note: MIME type validation in `validateFiles` trusts `file.type` from the multip
 
 ### 3C.3 — Request persistence
 
-- define requests table schema
+- define requests table schema (includes `referenceCode`, `clientSubmissionId`, `clientName`, and file records)
+- generate `referenceCode` server-side on insert (`REQ-YYYY-NNNN` format, sequential per year)
 - implement request insert via service layer
 - link uploaded file references to request record
+- return `referenceCode` in the API success response; update success UX to display it
 
-Note: the route currently generates a temporary `crypto.randomUUID()` as `requestId` and returns it to the client without storing it. In 3C.3, `requestId` must come from the DB insert result (or the record's primary key). The client success UX already renders `requestId` conditionally and will work once the real value is returned.
+Note: the route currently generates a temporary `crypto.randomUUID()` as a placeholder and returns it to the client without storing it. In 3C.3, the placeholder is replaced by `referenceCode` from the DB insert result. The client success UX already renders the value conditionally and will work once the real value is returned.
+
+### 3C.3.5 — Client Name field
+
+- add `clientName` to the request form (required text input)
+- add `clientName` to `requestFormSchema` and `ParsedRequestPayload`
+- store `clientName` in the DB request record (column added in 3C.3 schema)
+- include `clientName` in Telegram notification (Stage 3E)
+
+This is a small dedicated stage. Implement before Stage 4 (Admin Panel) so admin requests always carry a name.
 
 ### 3C.4 — End-to-end submission
 
@@ -210,8 +221,8 @@ Note: `clientSubmissionId` client generation and payload wiring is introduced in
 ### 3D.0 — clientSubmissionId idempotency
 
 - store `clientSubmissionId` in the database with a unique constraint on the requests table
-- implement server-side deduplication: if `clientSubmissionId` already exists, return existing request info without creating a duplicate
-- include the request reference ID in the success response, Telegram notification, and success UX
+- implement server-side deduplication: if `clientSubmissionId` already exists, return existing request info (including `referenceCode`) without creating a duplicate
+- `referenceCode` is already stored in the DB from 3C.3; deduplication returns the existing record's `referenceCode`
 
 Note: `ParsedRequestPayload`, `parseRequestFormData` (BFF), `RequestForm.tsx` (client FormData build), and the route handler will already include `clientSubmissionId` from 3C.2.1. Stage 3D adds the DB constraint and deduplication logic only.
 

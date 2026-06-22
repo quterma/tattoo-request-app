@@ -68,91 +68,97 @@ tattoo-request-app/
 │       ├── PROJECT_CONTEXT.md
 │       ├── PROJECT_DECISIONS.md
 │       ├── PROJECT_IMPLEMENTATION_PLAN.md
+│       ├── PROJECT_PRODUCTION_READINESS.md
 │       ├── PROJECT_STAGE_LOG.md
 │       ├── PROJECT_STRUCTURE.md
 │       └── PROJECT_TESTING_STRATEGY.md
 ├── scripts/
 │   └── update-structure.mjs
-└── src/
-    ├── bff/
-    │   ├── index.ts
-    │   ├── request.ts
-    │   ├── validateFiles.ts
-    │   └── __tests__/
-    │       ├── request.test.ts
-    │       ├── validateFiles.test.ts
-    │       └── validateRequestPayload.test.ts
-    ├── config/
-    │   └── index.ts
-    ├── features/
-    │   ├── index.ts
-    │   └── request/
-    │       ├── __tests__/
-    │       │   ├── RequestForm.submission.test.tsx
-    │       │   └── schema.test.ts
-    │       ├── config/
-    │       │   ├── form.ts
-    │       │   └── index.ts
-    │       ├── lib/
-    │       │   └── errors.ts
-    │       ├── types/
-    │       │   └── index.ts
-    │       ├── ui/
-    │       │   ├── Button.tsx
-    │       │   ├── CheckboxInput.tsx
-    │       │   ├── FileUploadInput.tsx
-    │       │   ├── index.ts
-    │       │   ├── RequestForm.tsx
-    │       │   ├── SelectInput.tsx
-    │       │   ├── TextareaInput.tsx
-    │       │   ├── TextInput.tsx
-    │       │   └── field/
-    │       │       ├── FieldError.tsx
-    │       │       ├── FieldHint.tsx
-    │       │       ├── FieldLabel.tsx
-    │       │       └── FormFieldLayout.tsx
-    │       └── validation/
-    │           ├── index.ts
-    │           ├── schema.ts
-    │           └── validationKeys.ts
-    ├── services/
-    │   ├── index.ts
-    │   ├── storage.ts
-    │   ├── supabase.ts
-    │   └── __tests__/
-    │       └── storage.test.ts
-    ├── shared/
-    │   ├── index.ts
-    │   ├── hooks/
-    │   │   └── index.ts
-    │   ├── i18n/
-    │   │   ├── config.ts
-    │   │   ├── index.ts
-    │   │   ├── navigation.ts
-    │   │   ├── request.ts
-    │   │   ├── routing.ts
-    │   │   └── messages/
-    │   │       └── en.json
-    │   ├── styles/
-    │   │   ├── index.ts
-    │   │   └── tokens.css
-    │   ├── test/
-    │   │   ├── index.ts
-    │   │   └── setup.ts
-    │   ├── ui/
-    │   │   ├── app-nav.tsx
-    │   │   ├── container.tsx
-    │   │   ├── icons.tsx
-    │   │   ├── index.ts
-    │   │   ├── page.tsx
-    │   │   ├── public-footer.tsx
-    │   │   ├── section.tsx
-    │   │   └── stack.tsx
-    │   └── utils/
-    │       ├── cn.ts
-    │       ├── index.ts
-    │       └── validation.ts
-    └── types/
-        ├── css.d.ts
-        └── index.ts
+├── src/
+│   ├── bff/
+│   │   ├── index.ts
+│   │   ├── request.ts
+│   │   ├── validateFiles.ts
+│   │   └── __tests__/
+│   │       ├── request.test.ts
+│   │       ├── validateFiles.test.ts
+│   │       └── validateRequestPayload.test.ts
+│   ├── config/
+│   │   └── index.ts
+│   ├── features/
+│   │   ├── index.ts
+│   │   └── request/
+│   │       ├── __tests__/
+│   │       │   ├── RequestForm.submission.test.tsx
+│   │       │   └── schema.test.ts
+│   │       ├── config/
+│   │       │   ├── form.ts
+│   │       │   └── index.ts
+│   │       ├── lib/
+│   │       │   └── errors.ts
+│   │       ├── types/
+│   │       │   └── index.ts
+│   │       ├── ui/
+│   │       │   ├── Button.tsx
+│   │       │   ├── CheckboxInput.tsx
+│   │       │   ├── FileUploadInput.tsx
+│   │       │   ├── index.ts
+│   │       │   ├── RequestForm.tsx
+│   │       │   ├── SelectInput.tsx
+│   │       │   ├── TextareaInput.tsx
+│   │       │   ├── TextInput.tsx
+│   │       │   └── field/
+│   │       │       ├── FieldError.tsx
+│   │       │       ├── FieldHint.tsx
+│   │       │       ├── FieldLabel.tsx
+│   │       │       └── FormFieldLayout.tsx
+│   │       └── validation/
+│   │           ├── index.ts
+│   │           ├── schema.ts
+│   │           └── validationKeys.ts
+│   ├── services/
+│   │   ├── db.ts
+│   │   ├── index.ts
+│   │   ├── storage.ts
+│   │   ├── supabase.ts
+│   │   └── __tests__/
+│   │       ├── db.test.ts
+│   │       └── storage.test.ts
+│   ├── shared/
+│   │   ├── index.ts
+│   │   ├── hooks/
+│   │   │   └── index.ts
+│   │   ├── i18n/
+│   │   │   ├── config.ts
+│   │   │   ├── index.ts
+│   │   │   ├── navigation.ts
+│   │   │   ├── request.ts
+│   │   │   ├── routing.ts
+│   │   │   └── messages/
+│   │   │       └── en.json
+│   │   ├── styles/
+│   │   │   ├── index.ts
+│   │   │   └── tokens.css
+│   │   ├── test/
+│   │   │   ├── index.ts
+│   │   │   └── setup.ts
+│   │   ├── ui/
+│   │   │   ├── app-nav.tsx
+│   │   │   ├── container.tsx
+│   │   │   ├── icons.tsx
+│   │   │   ├── index.ts
+│   │   │   ├── page.tsx
+│   │   │   ├── public-footer.tsx
+│   │   │   ├── section.tsx
+│   │   │   └── stack.tsx
+│   │   └── utils/
+│   │       ├── cn.ts
+│   │       ├── index.ts
+│   │       └── validation.ts
+│   └── types/
+│       ├── css.d.ts
+│       └── index.ts
+└── supabase/
+    └── migrations/
+        └── 20260622000000_create_requests.sql
 ```

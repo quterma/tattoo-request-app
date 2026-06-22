@@ -23,7 +23,7 @@ export function RequestForm() {
 
   const [clientSubmissionId] = useState(() => crypto.randomUUID())
   const [status, setStatus] = useState<SubmitStatus>("idle")
-  const [requestId, setRequestId] = useState<string | null>(null)
+  const [referenceCode, setReferenceCode] = useState<string | null>(null)
 
   const {
     register,
@@ -89,7 +89,7 @@ export function RequestForm() {
       const response = await res.json()
 
       if (response.ok === true) {
-        setRequestId(response.requestId ?? null)
+        setReferenceCode(response.referenceCode ?? null)
         setStatus("success")
       } else if (response.error?.code === API_ERROR_CODES.VALIDATION_ERROR) {
         const fieldErrors = response.error.fieldErrors as Record<string, string[]>
@@ -134,9 +134,9 @@ export function RequestForm() {
       <div className="flex flex-col gap-3 rounded-md border border-border p-6">
         <p className="text-lg font-semibold text-foreground">{t("successTitle")}</p>
         <p className="text-sm text-muted-foreground">{t("successMessage")}</p>
-        {requestId && (
+        {referenceCode && (
           <p className="text-sm font-mono text-foreground">
-            {t("successRequestId", { requestId })}
+            {t("successReferenceCode", { referenceCode })}
           </p>
         )}
       </div>
