@@ -6,6 +6,22 @@ export interface CreatedRequest {
   referenceCode: string
 }
 
+export async function getRequestByClientSubmissionId(
+  clientSubmissionId: string,
+): Promise<string | null> {
+  const { data, error } = await supabase
+    .from("requests")
+    .select("reference_code")
+    .eq("client_submission_id", clientSubmissionId)
+    .maybeSingle()
+
+  if (error) {
+    throw new Error(`DB lookup failed: ${error.message}`)
+  }
+
+  return data ? (data as { reference_code: string }).reference_code : null
+}
+
 interface CreateRequestParams {
   clientSubmissionId: string
   clientName: string

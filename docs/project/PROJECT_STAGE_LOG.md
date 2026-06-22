@@ -17,7 +17,7 @@ Status: In Progress
 
 Current focus:
 
-- Stage 3D — Idempotency (next)
+- Stage 3E — Notifications and Stabilization (next)
 
 Architecture decisions confirmed for Stage 3C.2:
 
@@ -58,6 +58,48 @@ Next expected step:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-06-22 — Stage 3D.0 — Request Identity & Idempotency
+
+Status: Completed
+
+Completed:
+
+- `supabase/migrations/20260622000001_add_client_submission_id_unique.sql` created:
+  - `ALTER TABLE requests ADD CONSTRAINT requests_client_submission_id_key UNIQUE (client_submission_id)`
+  - Separate migration from Stage 3C.3 — applies cleanly on top of the already-deployed schema
+- `getRequestByClientSubmissionId(clientSubmissionId)` added to `src/services/db.ts`:
+  - queries `requests` table by `client_submission_id` using `.maybeSingle()`
+  - returns existing `reference_code` as string, or `null` if not found
+  - throws on Supabase error
+  - exported through `src/services/index.ts`
+- Route handler (`app/api/request/route.ts`) updated with three-path idempotency flow:
+  1. Pre-upload lookup: if `clientSubmissionId` already exists → log `[route] idempotent replay: REQ-XXXX` → return `{ ok: true, referenceCode }` immediately (no upload, no DB insert)
+  2. Normal path: lookup returns null → upload files → create request → return `{ ok: true, referenceCode }`
+  3. Race-condition fallback: `createRequest` throws with unique constraint message → cleanup uploaded files → re-fetch by `clientSubmissionId` → if found: log `[route] idempotent race recovered: REQ-XXXX` → return `{ ok: true, referenceCode }`; if not found: return 500
+- All three paths return identical `{ ok: true, referenceCode }` response shape — client cannot distinguish them
+- Race detection: string-matches `"23505"` (Postgres unique violation code) or `"unique constraint"` in error message; all other DB errors remain 500
+- `app/api/request/__tests__/route.test.ts` created: 11 route-level tests covering:
+  - normal success flow
+  - upload order (uploadRequestFiles called before createRequest)
+  - replay returns existing referenceCode
+  - replay does not call uploadRequestFiles or createRequest
+  - response shape identity between normal and replay
+  - race: cleanup + fetch existing → success
+  - race: cleanup + fetch returns null → 500
+  - non-unique DB error → 500 (no race recovery attempted)
+  - payload validation failure
+  - file validation failure
+- `src/services/__tests__/db.test.ts` updated: 4 new tests for `getRequestByClientSubmissionId` (returns code, returns null, throws on error, includes error message); total 10 tests in file
+- Total tests: 104 (was 89) — all pass
+- lint / typecheck / build — all PASS
+
+Architecture confirmed before implementation:
+- Option A (route-level lookup) chosen over Option B (RPC-level upsert) — keeps `create_request` RPC as pure insert; deduplication logic in the orchestration layer where it belongs
+- Both replay paths (lookup hit and race recovery) log distinct messages but return identical response
+- UNIQUE constraint is the DB safety net; application-level lookup is an optimization to avoid unnecessary uploads on replays
+
+---
 
 ### 2026-06-22 — Stage 3C.3.5 — Client Name
 

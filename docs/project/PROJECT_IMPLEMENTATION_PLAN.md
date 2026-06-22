@@ -218,7 +218,7 @@ Goal: prevent duplicate requests from reaching the artist.
 
 Note: `clientSubmissionId` client generation and payload wiring is introduced in Stage 3C.2.1 (storage folder use only). Stage 3D completes the full idempotency story.
 
-### 3D.0 — clientSubmissionId idempotency
+### 3D.0 — clientSubmissionId idempotency ✓ completed
 
 - store `clientSubmissionId` in the database with a unique constraint on the requests table
 - implement server-side deduplication: if `clientSubmissionId` already exists, return existing request info (including `referenceCode`) without creating a duplicate

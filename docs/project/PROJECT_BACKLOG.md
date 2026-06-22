@@ -73,6 +73,28 @@ Revisit route/path constants when admin routes, image proxy, and additional API 
 Currently `/api/request` is the only endpoint and is used in one place — centralizing it now would be premature.
 Introduce a `API_ROUTES` constant in `src/bff` or `src/shared/config` at that point.
 
+## Admin Panel Enhancements
+
+### Possible Repeat Client Indicator (post-MVP)
+
+Goal: help the artist notice when multiple requests likely belong to the same person.
+
+This is informational only — not blocking, not deduplication, not enforcement.
+Idempotency (Stage 3D) deduplicates by `clientSubmissionId` only. This feature is separate.
+
+Potential signals to compare across existing requests:
+- email
+- phone
+- contact_other
+
+Implementation options (decide at Stage 4+):
+- highlight matching contact fields in the request detail view
+- count badge on the admin list next to requests that share a contact value
+- manual "repeat client" flag set by the artist
+
+No DB changes required now. Existing `email`, `phone`, `contact_other` columns are sufficient.
+Do not implement until the admin panel exists and the artist confirms this is a real workflow need.
+
 ## Observability (post-MVP)
 
 - Add Sentry (error tracking)

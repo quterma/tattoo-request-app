@@ -6,10 +6,13 @@ import {
   validateFiles,
   validateRequestPayload,
 } from "@/bff"
-import { createRequest, uploadRequestFiles } from "@/services"
+import { createRequest, getRequestByClientSubmissionId, uploadRequestFiles } from "@/services"
 import { supabase } from "@/services"
 
 const BUCKET = "request-images"
+
+// Postgres unique violation error code
+const PG_UNIQUE_VIOLATION = "23505"
 
 async function cleanupStorageFiles(paths: string[]): Promise<void> {
   if (paths.length === 0) return
@@ -37,14 +40,21 @@ export async function POST(req: Request) {
       return NextResponse.json(fileValidation, { status: 400 })
     }
 
+    // Idempotency check: return existing request without uploading or inserting
+    const existingReferenceCode = await getRequestByClientSubmissionId(payload.clientSubmissionId)
+    if (existingReferenceCode !== null) {
+      console.log(`[route] idempotent replay: ${existingReferenceCode}`)
+      return NextResponse.json({ ok: true, referenceCode: existingReferenceCode })
+    }
+
     const uploadedFiles = await uploadRequestFiles(
       { referenceImages: payload.referenceImages, placementImages: payload.placementImages },
       payload.clientSubmissionId,
     )
 
-    let result: { id: string; referenceCode: string }
+    let referenceCode: string
     try {
-      result = await createRequest({
+      const result = await createRequest({
         clientSubmissionId: payload.clientSubmissionId,
         clientName: payload.clientName,
         description: payload.ideaDescription,
@@ -59,17 +69,37 @@ export async function POST(req: Request) {
         consent: payload.consent as true,
         files: uploadedFiles,
       })
+      referenceCode = result.referenceCode
     } catch (dbErr) {
       const message = dbErr instanceof Error ? dbErr.message : String(dbErr)
-      console.error("[route] DB insert failed:", message)
-      await cleanupStorageFiles(uploadedFiles.map((f) => f.storagePath))
+
+      // Race condition: concurrent request already inserted with same clientSubmissionId
+      if (message.includes(PG_UNIQUE_VIOLATION) || message.includes("unique constraint")) {
+        await cleanupStorageFiles(uploadedFiles.map((f) => f.storagePath))
+        try {
+          const racedReferenceCode = await getRequestByClientSubmissionId(
+            payload.clientSubmissionId,
+          )
+          if (racedReferenceCode !== null) {
+            console.log(`[route] idempotent race recovered: ${racedReferenceCode}`)
+            return NextResponse.json({ ok: true, referenceCode: racedReferenceCode })
+          }
+        } catch (lookupErr) {
+          const lookupMessage = lookupErr instanceof Error ? lookupErr.message : String(lookupErr)
+          console.error("[route] race recovery lookup failed:", lookupMessage)
+        }
+      } else {
+        console.error("[route] DB insert failed:", message)
+        await cleanupStorageFiles(uploadedFiles.map((f) => f.storagePath))
+      }
+
       return NextResponse.json(
         { ok: false, error: { code: API_ERROR_CODES.SERVER_ERROR } },
         { status: 500 },
       )
     }
 
-    return NextResponse.json({ ok: true, referenceCode: result.referenceCode })
+    return NextResponse.json({ ok: true, referenceCode })
   } catch (err) {
     if (err instanceof ClientSubmissionIdError) {
       return NextResponse.json(

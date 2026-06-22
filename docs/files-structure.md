@@ -43,7 +43,9 @@ tattoo-request-app/
 │   │           └── page.tsx
 │   └── api/
 │       └── request/
-│           └── route.ts
+│           ├── route.ts
+│           └── __tests__/
+│               └── route.test.ts
 ├── docs/
 │   ├── files-structure.md
 │   ├── framework/
@@ -160,5 +162,6 @@ tattoo-request-app/
 │       └── index.ts
 └── supabase/
     └── migrations/
-        └── 20260622000000_create_requests.sql
+        ├── 20260622000000_create_requests.sql
+        └── 20260622000001_add_client_submission_id_unique.sql
 ```

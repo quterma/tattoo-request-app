@@ -1,14 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 
-const { mockRpc } = vi.hoisted(() => ({ mockRpc: vi.fn() }))
+const { mockRpc, mockFrom } = vi.hoisted(() => ({
+  mockRpc: vi.fn(),
+  mockFrom: vi.fn(),
+}))
 
 vi.mock("../supabase", () => ({
   supabase: {
     rpc: mockRpc,
+    from: mockFrom,
   },
 }))
 
-import { createRequest } from "../db"
+import { createRequest, getRequestByClientSubmissionId } from "../db"
 import type { UploadedFile } from "../storage"
 
 const baseParams = {
@@ -138,5 +142,46 @@ describe("createRequest", () => {
     })
 
     await expect(createRequest(baseParams)).rejects.toThrow("connection timeout")
+  })
+})
+
+describe("getRequestByClientSubmissionId", () => {
+  const CLIENT_ID = "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+
+  function makeChain(result: { data: unknown; error: unknown }) {
+    const maybeSingle = vi.fn().mockResolvedValue(result)
+    const eq = vi.fn().mockReturnValue({ maybeSingle })
+    const select = vi.fn().mockReturnValue({ eq })
+    mockFrom.mockReturnValue({ select })
+    return { select, eq, maybeSingle }
+  }
+
+  it("returns referenceCode when request exists", async () => {
+    makeChain({ data: { reference_code: "REQ-2026-0001" }, error: null })
+
+    const result = await getRequestByClientSubmissionId(CLIENT_ID)
+
+    expect(result).toBe("REQ-2026-0001")
+    expect(mockFrom).toHaveBeenCalledWith("requests")
+  })
+
+  it("returns null when no matching request exists", async () => {
+    makeChain({ data: null, error: null })
+
+    const result = await getRequestByClientSubmissionId(CLIENT_ID)
+
+    expect(result).toBeNull()
+  })
+
+  it("throws when supabase returns an error", async () => {
+    makeChain({ data: null, error: { message: "relation does not exist" } })
+
+    await expect(getRequestByClientSubmissionId(CLIENT_ID)).rejects.toThrow("DB lookup failed")
+  })
+
+  it("throws with the supabase error message", async () => {
+    makeChain({ data: null, error: { message: "connection timeout" } })
+
+    await expect(getRequestByClientSubmissionId(CLIENT_ID)).rejects.toThrow("connection timeout")
   })
 })

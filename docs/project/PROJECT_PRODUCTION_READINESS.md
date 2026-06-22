@@ -87,6 +87,36 @@ This is a release-readiness verification item, not a backlog task and not a perf
 
 ---
 
+# Integration / End-to-End Test Coverage
+
+## Context
+
+Unit and service-layer tests cover individual functions in isolation. Route-level tests
+(added in Stage 3D) cover the handler logic against mocked services. However, the
+idempotency replay and race-condition paths are hard to exercise through the UI manually
+and are not covered by any test that touches a real database or storage layer.
+
+## Suggested coverage before production release
+
+- normal request submit: form → API → storage → DB → referenceCode returned
+- replay with same `clientSubmissionId`: same `referenceCode` returned, no second DB row
+- replay: `uploadRequestFiles` not called a second time
+- UNIQUE constraint race fallback: second upload cleaned up, existing `referenceCode` returned
+- DB/storage consistency: `request_files` rows correctly linked to `requests` row after insert
+- failed DB insert: uploaded storage files deleted (cleanup path)
+
+## When to address
+
+Not required before committing Stage 3D.
+Consider before production release or during Stage 3D.5 Architecture & Documentation Audit.
+
+Implementation options:
+- Vitest integration tests with a real Supabase test project (separate from production)
+- Playwright / end-to-end tests against a local or preview deployment
+- Manual test protocol documented and executed before launch (minimum viable option for MVP)
+
+---
+
 # AI Review (Optional)
 
 Before major releases or significant feature additions:
