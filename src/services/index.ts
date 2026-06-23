@@ -1,5 +1,5 @@
 export { supabase } from "./supabase"
-export { uploadRequestFiles } from "./storage"
+export { BUCKET, uploadRequestFiles } from "./storage"
 export type { UploadedFile, FileType } from "./storage"
 export { createRequest, getRequestByClientSubmissionId } from "./db"
 export type { CreatedRequest } from "./db"

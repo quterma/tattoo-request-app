@@ -1,6 +1,6 @@
 import { supabase } from "./supabase"
 
-const BUCKET = "request-images"
+export const BUCKET = "request-images"
 const MAX_RETRIES = 3
 const RETRY_BASE_MS = 200
 

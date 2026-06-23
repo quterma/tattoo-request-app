@@ -6,10 +6,8 @@ import {
   validateFiles,
   validateRequestPayload,
 } from "@/bff"
-import { createRequest, getRequestByClientSubmissionId, uploadRequestFiles } from "@/services"
+import { BUCKET, createRequest, getRequestByClientSubmissionId, uploadRequestFiles } from "@/services"
 import { supabase } from "@/services"
-
-const BUCKET = "request-images"
 
 // Postgres unique violation error code
 const PG_UNIQUE_VIOLATION = "23505"

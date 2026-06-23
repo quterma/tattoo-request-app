@@ -89,6 +89,7 @@ Current modules:
 #### services/db.ts
 
 - `createRequest(params)` — calls `create_request` RPC; atomically inserts request + files, returns `{ id, referenceCode }`
+- `getRequestByClientSubmissionId(clientSubmissionId)` — looks up existing request by `clientSubmissionId`; returns `referenceCode` string or `null`
 - `CreatedRequest` — exported type
 
 ---

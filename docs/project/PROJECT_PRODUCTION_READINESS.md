@@ -107,13 +107,38 @@ and are not covered by any test that touches a real database or storage layer.
 
 ## When to address
 
-Not required before committing Stage 3D.
-Consider before production release or during Stage 3D.5 Architecture & Documentation Audit.
+Not required before Stage 4A.
+Address before production release — Stage 3D.5 audit confirmed this remains an open gap.
 
 Implementation options:
 - Vitest integration tests with a real Supabase test project (separate from production)
 - Playwright / end-to-end tests against a local or preview deployment
 - Manual test protocol documented and executed before launch (minimum viable option for MVP)
+
+---
+
+# Architecture & Documentation Audit Checkpoints
+
+Architecture and documentation audits should be conducted after major milestones to catch
+consistency gaps, stale references, and pre-launch risks before they compound.
+
+## Planned audit checkpoints
+
+- After Stage 4A — Admin Authentication
+- After Stage 4B — Admin Panel
+- Before production release (final pre-launch audit)
+- After major integrations (Telegram notifications, any future scheduler or payment work)
+
+## Audit protocol
+
+Each audit follows the same pattern as Stage 3D.5.1:
+
+1. Audit first — read-only review, report findings by severity (Critical / High / Medium / Low)
+2. Developer approves fix scope — not everything found must be fixed immediately
+3. Fix pass — separate stage, with quality gates before commit
+
+**Audits are checkpoints, not automatic refactor permission.**
+Finding something during an audit does not authorize refactoring it. Each fix requires explicit approval.
 
 ---
 

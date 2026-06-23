@@ -34,6 +34,7 @@ vi.mock("@/bff", () => ({
 }))
 
 vi.mock("@/services", () => ({
+  BUCKET: "request-images",
   uploadRequestFiles: mockUploadRequestFiles,
   createRequest: mockCreateRequest,
   getRequestByClientSubmissionId: mockGetRequestByClientSubmissionId,

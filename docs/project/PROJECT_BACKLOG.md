@@ -61,12 +61,6 @@ Future optional feature: AI-generated short title or summary for each request.
 
 `validateFiles` in BFF trusts `file.type` from the multipart Content-Type header (browser-provided). No magic-byte verification is done. Acceptable for MVP at low volume with a known artist audience. Add magic-byte MIME checking if abuse is observed post-launch.
 
-## Route-Level Tests
-
-The `POST /api/request` handler currently has no tests — all coverage is on BFF helper functions in isolation. This is acceptable while the route only parses and validates. When 3C adds storage upload and DB insert orchestration, route-level integration tests become worthwhile to catch ordering bugs and error-path gaps.
-
-Revisit at the end of Stage 3C.4 (end-to-end submission).
-
 ## API Route Constants (post-MVP)
 
 Revisit route/path constants when admin routes, image proxy, and additional API endpoints are added.
@@ -101,3 +95,20 @@ Do not implement until the admin panel exists and the artist confirms this is a 
 - Add PostHog (behavior tracking, form drop-off)
 
 Condition: only after real traffic exists
+
+## Automated E2E / Integration Tests (pre-release)
+
+Unit and route-level tests cover isolated logic and handler orchestration against mocks.
+The following flows have no test touching a real database or storage layer:
+
+- normal request submit: form → API → storage → DB → referenceCode returned
+- replay with same `clientSubmissionId`: same `referenceCode`, no duplicate DB row
+- UNIQUE constraint race fallback: cleanup + existing referenceCode returned
+- failed DB insert: uploaded storage files deleted
+
+Address before production release. Options:
+- Vitest integration tests with a real Supabase test project (separate from production)
+- Playwright / end-to-end tests against a local or preview deployment
+- Manual test protocol executed before each release (minimum viable option for MVP)
+
+See PROJECT_PRODUCTION_READINESS.md — Integration / End-to-End Test Coverage for full details.

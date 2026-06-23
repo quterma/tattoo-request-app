@@ -17,7 +17,14 @@ Status: In Progress
 
 Current focus:
 
-- Stage 3E — Notifications and Stabilization (next)
+- Stage 3D.5.3 — Supabase CLI Migration Workflow (next)
+- then Stage 4A — Admin Authentication
+
+Completed stages:
+
+- Stage 3D — Request Identity & Idempotency ✓
+- Stage 3D.5.1 — Architecture & Documentation Audit ✓
+- Stage 3D.5.2 — Audit Fix Pass ✓
 
 Architecture decisions confirmed for Stage 3C.2:
 
@@ -51,13 +58,41 @@ Completed in Stage 3:
 - Supabase foundation: @supabase/supabase-js installed; config layer (src/config/index.ts) reads SUPABASE_URL + SUPABASE_SECRET_KEY with fail-fast validation; server-side Supabase client in src/services/supabase.ts exported through src/services/index.ts; .env.example created
 - clientName field: required `clientName` added to form, schema (trim, min 2, max 30), BFF parsing, route handler, db.ts; wired to existing `client_name` DB column via RPC; 8 new tests (schema validation, BFF parsing, form FormData, db persistence mapping)
 
-Next expected step:
-
-- Stage 3D — Idempotency
-
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-06-23 — Stage 3D.5 — Architecture & Documentation Audit / Fix Pass
+
+Status: Completed
+
+Audit (3D.5.1):
+
+- Full audit of all PROJECT_* docs, code, migrations, and tests after Stage 3D completion
+- Findings: 2 Critical (stale stage log, missing 3D.5 in plan), 3 High (client_name nullable, BUCKET duplicate, stale current focus), several Medium/Low doc gaps
+- No code correctness issues found; all quality gates passed; idempotency flow confirmed correct
+
+Fix pass (3D.5.2):
+
+- `PROJECT_STAGE_LOG.md`: removed stale "Next expected step: Stage 3D" block; updated current focus; added completed stages list
+- `PROJECT_IMPLEMENTATION_PLAN.md`: added Stage 3D.5 sub-stage under Stage 3D; added Stage 3D.5.3 planned sub-stage
+- `PROJECT_CONTEXT.md`: added `clientName` to Request Form scope; corrected status values to match DB CHECK constraint (`new / contacted / booked / completed / rejected`)
+- `PROJECT_BACKLOG.md`: removed stale Route-Level Tests backlog item (tests added in Stage 3D.0)
+- `PROJECT_STRUCTURE.md`: added `getRequestByClientSubmissionId()` to services/db.ts section
+- `src/services/storage.ts`: exported `BUCKET` constant
+- `app/api/request/route.ts`: removed local `BUCKET` definition; imports from `@/services`
+- `app/api/request/__tests__/route.test.ts`: added `BUCKET` to `@/services` mock
+- `supabase/migrations/20260623000000_make_client_name_not_null.sql`: backfills null `client_name` rows with `[unknown]`, then enforces `NOT NULL` constraint; patch SQL applied manually to live Supabase project
+- `PROJECT_PRODUCTION_READINESS.md`: added Architecture Audit Checkpoints section; added E2E integration testing section reference; updated migration workflow note
+- `PROJECT_BACKLOG.md`: added Migration Workflow and Automated E2E Tests sections
+
+Documentation sync (3D.5.3 prep):
+
+- `PROJECT_IMPLEMENTATION_PLAN.md`: added Stage 3D.5.3 — Supabase CLI Migration Workflow
+- `PROJECT_PRODUCTION_READINESS.md`: added Architecture Audit Checkpoints section
+- Confirmed all planned future items already documented: Repeat Client Indicator ✓, AI Tattoo Title ✓, performance validation ✓, E2E test coverage ✓, dependency/security review ✓
+
+---
 
 ### 2026-06-22 — Stage 3D.0 — Request Identity & Idempotency
 

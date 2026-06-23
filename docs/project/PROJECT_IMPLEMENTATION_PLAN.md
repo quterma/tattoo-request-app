@@ -228,6 +228,32 @@ Note: `ParsedRequestPayload`, `parseRequestFormData` (BFF), `RequestForm.tsx` (c
 
 Must be complete before public production launch and before broad user testing.
 
+### 3D.5 — Architecture & Documentation Audit / Fix Pass ✓ completed
+
+- audit all PROJECT_* docs, code, migrations, and tests after Stage 3D
+- fix documentation gaps and code-level inconsistencies found during audit
+- enforce `NOT NULL` on `client_name` via migration with non-destructive backfill
+- deduplicate `BUCKET` constant between `storage.ts` and `route.ts`
+
+### 3D.5.3 — Supabase CLI Migration Workflow
+
+Goal: establish a reliable migration workflow so future schema changes are applied via CLI rather than manual SQL Editor patches.
+
+Tasks:
+
+- install and verify Supabase CLI
+- link existing Supabase project (`supabase link`)
+- inspect remote migration state (`supabase migration list`)
+- sync/repair migration history if local and remote are out of sync
+- document the verified workflow for future agents: how to write, apply, and verify migrations
+- decide how agents should verify DB state safely without requiring live DB access during implementation
+
+Exit Criteria:
+
+- Supabase CLI linked and working against the project
+- `supabase migration list` reflects the three applied migrations (3C.3, 3D.0, 3D.5.2)
+- future migration workflow documented in PROJECT_DECISIONS.md or PROJECT_PRODUCTION_READINESS.md
+
 ---
 
 ## Stage 3E — Notifications and Stabilization

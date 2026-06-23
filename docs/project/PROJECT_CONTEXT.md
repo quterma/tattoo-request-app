@@ -60,19 +60,20 @@ Instead of chat-based communication, users provide all necessary information upf
 
 ### Request Form
 
+- client name (required)
 - structured input (description, placement, size, color)
 - image uploads (references, placement, artist work)
   - up to 3 files per upload field
   - total expected 2–8 images per request
 - contact information
 - consent confirmation
-- success state after submission
+- success state after submission (shows reference code)
 
 ### Admin Interface
 
 - request list
 - request details view (data + images)
-- status management (New / In progress / Done / Rejected)
+- status management (new / contacted / booked / completed / rejected)
 - internal notes
 - unread tracking
 
