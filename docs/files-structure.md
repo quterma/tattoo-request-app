@@ -161,6 +161,8 @@ tattoo-request-app/
 │       ├── css.d.ts
 │       └── index.ts
 └── supabase/
+    ├── .gitignore
+    ├── config.toml
     └── migrations/
         ├── 20260622000000_create_requests.sql
         ├── 20260622000001_add_client_submission_id_unique.sql

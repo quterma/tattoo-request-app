@@ -306,6 +306,41 @@ Reason: runtime permission issues (e.g. sequence grants, table grants) are invis
 
 ---
 
+# Migration Workflow Decisions
+
+## CLI
+
+Supabase CLI is installed as a project devDependency (`supabase` npm package).
+
+- Canonical invocation: `pnpm exec supabase <command>`
+- Never use a globally installed binary — version must be pinned and reproducible via `pnpm install`
+- CLI version is managed in `package.json` devDependencies
+
+## Applying migrations
+
+All future schema changes must be applied via CLI, not the Supabase SQL Editor:
+
+1. Create migration file: `pnpm exec supabase migration new <name>`
+2. Write SQL in the generated file under `supabase/migrations/`
+3. Apply to remote: `pnpm exec supabase db push`
+4. Verify: `pnpm exec supabase migration list` — Local and Remote columns must match
+
+## Verifying migration state
+
+After any migration operation, confirm with:
+
+```
+pnpm exec supabase migration list
+```
+
+Local and Remote columns must show identical timestamps for all rows.
+
+## Historical context
+
+Migrations for Stages 3C.3, 3D.0, and 3D.5.2 were applied manually via SQL Editor before the CLI was introduced. Migration history was repaired in Stage 3D.5.3 using `supabase migration repair --status applied <timestamp>`. Repair is metadata-only — it records that a migration is already applied without re-executing its SQL.
+
+---
+
 # Rule for Future Changes
 
 All architectural, product, or behavioral decisions MUST be recorded in this document.

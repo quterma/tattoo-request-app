@@ -17,14 +17,14 @@ Status: In Progress
 
 Current focus:
 
-- Stage 3D.5.3 — Supabase CLI Migration Workflow (next)
-- then Stage 4A — Admin Authentication
+- Stage 4A — Admin Authentication
 
 Completed stages:
 
 - Stage 3D — Request Identity & Idempotency ✓
 - Stage 3D.5.1 — Architecture & Documentation Audit ✓
 - Stage 3D.5.2 — Audit Fix Pass ✓
+- Stage 3D.5.3 — Supabase CLI Migration Workflow ✓
 
 Architecture decisions confirmed for Stage 3C.2:
 
@@ -61,6 +61,27 @@ Completed in Stage 3:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-06-24 — Stage 3D.5.3 — Supabase CLI Migration Workflow
+
+Status: Completed
+
+Completed:
+
+- Supabase CLI v2.107.0 installed as project devDependency (`pnpm add -D supabase`)
+- `pnpm exec supabase` confirmed as the canonical invocation going forward
+- `supabase init` run: `supabase/config.toml` and `supabase/.gitignore` created
+- Project linked to remote: `supabase link --project-ref vjjvouihcvqmupjojgrs`
+- Pre-repair audit: `migration list` confirmed all three migrations had empty Remote column (expected — all were applied manually via SQL Editor; `supabase_migrations.schema_migrations` was empty)
+- Migration history repaired (metadata only, no schema changes):
+  - `20260622000000` → applied
+  - `20260622000001` → applied
+  - `20260623000000` → applied
+- Post-repair `migration list` confirmed Local = Remote for all three migrations
+- Global binary (`C:\Users\danik\AppData\Local\supabase\`) removed; project-local CLI verified working independently
+- lint / typecheck / tests (104/104) / build — all PASS
+
+---
 
 ### 2026-06-23 — Stage 3D.5 — Architecture & Documentation Audit / Fix Pass
 
