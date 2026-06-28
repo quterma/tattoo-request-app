@@ -77,11 +77,6 @@ Instead of chat-based communication, users provide all necessary information upf
 - internal notes
 - unread tracking
 
-### Notifications
-
-- Telegram notification on new request
-- reminder for unread requests
-
 ---
 
 # Constraints
@@ -96,8 +91,9 @@ Instead of chat-based communication, users provide all necessary information upf
 
 # Non-Goals
 
-The following are explicitly out of scope for MVP:
+The following are explicitly out of scope for the initial production release:
 
+- Telegram notifications (planned post-launch — see Post-Launch Roadmap in PROJECT_IMPLEMENTATION_PLAN.md)
 - booking or calendar integration
 - payments or deposits
 - chat functionality
@@ -110,13 +106,13 @@ The following are explicitly out of scope for MVP:
 
 # Success Criteria
 
-The MVP is considered complete when:
+The production release is considered complete when:
 
 - users can submit requests with required data and images
 - requests are stored and accessible to the artist
-- the artist receives Telegram notifications
 - requests can be reviewed and managed in the admin interface
 - the application works smoothly on mobile devices
+- UI/UX quality is production-ready across all surfaces (see Stage 6 in PROJECT_IMPLEMENTATION_PLAN.md)
 - the system is deployed and usable in real conditions
 
 ---

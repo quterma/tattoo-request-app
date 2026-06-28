@@ -12,7 +12,7 @@ AI agents and developers working on the project.
 
 ## Current Stage
 
-Stage: Stage 3 — Request Flow
+Stage: Stage 4 — Admin
 Status: In Progress
 
 Current focus:
@@ -21,10 +21,15 @@ Current focus:
 
 Completed stages:
 
+- Stage 3 — Request Flow ✓
 - Stage 3D — Request Identity & Idempotency ✓
 - Stage 3D.5.1 — Architecture & Documentation Audit ✓
 - Stage 3D.5.2 — Audit Fix Pass ✓
 - Stage 3D.5.3 — Supabase CLI Migration Workflow ✓
+
+Note: Stage 3E (Telegram Notifications + Stabilization) was superseded by the roadmap
+restructure on 2026-06-28. Telegram moved to Stage 2 (Post-Launch). Stabilization
+responsibilities absorbed into Stage 5 (Production Hardening).
 
 Architecture decisions confirmed for Stage 3C.2:
 

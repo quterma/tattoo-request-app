@@ -142,7 +142,7 @@ Goal: implement request submission.
 - map `fieldErrors` → RHF `setError()` to display server-side messages per field
 - map `formErrors` → contact group error display
 - preserve existing client-side validation UX
-- no persistence, no storage, no Supabase, no Telegram
+- no persistence, no storage, no Supabase
 
 ### 3B.5 — File transport
 
@@ -184,7 +184,7 @@ Architecture decisions confirmed in pre-implementation review. See PROJECT_DECIS
 
 Note: file count per field (MAX_FILES_PER_FIELD) is currently enforced by `requestFormSchema` inside `validateRequestPayload`, before `validateFiles` runs. `validateFiles` does not independently cap count — do not decouple validation order without updating both.
 
-Note: MIME type validation in `validateFiles` trusts `file.type` from the multipart header (browser-provided). Magic-byte verification is not implemented. Acceptable for MVP at low volume; revisit if abuse is observed.
+Note: MIME type validation in `validateFiles` trusts `file.type` from the multipart Content-Type header (browser-provided). Magic-byte verification is not implemented. Acceptable for MVP at low volume; revisit if abuse is observed.
 
 ### 3C.3 — Request persistence
 
@@ -201,9 +201,6 @@ Note: the route currently generates a temporary `crypto.randomUUID()` as a place
 - add `clientName` to the request form (required text input)
 - add `clientName` to `requestFormSchema` and `ParsedRequestPayload`
 - store `clientName` in the DB request record (column added in 3C.3 schema)
-- include `clientName` in Telegram notification (Stage 3E)
-
-This is a small dedicated stage. Implement before Stage 4 (Admin Panel) so admin requests always carry a name.
 
 ### 3C.4 — End-to-end submission
 
@@ -235,56 +232,18 @@ Must be complete before public production launch and before broad user testing.
 - enforce `NOT NULL` on `client_name` via migration with non-destructive backfill
 - deduplicate `BUCKET` constant between `storage.ts` and `route.ts`
 
-### 3D.5.3 — Supabase CLI Migration Workflow
+### 3D.5.3 — Supabase CLI Migration Workflow ✓ completed
 
-Goal: establish a reliable migration workflow so future schema changes are applied via CLI rather than manual SQL Editor patches.
-
-Tasks:
-
-- install and verify Supabase CLI
+- install and verify Supabase CLI as project devDependency
 - link existing Supabase project (`supabase link`)
-- inspect remote migration state (`supabase migration list`)
-- sync/repair migration history if local and remote are out of sync
-- document the verified workflow for future agents: how to write, apply, and verify migrations
-- decide how agents should verify DB state safely without requiring live DB access during implementation
-
-Exit Criteria:
-
-- Supabase CLI linked and working against the project
-- `supabase migration list` reflects the three applied migrations (3C.3, 3D.0, 3D.5.2)
-- future migration workflow documented in PROJECT_DECISIONS.md or PROJECT_PRODUCTION_READINESS.md
-
----
-
-## Stage 3E — Notifications and Stabilization
-
-### 3E.1 — Telegram notifications
-
-- trigger Telegram notification after successful request creation
-- notification must not block or break submission on failure
-
-### 3E.2 — Stage 3 stabilization
-
-- smoke test full submission flow
-- fix any integration issues
-- verify exit criteria
-
-Exit Criteria:
-
-- user can submit request successfully
-- invalid data is rejected (client + server)
-- files are uploaded and linked correctly
-- request is stored in database
-- success response is shown to user
-- no console or server errors
-
-Result:
-
-- users can submit requests end-to-end
+- repair migration history for the three manually-applied migrations
+- document verified migration workflow in PROJECT_DECISIONS.md
 
 ---
 
 # Stage 4 — Admin
+
+Goal: implement protected admin interface for request management.
 
 ## Stage 4A — Admin Authentication
 
@@ -310,25 +269,34 @@ Result:
 
 ---
 
-## Stage 4B — Admin Panel
+## Stage 4B — Admin Dashboard
 
-Goal: implement request management.
+Goal: implement request management interface.
+
+**Before implementation: conduct a UI architecture audit** to confirm component structure,
+data-fetching patterns, and how the existing design system and UI primitives will be applied
+consistently across the admin surface.
 
 Tasks:
 
-- request list
-- request details page
-- status updates
+- request list with unread/new indicators
+- request details page (data + images via signed URLs)
+- status management (new / contacted / booked / completed / rejected)
 - admin notes
-- unread indicator
+- basic dashboard metrics:
+  - total request count
+  - count by status
+  - requests this week / month
+  - last request received timestamp
 
 Exit Criteria:
 
 - admin can view all requests
-- admin can open request details
-- admin can update status
-- admin notes are saved
-- UI reflects updated state
+- admin can open request details with images
+- admin can update status and notes
+- unread indicator reflects read/unread state
+- dashboard metrics display correctly
+- UI uses existing design system and primitives
 
 Result:
 
@@ -336,51 +304,134 @@ Result:
 
 ---
 
-# Stage 5 — Notifications
+# Stage 5 — Production Hardening
 
-Goal: notify about new requests.
+Goal: verify readiness and deploy to production.
 
 Tasks:
 
-- Telegram integration
-- trigger on new request
-- optional reminder logic
+- E2E / integration test coverage (see PROJECT_PRODUCTION_READINESS.md)
+- security review checklist (see PROJECT_PRODUCTION_READINESS.md)
+- performance validation on deployed environment
+- logging and error handling review
+- dependency security audit (`pnpm audit`)
+- architecture and documentation audit (post-Stage-4 checkpoint)
+- deployment (Vercel + Supabase production)
+- final release checklist — sign off on all quality gates
 
 Exit Criteria:
 
-- notification is sent on new request
-- notification contains correct data
-- system does not break if notification fails
+- all items in PROJECT_PRODUCTION_READINESS.md are resolved or explicitly deferred
+- security checklist complete
+- application deployed and accessible
+- no critical bugs or regressions
+- manual smoke test of full submission and admin flow passes
 
 Result:
 
-- admin receives notifications
+- production-ready application, publicly launched
 
 ---
 
-# Stage 6 — Stabilization
+# Stage 6 — Product Experience Polish
 
-Goal: prepare for real usage.
+Goal: elevate UI/UX quality after the initial release.
+
+This stage does not ship new features — it improves what exists.
 
 Tasks:
 
-- bug fixes
-- UX improvements
-- mobile optimization
-- basic testing
-- deployment
+- complete UI/UX pass across all public pages and the admin interface
+- landing page improvements (copy, layout, positioning, trust signals)
+- request flow optimization (reduce friction, improve guidance)
+- onboarding and conversion improvements
+- mobile polish (spacing, touch targets, scroll behavior)
+- design system refinement (typography, color, spacing consistency)
+- animations and micro-interactions
+- accessibility and readability improvements
+- trust-building content (portfolio, process, social proof)
 
 Exit Criteria:
 
-- no critical bugs
-- mobile UX is acceptable
-- main flows tested manually
-- application deployed
-- system usable in real conditions
+- visual and interaction quality is consistently high across all surfaces
+- mobile experience is polished
+- no regressions in core flows
 
 Result:
 
-- production-ready MVP
+- refined product experience ready for growth
+
+---
+
+# Post-Launch Roadmap
+
+These features are out of scope for the initial production release (Stages 0–6).
+Each item requires a dedicated planning and decision phase before implementation.
+
+## Telegram Notifications
+
+- new request alert sent to artist via Telegram bot
+- reminder for unread requests older than a threshold
+- notification includes: client name, reference code, placement, size, description excerpt
+
+Note: Telegram was originally planned for Stage 3E and Stage 5. Decision recorded on 2026-06-28: moved post-launch. The production release (Stages 0–6) ships without notifications.
+
+## Calendar Integration
+
+- booking availability management
+- request-to-appointment flow
+- block-off dates
+
+## Payments
+
+- deposit collection on booking
+- payment link or embedded flow
+
+## Browser / PWA Push Notifications
+
+- admin push alerts for new requests (as alternative or complement to Telegram)
+- requires notification permission grant
+
+## PWA Evaluation
+
+- assess whether installability (Add to Home Screen) meaningfully improves mobile UX
+- implement only if usage data justifies it
+
+## AI Features
+
+- AI-generated short title or summary for each request (from description + reference images)
+- shown in admin panel for at-a-glance scanning
+- optional — not required field, not shown to the client
+- no DB column reserved; no architecture work until this is prioritized
+
+## Repeat Client Improvements
+
+- highlight matching contact fields (email, phone) across existing requests in the admin panel
+- count badge or indicator on the request list
+- optionally: manual "repeat client" flag set by the artist
+- no DB changes required — existing columns are sufficient
+
+## Analytics Expansion
+
+- add PostHog (behavior tracking, form drop-off analysis)
+- add Sentry (error tracking)
+- condition: only after real traffic exists
+
+## File Upload UX
+
+- per-file delete and replace
+- accumulate files across multiple selections
+- image previews (thumbnails)
+- drag-and-drop, progress indicator
+
+## Other Planned Improvements
+
+- budget range and willingness-to-wait fields on the request form
+- FAQ accordion on the policies page
+- magic-byte MIME type verification (if abuse observed)
+- API route constants consolidation (when multiple endpoints exist)
+- typography component extraction (SectionTitle, SectionText, BulletList)
+- i18n string arrays to replace `split("\n")` usage
 
 ---
 
@@ -391,16 +442,16 @@ Result:
 - do not start next stage before completing current
 - each stage must satisfy its Exit Criteria
 - avoid premature optimization
-- keep scope within MVP
+- keep scope within current stage
 
 ---
 
 # Done Criteria
 
-The implementation is complete when:
+The Production Release (Stages 0–6) is complete when:
 
 - all stages are completed
 - request flow works end-to-end
 - admin panel is functional
-- notifications are working
-- application is deployed and usable
+- UI/UX quality meets the production standard defined in Stage 6
+- application is deployed and usable in real conditions

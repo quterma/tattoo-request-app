@@ -80,7 +80,9 @@ Used for critical request flow behavior.
 
 ### End-to-End Tests
 
-Not required for MVP.
+Not required during feature development (Stages 1–4).
+Required before production release: E2E / integration verification is a Stage 5 gate.
+See PROJECT_PRODUCTION_READINESS.md — Integration / End-to-End Test Coverage.
 
 ---
 

@@ -86,7 +86,7 @@ Every feature included in the first public release must be production-ready for 
 - Backend-for-frontend (BFF) may be used via Next.js Route Handlers where needed.
 - Supabase (PostgreSQL) is the chosen database, treated as an external managed system.
 - Supabase Storage is the chosen file storage. Storage bucket must be private.
-- Telegram is the notification channel for MVP.
+- Telegram is the planned notification channel (post-launch, not part of the initial production release).
 - Global state management is not used in MVP.
 - Feature-oriented frontend structure is used.
 
@@ -279,16 +279,12 @@ Goal: idempotent request creation.
 After successful submission:
 
 - user receives the `referenceCode` (e.g., `REQ-2026-0001`) on the success screen
-- artist receives the same `referenceCode` in the Telegram notification
 - future support and communication use `referenceCode` as the shared identifier
+- when Telegram notifications are implemented (post-launch), the artist will receive the same `referenceCode` in the notification
 
-## Planning
+## Implementation
 
-This is a dedicated implementation story: **Request Identity & Idempotency**.
-
-- Not assigned to Stage 3B.2.
-- Must be implemented before public production launch and before broad user testing.
-- Recommended placement: late Stage 3C or a dedicated pre-launch stabilization stage.
+Implemented in Stage 3D.0 (completed). Applied before public production launch as required.
 
 ---
 

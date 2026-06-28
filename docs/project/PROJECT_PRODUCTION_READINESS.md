@@ -107,8 +107,8 @@ and are not covered by any test that touches a real database or storage layer.
 
 ## When to address
 
-Not required before Stage 4A.
-Address before production release — Stage 3D.5 audit confirmed this remains an open gap.
+Not required before Stage 4A or 4B.
+Address in Stage 5 (Production Hardening) before public launch — Stage 3D.5 audit confirmed this remains an open gap.
 
 Implementation options:
 - Vitest integration tests with a real Supabase test project (separate from production)
@@ -125,9 +125,9 @@ consistency gaps, stale references, and pre-launch risks before they compound.
 ## Planned audit checkpoints
 
 - After Stage 4A — Admin Authentication
-- After Stage 4B — Admin Panel
-- Before production release (final pre-launch audit)
-- After major integrations (Telegram notifications, any future scheduler or payment work)
+- After Stage 4B — Admin Dashboard
+- Stage 5 — Production Hardening (final pre-launch audit)
+- After major post-launch integrations (Telegram notifications, calendar, payments)
 
 ## Audit protocol
 

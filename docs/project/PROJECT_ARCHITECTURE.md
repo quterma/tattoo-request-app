@@ -17,7 +17,7 @@ The application is a web-based system consisting of:
 - client application (public + admin interfaces)
 - backend layer (API / BFF)
 - database and file storage
-- external notification service (Telegram)
+- external notification service (Telegram — planned post-launch)
 
 The system is designed as a simple, production-ready MVP with minimal moving parts.
 
@@ -133,12 +133,12 @@ Image Proxy through BFF was evaluated and rejected in Stage 3C.2 planning — se
 
 ### Notification Service
 
-Telegram is used for:
+Telegram notifications are planned post-launch (see PROJECT_IMPLEMENTATION_PLAN.md — Stage 2).
 
-- new request alerts
-- reminders (optional)
+They are not part of the initial production release. When implemented:
 
-Notifications are triggered by backend events after successful request creation.
+- new request alerts triggered by backend events after successful request creation
+- optional reminders for unread requests
 
 ---
 
@@ -152,8 +152,9 @@ Notifications are triggered by backend events after successful request creation.
 4. backend performs server validation
 5. backend uploads files to storage
 6. backend stores request data in database
-7. backend triggers Telegram notification
-8. backend returns success response to client
+7. backend returns success response to client
+
+Note: Telegram notification (step 7 in the original design) is post-launch. See Stage 2 in PROJECT_IMPLEMENTATION_PLAN.md.
 
 ---
 
@@ -179,7 +180,7 @@ Used for image uploads and retrieval. Accessed only through the service layer.
 
 ### Telegram Bot
 
-Used for notifications.
+Planned post-launch for notifications. Not part of the initial production release.
 
 ---
 
