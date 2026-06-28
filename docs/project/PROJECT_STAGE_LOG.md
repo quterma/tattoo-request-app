@@ -12,12 +12,12 @@ AI agents and developers working on the project.
 
 ## Current Stage
 
-Stage: Stage 4 — Admin
+Stage: Stage 3D.6 — Domain Foundation
 Status: In Progress
 
 Current focus:
 
-- Stage 4A — Admin Authentication
+- Stage 3D.6 — Domain Foundation (planning complete; implementation pending)
 
 Completed stages:
 
@@ -66,6 +66,26 @@ Completed in Stage 3:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-06-28 — Stage 3D.6 — Domain Foundation (planning)
+
+Status: Planning complete
+
+Decisions recorded:
+
+- `studios` and `studio_members` tables defined; schema documented in PROJECT_DECISIONS.md
+- `studio_id` FK column will be added to `requests`; backfill strategy for existing rows documented
+- `create_request` RPC will be updated to accept `p_studio_id`
+- `DEPLOYMENT_STUDIO_ID` env var chosen for single-studio route resolution
+- `studio_members` supersedes the earlier `admin_profiles` direction; 4A will use `studio_members` as the access gate
+- `getRequestByClientSubmissionId()` confirmed to remain global (no studio filter)
+- Storage paths unchanged; RLS, roles, invite flow, multi-studio routing, billing all deferred
+- Stage placed before 4A due to zero-data migration cost
+- Stage 3D.6 added to PROJECT_IMPLEMENTATION_PLAN.md with full scope, exit criteria, and deferred items
+
+No code changes. Implementation is next.
+
+---
 
 ### 2026-06-24 — Stage 3D.5.3 — Supabase CLI Migration Workflow
 

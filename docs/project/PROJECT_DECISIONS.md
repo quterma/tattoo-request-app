@@ -337,6 +337,64 @@ Migrations for Stages 3C.3, 3D.0, and 3D.5.2 were applied manually via SQL Edito
 
 ---
 
+# Domain Foundation Decisions (Stage 3D.6)
+
+## Studio Ownership Model
+
+Every request belongs to a studio. This is the minimal ownership layer added before Admin Authentication.
+
+### Tables
+
+**`studios`**
+- `id UUID PRIMARY KEY`
+- `name TEXT NOT NULL`
+- `created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`
+
+**`studio_members`**
+- `user_id UUID NOT NULL REFERENCES auth.users(id)`
+- `studio_id UUID NOT NULL REFERENCES studios(id)`
+- `created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`
+- `PRIMARY KEY (user_id, studio_id)`
+
+**`requests.studio_id`**
+- `UUID NOT NULL REFERENCES studios(id)` — added in Stage 3D.6
+- Backfilled for all existing rows to Masha's studio UUID
+
+### `studio_members` replaces `admin_profiles`
+
+The earlier direction of using a standalone `admin_profiles` table as the access gate for admin auth is superseded. `studio_members` provides the same gate (a row confirms access) while also carrying studio ownership semantics. Stage 4A will check for an active `studio_members` row when authorizing admin access.
+
+### Idempotency lookup remains global
+
+`getRequestByClientSubmissionId()` queries `requests` without a studio filter. This is intentional and must not be changed.
+
+Reason: `client_submission_id` has a global UNIQUE constraint. The idempotency and race-recovery logic only needs to find the row by submission ID — which studio it belongs to is irrelevant for deduplication. Adding a studio filter would require the route to know the studio before the lookup, which is circular and unnecessary.
+
+### `DEPLOYMENT_STUDIO_ID` env var
+
+The public request submission route has no authenticated context. For a single-studio deployment, the studio to assign to incoming requests is resolved from a `DEPLOYMENT_STUDIO_ID` environment variable.
+
+- Server-only (not `NEXT_PUBLIC_`)
+- Added to `config.app.deploymentStudioId` in `src/config/index.ts`
+- Documented in `.env.example`
+- When multi-studio routing is built, this env var becomes an optional fallback
+
+### Deferred
+
+- RLS policies on `studios`, `studio_members`, `requests` — deferred to Stage 5
+- Role column on `studio_members` — deferred until RBAC is needed
+- `is_active` flag on `studio_members` — revoke access by row deletion for now
+- Workspace routing / multi-studio URL resolution — post-launch
+- Invite flow — post-launch
+- Storage path changes — deferred; paths remain `{clientSubmissionId}/...`
+- Billing, trial, subscription columns — SaaS phase
+
+### Why before 4A
+
+Migration cost is lowest before any production data exists. Adding `studio_id NOT NULL` to `requests` with zero real rows requires only a trivial backfill. After Masha's launch, the same migration touches live data.
+
+---
+
 # Rule for Future Changes
 
 All architectural, product, or behavioral decisions MUST be recorded in this document.

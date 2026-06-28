@@ -239,6 +239,51 @@ Must be complete before public production launch and before broad user testing.
 - repair migration history for the three manually-applied migrations
 - document verified migration workflow in PROJECT_DECISIONS.md
 
+## Stage 3D.6 — Domain Foundation
+
+Goal: add a minimal studio ownership model before Admin Authentication.
+
+Every request belongs to a studio. This is domain foundation, not full SaaS or multi-tenancy.
+Placed here because migration cost is lowest before real production data exists.
+
+Tasks:
+
+- create `studios` table (id, name, created_at)
+- create `studio_members` table (user_id FK → auth.users, studio_id FK → studios, created_at)
+- add `studio_id` FK column to `requests` (NOT NULL)
+- backfill all existing requests to Masha's studio (fixed UUID generated before migration)
+- drop and recreate `create_request` RPC to accept `p_studio_id` parameter
+- add `DEPLOYMENT_STUDIO_ID` env var to config layer and `.env.example`
+- update `createRequest()` in service layer to accept and pass `studioId`
+- update route handler to resolve `studioId` from `config.app.deploymentStudioId`
+- update affected tests
+- apply migration via CLI; verify end-to-end with a real form submission
+
+Deferred:
+
+- RLS policies on `studios`, `studio_members`, `requests`
+- billing, trial, subscription columns
+- role column on `studio_members`
+- workspace routing / multi-studio URL resolution
+- invite flow
+- storage path changes (paths remain `{clientSubmissionId}/...`)
+
+Exit Criteria:
+
+- `studios` and `studio_members` tables exist in Supabase
+- all `requests` rows have a non-null `studio_id`
+- `create_request` RPC accepts `p_studio_id`; old signature removed
+- `DEPLOYMENT_STUDIO_ID` wired through config → service → route
+- pnpm qg passes (lint + typecheck + tests + build)
+- `pnpm exec supabase migration list` shows Local = Remote
+- one real end-to-end form submission succeeds with correct `studio_id` persisted
+
+Notes:
+
+- `studio_members` replaces `admin_profiles` as the access gate for Stage 4A
+- `getRequestByClientSubmissionId()` remains global (no studio filter) — see PROJECT_DECISIONS.md
+- Masha's studio UUID must be generated and fixed before writing the migration SQL
+
 ---
 
 # Stage 4 — Admin
