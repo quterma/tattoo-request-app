@@ -253,36 +253,41 @@ Tasks:
 - add `studio_id` FK column to `requests` (NOT NULL)
 - backfill all existing requests to Masha's studio (fixed UUID generated before migration)
 - drop and recreate `create_request` RPC to accept `p_studio_id` parameter
+- update storage path structure from `{clientSubmissionId}/{type}/{file}` to `{studioId}/{clientSubmissionId}/{type}/{file}`
 - add `DEPLOYMENT_STUDIO_ID` env var to config layer and `.env.example`
 - update `createRequest()` in service layer to accept and pass `studioId`
 - update route handler to resolve `studioId` from `config.app.deploymentStudioId`
 - update affected tests
 - apply migration via CLI; verify end-to-end with a real form submission
 
+No RLS policies in this stage. All access remains through service_role.
+
 Deferred:
 
-- RLS policies on `studios`, `studio_members`, `requests`
-- billing, trial, subscription columns
-- role column on `studio_members`
-- workspace routing / multi-studio URL resolution
-- invite flow
-- storage path changes (paths remain `{clientSubmissionId}/...`)
+- RLS policies on `studios`, `studio_members`, `requests`, and Storage — Stage 5
+- billing, trial, subscription columns — SaaS phase
+- role column on `studio_members` — deferred until RBAC is needed
+- workspace routing / multi-studio URL resolution — post-launch
+- invite flow — post-launch
+- staging Supabase project and Vercel preview/staging environment — Stage 5 decision point
 
 Exit Criteria:
 
 - `studios` and `studio_members` tables exist in Supabase
 - all `requests` rows have a non-null `studio_id`
 - `create_request` RPC accepts `p_studio_id`; old signature removed
+- storage uploads use `{studioId}/{clientSubmissionId}/{type}/{file}` path structure
 - `DEPLOYMENT_STUDIO_ID` wired through config → service → route
 - pnpm qg passes (lint + typecheck + tests + build)
 - `pnpm exec supabase migration list` shows Local = Remote
-- one real end-to-end form submission succeeds with correct `studio_id` persisted
+- one real end-to-end form submission succeeds with correct `studio_id` persisted and new storage path
 
 Notes:
 
 - `studio_members` replaces `admin_profiles` as the access gate for Stage 4A
 - `getRequestByClientSubmissionId()` remains global (no studio filter) — see PROJECT_DECISIONS.md
 - Masha's studio UUID must be generated and fixed before writing the migration SQL
+- existing stored file paths remain valid; DB `storage_path` column stores the full path
 
 ---
 
@@ -296,16 +301,25 @@ Goal: protect admin access before public launch.
 
 **Required before public launch.** See PROJECT_DECISIONS.md — Admin Authentication Requirement.
 
+Authorization model (see PROJECT_DECISIONS.md — Authentication and Authorization Model):
+
+- Authentication: Supabase Auth session confirms who the user is
+- Authorization: `studio_members` membership confirms which studio data they may access
+- A valid session alone is not sufficient — a `studio_members` row for the target studio is required
+- Users with no `studio_members` row must not access admin routes even if authenticated
+
 Tasks:
 
 - login / logout
 - protected admin routes
 - authenticated admin session
+- access gate: verify `studio_members` row before allowing admin access
 
 Exit Criteria:
 
 - admin routes are not publicly accessible
 - unauthenticated requests are rejected or redirected
+- authenticated users without a `studio_members` row are rejected
 - login and logout work correctly
 
 Result:
@@ -357,6 +371,8 @@ Tasks:
 
 - E2E / integration test coverage (see PROJECT_PRODUCTION_READINESS.md)
 - security review checklist (see PROJECT_PRODUCTION_READINESS.md)
+- RLS policies for `studios`, `studio_members`, `requests`, `request_files`, and Storage
+- environment separation: decide on and set up staging Supabase project and Vercel preview/staging environment before public launch
 - performance validation on deployed environment
 - logging and error handling review
 - dependency security audit (`pnpm audit`)
@@ -477,6 +493,46 @@ Note: Telegram was originally planned for Stage 3E and Stage 5. Decision recorde
 - API route constants consolidation (when multiple endpoints exist)
 - typography component extraction (SectionTitle, SectionText, BulletList)
 - i18n string arrays to replace `split("\n")` usage
+
+---
+
+## SaaS & Platform Expansion
+
+These items are out of scope for the initial production release (Stages 0–6) and for any single-artist deployment.
+Each requires a dedicated planning phase before implementation begins.
+
+### Studio Onboarding
+
+- **Sales-assisted onboarding** — manually onboard the first 5–10 studios; no self-service required at this stage
+- **Self-service onboarding** — studio registration flow, guided setup, studio profile creation; only after sales-assisted model is validated
+
+### Subscriptions & Billing
+
+- **Trial period** — free trial for early studios (duration and conversion logic TBD)
+- **Paid subscriptions** — recurring billing integration (Stripe or equivalent)
+- **Plans and pricing tiers** — feature gating by plan (e.g. request limits, team size, integrations)
+
+### Studio Management
+
+- **Studio settings and profile** — studio name, logo, description, contact info, social links; editable by studio admin
+- **Multi-studio routing** — studio-specific URLs via slug (`/studio/masha`) or subdomain (`masha.app.com`); requires routing and tenant resolution changes
+- **Invite and team management** — invite an assistant or co-artist; manage active team members per studio
+- **RBAC / roles** — role column on `studio_members` (e.g. owner, admin, viewer); role-based feature access within a studio
+
+### Notification Channels & Preferences
+
+- **WhatsApp notifications** — alternative or supplement to Telegram for new request alerts
+- **Email notifications** — transactional email for new requests and status changes
+- **Notification preferences** — per-studio settings for which channels are active and which events trigger them
+
+### Platform / Internal Admin
+
+- **Platform admin panel** — internal interface for managing studios, subscriptions, support; separate from studio-facing admin
+
+### Research Items
+
+- **Instagram integration** — research feasibility and real demand; potential: sync portfolio posts, add request CTA to profile, track referral source
+- **Competitor onboarding research** — review how comparable tools (booking apps, tattoo platforms) onboard studios; inform self-service flow design before building it
 
 ---
 

@@ -379,15 +379,47 @@ The public request submission route has no authenticated context. For a single-s
 - Documented in `.env.example`
 - When multi-studio routing is built, this env var becomes an optional fallback
 
+### Storage Path Change
+
+Stage 3D.6 includes changing the storage path structure from:
+
+```
+{clientSubmissionId}/{type}/{file}
+```
+
+to:
+
+```
+{studioId}/{clientSubmissionId}/{type}/{file}
+```
+
+Reason: aligns storage ownership with the studio ownership model. Makes future Storage RLS policies straightforward — policies can filter on the leading `studioId` path segment.
+
+Existing stored file paths remain valid because the DB `storage_path` column stores the full path. Only new uploads use the new structure.
+
+### RLS in Stage 3D.6
+
+RLS is **not** enabled on `studios`, `studio_members`, or updated on `requests` in Stage 3D.6.
+
+All access goes through the BFF using the `service_role` key, which bypasses RLS. RLS policies for all application tables and storage are explicit Stage 5 (Production Hardening) tasks.
+
+### Authentication and Authorization Model
+
+- **Authentication** proves who the user is — Supabase Auth session.
+- **Authorization** decides which studio data they may access — based on `studio_members` membership.
+- Access check: a valid Supabase Auth session + a matching row in `studio_members` for the target studio.
+- For public request creation (unauthenticated context): studio is resolved from `DEPLOYMENT_STUDIO_ID`.
+- Stage 4A must use `studio_members` as the admin access gate — a user with no row in `studio_members` must not access admin routes even if authenticated.
+
 ### Deferred
 
-- RLS policies on `studios`, `studio_members`, `requests` — deferred to Stage 5
+- RLS policies on `studios`, `studio_members`, `requests`, and Storage — deferred to Stage 5
 - Role column on `studio_members` — deferred until RBAC is needed
 - `is_active` flag on `studio_members` — revoke access by row deletion for now
 - Workspace routing / multi-studio URL resolution — post-launch
 - Invite flow — post-launch
-- Storage path changes — deferred; paths remain `{clientSubmissionId}/...`
 - Billing, trial, subscription columns — SaaS phase
+- Staging Supabase project and Vercel preview/staging environment — Stage 5 decision point (not required before 3D.6 or 4A)
 
 ### Why before 4A
 

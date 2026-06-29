@@ -67,9 +67,23 @@ Completed in Stage 3:
 
 ## Log Entries (reverse chronological)
 
-### 2026-06-28 — Stage 3D.6 — Domain Foundation (planning)
+### 2026-06-29 — Stage 3D.6 — Domain Foundation (planning update after architecture review)
 
-Status: Planning complete
+Status: Planning updated — implementation pending
+
+Additional decisions recorded:
+
+- Storage path structure changed: `{clientSubmissionId}/{type}/{file}` → `{studioId}/{clientSubmissionId}/{type}/{file}`
+  Reason: aligns storage ownership with studio model; makes future Storage RLS policies straightforward.
+  Existing stored paths remain valid (DB stores full path); only new uploads use the new structure.
+- RLS confirmed NOT included in Stage 3D.6. All three new/updated tables (`studios`, `studio_members`, `requests`) remain without RLS policies until Stage 5. Access goes through service_role only.
+- Authentication and authorization model documented: Auth session proves identity; `studio_members` row proves access. Stage 4A must enforce both.
+- Staging environment (Supabase + Vercel preview) deferred to Stage 5 as an explicit decision point — not required before 3D.6 or 4A.
+- Deferred items confirmed: role column, is_active/soft-delete, invite flow, billing, multi-studio routing.
+
+### 2026-06-28 — Stage 3D.6 — Domain Foundation (initial planning)
+
+Status: Superseded by 2026-06-29 update above
 
 Decisions recorded:
 
@@ -79,11 +93,10 @@ Decisions recorded:
 - `DEPLOYMENT_STUDIO_ID` env var chosen for single-studio route resolution
 - `studio_members` supersedes the earlier `admin_profiles` direction; 4A will use `studio_members` as the access gate
 - `getRequestByClientSubmissionId()` confirmed to remain global (no studio filter)
-- Storage paths unchanged; RLS, roles, invite flow, multi-studio routing, billing all deferred
 - Stage placed before 4A due to zero-data migration cost
 - Stage 3D.6 added to PROJECT_IMPLEMENTATION_PLAN.md with full scope, exit criteria, and deferred items
 
-No code changes. Implementation is next.
+No code changes.
 
 ---
 

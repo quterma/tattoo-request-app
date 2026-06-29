@@ -37,7 +37,8 @@ Complete before public launch:
 
 ## Supabase RLS Review
 
-- RLS enabled on all application tables (`requests`, `request_files`)
+- RLS enabled on all application tables (`requests`, `request_files`, `studios`, `studio_members`)
+- RLS policies written and verified for each table — deferred from Stage 3D.6 to Stage 5
 - No public policies exist — all access through BFF with `service_role`
 - Verify no accidental `anon` role grants were introduced
 
@@ -46,7 +47,18 @@ Complete before public launch:
 - `request-images` bucket confirmed private
 - No public bucket policies
 - Signed URLs used for admin access only — never returned to public users
+- Storage RLS policies written and verified — deferred from Stage 3D.6 to Stage 5
 - Verify storage policies in Supabase Dashboard before launch
+
+## Environment Separation
+
+Before public launch, decide on and set up environment separation:
+
+- staging Supabase project (separate from production — separate DB, storage, auth)
+- Vercel preview / staging environment pointed at staging Supabase
+- production Supabase project protected; no test data or preview deployments pointing at it
+
+Not required before Stage 3D.6 or Stage 4A. Address in Stage 5 as an explicit decision point.
 
 ## Upload Security Review
 
