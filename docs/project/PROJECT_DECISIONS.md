@@ -484,6 +484,25 @@ A shared server-side function is added in Stage 4A:
 - Checks: valid Supabase Auth session AND matching `studio_members` row
 - Stage 4B route handlers must call this function and scope all data queries to the returned `studioId`
 
+## Future Authorization States (Post-MVP)
+
+Current MVP intentionally supports only two authorization outcomes:
+
+- `unauthenticated` → redirect to login
+- `unauthorized` → access denied
+
+As the product evolves into a multi-studio SaaS, the generic `unauthorized` state may be replaced or expanded with more specific business states, for example:
+
+- membership required
+- invitation required
+- subscription/payment required
+- studio disabled
+- insufficient role/permissions
+
+The shared authorization API (`AuthResult`, `AuthFailureReason`) is intentionally designed to evolve without requiring breaking changes to callers.
+
+---
+
 ## Login and Registration
 
 - Login route: `app/[locale]/(admin)/admin/login/page.tsx`

@@ -39,6 +39,20 @@ The project follows a feature-oriented structure with shared modules and clear b
 - route composition only
 - api/ — Next.js Route Handlers (BFF endpoints)
 
+#### app/[locale]/(admin)/admin/layout.tsx
+
+- Admin layout server component — auth gate for all `/[locale]/admin/` routes
+- Calls `getAuthenticatedStudioMember()` with the current request cookies
+- No session → redirects to `/${locale}/admin/login`
+- Session but no `studio_members` row → renders unauthorized message
+- Session + `studio_members` row → renders children
+
+#### app/[locale]/(admin)/admin/login/page.tsx
+
+- Placeholder login page (Stage 4A.3)
+- No form or auth logic — needed so the redirect target resolves
+- Full login UI is Stage 4A.4+
+
 #### app/auth/callback/route.ts (planned — Stage 4A)
 
 - Fixed non-locale OAuth callback route

@@ -17,7 +17,7 @@ Status: In progress
 
 Current focus:
 
-- Stage 4A.1 complete — Stage 4A.2 complete — proceeding to Stage 4A.3 (admin layout)
+- Stage 4A.1 complete — Stage 4A.2 complete — Stage 4A.3 complete — proceeding to Stage 4A.4 (login page)
 
 Completed stages:
 
@@ -67,6 +67,26 @@ Completed in Stage 3:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-06-30 — Stage 4A.3 — Admin Route Protection
+
+Status: Completed
+
+Completed:
+
+- `app/[locale]/(admin)/admin/layout.tsx` created: server component auth gate
+- Calls `getAuthenticatedStudioMember()` with read-only cookie handler (setAll no-op — server component cannot write cookies; middleware handles refresh)
+- No session (`unauthenticated`) → `redirect(`/${locale}/admin/login`)`
+- Session but no `studio_members` row (`unauthorized`) → renders `<p>This account is not authorized.</p>`
+- Session + membership → renders `{children}`
+- `app/[locale]/(admin)/admin/login/page.tsx` created: minimal placeholder so redirect target resolves; no form, no auth logic
+- `eslint.config.mjs`: `**/services/auth` added to `import/no-internal-modules` allow-list (same pattern as `supabaseAuth`)
+- No new tests — layout orchestrates `getAuthenticatedStudioMember` (already tested 6/6) and Next.js framework behavior (not tested per strategy)
+- Total tests: 112 — all pass
+- lint / typecheck / build — all PASS
+- `PROJECT_STRUCTURE.md`, `PROJECT_STAGE_LOG.md`: updated
+
+---
 
 ### 2026-06-30 — Stage 4A.2 — Shared Authorization Function
 
