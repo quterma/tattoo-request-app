@@ -68,6 +68,24 @@ Completed in Stage 3:
 
 ## Log Entries (reverse chronological)
 
+### 2026-06-30 — Stage 4A.1 — Supabase SSR Auth Foundation
+
+Status: Completed
+
+Completed:
+
+- `@supabase/ssr 0.12.0` installed as dependency
+- `SUPABASE_PUBLISHABLE_KEY` added to `src/config/index.ts` (`config.supabase.publishableKey`) and `.env.example`
+- `src/services/supabaseAuth.ts` created: `createSupabaseAuthClient(cookies)` factory using `@supabase/ssr`; reads `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` directly from `process.env` (does not import `@/config`) to keep service_role config out of the middleware bundle; accepts `CookieHandler` (getAll/setAll) for use in both middleware and server components; scoped to session identity only
+- `proxy.ts` extended: session refresh via `supabase.auth.getUser()` after intl middleware runs; cookie read/write wired to request/response; no auth logic, no redirects; i18n behavior unchanged
+- `eslint.config.mjs`: `**/services/supabaseAuth` added to `import/no-internal-modules` allow list (intentionally not exported through barrel)
+- `docs/project/PROJECT_STRUCTURE.md`: `supabaseAuth.ts` entry updated from planned to implemented
+- Quality gates: lint ✓, typecheck ✓, 106/106 tests ✓, build ✓
+
+Note: `.env.local` requires `SUPABASE_PUBLISHABLE_KEY` set to the publishable key from the Supabase dashboard (Settings → API Keys → Publishable key). A placeholder is present; replace before running any auth flow.
+
+---
+
 ### 2026-06-30 — Stage 4A — Admin Authentication (architecture documentation)
 
 Status: Documentation only — implementation not started

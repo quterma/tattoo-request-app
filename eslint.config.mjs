@@ -35,6 +35,7 @@ const eslintConfig = defineConfig([
             "zod/v3",
             "zod/v4",
             "zod/v4/*",
+            "**/services/supabaseAuth",
             "@testing-library/jest-dom/*",
             "@vitejs/plugin-react",
             "vitest/*",

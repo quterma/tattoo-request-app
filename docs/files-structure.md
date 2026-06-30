@@ -124,6 +124,7 @@ tattoo-request-app/
 │   │   ├── index.ts
 │   │   ├── storage.ts
 │   │   ├── supabase.ts
+│   │   ├── supabaseAuth.ts
 │   │   └── __tests__/
 │   │       ├── db.test.ts
 │   │       └── storage.test.ts

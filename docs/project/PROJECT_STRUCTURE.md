@@ -97,9 +97,10 @@ Current modules:
 - Used for all DB and Storage operations
 - Must never be exposed to the client
 
-#### services/supabaseAuth.ts (planned — Stage 4A)
+#### services/supabaseAuth.ts
 
-- SSR/cookie-session Supabase client using `@supabase/ssr`
+- `createSupabaseAuthClient(cookies)` — factory that creates an SSR Supabase client using `@supabase/ssr`
+- Accepts a `CookieHandler` (getAll/setAll) so it can be used from both middleware and server components
 - Used only to verify session identity (session checks, cookie refresh)
 - Must not be used to query `requests`, `request_files`, or admin data
 
