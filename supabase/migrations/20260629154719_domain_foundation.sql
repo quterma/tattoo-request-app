@@ -15,8 +15,6 @@ CREATE TABLE studios (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-ALTER TABLE studios ENABLE ROW LEVEL SECURITY;
-
 GRANT INSERT, SELECT, UPDATE ON TABLE studios TO service_role;
 
 -- ============================================================
@@ -64,15 +62,15 @@ CREATE TABLE studio_members (
   PRIMARY KEY (user_id, studio_id)
 );
 
-ALTER TABLE studio_members ENABLE ROW LEVEL SECURITY;
-
 GRANT INSERT, SELECT, DELETE ON TABLE studio_members TO service_role;
 
 -- ============================================================
 -- 7. Drop old create_request function
 --    Exact signature from 20260622000000_create_requests.sql:
 --    12 parameters — UUID, TEXT×10, BOOLEAN, JSONB
---    IF EXISTS is safe; errors if signature drifts.
+--    WARNING: IF EXISTS means a signature mismatch silently no-ops,
+--    leaving the old function alive. Verify the live signature in
+--    Dashboard → Database → Functions before applying this migration.
 -- ============================================================
 DROP FUNCTION IF EXISTS create_request(
   UUID,    -- p_client_submission_id
