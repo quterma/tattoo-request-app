@@ -301,26 +301,77 @@ Goal: protect admin access before public launch.
 
 **Required before public launch.** See PROJECT_DECISIONS.md — Admin Authentication Requirement.
 
-Authorization model (see PROJECT_DECISIONS.md — Authentication and Authorization Model):
+Authorization model (see PROJECT_DECISIONS.md — Admin Authentication Architecture):
 
 - Authentication: Supabase Auth session confirms who the user is
-- Authorization: `studio_members` membership confirms which studio data they may access
-- A valid session alone is not sufficient — a `studio_members` row for the target studio is required
+- Authorization: `studio_members` row confirms which studio data they may access
+- A valid session alone is not sufficient — a `studio_members` row is required
 - Users with no `studio_members` row must not access admin routes even if authenticated
 
-Tasks:
+Implementation sequence:
 
-- login / logout
-- protected admin routes
-- authenticated admin session
-- access gate: verify `studio_members` row before allowing admin access
+### 4A.1 — Supabase SSR Auth Client
+
+- Install `@supabase/ssr`
+- Create `src/services/supabaseAuth.ts`: cookie-session Supabase client
+- Extend `proxy.ts` with Supabase SSR session refresh (preserve i18n behavior)
+- Add any required env vars to `src/config/index.ts` and `.env.example`
+
+### 4A.2 — Shared Authorization Function
+
+- Create `src/services/auth.ts`
+- Implement `getAuthenticatedStudioMember()`: checks Supabase session + `studio_members` row
+- Returns `{ userId, studioId }` or `null`
+- Export through `src/services/index.ts`
+
+### 4A.3 — Admin Route Protection
+
+- Add server component auth check to `app/[locale]/(admin)/admin/layout.tsx`
+- No session → redirect to locale-aware `/[locale]/admin/login`
+- Session but no `studio_members` row → render unauthorized page ("This account is not authorized.")
+- Session + row → render admin content
+
+### 4A.4 — Login Page
+
+- Create `app/[locale]/(admin)/admin/login/page.tsx`
+- Email/password login form via Supabase Auth SSR client
+- On success: redirect to `/[locale]/admin`
+- On failure: display error message inline
+
+### 4A.5 — Logout
+
+- Add logout action (server action or route handler)
+- Clears Supabase session
+- Redirects to locale-aware login page
+
+### 4A.6 — OAuth Callback (if Google OAuth is included)
+
+- Create `app/auth/callback/route.ts`
+- Exchanges code for session; redirects to `/[locale]/admin`
+- No authorization or business logic in callback
+
+### 4A.7 — Password Reset
+
+- Reset-link request: form on login page or separate page; calls Supabase `resetPasswordForEmail`
+- Reset-password page: consumes recovery session, sets new password
+- Recovery session must not grant admin access before reset is completed
+
+### 4A.8 — Manual Activation Documentation
+
+- Document the manual `studio_members` insert step in project docs (or internal dev notes)
+- No invite flow, no self-service registration for admin access
 
 Exit Criteria:
 
-- admin routes are not publicly accessible
-- unauthenticated requests are rejected or redirected
-- authenticated users without a `studio_members` row are rejected
-- login and logout work correctly
+- admin routes are not publicly accessible without a valid session
+- unauthenticated users are redirected to login
+- authenticated users without a `studio_members` row see the unauthorized page
+- authenticated users with a `studio_members` row can access admin content
+- login (email/password) works correctly
+- logout clears session and redirects to login
+- password reset flow works end-to-end
+- `proxy.ts` still handles i18n routing correctly; no regression
+- `pnpm qg` passes (lint + typecheck + tests + build)
 
 Result:
 

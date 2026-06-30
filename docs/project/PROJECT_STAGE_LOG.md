@@ -12,12 +12,12 @@ AI agents and developers working on the project.
 
 ## Current Stage
 
-Stage: Stage 3D.6 — Domain Foundation
-Status: In Progress
+Stage: Stage 4A — Admin Authentication
+Status: Ready to start
 
 Current focus:
 
-- Stage 3D.6.2 — Application wiring complete; DB migration (3D.6.1) and end-to-end verification pending
+- Stage 3D.6 complete — beginning Stage 4A
 
 Completed stages:
 
@@ -26,6 +26,7 @@ Completed stages:
 - Stage 3D.5.1 — Architecture & Documentation Audit ✓
 - Stage 3D.5.2 — Audit Fix Pass ✓
 - Stage 3D.5.3 — Supabase CLI Migration Workflow ✓
+- Stage 3D.6 — Domain Foundation ✓
 
 Note: Stage 3E (Telegram Notifications + Stabilization) was superseded by the roadmap
 restructure on 2026-06-28. Telegram moved to Stage 2 (Post-Launch). Stabilization
@@ -67,11 +68,36 @@ Completed in Stage 3:
 
 ## Log Entries (reverse chronological)
 
-### 2026-06-30 — Stage 3D.6.2 — Application Wiring
+### 2026-06-30 — Stage 4A — Admin Authentication (architecture documentation)
+
+Status: Documentation only — implementation not started
+
+Documented:
+
+- Authentication vs Authorization distinction: Supabase session proves identity; `studio_members` row proves access; both required
+- Two Supabase clients: service_role client (existing, DB/Storage) + SSR auth client (new in 4A, session identity only)
+- `proxy.ts` role clarified: sole Next.js middleware entry point; will be extended with SSR session refresh; must not create parallel `middleware.ts`
+- Admin route protection: no session → redirect to login; session without `studio_members` row → unauthorized page; session + row → admin content
+- `getAuthenticatedStudioMember()` planned in `src/services/auth.ts`: returns `{ userId, studioId }` or `null`; Stage 4B handlers must call this and scope data by `studioId`
+- Login: `app/[locale]/(admin)/admin/login/page.tsx`; email/password; Google OAuth if feasible
+- OAuth callback: `app/auth/callback/route.ts` — code exchange and redirect only; no business logic
+- Logout: clears session, locale-aware redirect to login
+- Password reset: request-link flow + reset page; recovery session must not grant admin access prematurely
+- Manual admin activation: developer inserts `studio_members` row; no invite flow, no RBAC
+- Stage 5 boundary: application-layer auth enforcement in Stage 4 is an accepted temporary risk; RLS deferred to Stage 5
+- Stage 4A implementation sequence (4A.1 → 4A.8) documented in PROJECT_IMPLEMENTATION_PLAN.md
+
+Files updated: PROJECT_DECISIONS.md, PROJECT_ARCHITECTURE.md, PROJECT_STRUCTURE.md, PROJECT_IMPLEMENTATION_PLAN.md, PROJECT_STAGE_LOG.md
+
+No code changes.
+
+---
+
+### 2026-06-30 — Stage 3D.6 — Domain Foundation
 
 Status: Completed
 
-Completed:
+Completed (3D.6.2 — Application Wiring):
 
 - `DEPLOYMENT_STUDIO_ID` added to `.env.example` and `src/config/index.ts` (`config.app.deploymentStudioId`)
 - `uploadRequestFiles()` in `src/services/storage.ts`: accepts `studioId` as new second parameter; storage path changed from `{clientSubmissionId}/{type}/{file}` to `{studioId}/{clientSubmissionId}/{type}/{file}`; all existing cleanup/retry behavior unchanged
@@ -81,10 +107,15 @@ Completed:
 - Total tests: 106 (was 104) — all pass
 - lint / typecheck / build — all PASS
 
-Remaining in Stage 3D.6:
+Completed (3D.6.1 — DB Migration):
 
-- 3D.6.1 — DB migration (studios table, studio_members table, studio_id FK on requests, create_request RPC update) — not yet applied
-- End-to-end verification with real Supabase
+- `supabase/migrations/20260629154719_domain_foundation.sql` applied to remote
+- `studios` table: id (UUID PK, fixed seed `2617c7d8-23bb-4269-ab2e-fd104c3d12b8`), name, created_at; GRANT INSERT/SELECT/UPDATE to service_role
+- `studio_id` UUID column added to `requests`; all existing rows backfilled to Masha's studio UUID; NOT NULL enforced; FK constraint added
+- `studio_members` table: composite PK (user_id, studio_id), references auth.users + studios; GRANT INSERT/SELECT/DELETE to service_role; starts empty (populated in Stage 4A)
+- Old `create_request` RPC (12 params) dropped; new `create_request` (13 params, adds p_studio_id) created; REVOKE from PUBLIC / GRANT EXECUTE to service_role
+- Migration list confirmed: all 4 migrations Local = Remote
+- Quality gates at audit time: 106 tests PASS, lint PASS, typecheck PASS, build PASS
 
 ---
 

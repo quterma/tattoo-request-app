@@ -3,6 +3,7 @@
 ```
 tattoo-request-app/
 ├── .editorconfig
+├── .env.example
 ├── .gitignore
 ├── .prettierignore
 ├── .prettierrc

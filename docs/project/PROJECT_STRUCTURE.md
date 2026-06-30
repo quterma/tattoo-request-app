@@ -39,6 +39,20 @@ The project follows a feature-oriented structure with shared modules and clear b
 - route composition only
 - api/ — Next.js Route Handlers (BFF endpoints)
 
+#### app/auth/callback/route.ts (planned — Stage 4A)
+
+- Fixed non-locale OAuth callback route
+- Exchanges Supabase auth code for a session; redirects to admin
+- No authorization logic; no business logic
+
+#### proxy.ts (project middleware entry point)
+
+- Located at the project root as the Next.js middleware file
+- **This is the only Next.js middleware file.** Do not create a parallel `middleware.ts`.
+- Currently handles next-intl locale routing
+- Stage 4A will extend it with Supabase SSR session cookie refresh
+- Admin redirects added here must be locale-aware
+
 ---
 
 ### features/
@@ -80,6 +94,20 @@ Current modules:
 #### services/supabase.ts
 
 - `supabase` — server-side Supabase client (service role, no session persistence)
+- Used for all DB and Storage operations
+- Must never be exposed to the client
+
+#### services/supabaseAuth.ts (planned — Stage 4A)
+
+- SSR/cookie-session Supabase client using `@supabase/ssr`
+- Used only to verify session identity (session checks, cookie refresh)
+- Must not be used to query `requests`, `request_files`, or admin data
+
+#### services/auth.ts (planned — Stage 4A)
+
+- `getAuthenticatedStudioMember()` — verifies Supabase Auth session + `studio_members` row
+- Returns `{ userId, studioId }` or `null`
+- Must be called by all Stage 4B route handlers before any data access
 
 #### services/storage.ts
 

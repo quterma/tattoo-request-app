@@ -427,6 +427,104 @@ Migration cost is lowest before any production data exists. Adding `studio_id NO
 
 ---
 
+# Admin Authentication Architecture (Stage 4A)
+
+## Authentication vs Authorization
+
+- **Authentication** — a valid Supabase Auth session proves who the user is.
+- **Authorization** — a `studio_members` row proves which studio the user may access.
+- A valid Supabase session alone is not sufficient for admin access.
+- Both checks are required. A user authenticated but absent from `studio_members` must be rejected.
+
+## Supabase Clients
+
+Two separate Supabase clients are used:
+
+**Service role client** (`src/services/supabase.ts` — existing)
+- Uses `SUPABASE_SECRET_KEY` (service_role key)
+- Server-only; must never be exposed to the client
+- Used for all DB and Storage operations (bypasses RLS while RLS is deferred)
+- Not used for session/auth identity checks
+
+**SSR auth client** (`src/services/supabaseAuth.ts` — new in Stage 4A)
+- Uses `@supabase/ssr` package with cookie-based session handling
+- Used only to verify the current user's session identity
+- Must not be used to query `requests`, `request_files`, or admin business data in Stage 4
+- Named `supabaseAuth` to distinguish from the service role client
+
+## `proxy.ts` — Next.js Middleware
+
+- `proxy.ts` is the Next.js middleware entry point in this project (not `middleware.ts`)
+- Currently handles next-intl locale routing
+- Stage 4A will extend it to add Supabase SSR session refresh (cookie rotation)
+- Must preserve existing i18n behavior; must not break locale routing
+- Admin redirects in middleware must be locale-aware (e.g. `/en/admin/login`)
+- A parallel `middleware.ts` must not be created
+
+## Admin Route Protection
+
+Protected admin layout: `app/[locale]/(admin)/admin/layout.tsx`
+
+Three states:
+
+| State | Behavior |
+|---|---|
+| No valid Supabase session | Redirect to locale-aware `/[locale]/admin/login` |
+| Valid session, no `studio_members` row | Render unauthorized page: "This account is not authorized." |
+| Valid session + `studio_members` row | Render admin content |
+
+## Shared Authorization Function
+
+A shared server-side function is added in Stage 4A:
+
+- Location: `src/services/auth.ts`
+- Function: `getAuthenticatedStudioMember()`
+- Returns: `{ userId, studioId }` if both checks pass, or `null`
+- Checks: valid Supabase Auth session AND matching `studio_members` row
+- Stage 4B route handlers must call this function and scope all data queries to the returned `studioId`
+
+## Login and Registration
+
+- Login route: `app/[locale]/(admin)/admin/login/page.tsx`
+- Email/password login via Supabase Auth
+- Google OAuth login and registration: included in Stage 4A if feasible; may be split to 4A.1 if needed
+- Registration creates a Supabase Auth user only
+- Newly registered users have no admin access until manually inserted into `studio_members`
+
+## OAuth Callback
+
+- Fixed non-locale route: `app/auth/callback/route.ts`
+- Responsibility: exchange auth code for a session and redirect
+- Must not contain authorization or business logic
+
+## Logout
+
+- Clears Supabase session (server-side)
+- Redirects to locale-aware login page
+
+## Password Reset
+
+- Reset-link request flow: user submits email, Supabase sends reset link
+- Reset-password page: consumes Supabase recovery session, sets new password
+- Recovery sessions must not grant admin access before the reset is completed
+
+## Manual Admin Activation
+
+- First admin user signs up or logs in to create a Supabase Auth account
+- Developer manually inserts `auth.users.id` into `studio_members` with the correct `studio_id`
+- No invite flow, no RBAC, no role column, no `is_active` flag, no SaaS onboarding
+- Remove access by deleting the `studio_members` row
+
+## Application-Layer Authorization (Stage 4 boundary)
+
+Until Stage 5 RLS, admin authorization is enforced at the application layer only.
+
+- This is an accepted temporary risk, not an oversight
+- Stage 4B route handlers must explicitly call `getAuthenticatedStudioMember()` before any data access
+- Stage 5 will add RLS and Storage policies as defense-in-depth
+
+---
+
 # Rule for Future Changes
 
 All architectural, product, or behavioral decisions MUST be recorded in this document.

@@ -158,6 +158,35 @@ Note: Telegram notification (step 7 in the original design) is post-launch. See 
 
 ---
 
+### Admin Authentication Flow (Stage 4A)
+
+1. admin navigates to any protected route under `/[locale]/admin/`
+2. Next.js middleware (`proxy.ts`) refreshes the Supabase SSR session cookie if present
+3. Admin layout server component checks for a valid Supabase session via SSR auth client
+4. If no session → redirect to `/[locale]/admin/login`
+5. If session present → call `getAuthenticatedStudioMember()` (checks `studio_members` row)
+6. If no `studio_members` row → render unauthorized page
+7. If both checks pass → render admin content
+
+Login flow:
+1. Admin submits email/password (or Google OAuth) on the login page
+2. Supabase Auth issues a session (cookie-based via SSR client)
+3. Redirect to `/[locale]/admin`
+
+OAuth callback (Google):
+1. Supabase redirects to `app/auth/callback/route.ts` with auth code
+2. Route exchanges code for session; redirects to `/[locale]/admin`
+3. No authorization logic in the callback
+
+Password reset flow:
+1. Admin requests reset link via email
+2. Supabase sends a recovery link
+3. Admin opens link → recovery session issued
+4. Admin sets new password; recovery session is exchanged for a full session
+5. Recovery session must not grant admin access before reset is completed
+
+---
+
 ### Admin Flow
 
 1. admin opens request list
@@ -192,6 +221,15 @@ The service layer is implemented as plain service modules — no provider abstra
 DI containers, factory patterns, or interface hierarchies unless a second real provider is added.
 
 See PROJECT_DECISIONS.md — Service Layer Decisions.
+
+## Supabase Clients
+
+Two separate Supabase clients exist from Stage 4A onward:
+
+- **`services/supabase.ts`** — service role client; used for all DB and Storage operations; server-only; must never reach the client
+- **`services/supabaseAuth.ts`** — SSR/cookie-session auth client (`@supabase/ssr`); used only to verify session identity; must not be used for data queries on `requests`, `request_files`, or admin data in Stage 4
+
+The SSR auth client is also used by `proxy.ts` (Next.js middleware) to refresh session cookies.
 
 ---
 
