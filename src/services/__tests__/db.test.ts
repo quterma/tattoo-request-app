@@ -16,6 +16,7 @@ import { createRequest, getRequestByClientSubmissionId } from "../db"
 import type { UploadedFile } from "../storage"
 
 const baseParams = {
+  studioId: "a1b2c3d4-0000-4000-8000-000000000001",
   clientSubmissionId: "f47ac10b-58cc-4372-a567-0e02b2c3d479",
   clientName: "Alex",
   description: "A wolf on my forearm",
@@ -33,7 +34,7 @@ const baseParams = {
 const sampleFiles: UploadedFile[] = [
   {
     type: "reference",
-    storagePath: "uuid/reference/reference-01.jpg",
+    storagePath: "a1b2c3d4-0000-4000-8000-000000000001/uuid/reference/reference-01.jpg",
     originalName: "ref.jpg",
     mimeType: "image/jpeg",
     size: 512000,
@@ -56,6 +57,7 @@ describe("createRequest", () => {
     expect(result).toEqual({ id: "db-uuid-1234", referenceCode: "REQ-2026-0001" })
 
     expect(mockRpc).toHaveBeenCalledWith("create_request", {
+      p_studio_id: baseParams.studioId,
       p_client_submission_id: baseParams.clientSubmissionId,
       p_client_name: "Alex",
       p_description: baseParams.description,
@@ -70,7 +72,7 @@ describe("createRequest", () => {
       p_files: [
         {
           type: "reference",
-          storagePath: "uuid/reference/reference-01.jpg",
+          storagePath: "a1b2c3d4-0000-4000-8000-000000000001/uuid/reference/reference-01.jpg",
           originalName: "ref.jpg",
           mimeType: "image/jpeg",
           size: 512000,

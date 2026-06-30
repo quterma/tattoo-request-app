@@ -52,6 +52,7 @@ function extFromMime(mimeType: string): string {
 function buildFileList(
   referenceImages: File[],
   placementImages: File[],
+  studioId: string,
   clientSubmissionId: string,
 ): FileToUpload[] {
   const files: FileToUpload[] = []
@@ -63,7 +64,7 @@ function buildFileList(
     files.push({
       file,
       type: "reference",
-      storagePath: `${clientSubmissionId}/reference/reference-${index}.${ext}`,
+      storagePath: `${studioId}/${clientSubmissionId}/reference/reference-${index}.${ext}`,
     })
   }
 
@@ -74,7 +75,7 @@ function buildFileList(
     files.push({
       file,
       type: "placement",
-      storagePath: `${clientSubmissionId}/placement/placement-${index}.${ext}`,
+      storagePath: `${studioId}/${clientSubmissionId}/placement/placement-${index}.${ext}`,
     })
   }
 
@@ -126,9 +127,10 @@ async function cleanupFiles(paths: string[]): Promise<void> {
 
 export async function uploadRequestFiles(
   files: { referenceImages: File[]; placementImages: File[] },
+  studioId: string,
   clientSubmissionId: string,
 ): Promise<UploadedFile[]> {
-  const fileList = buildFileList(files.referenceImages, files.placementImages, clientSubmissionId)
+  const fileList = buildFileList(files.referenceImages, files.placementImages, studioId, clientSubmissionId)
 
   const uploaded: string[] = []
   const results: UploadedFile[] = []

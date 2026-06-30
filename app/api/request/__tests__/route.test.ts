@@ -45,10 +45,17 @@ vi.mock("@/services", () => ({
   },
 }))
 
+vi.mock("@/config", () => ({
+  config: {
+    app: { deploymentStudioId: "a1b2c3d4-0000-4000-8000-000000000001" },
+  },
+}))
+
 // ── helpers ────────────────────────────────────────────────────────────────
 
 import { POST } from "../route"
 
+const STUDIO_ID = "a1b2c3d4-0000-4000-8000-000000000001"
 const CLIENT_ID = "f47ac10b-58cc-4372-a567-0e02b2c3d479"
 
 const basePayload = {
@@ -70,7 +77,7 @@ const basePayload = {
 const uploadedFiles = [
   {
     type: "reference" as const,
-    storagePath: `${CLIENT_ID}/reference/reference-01.jpg`,
+    storagePath: `${STUDIO_ID}/${CLIENT_ID}/reference/reference-01.jpg`,
     originalName: "ref.jpg",
     mimeType: "image/jpeg",
     size: 512000,
@@ -112,6 +119,24 @@ describe("POST /api/request — normal flow", () => {
     await callPost()
 
     expect(mockUploadRequestFiles).toHaveBeenCalledBefore(mockCreateRequest as never)
+  })
+
+  it("passes studioId to uploadRequestFiles", async () => {
+    await callPost()
+
+    expect(mockUploadRequestFiles).toHaveBeenCalledWith(
+      { referenceImages: basePayload.referenceImages, placementImages: basePayload.placementImages },
+      STUDIO_ID,
+      CLIENT_ID,
+    )
+  })
+
+  it("passes studioId to createRequest", async () => {
+    await callPost()
+
+    expect(mockCreateRequest).toHaveBeenCalledWith(
+      expect.objectContaining({ studioId: STUDIO_ID }),
+    )
   })
 })
 

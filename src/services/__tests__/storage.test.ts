@@ -16,6 +16,7 @@ vi.mock("../supabase", () => ({
 
 import { uploadRequestFiles } from "../storage"
 
+const STUDIO_ID = "a1b2c3d4-0000-4000-8000-000000000001"
 const CLIENT_ID = "f47ac10b-58cc-4372-a567-0e02b2c3d479"
 const MB = 1024 * 1024
 
@@ -38,25 +39,26 @@ describe("uploadRequestFiles", () => {
 
     const results = await uploadRequestFiles(
       { referenceImages: [ref1, ref2], placementImages: [place1] },
+      STUDIO_ID,
       CLIENT_ID,
     )
 
     expect(results).toHaveLength(3)
 
     expect(results[0]).toMatchObject({
-      storagePath: `${CLIENT_ID}/reference/reference-01.jpg`,
+      storagePath: `${STUDIO_ID}/${CLIENT_ID}/reference/reference-01.jpg`,
       originalName: "ref1.jpg",
       mimeType: "image/jpeg",
       type: "reference",
     })
     expect(results[1]).toMatchObject({
-      storagePath: `${CLIENT_ID}/reference/reference-02.png`,
+      storagePath: `${STUDIO_ID}/${CLIENT_ID}/reference/reference-02.png`,
       originalName: "ref2.png",
       mimeType: "image/png",
       type: "reference",
     })
     expect(results[2]).toMatchObject({
-      storagePath: `${CLIENT_ID}/placement/placement-01.jpg`,
+      storagePath: `${STUDIO_ID}/${CLIENT_ID}/placement/placement-01.jpg`,
       originalName: "place1.jpg",
       type: "placement",
     })
@@ -75,19 +77,24 @@ describe("uploadRequestFiles", () => {
         ],
         placementImages: [makeFile("body.png", "image/jpeg")],
       },
+      STUDIO_ID,
       CLIENT_ID,
     )
 
-    expect(results[0].storagePath).toBe(`${CLIENT_ID}/reference/reference-01.webp`)
+    expect(results[0].storagePath).toBe(`${STUDIO_ID}/${CLIENT_ID}/reference/reference-01.webp`)
     expect(results[0].originalName).toBe("photo.jpg")
-    expect(results[1].storagePath).toBe(`${CLIENT_ID}/reference/reference-02.heic`)
-    expect(results[2].storagePath).toBe(`${CLIENT_ID}/reference/reference-03.heif`)
-    expect(results[3].storagePath).toBe(`${CLIENT_ID}/placement/placement-01.jpg`)
+    expect(results[1].storagePath).toBe(`${STUDIO_ID}/${CLIENT_ID}/reference/reference-02.heic`)
+    expect(results[2].storagePath).toBe(`${STUDIO_ID}/${CLIENT_ID}/reference/reference-03.heif`)
+    expect(results[3].storagePath).toBe(`${STUDIO_ID}/${CLIENT_ID}/placement/placement-01.jpg`)
     expect(results[3].originalName).toBe("body.png")
   })
 
   it("returns empty array when no files provided", async () => {
-    const results = await uploadRequestFiles({ referenceImages: [], placementImages: [] }, CLIENT_ID)
+    const results = await uploadRequestFiles(
+      { referenceImages: [], placementImages: [] },
+      STUDIO_ID,
+      CLIENT_ID,
+    )
 
     expect(results).toEqual([])
     expect(mockUpload).not.toHaveBeenCalled()
@@ -102,6 +109,7 @@ describe("uploadRequestFiles", () => {
 
     const promise = uploadRequestFiles(
       { referenceImages: [makeFile("ref.jpg")], placementImages: [] },
+      STUDIO_ID,
       CLIENT_ID,
     )
     await vi.runAllTimersAsync()
@@ -118,7 +126,11 @@ describe("uploadRequestFiles", () => {
     mockRemove.mockResolvedValue({ error: null })
 
     const rejectPromise = expect(
-      uploadRequestFiles({ referenceImages: [makeFile("ref.jpg")], placementImages: [] }, CLIENT_ID),
+      uploadRequestFiles(
+        { referenceImages: [makeFile("ref.jpg")], placementImages: [] },
+        STUDIO_ID,
+        CLIENT_ID,
+      ),
     ).rejects.toThrow()
 
     await vi.runAllTimersAsync()
@@ -132,7 +144,11 @@ describe("uploadRequestFiles", () => {
     mockRemove.mockResolvedValue({ error: null })
 
     await expect(
-      uploadRequestFiles({ referenceImages: [makeFile("ref.jpg")], placementImages: [] }, CLIENT_ID),
+      uploadRequestFiles(
+        { referenceImages: [makeFile("ref.jpg")], placementImages: [] },
+        STUDIO_ID,
+        CLIENT_ID,
+      ),
     ).rejects.toThrow()
 
     expect(mockUpload).toHaveBeenCalledTimes(1)
@@ -147,6 +163,7 @@ describe("uploadRequestFiles", () => {
     await expect(
       uploadRequestFiles(
         { referenceImages: [makeFile("ref1.jpg"), makeFile("ref2.jpg")], placementImages: [] },
+        STUDIO_ID,
         CLIENT_ID,
       ),
     ).rejects.toThrow()
@@ -168,6 +185,7 @@ describe("uploadRequestFiles", () => {
     await expect(
       uploadRequestFiles(
         { referenceImages: [makeFile("ref1.jpg"), makeFile("ref2.jpg")], placementImages: [] },
+        STUDIO_ID,
         CLIENT_ID,
       ),
     ).rejects.toThrow()
@@ -184,7 +202,11 @@ describe("uploadRequestFiles", () => {
     mockUpload.mockResolvedValue({ error: { message: "The object already exists" } })
 
     await expect(
-      uploadRequestFiles({ referenceImages: [makeFile("ref.jpg")], placementImages: [] }, CLIENT_ID),
+      uploadRequestFiles(
+        { referenceImages: [makeFile("ref.jpg")], placementImages: [] },
+        STUDIO_ID,
+        CLIENT_ID,
+      ),
     ).rejects.toThrow()
 
     expect(mockRemove).not.toHaveBeenCalled()

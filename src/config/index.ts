@@ -9,4 +9,7 @@ export const config = {
     url: requireEnv("SUPABASE_URL"),
     secretKey: requireEnv("SUPABASE_SECRET_KEY"),
   },
+  app: {
+    deploymentStudioId: requireEnv("DEPLOYMENT_STUDIO_ID"),
+  },
 }

@@ -23,6 +23,7 @@ export async function getRequestByClientSubmissionId(
 }
 
 interface CreateRequestParams {
+  studioId: string
   clientSubmissionId: string
   clientName: string
   description: string
@@ -39,6 +40,7 @@ interface CreateRequestParams {
 
 export async function createRequest(params: CreateRequestParams): Promise<CreatedRequest> {
   const { data, error } = await supabase.rpc("create_request", {
+    p_studio_id: params.studioId,
     p_client_submission_id: params.clientSubmissionId,
     p_client_name: params.clientName,
     p_description: params.description,

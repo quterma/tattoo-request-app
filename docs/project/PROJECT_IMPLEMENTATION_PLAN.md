@@ -515,9 +515,28 @@ Each requires a dedicated planning phase before implementation begins.
 ### Studio Management
 
 - **Studio settings and profile** — studio name, logo, description, contact info, social links; editable by studio admin
-- **Multi-studio routing** — studio-specific URLs via slug (`/studio/masha`) or subdomain (`masha.app.com`); requires routing and tenant resolution changes
+- **Multi-studio routing and public studio pages** — see note below
 - **Invite and team management** — invite an assistant or co-artist; manage active team members per studio
 - **RBAC / roles** — role column on `studio_members` (e.g. owner, admin, viewer); role-based feature access within a studio
+
+#### Public Studio Routing and Content Model (future, post-launch)
+
+The current MVP uses `DEPLOYMENT_STUDIO_ID` as a single-studio resolver — a temporary mechanism for one production client. It is not a multi-studio architecture.
+
+In a future multi-studio product, each studio would have its own public URL namespace:
+
+```
+/masha
+/masha/request
+/masha/location
+/masha/policies
+```
+
+Each studio may also have its own public content: copy and texts, pricing and process description, location, gallery, branding and theme, request form configuration.
+
+This model will likely require additional tables (`studio_public_profile`, `studio_content`, or similar) to store per-studio content separately from the core ownership model introduced in Stage 3D.6.
+
+Do not add schema placeholders for this now. The `studios` table introduced in Stage 3D.6 is the correct foundation; the content model is a separate, later design problem.
 
 ### Notification Channels & Preferences
 

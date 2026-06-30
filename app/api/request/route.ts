@@ -8,6 +8,11 @@ import {
 } from "@/bff"
 import { BUCKET, createRequest, getRequestByClientSubmissionId, uploadRequestFiles } from "@/services"
 import { supabase } from "@/services"
+import { config } from "@/config"
+
+function resolveStudioId(): string {
+  return config.app.deploymentStudioId
+}
 
 // Postgres unique violation error code
 const PG_UNIQUE_VIOLATION = "23505"
@@ -38,6 +43,8 @@ export async function POST(req: Request) {
       return NextResponse.json(fileValidation, { status: 400 })
     }
 
+    const studioId = resolveStudioId()
+
     // Idempotency check: return existing request without uploading or inserting
     const existingReferenceCode = await getRequestByClientSubmissionId(payload.clientSubmissionId)
     if (existingReferenceCode !== null) {
@@ -47,12 +54,14 @@ export async function POST(req: Request) {
 
     const uploadedFiles = await uploadRequestFiles(
       { referenceImages: payload.referenceImages, placementImages: payload.placementImages },
+      studioId,
       payload.clientSubmissionId,
     )
 
     let referenceCode: string
     try {
       const result = await createRequest({
+        studioId,
         clientSubmissionId: payload.clientSubmissionId,
         clientName: payload.clientName,
         description: payload.ideaDescription,

@@ -166,5 +166,6 @@ tattoo-request-app/
     └── migrations/
         ├── 20260622000000_create_requests.sql
         ├── 20260622000001_add_client_submission_id_unique.sql
-        └── 20260623000000_make_client_name_not_null.sql
+        ├── 20260623000000_make_client_name_not_null.sql
+        └── 20260629154719_domain_foundation.sql
 ```

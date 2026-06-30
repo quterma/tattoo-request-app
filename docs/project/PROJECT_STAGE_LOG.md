@@ -17,7 +17,7 @@ Status: In Progress
 
 Current focus:
 
-- Stage 3D.6 — Domain Foundation (planning complete; implementation pending)
+- Stage 3D.6.2 — Application wiring complete; DB migration (3D.6.1) and end-to-end verification pending
 
 Completed stages:
 
@@ -66,6 +66,27 @@ Completed in Stage 3:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-06-30 — Stage 3D.6.2 — Application Wiring
+
+Status: Completed
+
+Completed:
+
+- `DEPLOYMENT_STUDIO_ID` added to `.env.example` and `src/config/index.ts` (`config.app.deploymentStudioId`)
+- `uploadRequestFiles()` in `src/services/storage.ts`: accepts `studioId` as new second parameter; storage path changed from `{clientSubmissionId}/{type}/{file}` to `{studioId}/{clientSubmissionId}/{type}/{file}`; all existing cleanup/retry behavior unchanged
+- `CreateRequestParams` in `src/services/db.ts`: `studioId` field added; `p_studio_id` passed as first argument to `create_request` RPC
+- Route handler (`app/api/request/route.ts`): `resolveStudioId()` helper reads `config.app.deploymentStudioId`; `studioId` resolved once and passed to both `uploadRequestFiles` and `createRequest`; resolver is isolated so it can be replaced by slug/domain resolution in Stage 4 without touching the rest of the handler
+- Tests updated: `STUDIO_ID` constant added to storage and route fixtures; storage path expectations updated throughout; `p_studio_id` added to db RPC assertion; `@/config` mocked in route.test.ts; two new route assertions added (passes studioId to upload, passes studioId to createRequest)
+- Total tests: 106 (was 104) — all pass
+- lint / typecheck / build — all PASS
+
+Remaining in Stage 3D.6:
+
+- 3D.6.1 — DB migration (studios table, studio_members table, studio_id FK on requests, create_request RPC update) — not yet applied
+- End-to-end verification with real Supabase
+
+---
 
 ### 2026-06-29 — Stage 3D.6 — Domain Foundation (planning update after architecture review)
 
