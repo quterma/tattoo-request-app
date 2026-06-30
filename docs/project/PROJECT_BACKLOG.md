@@ -75,3 +75,13 @@ Address before production release (Stage 5). Options:
 - Manual test protocol executed before each release (minimum viable option for MVP)
 
 See PROJECT_PRODUCTION_READINESS.md — Integration / End-to-End Test Coverage for full details.
+
+---
+
+## Supabase Generated Database Types
+
+Generate Supabase TypeScript database types via the Supabase CLI (`supabase gen types typescript`) and use `createClient<Database>()` for both Supabase clients (`supabase.ts`, `supabaseAuth.ts`).
+
+Goal: improve query result typing across all service modules and remove narrow casts such as `membership.studio_id as string` in `services/auth.ts`.
+
+Suggested timing: Stage 5 Production Hardening, or earlier if Stage 4B introduces many Supabase queries that require similar casts.

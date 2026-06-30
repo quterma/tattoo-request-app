@@ -104,10 +104,11 @@ Current modules:
 - Used only to verify session identity (session checks, cookie refresh)
 - Must not be used to query `requests`, `request_files`, or admin data
 
-#### services/auth.ts (planned — Stage 4A)
+#### services/auth.ts
 
-- `getAuthenticatedStudioMember()` — verifies Supabase Auth session + `studio_members` row
-- Returns `{ userId, studioId }` or `null`
+- `getAuthenticatedStudioMember(cookies)` — verifies Supabase Auth session + `studio_members` row
+- Returns `AuthResult`: `{ ok: true, userId, studioId }` | `{ ok: false, reason: "unauthenticated" | "unauthorized" }`
+- Expected auth failures are business outcomes (ok: false); infrastructure errors throw
 - Must be called by all Stage 4B route handlers before any data access
 
 #### services/storage.ts

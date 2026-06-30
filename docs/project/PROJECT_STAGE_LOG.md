@@ -13,11 +13,11 @@ AI agents and developers working on the project.
 ## Current Stage
 
 Stage: Stage 4A — Admin Authentication
-Status: Ready to start
+Status: In progress
 
 Current focus:
 
-- Stage 3D.6 complete — beginning Stage 4A
+- Stage 4A.1 complete — Stage 4A.2 complete — proceeding to Stage 4A.3 (admin layout)
 
 Completed stages:
 
@@ -68,6 +68,25 @@ Completed in Stage 3:
 
 ## Log Entries (reverse chronological)
 
+### 2026-06-30 — Stage 4A.2 — Shared Authorization Function
+
+Status: Completed
+
+Completed:
+
+- `src/services/auth.ts` created: `getAuthenticatedStudioMember(cookies: CookieHandler)` shared authorization gate
+- Returns `AuthResult` discriminated union: `{ ok: true, userId, studioId }` | `{ ok: false, reason: "unauthenticated" | "unauthorized" }`
+- Expected auth failures are business outcomes (ok: false); infrastructure errors (Supabase auth error, DB error) throw
+- Session identity via SSR auth client (`createSupabaseAuthClient`); membership via service-role client (`supabase`) querying `studio_members`
+- Not exported through `services/index.ts` barrel — intentionally imported directly by callers (same pattern as `supabaseAuth.ts`)
+- `src/services/__tests__/auth.test.ts` created: 6 tests — authenticated + member, authenticated + no member, unauthenticated, auth error throws, DB error throws, error message propagated
+- Total tests: 112 (was 106) — all pass
+- lint / typecheck / build — all PASS
+- `PROJECT_STRUCTURE.md`, `PROJECT_DECISIONS.md`, `PROJECT_STAGE_LOG.md`: updated to reflect `AuthResult` discriminated union (was described as `null`-returning in architecture docs)
+- Deferred: Supabase generated Database types — `membership.studio_id as string` cast noted; tracked in PROJECT_BACKLOG.md for Stage 5 or earlier
+
+---
+
 ### 2026-06-30 — Stage 4A.1 — Supabase SSR Auth Foundation
 
 Status: Completed
@@ -96,7 +115,7 @@ Documented:
 - Two Supabase clients: service_role client (existing, DB/Storage) + SSR auth client (new in 4A, session identity only)
 - `proxy.ts` role clarified: sole Next.js middleware entry point; will be extended with SSR session refresh; must not create parallel `middleware.ts`
 - Admin route protection: no session → redirect to login; session without `studio_members` row → unauthorized page; session + row → admin content
-- `getAuthenticatedStudioMember()` planned in `src/services/auth.ts`: returns `{ userId, studioId }` or `null`; Stage 4B handlers must call this and scope data by `studioId`
+- `getAuthenticatedStudioMember()` planned in `src/services/auth.ts`: returns `AuthResult` discriminated union (`{ ok: true, userId, studioId }` | `{ ok: false, reason }`); Stage 4B handlers must call this and scope data by `studioId`
 - Login: `app/[locale]/(admin)/admin/login/page.tsx`; email/password; Google OAuth if feasible
 - OAuth callback: `app/auth/callback/route.ts` — code exchange and redirect only; no business logic
 - Logout: clears session, locale-aware redirect to login

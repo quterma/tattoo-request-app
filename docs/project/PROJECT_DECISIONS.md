@@ -478,8 +478,9 @@ Three states:
 A shared server-side function is added in Stage 4A:
 
 - Location: `src/services/auth.ts`
-- Function: `getAuthenticatedStudioMember()`
-- Returns: `{ userId, studioId }` if both checks pass, or `null`
+- Function: `getAuthenticatedStudioMember(cookies: CookieHandler)`
+- Returns: `AuthResult` — `{ ok: true, userId, studioId }` | `{ ok: false, reason: "unauthenticated" | "unauthorized" }`
+- Expected failures are business outcomes (ok: false); infrastructure errors throw
 - Checks: valid Supabase Auth session AND matching `studio_members` row
 - Stage 4B route handlers must call this function and scope all data queries to the returned `studioId`
 

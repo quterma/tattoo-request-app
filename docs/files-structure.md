@@ -120,12 +120,14 @@ tattoo-request-app/
 │   │           ├── schema.ts
 │   │           └── validationKeys.ts
 │   ├── services/
+│   │   ├── auth.ts
 │   │   ├── db.ts
 │   │   ├── index.ts
 │   │   ├── storage.ts
 │   │   ├── supabase.ts
 │   │   ├── supabaseAuth.ts
 │   │   └── __tests__/
+│   │       ├── auth.test.ts
 │   │       ├── db.test.ts
 │   │       └── storage.test.ts
 │   ├── shared/
