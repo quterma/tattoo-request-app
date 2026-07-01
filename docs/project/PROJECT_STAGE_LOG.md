@@ -17,7 +17,7 @@ Status: In progress
 
 Current focus:
 
-- Stage 4A.1 complete — Stage 4A.2 complete — Stage 4A.3 complete — proceeding to Stage 4A.4 (login page)
+- Stage 4A.1 complete — Stage 4A.2 complete — Stage 4A.3 complete — Stage 4A.4 complete — proceeding to Stage 4A.5 (logout)
 
 Completed stages:
 
@@ -67,6 +67,26 @@ Completed in Stage 3:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-06-30 — Stage 4A.4 — Email/Password Login Page
+
+Status: Completed
+
+Completed:
+
+- Route group restructured: `app/[locale]/(admin)/admin/layout.tsx` moved to `app/[locale]/(admin)/admin/(protected)/layout.tsx` and `app/[locale]/(admin)/admin/page.tsx` moved to `(protected)/page.tsx`. This is required: the old layout wrapped the login page, causing an infinite redirect loop for unauthenticated users. The `(protected)` route group excludes the login route. URLs are unchanged.
+- `app/[locale]/(admin)/admin/login/actions.ts` — `loginAction(locale, prev, formData)` server action: calls `supabase.auth.signInWithPassword()` via SSR auth client with writable cookies; on success redirects to `/${locale}/admin`; on failure returns `{ error: "Invalid email or password." }` (no technical details exposed)
+- `app/[locale]/(admin)/admin/login/LoginForm.tsx` — Client Component; uses `useActionState` for server action integration; inline error display; loading state ("Signing in…") while pending
+- `app/[locale]/(admin)/admin/login/page.tsx` — Server Component; reads Supabase session on render; authenticated user → redirect to `/${locale}/admin`; unauthenticated → renders LoginForm with locale-bound action
+- Authenticated users visiting `/[locale]/admin/login` are redirected to `/[locale]/admin` (server-side, before page renders)
+- Logout remains Stage 4A.5; Google OAuth remains Stage 4A.6
+- No new tests for login page — orchestrates Supabase SDK + Next.js redirect (not tested per strategy); `loginAction` error branch is a pass-through of an external SDK result
+- Bugfix (pre-commit): `getAuthenticatedStudioMember()` now treats `AuthSessionMissingError` from `getUser()` as `unauthenticated` instead of throwing — unauthenticated access to `/[locale]/admin` now correctly redirects to login instead of crashing. New test added for this case. See `src/services/auth.ts`.
+- Total tests: 113 — all pass
+- lint / typecheck / build — all PASS
+- `PROJECT_STRUCTURE.md`, `PROJECT_STAGE_LOG.md`: updated
+
+---
 
 ### 2026-06-30 — Stage 4A.3 — Admin Route Protection
 

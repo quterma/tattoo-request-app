@@ -2,7 +2,7 @@ import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { getAuthenticatedStudioMember } from "@/services/auth"
 
-export default async function AdminLayout({
+export default async function AdminProtectedLayout({
   children,
   params,
 }: {

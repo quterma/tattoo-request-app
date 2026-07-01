@@ -15,7 +15,12 @@ export async function getAuthenticatedStudioMember(
 
   const { data: userData, error: authError } = await authClient.auth.getUser()
 
-  if (authError) throw new Error(`Auth session check failed: ${authError.message}`)
+  if (authError) {
+    if (authError.name === "AuthSessionMissingError") {
+      return { ok: false, reason: "unauthenticated" }
+    }
+    throw new Error(`Auth session check failed: ${authError.message}`)
+  }
 
   if (!userData.user) return { ok: false, reason: "unauthenticated" }
 

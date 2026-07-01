@@ -77,10 +77,22 @@ describe("getAuthenticatedStudioMember", () => {
     expect(mockFrom).not.toHaveBeenCalled()
   })
 
-  it("throws when Supabase auth returns an error", async () => {
+  it("returns ok:false reason:unauthenticated when Supabase returns AuthSessionMissingError", async () => {
     mockGetUser.mockResolvedValue({
       data: { user: null },
-      error: { message: "JWT expired" },
+      error: { name: "AuthSessionMissingError", message: "Auth session missing!" },
+    })
+
+    const result = await getAuthenticatedStudioMember(cookies)
+
+    expect(result).toEqual({ ok: false, reason: "unauthenticated" })
+    expect(mockFrom).not.toHaveBeenCalled()
+  })
+
+  it("throws when Supabase auth returns an unexpected infrastructure error", async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: null },
+      error: { name: "AuthUnknownError", message: "JWT expired" },
     })
 
     await expect(getAuthenticatedStudioMember(cookies)).rejects.toThrow("Auth session check failed")

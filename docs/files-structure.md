@@ -32,7 +32,12 @@ tattoo-request-app/
 │   │   │   └── admin/
 │   │   │       ├── layout.tsx
 │   │   │       ├── page.tsx
+│   │   │       ├── (protected)/
+│   │   │       │   ├── layout.tsx
+│   │   │       │   └── page.tsx
 │   │   │       └── login/
+│   │   │           ├── actions.ts
+│   │   │           ├── LoginForm.tsx
 │   │   │           └── page.tsx
 │   │   └── (public)/
 │   │       ├── layout.tsx

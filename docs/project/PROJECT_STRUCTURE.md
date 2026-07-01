@@ -39,19 +39,35 @@ The project follows a feature-oriented structure with shared modules and clear b
 - route composition only
 - api/ — Next.js Route Handlers (BFF endpoints)
 
-#### app/[locale]/(admin)/admin/layout.tsx
+#### app/[locale]/(admin)/admin/(protected)/layout.tsx
 
-- Admin layout server component — auth gate for all `/[locale]/admin/` routes
+- Admin layout server component — auth gate for all protected `/[locale]/admin/` routes
 - Calls `getAuthenticatedStudioMember()` with the current request cookies
 - No session → redirects to `/${locale}/admin/login`
 - Session but no `studio_members` row → renders unauthorized message
 - Session + `studio_members` row → renders children
+- Login page is intentionally outside this route group to prevent redirect loops
 
 #### app/[locale]/(admin)/admin/login/page.tsx
 
-- Placeholder login page (Stage 4A.3)
-- No form or auth logic — needed so the redirect target resolves
-- Full login UI is Stage 4A.4+
+- Login page — Server Component
+- Checks Supabase session on load: authenticated user → redirect to `/${locale}/admin`
+- Renders `LoginForm` (Client Component) for unauthenticated users
+- Passes locale-bound `loginAction` to the form
+
+#### app/[locale]/(admin)/admin/login/LoginForm.tsx
+
+- Login form — Client Component
+- Uses `useActionState` to wire the `loginAction` server action
+- Displays inline error on invalid credentials
+- Shows "Signing in…" loading state while pending
+
+#### app/[locale]/(admin)/admin/login/actions.ts
+
+- `loginAction(locale, prev, formData)` — server action
+- Calls `supabase.auth.signInWithPassword()` via SSR auth client with writable cookies
+- On success: redirects to `/${locale}/admin`
+- On failure: returns `{ error: "Invalid email or password." }` (no technical details exposed)
 
 #### app/auth/callback/route.ts (planned — Stage 4A)
 
