@@ -17,7 +17,7 @@ vi.mock("../supabase", () => ({
   },
 }))
 
-import { getAuthenticatedStudioMember } from "../auth"
+import { getAuthenticatedStudioMember, getOptionalUser } from "../auth"
 import type { CookieHandler } from "../supabaseAuth"
 
 const cookies: CookieHandler = {
@@ -118,5 +118,49 @@ describe("getAuthenticatedStudioMember", () => {
     makeChain({ data: null, error: { message: "connection refused" } })
 
     await expect(getAuthenticatedStudioMember(cookies)).rejects.toThrow("connection refused")
+  })
+})
+
+describe("getOptionalUser", () => {
+  it("returns the user when a session exists", async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: USER_ID } },
+      error: null,
+    })
+
+    const result = await getOptionalUser(cookies)
+
+    expect(result).toEqual({ id: USER_ID })
+  })
+
+  it("returns null when no session exists", async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: null },
+      error: null,
+    })
+
+    const result = await getOptionalUser(cookies)
+
+    expect(result).toBeNull()
+  })
+
+  it("returns null when Supabase returns AuthSessionMissingError", async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: null },
+      error: { name: "AuthSessionMissingError", message: "Auth session missing!" },
+    })
+
+    const result = await getOptionalUser(cookies)
+
+    expect(result).toBeNull()
+  })
+
+  it("throws when Supabase auth returns an unexpected infrastructure error", async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: null },
+      error: { name: "AuthUnknownError", message: "JWT expired" },
+    })
+
+    await expect(getOptionalUser(cookies)).rejects.toThrow("Auth session check failed")
   })
 })

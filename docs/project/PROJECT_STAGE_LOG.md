@@ -17,7 +17,7 @@ Status: In progress
 
 Current focus:
 
-- Stage 4A.1 complete — Stage 4A.2 complete — Stage 4A.3 complete — Stage 4A.4 complete — Stage 4A.5 complete — Stage 4A.6 complete — Stage 4A.7.1 (documentation) complete — Stage 4A.7.2 (implementation) complete — proceeding to Stage 4A.8
+- Stage 4A.1 complete — Stage 4A.2 complete — Stage 4A.3 complete — Stage 4A.4 complete — Stage 4A.5 complete — Stage 4A.6 complete — Stage 4A.7.1 (documentation) complete — Stage 4A.7.2 (implementation) complete — Stage 4A.8 audit complete — Stage 4A.8 fix pass complete — Stage 4A closed — proceeding to Stage 4B
 
 Completed stages:
 
@@ -67,6 +67,34 @@ Completed in Stage 3:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-07-01 — Stage 4A.8 — Audit fix pass; Stage 4A closed
+
+Status: Completed
+
+Non-blocking findings from the Stage 4A.8 audit addressed:
+
+- **Origin construction:** `getRequestOrigin(headers)` added to `src/services/supabaseAuth.ts`; derives `protocol://host` preferring `x-forwarded-host`/`x-forwarded-proto` (reverse-proxy-set, not client-controlled in production) over the raw `Host` header. Replaces duplicated inline origin logic previously in `googleLoginAction` and `forgotPasswordAction`. No `NEXT_PUBLIC_` env var introduced; local dev and production both continue to resolve correctly (Vercel sets these headers; local dev falls through to `host`).
+- **Callback duplication:** documented as an accepted, intentional tradeoff in `PROJECT_DECISIONS.md` (Password Reset section) — `/auth/callback` and `/auth/reset-callback` remain separate, not merged.
+- **`getUser()` consistency:** `getOptionalUser(cookies)` extracted in `src/services/auth.ts` — returns the user or `null`, treating `AuthSessionMissingError` as "no user" and rethrowing any other error. `getAuthenticatedStudioMember()` now calls it internally (no behavior change — pure extraction). `login/page.tsx` and `reset-password/page.tsx` now call `getOptionalUser()` instead of the SSR client's `getUser()` directly, so unexpected auth errors are no longer silently discarded. 4 new tests added for `getOptionalUser` in `src/services/__tests__/auth.test.ts` (total 10 tests in file).
+- **Admin i18n:** all Stage 4A auth UI strings (login, forgot-password, reset-password, protected-layout header/unauthorized/sign-out) moved from hardcoded English literals to a new `admin` namespace in `src/shared/i18n/messages/en.json`. Server Components and Server Actions use `getTranslations({ locale, namespace: "admin" })` from `next-intl/server` (first use of the server-side next-intl API in this codebase — Client Components previously only used `useTranslations`). Client Components (`LoginForm`, `ForgotPasswordForm`, `ResetPasswordForm`, `SignOutButton`) receive translated strings as props from their Server Component parent rather than calling `next-intl` themselves. No ru/he translations added; no visual or behavioral change — this is a like-for-like string relocation. `(protected)/page.tsx` (Stage 4B admin dashboard placeholder) intentionally left untouched — out of Stage 4A scope.
+- Manual end-to-end password-reset verification (flagged as outstanding in the Stage 4A.7.2 log entry) completed successfully.
+- No Stage 4B work performed; no password policy or show/hide-password toggle added (both remain in `PROJECT_BACKLOG.md`); no callback merge.
+- Total tests: 117 (was 113) — all pass
+- lint / typecheck / build — all PASS
+- `PROJECT_DECISIONS.md`, `PROJECT_STRUCTURE.md`, `PROJECT_STAGE_LOG.md`, `docs/files-structure.md`: updated
+
+**Stage 4A — Admin Authentication is now CLOSED.** All sub-stages (4A.1–4A.8) complete; audit findings resolved; manual verification complete. Proceeding to Stage 4B.
+
+---
+
+### 2026-07-01 — Stage 4A.8 — Final Architecture & Production Readiness Audit
+
+Status: Completed (audit only, no code changes)
+
+Full audit conducted per PROJECT_PRODUCTION_READINESS.md — Architecture & Documentation Audit Checkpoints protocol. Verdict: READY AFTER MINOR FIXES. No Critical or High findings. Medium/Low findings (origin construction duplication, callback route duplication, admin i18n gap, `getUser()` error-handling inconsistency) addressed in the fix pass above.
+
+---
 
 ### 2026-07-01 — Stage 4A.7.2 — Password Reset implementation
 

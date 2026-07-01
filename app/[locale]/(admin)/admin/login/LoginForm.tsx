@@ -6,9 +6,22 @@ import type { LoginResult } from "./actions"
 type Props = {
   action: (prev: LoginResult, formData: FormData) => Promise<LoginResult>
   googleAction: () => Promise<void>
+  emailLabel: string
+  passwordLabel: string
+  signInButton: string
+  signInButtonLoading: string
+  googleButton: string
 }
 
-export function LoginForm({ action, googleAction }: Props) {
+export function LoginForm({
+  action,
+  googleAction,
+  emailLabel,
+  passwordLabel,
+  signInButton,
+  signInButtonLoading,
+  googleButton,
+}: Props) {
   const [state, formAction, pending] = useActionState<LoginResult, FormData>(action, null)
 
   return (
@@ -16,7 +29,7 @@ export function LoginForm({ action, googleAction }: Props) {
       <form action={formAction} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <label htmlFor="email" className="text-sm font-medium text-foreground">
-            Email
+            {emailLabel}
           </label>
           <input
             id="email"
@@ -30,7 +43,7 @@ export function LoginForm({ action, googleAction }: Props) {
 
         <div className="flex flex-col gap-1">
           <label htmlFor="password" className="text-sm font-medium text-foreground">
-            Password
+            {passwordLabel}
           </label>
           <input
             id="password"
@@ -53,7 +66,7 @@ export function LoginForm({ action, googleAction }: Props) {
           disabled={pending}
           className="rounded-md bg-foreground px-6 py-3 text-sm font-semibold text-background hover:bg-foreground/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {pending ? "Signing in…" : "Sign in"}
+          {pending ? signInButtonLoading : signInButton}
         </button>
       </form>
 
@@ -62,7 +75,7 @@ export function LoginForm({ action, googleAction }: Props) {
           type="submit"
           className="w-full rounded-md border border-border px-6 py-3 text-sm font-semibold text-foreground hover:bg-foreground/5 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors"
         >
-          Google
+          {googleButton}
         </button>
       </form>
     </div>

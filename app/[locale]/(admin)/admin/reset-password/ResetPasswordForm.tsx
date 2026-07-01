@@ -5,16 +5,26 @@ import type { ResetPasswordResult } from "./actions"
 
 type Props = {
   action: (prev: ResetPasswordResult, formData: FormData) => Promise<ResetPasswordResult>
+  newPasswordLabel: string
+  confirmNewPasswordLabel: string
+  updatePasswordButton: string
+  updatePasswordButtonLoading: string
 }
 
-export function ResetPasswordForm({ action }: Props) {
+export function ResetPasswordForm({
+  action,
+  newPasswordLabel,
+  confirmNewPasswordLabel,
+  updatePasswordButton,
+  updatePasswordButtonLoading,
+}: Props) {
   const [state, formAction, pending] = useActionState<ResetPasswordResult, FormData>(action, null)
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
         <label htmlFor="password" className="text-sm font-medium text-foreground">
-          New password
+          {newPasswordLabel}
         </label>
         <input
           id="password"
@@ -29,7 +39,7 @@ export function ResetPasswordForm({ action }: Props) {
 
       <div className="flex flex-col gap-1">
         <label htmlFor="confirmPassword" className="text-sm font-medium text-foreground">
-          Confirm new password
+          {confirmNewPasswordLabel}
         </label>
         <input
           id="confirmPassword"
@@ -53,7 +63,7 @@ export function ResetPasswordForm({ action }: Props) {
         disabled={pending}
         className="rounded-md bg-foreground px-6 py-3 text-sm font-semibold text-background hover:bg-foreground/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
-        {pending ? "Updating…" : "Update password"}
+        {pending ? updatePasswordButtonLoading : updatePasswordButton}
       </button>
     </form>
   )

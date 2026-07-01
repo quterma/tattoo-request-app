@@ -1,7 +1,7 @@
 "use server"
 
 import { cookies, headers } from "next/headers"
-import { createSupabaseAuthClient } from "@/services/supabaseAuth"
+import { createSupabaseAuthClient, getRequestOrigin } from "@/services/supabaseAuth"
 
 export type ForgotPasswordResult = { sent: true } | { error: string }
 
@@ -24,9 +24,7 @@ export async function forgotPasswordAction(
     },
   })
 
-  const origin =
-    headerList.get("origin") ??
-    `${headerList.get("x-forwarded-proto") ?? "https"}://${headerList.get("host")}`
+  const origin = getRequestOrigin(headerList)
 
   await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${origin}/auth/reset-callback?locale=${locale}`,

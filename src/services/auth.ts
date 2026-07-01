@@ -8,23 +8,32 @@ export type AuthResult =
   | { ok: true; userId: string; studioId: string }
   | { ok: false; reason: AuthFailureReason }
 
+/**
+ * Returns the current Supabase Auth user, or null if there is no session.
+ * A missing session (AuthSessionMissingError) is expected and returns null;
+ * any other error is an infrastructure failure and is rethrown.
+ */
+export async function getOptionalUser(cookies: CookieHandler) {
+  const authClient = createSupabaseAuthClient(cookies)
+
+  const { data, error } = await authClient.auth.getUser()
+
+  if (error) {
+    if (error.name === "AuthSessionMissingError") return null
+    throw new Error(`Auth session check failed: ${error.message}`)
+  }
+
+  return data.user
+}
+
 export async function getAuthenticatedStudioMember(
   cookies: CookieHandler,
 ): Promise<AuthResult> {
-  const authClient = createSupabaseAuthClient(cookies)
+  const user = await getOptionalUser(cookies)
 
-  const { data: userData, error: authError } = await authClient.auth.getUser()
+  if (!user) return { ok: false, reason: "unauthenticated" }
 
-  if (authError) {
-    if (authError.name === "AuthSessionMissingError") {
-      return { ok: false, reason: "unauthenticated" }
-    }
-    throw new Error(`Auth session check failed: ${authError.message}`)
-  }
-
-  if (!userData.user) return { ok: false, reason: "unauthenticated" }
-
-  const userId = userData.user.id
+  const userId = user.id
 
   const { data: membership, error: dbError } = await supabase
     .from("studio_members")

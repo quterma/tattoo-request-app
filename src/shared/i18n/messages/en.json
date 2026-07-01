@@ -161,6 +161,41 @@
       "fileTooLarge": "Each image must be 10 MB or less"
     }
   },
+  "admin": {
+    "adminLabel": "Admin",
+    "signOut": "Sign out",
+    "unauthorized": "This account is not authorized.",
+
+    "signInTitle": "Admin sign in",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "signInButton": "Sign in",
+    "signInButtonLoading": "Signing in…",
+    "googleButton": "Google",
+    "forgotPasswordLink": "Forgot password?",
+    "loginInvalidCredentials": "Invalid email or password.",
+    "oauthError": "Google sign-in failed. Please try again.",
+    "resetSuccess": "Password updated. Please sign in with your new password.",
+
+    "forgotPasswordTitle": "Reset password",
+    "backToSignIn": "Back to sign in",
+    "sendResetLinkButton": "Send reset link",
+    "sendResetLinkButtonLoading": "Sending…",
+    "resetLinkSentMessage": "If an account with this email exists, a reset link has been sent.",
+    "resetLinkExpiredMessage": "Reset link has expired or is no longer valid. Request a new one below.",
+
+    "resetPasswordTitle": "Set a new password",
+    "resetPasswordExpiredTitle": "Reset password",
+    "resetPasswordExpiredMessage": "Reset link has expired or is no longer valid.",
+    "requestNewLinkButton": "Request a new link",
+    "newPasswordLabel": "New password",
+    "confirmNewPasswordLabel": "Confirm new password",
+    "updatePasswordButton": "Update password",
+    "updatePasswordButtonLoading": "Updating…",
+    "resetPasswordFieldsRequired": "Please fill in both password fields.",
+    "resetPasswordMismatch": "Passwords do not match.",
+    "resetPasswordFailed": "Could not update password. Please try again."
+  },
   "footer": {
     "studio": "Studio Name",
     "address": "Herzl 100, Tel Aviv, Israel",

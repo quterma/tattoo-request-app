@@ -428,14 +428,16 @@ Goal: verify readiness and deploy to production.
 
 Tasks:
 
+- full app-wide audit and fix pass (architecture, security, frontend/BFF, documentation, UX flows, accumulated tech debt) — see PROJECT_PRODUCTION_READINESS.md, Architecture & Documentation Audit Checkpoints
 - E2E / integration test coverage (see PROJECT_PRODUCTION_READINESS.md)
 - security review checklist (see PROJECT_PRODUCTION_READINESS.md)
 - RLS policies for `studios`, `studio_members`, `requests`, `request_files`, and Storage
 - environment separation: decide on and set up staging Supabase project and Vercel preview/staging environment before public launch
+- production environment setup: domain, production env vars, Google OAuth production redirect URI, backups, monitoring/logging (see PROJECT_PRODUCTION_READINESS.md, Production Environment Setup)
 - performance validation on deployed environment
 - logging and error handling review
 - dependency security audit (`pnpm audit`)
-- architecture and documentation audit (post-Stage-4 checkpoint)
+- CI/CD: GitHub → Vercel preview/production deploy flow, `pnpm qg` gate before merge (see PROJECT_PRODUCTION_READINESS.md, CI/CD)
 - deployment (Vercel + Supabase production)
 - final release checklist — sign off on all quality gates
 
@@ -470,6 +472,7 @@ Tasks:
 - animations and micro-interactions
 - accessibility and readability improvements
 - trust-building content (portfolio, process, social proof)
+- basics: favicon, Open Graph / social preview image, meta description/SEO tags
 
 Exit Criteria:
 
@@ -487,6 +490,10 @@ Result:
 
 These features are out of scope for the initial production release (Stages 0–6).
 Each item requires a dedicated planning and decision phase before implementation.
+
+Immediately after release: a feedback / bugfix stabilization loop with the real artist user comes
+first, before any item below is scheduled. Items in this roadmap are candidates for what follows
+stabilization, not a queue to start immediately at launch.
 
 ## Telegram Notifications
 

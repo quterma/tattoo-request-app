@@ -44,9 +44,10 @@ The project follows a feature-oriented structure with shared modules and clear b
 - Admin layout server component — auth gate for all protected `/[locale]/admin/` routes
 - Calls `getAuthenticatedStudioMember()` with the current request cookies
 - No session → redirects to `/${locale}/admin/login`
-- Session but no `studio_members` row → renders unauthorized message
+- Session but no `studio_members` row → renders unauthorized message (i18n: `admin.unauthorized`)
 - Session + `studio_members` row → renders header (with Sign out) + children
 - Login page is intentionally outside this route group to prevent redirect loops
+- All UI strings routed through `getTranslations({ locale, namespace: "admin" })`
 
 #### app/[locale]/(admin)/admin/(protected)/actions.ts
 
@@ -59,31 +60,34 @@ The project follows a feature-oriented structure with shared modules and clear b
 
 - Sign out button — Client Component
 - Renders a form wired to the locale-bound `logoutAction`
+- `label` (translated `admin.signOut` string) passed as a prop from the Server Component parent — Client Components in this tree do not call `getTranslations` themselves
 
 #### app/[locale]/(admin)/admin/login/page.tsx
 
 - Login page — Server Component
-- Checks Supabase session on load: authenticated user → redirect to `/${locale}/admin`
-- Renders inline message when `?reset=success` is present ("Password updated. Please sign in with your new password.")
-- Renders `LoginForm` (Client Component) for unauthenticated users
+- Checks Supabase session via `getOptionalUser()`: authenticated user → redirect to `/${locale}/admin`
+- Renders inline message when `?reset=success` is present (i18n: `admin.resetSuccess`)
+- Renders `LoginForm` (Client Component) for unauthenticated users, passing translated label props
 - Passes locale-bound `loginAction` to the form
 - Link to `/${locale}/admin/forgot-password`
+- All UI strings routed through `getTranslations({ locale, namespace: "admin" })`
 
 #### app/[locale]/(admin)/admin/login/LoginForm.tsx
 
 - Login form — Client Component
 - Uses `useActionState` to wire the `loginAction` server action
 - Displays inline error on invalid credentials
-- Shows "Signing in…" loading state while pending
+- Label/button text (`emailLabel`, `passwordLabel`, `signInButton`, `signInButtonLoading`, `googleButton`) passed as props from `page.tsx` — translated server-side, not fetched by the Client Component itself
 
 #### app/[locale]/(admin)/admin/login/actions.ts
 
 - `loginAction(locale, prev, formData)` — server action
 - Calls `supabase.auth.signInWithPassword()` via SSR auth client with writable cookies
 - On success: redirects to `/${locale}/admin`
-- On failure: returns `{ error: "Invalid email or password." }` (no technical details exposed)
+- On failure: returns `{ error: t("loginInvalidCredentials") }` via `getTranslations({ locale, namespace: "admin" })` (no technical details exposed)
 - `googleLoginAction(locale)` — server action
 - Calls `supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo, skipBrowserRedirect: true } })` via SSR auth client with writable cookies (PKCE code verifier persisted to cookies)
+- Origin derived via `getRequestOrigin(headers)` (see `services/supabaseAuth.ts`)
 - `redirectTo` points at `app/auth/callback/route.ts` with `?locale=` appended so locale survives the round trip through Google and Supabase
 - On success: redirects the browser to the returned Google consent URL
 - On failure: redirects to `/${locale}/admin/login?error=oauth`
@@ -99,19 +103,22 @@ The project follows a feature-oriented structure with shared modules and clear b
 
 - Reset-link request page — Server Component, outside `(protected)`
 - Renders inline expired/invalid-link message when `?error=reset` is present
-- Renders `ForgotPasswordForm` (Client Component) with locale-bound `forgotPasswordAction`
+- Renders `ForgotPasswordForm` (Client Component) with locale-bound `forgotPasswordAction` and translated label props
 - Link back to login
+- All UI strings routed through `getTranslations({ locale, namespace: "admin" })`
 
 #### app/[locale]/(admin)/admin/forgot-password/ForgotPasswordForm.tsx
 
 - Reset-link request form — Client Component
 - Uses `useActionState` to wire `forgotPasswordAction`
-- On `{ sent: true }`, replaces the form with a generic "if this email exists…" message — same message shown regardless of whether the email matched an account
+- On `{ sent: true }`, replaces the form with a generic "if this email exists…" message (i18n: `admin.resetLinkSentMessage`) — same message shown regardless of whether the email matched an account
+- Label/button/message text passed as props from `page.tsx`
 
 #### app/[locale]/(admin)/admin/forgot-password/actions.ts
 
 - `forgotPasswordAction(locale, prev, formData)` — server action
 - Calls `supabase.auth.resetPasswordForEmail(email, { redirectTo })` via SSR auth client with writable cookies
+- Origin derived via `getRequestOrigin(headers)` (see `services/supabaseAuth.ts`)
 - `redirectTo` points at `app/auth/reset-callback/route.ts` with `?locale=` appended
 - Always returns `{ sent: true }` regardless of the Supabase result — never reveals whether the email exists
 
@@ -126,22 +133,24 @@ The project follows a feature-oriented structure with shared modules and clear b
 #### app/[locale]/(admin)/admin/reset-password/page.tsx
 
 - New-password page — Server Component, outside `(protected)`
-- Checks for an active Supabase session (read-only cookie handler); no session → renders "Reset link has expired or is no longer valid." with a link to `forgot-password`
-- Session present → renders `ResetPasswordForm` (Client Component) with locale-bound `resetPasswordAction`
+- Checks for an active Supabase session via `getOptionalUser()` (read-only cookie handler); no session → renders expired-link message (i18n: `admin.resetPasswordExpiredMessage`) with a link to `forgot-password`
+- Session present → renders `ResetPasswordForm` (Client Component) with locale-bound `resetPasswordAction` and translated label props
+- All UI strings routed through `getTranslations({ locale, namespace: "admin" })`
 
 #### app/[locale]/(admin)/admin/reset-password/ResetPasswordForm.tsx
 
 - New-password form — Client Component
 - Password + confirm password fields; `minLength={6}` HTML attribute (matches Supabase's default minimum); no client-side validation library
 - Uses `useActionState` to wire `resetPasswordAction`; displays inline error on failure
+- Label/button text passed as props from `page.tsx`
 
 #### app/[locale]/(admin)/admin/reset-password/actions.ts
 
 - `resetPasswordAction(locale, prev, formData)` — server action
-- Validates both fields present and matching before calling Supabase (generic error message, no technical details)
+- Validates both fields present and matching before calling Supabase (generic error message via `getTranslations({ locale, namespace: "admin" })`, no technical details)
 - Calls `supabase.auth.updateUser({ password })` via SSR auth client with writable cookies
 - On success: immediately calls `supabase.auth.signOut()`, then redirects to `/${locale}/admin/login?reset=success`
-- On failure: returns a generic error; no technical details exposed
+- On failure: returns a generic translated error; no technical details exposed
 
 #### proxy.ts (project middleware entry point)
 
@@ -181,6 +190,8 @@ Current features:
 - styles
 - test helpers
 
+`shared/i18n/messages/en.json` namespaces include `admin` — all admin/auth UI strings (login, forgot-password, reset-password, protected-layout header/unauthorized message). Server Components use `getTranslations({ locale, namespace: "admin" })` from `next-intl/server`; Server Actions call it the same way, keyed by the `locale` param already passed to every action; Client Components receive translated strings as props from their Server Component parent rather than calling `useTranslations` themselves.
+
 ---
 
 ### services/
@@ -202,10 +213,12 @@ Current modules:
 - Accepts a `CookieHandler` (getAll/setAll) so it can be used from both middleware and server components
 - Used only to verify session identity (session checks, cookie refresh)
 - Must not be used to query `requests`, `request_files`, or admin data
+- `getRequestOrigin(headers)` — derives the request origin (`protocol://host`) for use in `redirectTo` URLs (Google OAuth, password reset); prefers `x-forwarded-host`/`x-forwarded-proto` (reverse-proxy-set, not client-controlled in production) over the raw `Host` header; shared by `googleLoginAction` and `forgotPasswordAction` to avoid duplicated origin-derivation logic
 
 #### services/auth.ts
 
-- `getAuthenticatedStudioMember(cookies)` — verifies Supabase Auth session + `studio_members` row
+- `getOptionalUser(cookies)` — returns the current Supabase Auth user, or `null` if there is no session; `AuthSessionMissingError` is treated as "no user" (returns `null`), any other error is an infrastructure failure and is rethrown; used directly by `login/page.tsx` and `reset-password/page.tsx` for session-presence checks, and internally by `getAuthenticatedStudioMember`
+- `getAuthenticatedStudioMember(cookies)` — verifies Supabase Auth session (via `getOptionalUser`) + `studio_members` row
 - Returns `AuthResult`: `{ ok: true, userId, studioId }` | `{ ok: false, reason: "unauthenticated" | "unauthorized" }`
 - Expected auth failures are business outcomes (ok: false); infrastructure errors throw
 - Must be called by all Stage 4B route handlers before any data access

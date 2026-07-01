@@ -543,6 +543,8 @@ Both `forgot-password` and `reset-password` live outside `(protected)` because t
 
 `proxy.ts` matcher already excludes `/auth` — no middleware change required for the new route.
 
+**Accepted duplication:** `app/auth/callback/route.ts` and `app/auth/reset-callback/route.ts` are structurally near-identical (locale resolution, code-presence check, `exchangeCodeForSession`, error branch) — only the redirect targets differ. This duplication is intentional, not an oversight: the two routes are single-purpose, have different destinations, and have different risk profiles (OAuth login vs. password recovery). Merging them would reintroduce the hidden-branching problem the split was designed to avoid. Do not merge.
+
 ### Flow
 
 1. User clicks "Forgot password?" on the login page, submits email on `forgot-password`

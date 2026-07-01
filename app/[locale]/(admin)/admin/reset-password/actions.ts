@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 import { createSupabaseAuthClient } from "@/services/supabaseAuth"
 
 export type ResetPasswordResult = { error: string } | null
@@ -14,12 +15,14 @@ export async function resetPasswordAction(
   const password = formData.get("password") as string
   const confirmPassword = formData.get("confirmPassword") as string
 
+  const t = await getTranslations({ locale, namespace: "admin" })
+
   if (!password || !confirmPassword) {
-    return { error: "Please fill in both password fields." }
+    return { error: t("resetPasswordFieldsRequired") }
   }
 
   if (password !== confirmPassword) {
-    return { error: "Passwords do not match." }
+    return { error: t("resetPasswordMismatch") }
   }
 
   const cookieStore = await cookies()
@@ -36,7 +39,7 @@ export async function resetPasswordAction(
   const { error } = await supabase.auth.updateUser({ password })
 
   if (error) {
-    return { error: "Could not update password. Please try again." }
+    return { error: t("resetPasswordFailed") }
   }
 
   await supabase.auth.signOut()

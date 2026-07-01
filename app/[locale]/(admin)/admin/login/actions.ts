@@ -2,7 +2,8 @@
 
 import { cookies, headers } from "next/headers"
 import { redirect } from "next/navigation"
-import { createSupabaseAuthClient } from "@/services/supabaseAuth"
+import { getTranslations } from "next-intl/server"
+import { createSupabaseAuthClient, getRequestOrigin } from "@/services/supabaseAuth"
 
 export type LoginResult = { error: string } | null
 
@@ -28,7 +29,8 @@ export async function loginAction(
   const { error } = await supabase.auth.signInWithPassword({ email, password })
 
   if (error) {
-    return { error: "Invalid email or password." }
+    const t = await getTranslations({ locale, namespace: "admin" })
+    return { error: t("loginInvalidCredentials") }
   }
 
   redirect(`/${locale}/admin`)
@@ -47,9 +49,7 @@ export async function googleLoginAction(locale: string): Promise<void> {
     },
   })
 
-  const origin =
-    headerList.get("origin") ??
-    `${headerList.get("x-forwarded-proto") ?? "https"}://${headerList.get("host")}`
+  const origin = getRequestOrigin(headerList)
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",

@@ -1,5 +1,6 @@
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 import { getAuthenticatedStudioMember } from "@/services/auth"
 import { logoutAction } from "./actions"
 import { SignOutButton } from "./SignOutButton"
@@ -13,6 +14,7 @@ export default async function AdminProtectedLayout({
 }) {
   const { locale } = await params
   const cookieStore = await cookies()
+  const t = await getTranslations({ locale, namespace: "admin" })
 
   const result = await getAuthenticatedStudioMember({
     getAll: () => cookieStore.getAll(),
@@ -29,9 +31,9 @@ export default async function AdminProtectedLayout({
     return (
       <div className="min-h-screen flex flex-col">
         <header className="flex items-center justify-end border-b border-border px-4 py-3">
-          <SignOutButton action={boundLogoutAction} />
+          <SignOutButton action={boundLogoutAction} label={t("signOut")} />
         </header>
-        <p className="px-4 py-3">This account is not authorized.</p>
+        <p className="px-4 py-3">{t("unauthorized")}</p>
       </div>
     )
   }
@@ -39,8 +41,8 @@ export default async function AdminProtectedLayout({
   return (
     <div className="min-h-screen flex flex-col">
       <header className="flex items-center justify-between border-b border-border px-4 py-3">
-        <span className="text-sm font-semibold text-foreground">Admin</span>
-        <SignOutButton action={boundLogoutAction} />
+        <span className="text-sm font-semibold text-foreground">{t("adminLabel")}</span>
+        <SignOutButton action={boundLogoutAction} label={t("signOut")} />
       </header>
       {children}
     </div>

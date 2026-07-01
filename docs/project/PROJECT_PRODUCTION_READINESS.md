@@ -68,6 +68,17 @@ Before public launch, decide on and set up environment separation:
 
 Not required before Stage 3D.6 or Stage 4A. Address in Stage 5 as an explicit decision point.
 
+## Production Environment Setup
+
+Before public launch:
+
+- production domain configured and pointed at the Vercel deployment
+- production env vars set in Vercel (not committed) — see `.env.example` for the required list
+- Google OAuth: production redirect URI added in Google Cloud Console and Supabase Dashboard (in addition to the dev URI already configured in Stage 4A.6) — see PROJECT_DECISIONS.md, Admin Authentication Architecture
+- Supabase automatic backups confirmed enabled on the production project (managed by Supabase; verify retention window in the dashboard)
+- basic monitoring/logging confirmed reachable (Vercel deployment logs / Supabase logs) — no new logging service required for MVP
+- manual smoke test of full submission and admin flow performed against the deployed production environment (not just local)
+
 ## Upload Security Review
 
 - File size limit enforced server-side (10 MB per file)
@@ -80,6 +91,18 @@ Not required before Stage 3D.6 or Stage 4A. Address in Stage 5 as an explicit de
 - All public API inputs validated server-side in BFF before use
 - `clientSubmissionId` validated as UUID v4 server-side
 - No raw user input passed to storage paths or DB queries without validation
+
+---
+
+# CI/CD
+
+Goal: a practical, minimal deploy pipeline — not an over-engineered one.
+
+- GitHub connected to Vercel; every PR gets a Vercel preview deployment
+- `main` auto-deploys to production on merge (Vercel's default Git integration — no custom pipeline needed at this scale)
+- lint, typecheck, tests, and build (`pnpm qg`) must pass locally before merge, per the Pre-Commit Checklist in `.claude/CLAUDE.md`
+- no dedicated GitHub Actions workflow required for MVP unless `pnpm qg` needs to run as a required PR check — revisit only if manual discipline proves insufficient
+- staging environment (separate Supabase project + Vercel preview/staging) is a prerequisite decision — see Environment Separation above
 
 ---
 

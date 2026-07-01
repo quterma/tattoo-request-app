@@ -1,7 +1,8 @@
 import Link from "next/link"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
-import { createSupabaseAuthClient } from "@/services/supabaseAuth"
+import { getTranslations } from "next-intl/server"
+import { getOptionalUser } from "@/services/auth"
 import { googleLoginAction, loginAction } from "./actions"
 import { LoginForm } from "./LoginForm"
 
@@ -15,14 +16,13 @@ export default async function AdminLoginPage({
   const { locale } = await params
   const { error, reset } = await searchParams
   const cookieStore = await cookies()
+  const t = await getTranslations({ locale, namespace: "admin" })
 
-  const supabase = createSupabaseAuthClient({
+  const user = await getOptionalUser({
     getAll: () => cookieStore.getAll(),
     setAll: () => {},
   })
-
-  const { data } = await supabase.auth.getUser()
-  if (data.user) {
+  if (user) {
     redirect(`/${locale}/admin`)
   }
 
@@ -32,23 +32,31 @@ export default async function AdminLoginPage({
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm flex flex-col gap-6">
-        <h1 className="text-xl font-semibold text-foreground">Admin sign in</h1>
+        <h1 className="text-xl font-semibold text-foreground">{t("signInTitle")}</h1>
         {error === "oauth" && (
           <p role="alert" className="text-sm text-destructive">
-            Google sign-in failed. Please try again.
+            {t("oauthError")}
           </p>
         )}
         {reset === "success" && (
           <p role="status" className="text-sm text-foreground">
-            Password updated. Please sign in with your new password.
+            {t("resetSuccess")}
           </p>
         )}
-        <LoginForm action={action} googleAction={googleAction} />
+        <LoginForm
+          action={action}
+          googleAction={googleAction}
+          emailLabel={t("emailLabel")}
+          passwordLabel={t("passwordLabel")}
+          signInButton={t("signInButton")}
+          signInButtonLoading={t("signInButtonLoading")}
+          googleButton={t("googleButton")}
+        />
         <Link
           href={`/${locale}/admin/forgot-password`}
           className="text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          Forgot password?
+          {t("forgotPasswordLink")}
         </Link>
       </div>
     </div>
