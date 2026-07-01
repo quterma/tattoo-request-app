@@ -47,7 +47,9 @@ export async function googleLoginAction(locale: string): Promise<void> {
     },
   })
 
-  const origin = `${headerList.get("x-forwarded-proto") ?? "https"}://${headerList.get("host")}`
+  const origin =
+    headerList.get("origin") ??
+    `${headerList.get("x-forwarded-proto") ?? "https"}://${headerList.get("host")}`
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",

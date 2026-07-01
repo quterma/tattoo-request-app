@@ -17,7 +17,7 @@ Status: In progress
 
 Current focus:
 
-- Stage 4A.1 complete — Stage 4A.2 complete — Stage 4A.3 complete — Stage 4A.4 complete — Stage 4A.5 complete — Stage 4A.6 complete — proceeding to Stage 4A.7
+- Stage 4A.1 complete — Stage 4A.2 complete — Stage 4A.3 complete — Stage 4A.4 complete — Stage 4A.5 complete — Stage 4A.6 complete — Stage 4A.7.1 (documentation) complete — Stage 4A.7.2 (implementation) complete — proceeding to Stage 4A.8
 
 Completed stages:
 
@@ -67,6 +67,55 @@ Completed in Stage 3:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-07-01 — Stage 4A.7.2 — Password Reset implementation
+
+Status: Completed
+
+Completed, exactly per the Stage 4A.7.1 documented architecture:
+
+- `app/[locale]/(admin)/admin/forgot-password/page.tsx` + `ForgotPasswordForm.tsx` + `actions.ts`: `forgotPasswordAction(locale, prev, formData)` calls `resetPasswordForEmail(email, { redirectTo })` via SSR auth client (writable cookies); `redirectTo` points at `/auth/reset-callback?locale=<locale>`; always returns `{ sent: true }` regardless of the Supabase result — no user enumeration; `?error=reset` renders an inline expired/invalid-link message; link back to login
+- `app/auth/reset-callback/route.ts`: fixed non-locale route, separate from `app/auth/callback/route.ts`; reads `code`/`locale`, validates locale with the same `isSupportedLocale` pattern as the OAuth callback; missing code or `exchangeCodeForSession` error → redirect to `forgot-password?error=reset`; success → redirect to `reset-password`; no authorization or business logic
+- `app/[locale]/(admin)/admin/reset-password/page.tsx` + `ResetPasswordForm.tsx` + `actions.ts`: page checks for an active session with a read-only cookie handler; no session → "Reset link has expired or is no longer valid." with a link to `forgot-password`; session present → password + confirm-password form; `resetPasswordAction` validates both fields present and matching, calls `updateUser({ password })`, immediately calls `signOut()` on success, then redirects to `login?reset=success`; generic error message on failure (no technical details)
+- `app/[locale]/(admin)/admin/login/page.tsx`: renders inline "Password updated. Please sign in with your new password." on `?reset=success`; added "Forgot password?" link to `forgot-password`; existing email/password and Google OAuth behavior unchanged
+- Password minimum length: `minLength={6}` HTML attribute only (matches Supabase's default server-side minimum) — no new validation library, no extracted schema, per the "keep Supabase-level validation only" option
+- `proxy.ts`: no change needed — matcher already excludes `/auth` broadly, confirmed before implementation
+- No `studio_members` changes; no RBAC; no invite flow; Google OAuth untouched
+- No new tests — all three actions and the callback route are Supabase SDK orchestration + Next.js redirects, same category as `loginAction`/`logoutAction`/`app/auth/callback/route.ts` (not tested per strategy); no isolated project-owned logic (e.g. extracted schema or locale-fallback helper) existed to unit-test separately
+- Total tests: 113 — all pass (unchanged)
+- lint / typecheck / build — all PASS
+- `PROJECT_STRUCTURE.md`, `docs/files-structure.md`, `PROJECT_STAGE_LOG.md`: updated
+- No deviation from the Stage 4A.7.1 documented architecture — `PROJECT_DECISIONS.md`, `PROJECT_ARCHITECTURE.md`, `PROJECT_IMPLEMENTATION_PLAN.md` unchanged
+
+Manual verification still required (not yet performed in this session): forgot-password with existing/non-existing email → same generic message; real email link → `reset-password`; expired/reused/bad code → `forgot-password?error=reset`; password mismatch → inline error; successful reset → forced sign-out → login with new password; `/admin` still requires auth + `studio_members` (unchanged, not touched this stage).
+
+Manual Supabase dashboard setup still required (not code, not committed): add `http://localhost:3000/auth/reset-callback` (and later the production origin) to Authentication → URL Configuration → Redirect URLs; verify the default "Reset Password" email template / `{{ .ConfirmationURL }}`. No new secrets, no Google Cloud changes, no env changes.
+
+---
+
+### 2026-07-01 — Stage 4A.7.1 — Password Reset documentation-first update
+
+Status: Documentation only — implementation not started
+
+Documented (agreed architecture, prior to implementation):
+
+- Routes: `admin/forgot-password/{page,actions}.ts`, `auth/reset-callback/route.ts`, `admin/reset-password/{page,actions}.ts` — both admin pages outside `(protected)`
+- Dedicated `/auth/reset-callback`, separate from `/auth/callback` (OAuth-only) — different destination, different risk profile, avoids hidden branching in a route documented elsewhere as "no business logic"
+- Full flow recorded: `resetPasswordForEmail` → email → `exchangeCodeForSession` → `reset-password` page → `updateUser({ password })` → forced `signOut()` → redirect to `login?reset=success`
+- Recovery session caveat: Supabase does not issue a distinct "recovery-only" session type; the session from `exchangeCodeForSession` is a normal session indistinguishable at the cookie level from a regular login. Accepted MVP mitigation is routing discipline (reset-password outside `(protected)`) + forced sign-out after password update — not a hard session-type barrier. A real barrier would require a client-side Supabase auth client listening for `PASSWORD_RECOVERY`, which does not exist in this codebase (SSR/server-actions only) — rejected as over-engineering for a single low-volume admin
+- Expired/invalid link UX: callback failure → `forgot-password?error=reset`; `reset-password` page with no session → "Reset link has expired or is no longer valid." state, not a silent login redirect
+- User enumeration: `forgot-password` always returns the same generic message regardless of whether the email exists
+- Locale preserved via `?locale=` on `redirectTo`, same mechanism as Google OAuth (4A.6)
+- Link scanners/prefetching documented as a known limitation (pre-opened links can consume single-use codes) — no mitigation planned for MVP
+- Manual Supabase setup documented: add `/auth/reset-callback` to the Redirect URLs allow-list (dev now, prod later); verify default Reset Password email template; no new secrets, no Google Cloud changes, no env changes
+- Test approach documented: no unit tests expected by default (same category as `loginAction`/`logoutAction`/OAuth callback); manual end-to-end verification required
+- `PROJECT_STRUCTURE.md` intentionally not updated — documents only files that exist; will be updated during implementation like every prior stage
+- No code changes; no package changes
+- lint / typecheck / test / build — all PASS (no source changed)
+
+Files updated: `PROJECT_DECISIONS.md`, `PROJECT_ARCHITECTURE.md`, `PROJECT_IMPLEMENTATION_PLAN.md`, `PROJECT_STAGE_LOG.md`
+
+---
 
 ### 2026-07-01 — Stage 4A.6 fix — OAuth callback error handling
 

@@ -35,10 +35,18 @@ tattoo-request-app/
 │   │   │       │   ├── layout.tsx
 │   │   │       │   ├── page.tsx
 │   │   │       │   └── SignOutButton.tsx
-│   │   │       └── login/
+│   │   │       ├── forgot-password/
+│   │   │       │   ├── actions.ts
+│   │   │       │   ├── ForgotPasswordForm.tsx
+│   │   │       │   └── page.tsx
+│   │   │       ├── login/
+│   │   │       │   ├── actions.ts
+│   │   │       │   ├── LoginForm.tsx
+│   │   │       │   └── page.tsx
+│   │   │       └── reset-password/
 │   │   │           ├── actions.ts
-│   │   │           ├── LoginForm.tsx
-│   │   │           └── page.tsx
+│   │   │           ├── page.tsx
+│   │   │           └── ResetPasswordForm.tsx
 │   │   └── (public)/
 │   │       ├── layout.tsx
 │   │       ├── page.tsx
@@ -56,7 +64,9 @@ tattoo-request-app/
 │   │       └── __tests__/
 │   │           └── route.test.ts
 │   └── auth/
-│       └── callback/
+│       ├── callback/
+│       │   └── route.ts
+│       └── reset-callback/
 │           └── route.ts
 ├── docs/
 │   ├── files-structure.md

@@ -179,11 +179,11 @@ OAuth callback (Google):
 3. No authorization logic in the callback
 
 Password reset flow:
-1. Admin requests reset link via email
-2. Supabase sends a recovery link
-3. Admin opens link → recovery session issued
-4. Admin sets new password; recovery session is exchanged for a full session
-5. Recovery session must not grant admin access before reset is completed
+1. Admin requests reset link via email on `forgot-password`; response is a generic message regardless of whether the email matches an account
+2. Supabase sends a recovery link pointing at `app/auth/reset-callback/route.ts`
+3. Admin opens link → `/auth/reset-callback` exchanges the code for a session (`exchangeCodeForSession`) → redirects to `/[locale]/admin/reset-password`
+4. Admin sets new password (`updateUser`); action immediately calls `signOut()`, then redirects to `/[locale]/admin/login`
+5. Note: the session created in step 3 is a normal Supabase session, not a distinct "recovery-only" type — it is not literally "exchanged for a full session" in step 4. Admin access before reset completion is prevented by routing discipline (`reset-password` is outside `(protected)`) and the forced sign-out in step 4, not by a session-type barrier. See PROJECT_DECISIONS.md — Password Reset, recovery session caveat.
 
 ---
 

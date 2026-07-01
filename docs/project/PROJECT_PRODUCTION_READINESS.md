@@ -28,6 +28,14 @@ AI agents and developers preparing the project for production release.
 
 Complete before public launch:
 
+## Email Delivery (Password Reset / Auth Emails)
+
+- Supabase's built-in email provider is limited and best-effort — not intended for production volume
+- Current Supabase limits observed during Stage 4A.7 manual testing: built-in email provider ~2 emails/hour; password reset endpoint ~60-second per-user cooldown
+- Repeated password-reset requests during testing stopped arriving after a few attempts — consistent with these limits, not a bug
+- Before public launch: configure custom SMTP in Supabase Dashboard → Authentication → Email (the built-in provider's rate limit cannot be raised without custom SMTP; only custom-SMTP-relevant limits are configurable under Authentication → Rate Limits)
+- Verify email deliverability (SPF/DKIM) once custom SMTP is configured
+
 ## Environment Variables and Secrets
 
 - All required env vars documented in `.env.example`

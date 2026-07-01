@@ -64,8 +64,10 @@ The project follows a feature-oriented structure with shared modules and clear b
 
 - Login page — Server Component
 - Checks Supabase session on load: authenticated user → redirect to `/${locale}/admin`
+- Renders inline message when `?reset=success` is present ("Password updated. Please sign in with your new password.")
 - Renders `LoginForm` (Client Component) for unauthenticated users
 - Passes locale-bound `loginAction` to the form
+- Link to `/${locale}/admin/forgot-password`
 
 #### app/[locale]/(admin)/admin/login/LoginForm.tsx
 
@@ -92,6 +94,54 @@ The project follows a feature-oriented structure with shared modules and clear b
 - Reads `code` and `locale` query params; exchanges the code for a session via `supabase.auth.exchangeCodeForSession()` (SSR auth client, writable cookies)
 - Redirects to `/${locale}/admin` (falls back to `defaultLocale` if `locale` param is missing/unsupported)
 - No authorization logic; no business logic — admin layout performs the authorization check after redirect
+
+#### app/[locale]/(admin)/admin/forgot-password/page.tsx
+
+- Reset-link request page — Server Component, outside `(protected)`
+- Renders inline expired/invalid-link message when `?error=reset` is present
+- Renders `ForgotPasswordForm` (Client Component) with locale-bound `forgotPasswordAction`
+- Link back to login
+
+#### app/[locale]/(admin)/admin/forgot-password/ForgotPasswordForm.tsx
+
+- Reset-link request form — Client Component
+- Uses `useActionState` to wire `forgotPasswordAction`
+- On `{ sent: true }`, replaces the form with a generic "if this email exists…" message — same message shown regardless of whether the email matched an account
+
+#### app/[locale]/(admin)/admin/forgot-password/actions.ts
+
+- `forgotPasswordAction(locale, prev, formData)` — server action
+- Calls `supabase.auth.resetPasswordForEmail(email, { redirectTo })` via SSR auth client with writable cookies
+- `redirectTo` points at `app/auth/reset-callback/route.ts` with `?locale=` appended
+- Always returns `{ sent: true }` regardless of the Supabase result — never reveals whether the email exists
+
+#### app/auth/reset-callback/route.ts
+
+- Fixed non-locale password-recovery callback route — separate from `app/auth/callback/route.ts` (OAuth-only)
+- Reads `code` and `locale` query params; exchanges the code via `supabase.auth.exchangeCodeForSession()` (SSR auth client, writable cookies)
+- Missing code or exchange error → redirects to `/${locale}/admin/forgot-password?error=reset`
+- On success → redirects to `/${locale}/admin/reset-password`
+- No authorization logic; no business logic
+
+#### app/[locale]/(admin)/admin/reset-password/page.tsx
+
+- New-password page — Server Component, outside `(protected)`
+- Checks for an active Supabase session (read-only cookie handler); no session → renders "Reset link has expired or is no longer valid." with a link to `forgot-password`
+- Session present → renders `ResetPasswordForm` (Client Component) with locale-bound `resetPasswordAction`
+
+#### app/[locale]/(admin)/admin/reset-password/ResetPasswordForm.tsx
+
+- New-password form — Client Component
+- Password + confirm password fields; `minLength={6}` HTML attribute (matches Supabase's default minimum); no client-side validation library
+- Uses `useActionState` to wire `resetPasswordAction`; displays inline error on failure
+
+#### app/[locale]/(admin)/admin/reset-password/actions.ts
+
+- `resetPasswordAction(locale, prev, formData)` — server action
+- Validates both fields present and matching before calling Supabase (generic error message, no technical details)
+- Calls `supabase.auth.updateUser({ password })` via SSR auth client with writable cookies
+- On success: immediately calls `supabase.auth.signOut()`, then redirects to `/${locale}/admin/login?reset=success`
+- On failure: returns a generic error; no technical details exposed
 
 #### proxy.ts (project middleware entry point)
 

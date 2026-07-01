@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { createSupabaseAuthClient } from "@/services/supabaseAuth"
@@ -9,10 +10,10 @@ export default async function AdminLoginPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>
-  searchParams: Promise<{ error?: string }>
+  searchParams: Promise<{ error?: string; reset?: string }>
 }) {
   const { locale } = await params
-  const { error } = await searchParams
+  const { error, reset } = await searchParams
   const cookieStore = await cookies()
 
   const supabase = createSupabaseAuthClient({
@@ -37,7 +38,18 @@ export default async function AdminLoginPage({
             Google sign-in failed. Please try again.
           </p>
         )}
+        {reset === "success" && (
+          <p role="status" className="text-sm text-foreground">
+            Password updated. Please sign in with your new password.
+          </p>
+        )}
         <LoginForm action={action} googleAction={googleAction} />
+        <Link
+          href={`/${locale}/admin/forgot-password`}
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Forgot password?
+        </Link>
       </div>
     </div>
   )

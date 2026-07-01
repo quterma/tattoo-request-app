@@ -352,9 +352,17 @@ Implementation sequence:
 
 ### 4A.7 — Password Reset
 
-- Reset-link request: form on login page or separate page; calls Supabase `resetPasswordForEmail`
-- Reset-password page: consumes recovery session, sets new password
-- Recovery session must not grant admin access before reset is completed
+Routes (outside `(protected)`):
+
+- `app/[locale]/(admin)/admin/forgot-password/page.tsx` + `actions.ts` — email form; calls `resetPasswordForEmail(email, { redirectTo })`; always returns a generic success message (no user enumeration)
+- `app/auth/reset-callback/route.ts` — dedicated fixed non-locale callback (not `/auth/callback`); exchanges code via `exchangeCodeForSession()`; redirects to `reset-password` on success, to `forgot-password?error=reset` on missing/invalid code or exchange failure
+- `app/[locale]/(admin)/admin/reset-password/page.tsx` + `actions.ts` — new-password form; if no active session, shows an expired/invalid-link state (not a login redirect); action calls `updateUser({ password })`, then immediately `signOut()`, then redirects to `login?reset=success`
+
+Locale preserved via `?locale=` on `redirectTo`, same mechanism as Google OAuth (4A.6).
+
+See PROJECT_DECISIONS.md — Password Reset for the full flow, the recovery-session caveat (no distinct restricted session type; enforced via routing + forced sign-out), and the link-scanner/prefetch limitation.
+
+No unit tests expected by default (same category as `loginAction`/`logoutAction`/OAuth callback — SDK orchestration + redirects); add tests only for isolated project-owned logic if extracted (e.g. a locale-fallback helper). Manual end-to-end verification with real Supabase is required — see PROJECT_TESTING_STRATEGY.md conventions already applied to 4A.4–4A.6.
 
 ### 4A.8 — Manual Activation Documentation
 

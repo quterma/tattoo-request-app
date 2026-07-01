@@ -524,9 +524,74 @@ The shared authorization API (`AuthResult`, `AuthFailureReason`) is intentionall
 
 ## Password Reset
 
-- Reset-link request flow: user submits email, Supabase sends reset link
-- Reset-password page: consumes Supabase recovery session, sets new password
-- Recovery sessions must not grant admin access before the reset is completed
+Routes:
+
+- `app/[locale]/(admin)/admin/forgot-password/page.tsx` + `actions.ts` — request-link form, outside `(protected)`
+- `app/auth/reset-callback/route.ts` — fixed non-locale callback, dedicated to password recovery
+- `app/[locale]/(admin)/admin/reset-password/page.tsx` + `actions.ts` — new-password form, outside `(protected)`
+
+Both `forgot-password` and `reset-password` live outside `(protected)` because they must be reachable without a `studio_members` row and without treating the visitor as already authorized.
+
+### Dedicated callback (not `/auth/callback`)
+
+`/auth/reset-callback` is separate from the existing OAuth callback:
+
+- `/auth/callback` is Google OAuth only
+- Recovery redirects to `/[locale]/admin/reset-password`, not `/[locale]/admin`
+- Recovery has a different risk profile (see recovery-session caveat below)
+- Keeping callbacks single-purpose avoids hidden branching (`type=recovery` vs OAuth) inside a route documented elsewhere as "no business logic"
+
+`proxy.ts` matcher already excludes `/auth` — no middleware change required for the new route.
+
+### Flow
+
+1. User clicks "Forgot password?" on the login page, submits email on `forgot-password`
+2. Action calls `supabase.auth.resetPasswordForEmail(email, { redirectTo })`, `redirectTo` = `/auth/reset-callback?locale=<locale>`
+3. Supabase sends the reset email (default template / `{{ .ConfirmationURL }}`)
+4. User opens the link; `/auth/reset-callback` exchanges the code via `exchangeCodeForSession(code)`
+5. On success → redirect to `/${locale}/admin/reset-password`; on missing/invalid code or exchange failure → redirect to `/${locale}/admin/forgot-password?error=reset`
+6. User submits new password; action calls `supabase.auth.updateUser({ password })`
+7. On success, action immediately calls `supabase.auth.signOut()`, then redirects to `/${locale}/admin/login?reset=success`
+
+### Recovery session caveat (accepted MVP risk)
+
+Supabase's recovery flow does **not** create a special restricted "recovery-only" session. After `exchangeCodeForSession(code)`, the resulting session cookie is a normal authenticated session — indistinguishable at the SSR cookie level from a regular login session. `getAuthenticatedStudioMember()` has no way to tell "this session came from a recovery link and hasn't completed its purpose yet" from "this is a normal logged-in admin."
+
+Accepted approach:
+
+- route straight from the reset callback to `reset-password`, never to `/admin`
+- `reset-password` lives outside `(protected)`, so it never goes through the authorization gate
+- immediately force `signOut()` after a successful password update, before redirecting to login
+- user must log in again with the new password
+
+This is routing discipline and exposure-window reduction, not a hard session-type barrier. The exposure window is: from the moment the recovery link is opened until the new password is submitted (or the user abandons the flow). Building a real barrier would require a client-side Supabase auth client listening for the `PASSWORD_RECOVERY` auth-state-change event — no client-side Supabase client exists in this codebase today (server actions + SSR only), and introducing one is a real architectural addition, not a trivial reuse. Rejected for MVP as over-engineering relative to a single low-volume admin.
+
+### Expired / invalid reset link UX
+
+- `/auth/reset-callback` with no `code` or a failed exchange → redirect to `/${locale}/admin/forgot-password?error=reset`
+- `/[locale]/admin/reset-password` loading with no active session → do not silently show/redirect to login as the primary UX; show "Reset link has expired or is no longer valid." with a link back to `forgot-password`
+
+### User enumeration
+
+`forgot-password` always returns the same generic message regardless of whether the email matches an account: "If an account with this email exists, a reset link has been sent." The action must never reveal whether the email exists.
+
+### Locale preservation
+
+Same mechanism as Google OAuth (Stage 4A.6): append `?locale=<locale>` to `redirectTo`; `/auth/reset-callback` validates the `locale` query param and falls back to `defaultLocale` if missing/unsupported.
+
+### Link scanners / prefetching (known limitation)
+
+Some mail clients and corporate security scanners pre-open links in email bodies, which can consume a single-use recovery code before the real user clicks it. If this happens, the user lands on the expired/invalid state and must request a new reset link. No mitigation planned for MVP — documented as a known limitation.
+
+### Manual Supabase setup required
+
+- Supabase Dashboard → Authentication → URL Configuration → Redirect URLs: add `http://localhost:3000/auth/reset-callback` (dev), plus the production origin equivalent later
+- Verify the "Reset Password" email template uses the default Supabase recovery link / `{{ .ConfirmationURL }}`
+- No new secrets, no Google Cloud changes, no env var changes
+
+### Recovery sessions must not grant admin access before reset is completed
+
+This remains the governing rule from the original Stage 4A architecture note — enforced here via routing discipline (reset-password outside `(protected)`) plus forced sign-out, not via a distinct session type.
 
 ## Manual Admin Activation
 
