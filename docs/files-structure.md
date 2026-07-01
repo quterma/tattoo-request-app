@@ -50,11 +50,14 @@ tattoo-request-app/
 │   │       │   └── page.tsx
 │   │       └── request/
 │   │           └── page.tsx
-│   └── api/
-│       └── request/
-│           ├── route.ts
-│           └── __tests__/
-│               └── route.test.ts
+│   ├── api/
+│   │   └── request/
+│   │       ├── route.ts
+│   │       └── __tests__/
+│   │           └── route.test.ts
+│   └── auth/
+│       └── callback/
+│           └── route.ts
 ├── docs/
 │   ├── files-structure.md
 │   ├── framework/

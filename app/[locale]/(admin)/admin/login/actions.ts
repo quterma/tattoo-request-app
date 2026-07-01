@@ -1,6 +1,6 @@
 "use server"
 
-import { cookies } from "next/headers"
+import { cookies, headers } from "next/headers"
 import { redirect } from "next/navigation"
 import { createSupabaseAuthClient } from "@/services/supabaseAuth"
 
@@ -32,4 +32,34 @@ export async function loginAction(
   }
 
   redirect(`/${locale}/admin`)
+}
+
+export async function googleLoginAction(locale: string): Promise<void> {
+  const cookieStore = await cookies()
+  const headerList = await headers()
+
+  const supabase = createSupabaseAuthClient({
+    getAll: () => cookieStore.getAll(),
+    setAll: (cookiesToSet) => {
+      for (const { name, value, options } of cookiesToSet) {
+        cookieStore.set(name, value, options)
+      }
+    },
+  })
+
+  const origin = `${headerList.get("x-forwarded-proto") ?? "https"}://${headerList.get("host")}`
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${origin}/auth/callback?locale=${locale}`,
+      skipBrowserRedirect: true,
+    },
+  })
+
+  if (error || !data.url) {
+    redirect(`/${locale}/admin/login?error=oauth`)
+  }
+
+  redirect(data.url)
 }

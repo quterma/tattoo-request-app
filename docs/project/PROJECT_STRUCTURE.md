@@ -80,20 +80,27 @@ The project follows a feature-oriented structure with shared modules and clear b
 - Calls `supabase.auth.signInWithPassword()` via SSR auth client with writable cookies
 - On success: redirects to `/${locale}/admin`
 - On failure: returns `{ error: "Invalid email or password." }` (no technical details exposed)
+- `googleLoginAction(locale)` — server action
+- Calls `supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo, skipBrowserRedirect: true } })` via SSR auth client with writable cookies (PKCE code verifier persisted to cookies)
+- `redirectTo` points at `app/auth/callback/route.ts` with `?locale=` appended so locale survives the round trip through Google and Supabase
+- On success: redirects the browser to the returned Google consent URL
+- On failure: redirects to `/${locale}/admin/login?error=oauth`
 
-#### app/auth/callback/route.ts (planned — Stage 4A)
+#### app/auth/callback/route.ts
 
 - Fixed non-locale OAuth callback route
-- Exchanges Supabase auth code for a session; redirects to admin
-- No authorization logic; no business logic
+- Reads `code` and `locale` query params; exchanges the code for a session via `supabase.auth.exchangeCodeForSession()` (SSR auth client, writable cookies)
+- Redirects to `/${locale}/admin` (falls back to `defaultLocale` if `locale` param is missing/unsupported)
+- No authorization logic; no business logic — admin layout performs the authorization check after redirect
 
 #### proxy.ts (project middleware entry point)
 
 - Located at the project root as the Next.js middleware file
 - **This is the only Next.js middleware file.** Do not create a parallel `middleware.ts`.
 - Currently handles next-intl locale routing
-- Stage 4A will extend it with Supabase SSR session cookie refresh
+- Extended in Stage 4A with Supabase SSR session cookie refresh
 - Admin redirects added here must be locale-aware
+- Matcher excludes `/auth` (in addition to `/api`, `/_next`, `/_vercel`) so the fixed non-locale `/auth/callback` route is not redirected into a locale-prefixed path
 
 ---
 

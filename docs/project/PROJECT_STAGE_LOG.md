@@ -17,7 +17,7 @@ Status: In progress
 
 Current focus:
 
-- Stage 4A.1 complete — Stage 4A.2 complete — Stage 4A.3 complete — Stage 4A.4 complete — Stage 4A.5 complete — proceeding to Stage 4A.6 (Google OAuth)
+- Stage 4A.1 complete — Stage 4A.2 complete — Stage 4A.3 complete — Stage 4A.4 complete — Stage 4A.5 complete — Stage 4A.6 complete — proceeding to Stage 4A.7
 
 Completed stages:
 
@@ -67,6 +67,54 @@ Completed in Stage 3:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-07-01 — Stage 4A.6 fix — OAuth callback error handling
+
+Status: Completed
+
+Completed:
+
+- `app/auth/callback/route.ts`: missing `code` now redirects to `/${locale}/admin/login?error=oauth` instead of proceeding to `/${locale}/admin`
+- `exchangeCodeForSession(code)` result is now checked; on `error`, redirects to `/${locale}/admin/login?error=oauth` instead of unconditionally redirecting to admin
+- Previously, a failed or missing code exchange still redirected to `/${locale}/admin`, relying on the protected layout's `unauthenticated` branch to redirect back to login — functionally recoverable but silent (no error surfaced) and slower (extra redirect hop)
+- No authorization or business logic added; locale fallback unchanged; admin redirect only reached on confirmed session exchange
+- No new tests — same category as the rest of the callback route (Supabase SDK result branching + Next.js redirect, not tested per strategy)
+- Total tests: 113 — all pass
+- lint / typecheck / build — all PASS
+
+---
+
+### 2026-07-01 — Stage 4A.6 — Google OAuth
+
+Status: Completed
+
+Completed:
+
+- `app/[locale]/(admin)/admin/login/actions.ts` — `googleLoginAction(locale)` server action added: calls `supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo, skipBrowserRedirect: true } })` via SSR auth client with writable cookies; redirects the browser to the returned Google consent URL; redirects to `/${locale}/admin/login?error=oauth` on failure
+- Chose server-action + `skipBrowserRedirect: true` over a browser Supabase client after explicit evaluation: fully PKCE-correct (code verifier persisted via the same writable `CookieHandler` already used by `loginAction`/`logoutAction`), requires no `NEXT_PUBLIC_` env vars, and introduces no new client-side Supabase client module
+- `app/[locale]/(admin)/admin/login/LoginForm.tsx` — added a second, separate `<form>` with a `Google` button wired to `googleAction` (server action passed as prop); no styling beyond existing primitives; kept as a sibling form, not nested, to stay valid HTML
+- `app/[locale]/(admin)/admin/login/page.tsx` — binds `googleLoginAction` to locale; reads `?error=oauth` search param and renders an inline error message when present
+- `app/auth/callback/route.ts` created: fixed non-locale Route Handler; reads `code` + `locale` query params; exchanges code for session via `supabase.auth.exchangeCodeForSession()` (SSR auth client, writable cookies); redirects to `/${locale}/admin` (`defaultLocale` fallback if `locale` missing/unsupported); no authorization or business logic — admin `(protected)` layout performs the authorization check after redirect, unchanged
+- Locale preservation: `redirectTo` passed to `signInWithOAuth` includes `?locale=<locale>`; Google and Supabase preserve this query param through the redirect chain back to `/auth/callback`
+- `proxy.ts`: matcher updated to exclude `/auth` (alongside existing `/api`, `/_next`, `/_vercel` exclusions) — without this, the fixed non-locale `/auth/callback` route would have been redirected to `/${defaultLocale}/auth/callback` by the locale-redirect logic, breaking the OAuth round trip. Found and fixed before implementation, per user confirmation.
+- No `studio_members` changes; no invite flow; no RBAC; no password reset — out of scope per stage definition. A Google-authenticated user with no `studio_members` row still hits the existing `unauthorized` branch in the protected admin layout (unchanged from Stage 4A.3–4A.5)
+- No new tests — both new code paths orchestrate Supabase SDK calls + Next.js redirects, same category as `loginAction`/`logoutAction` (not tested per strategy)
+- Total tests: 113 — all pass
+- lint / typecheck / build — all PASS
+- `PROJECT_STRUCTURE.md`, `docs/files-structure.md`, `PROJECT_STAGE_LOG.md`: updated
+
+Required manual Supabase/Google dashboard setup (not code, not committed):
+
+1. Google Cloud Console: create an OAuth 2.0 Client ID (Web application). Authorized redirect URI: `https://<project-ref>.supabase.co/auth/v1/callback`.
+2. Supabase Dashboard → Authentication → Providers → Google: enable, paste the Google Client ID and Client Secret.
+3. Supabase Dashboard → Authentication → URL Configuration: add the app's `/auth/callback` URL (e.g. `http://localhost:3000/auth/callback` for local dev, plus the production origin) to the Redirect URLs allow-list — `signInWithOAuth`'s `redirectTo` must match an allowed URL or Supabase rejects it.
+4. No secrets stored in this repo; Google Client ID/Secret live only in the Supabase dashboard.
+
+Manual verification still required (not yet performed in this session): click Google → complete Google login → return to app → confirm authenticated-but-not-a-`studio_members`-member sees "This account is not authorized." → confirm a `studio_members` member reaches `/admin`.
+
+Concern flagged before Stage 4A.7 (password reset): none blocking. Note that the `?error=oauth` query param on the login page is a plain URL param, not itself a security-sensitive value — no action needed, but worth being aware of when adding the password-reset request/confirm flow, which will introduce its own query-param-carried state (reset token) requiring more care.
+
+---
 
 ### 2026-07-01 — Stage 4A.5 fix — Sign out from unauthorized state
 
