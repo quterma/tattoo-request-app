@@ -17,7 +17,7 @@ Status: In progress
 
 Current focus:
 
-- Stage 4A.1 complete — Stage 4A.2 complete — Stage 4A.3 complete — Stage 4A.4 complete — proceeding to Stage 4A.5 (logout)
+- Stage 4A.1 complete — Stage 4A.2 complete — Stage 4A.3 complete — Stage 4A.4 complete — Stage 4A.5 complete — proceeding to Stage 4A.6 (Google OAuth)
 
 Completed stages:
 
@@ -67,6 +67,40 @@ Completed in Stage 3:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-07-01 — Stage 4A.5 fix — Sign out from unauthorized state
+
+Status: Completed
+
+Completed:
+
+- Manual testing found authenticated-but-unauthorized users (no `studio_members` row) had no way to sign out — stuck on "This account is not authorized." with an active session
+- `app/[locale]/(admin)/admin/(protected)/layout.tsx`: unauthorized branch now also renders `SignOutButton` (reused as-is) above the message; `boundLogoutAction` moved above both branches so it's available to both
+- No changes to `actions.ts` or `SignOutButton.tsx` — fully reused
+- No changes to authorization logic or `studio_members`
+- No new tests — same rationale as Stage 4A.5 (orchestration only)
+- Total tests: 113 — all pass
+- lint / typecheck / build — all PASS
+- `PROJECT_STAGE_LOG.md`: updated; `PROJECT_STRUCTURE.md` unchanged (no new files, no responsibility changes)
+
+---
+
+### 2026-07-01 — Stage 4A.5 — Logout
+
+Status: Completed
+
+Completed:
+
+- `app/[locale]/(admin)/admin/(protected)/actions.ts` — `logoutAction(locale)` server action: calls `supabase.auth.signOut()` via SSR auth client with writable cookies, then redirects to `/${locale}/admin/login`
+- `app/[locale]/(admin)/admin/(protected)/SignOutButton.tsx` — Client Component; form wired to the locale-bound `logoutAction`
+- `app/[locale]/(admin)/admin/(protected)/layout.tsx` — minimal header added (renders only once auth + authorization checks pass): "Admin" label + `SignOutButton`; unauthenticated/unauthorized branches unchanged
+- Logout terminates authentication only — no `studio_members` writes, no authorization logic; `getAuthenticatedStudioMember()` remains the sole authorization gate
+- No new tests — `logoutAction` orchestrates Supabase SDK + Next.js redirect, same category as `loginAction` (not tested per strategy)
+- Total tests: 113 — all pass
+- lint / typecheck / build — all PASS
+- `PROJECT_STRUCTURE.md`, `PROJECT_STAGE_LOG.md`, `docs/files-structure.md`: updated
+
+---
 
 ### 2026-06-30 — Stage 4A.4 — Email/Password Login Page
 

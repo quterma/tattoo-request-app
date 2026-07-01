@@ -30,11 +30,11 @@ tattoo-request-app/
 │   │   ├── layout.tsx
 │   │   ├── (admin)/
 │   │   │   └── admin/
-│   │   │       ├── layout.tsx
-│   │   │       ├── page.tsx
 │   │   │       ├── (protected)/
+│   │   │       │   ├── actions.ts
 │   │   │       │   ├── layout.tsx
-│   │   │       │   └── page.tsx
+│   │   │       │   ├── page.tsx
+│   │   │       │   └── SignOutButton.tsx
 │   │   │       └── login/
 │   │   │           ├── actions.ts
 │   │   │           ├── LoginForm.tsx

@@ -45,8 +45,20 @@ The project follows a feature-oriented structure with shared modules and clear b
 - Calls `getAuthenticatedStudioMember()` with the current request cookies
 - No session → redirects to `/${locale}/admin/login`
 - Session but no `studio_members` row → renders unauthorized message
-- Session + `studio_members` row → renders children
+- Session + `studio_members` row → renders header (with Sign out) + children
 - Login page is intentionally outside this route group to prevent redirect loops
+
+#### app/[locale]/(admin)/admin/(protected)/actions.ts
+
+- `logoutAction(locale)` — server action
+- Calls `supabase.auth.signOut()` via SSR auth client with writable cookies
+- Redirects to `/${locale}/admin/login`
+- Terminates authentication only; no `studio_members` writes, no authorization logic
+
+#### app/[locale]/(admin)/admin/(protected)/SignOutButton.tsx
+
+- Sign out button — Client Component
+- Renders a form wired to the locale-bound `logoutAction`
 
 #### app/[locale]/(admin)/admin/login/page.tsx
 
