@@ -75,7 +75,7 @@ Current Stage 4B scope (reduced, see PROJECT_DECISIONS.md — Stage 4B Admin Das
 
 - request list, scoped to the admin's own studio
 - request details view (data + images via signed URLs)
-- status management (new / contacted / booked / completed / rejected)
+- status management (new / active / booked / completed / rejected) — see PROJECT_DECISIONS.md, Request Status Semantics
 
 Deferred to Stage 4C (see PROJECT_IMPLEMENTATION_PLAN.md):
 

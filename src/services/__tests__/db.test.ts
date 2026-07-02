@@ -12,7 +12,7 @@ vi.mock("../supabase", () => ({
   },
 }))
 
-import { createRequest, getRequestByClientSubmissionId } from "../db"
+import { createRequest, getRequestByClientSubmissionId, listRequestsForStudio } from "../db"
 import type { UploadedFile } from "../storage"
 
 const baseParams = {
@@ -186,4 +186,109 @@ describe("getRequestByClientSubmissionId", () => {
 
     await expect(getRequestByClientSubmissionId(CLIENT_ID)).rejects.toThrow("connection timeout")
   })
+})
+
+describe("listRequestsForStudio", () => {
+  const STUDIO_ID = "a1b2c3d4-0000-4000-8000-000000000001"
+
+  function makeListChain(result: { data: unknown; error: unknown }) {
+    const order = vi.fn().mockResolvedValue(result)
+    const eq = vi.fn().mockReturnValue({ order })
+    const select = vi.fn().mockReturnValue({ eq })
+    mockFrom.mockReturnValue({ select })
+    return { select, eq, order }
+  }
+
+  const sampleRow = {
+    id: "req-uuid-1",
+    reference_code: "REQ-2026-0001",
+    client_name: "Alex",
+    placement: "forearm",
+    size: "medium",
+    color: "black",
+    status: "new",
+    created_at: "2026-07-01T10:00:00.000Z",
+  }
+
+  it("queries requests scoped by studio_id", async () => {
+    const { select, eq } = makeListChain({ data: [sampleRow], error: null })
+
+    await listRequestsForStudio(STUDIO_ID)
+
+    expect(mockFrom).toHaveBeenCalledWith("requests")
+    expect(select).toHaveBeenCalledWith(
+      "id, reference_code, client_name, placement, size, color, status, created_at",
+    )
+    expect(eq).toHaveBeenCalledWith("studio_id", STUDIO_ID)
+  })
+
+  it("orders by created_at descending", async () => {
+    const { order } = makeListChain({ data: [sampleRow], error: null })
+
+    await listRequestsForStudio(STUDIO_ID)
+
+    expect(order).toHaveBeenCalledWith("created_at", { ascending: false })
+  })
+
+  it("maps snake_case rows to camelCase DTOs", async () => {
+    makeListChain({ data: [sampleRow], error: null })
+
+    const result = await listRequestsForStudio(STUDIO_ID)
+
+    expect(result).toEqual([
+      {
+        id: "req-uuid-1",
+        referenceCode: "REQ-2026-0001",
+        clientName: "Alex",
+        placement: "forearm",
+        size: "medium",
+        color: "black",
+        status: "new",
+        createdAt: "2026-07-01T10:00:00.000Z",
+      },
+    ])
+  })
+
+  it("returns an empty array when the studio has no requests", async () => {
+    makeListChain({ data: [], error: null })
+
+    const result = await listRequestsForStudio(STUDIO_ID)
+
+    expect(result).toEqual([])
+  })
+
+  it("throws when supabase returns an error", async () => {
+    makeListChain({ data: null, error: { message: "relation does not exist" } })
+
+    await expect(listRequestsForStudio(STUDIO_ID)).rejects.toThrow("DB list query failed")
+  })
+
+  it("throws with the supabase error message", async () => {
+    makeListChain({ data: null, error: { message: "connection timeout" } })
+
+    await expect(listRequestsForStudio(STUDIO_ID)).rejects.toThrow("connection timeout")
+  })
+
+  it("throws when a row has an unrecognized status value", async () => {
+    makeListChain({ data: [{ ...sampleRow, status: "archived" }], error: null })
+
+    await expect(listRequestsForStudio(STUDIO_ID)).rejects.toThrow("Unknown request status")
+  })
+
+  it("throws for the retired 'contacted' status value", async () => {
+    makeListChain({ data: [{ ...sampleRow, status: "contacted" }], error: null })
+
+    await expect(listRequestsForStudio(STUDIO_ID)).rejects.toThrow("Unknown request status")
+  })
+
+  it.each(["new", "active", "booked", "completed", "rejected"] as const)(
+    "accepts the '%s' status value",
+    async (status) => {
+      makeListChain({ data: [{ ...sampleRow, status }], error: null })
+
+      const result = await listRequestsForStudio(STUDIO_ID)
+
+      expect(result[0].status).toBe(status)
+    },
+  )
 })

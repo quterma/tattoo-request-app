@@ -421,7 +421,8 @@ Tasks:
 
 - admin request list (all requests for the authenticated member's studio)
 - request detail page (data + images via server-generated signed URLs)
-- status management (new / contacted / booked / completed / rejected)
+- status management (new / active / booked / completed / rejected) — see PROJECT_DECISIONS.md,
+  Request Status Semantics
 - empty / loading / error states for list and detail
 
 Architecture (see PROJECT_DECISIONS.md — Stage 4B Admin Dashboard Architecture for full detail):
@@ -438,6 +439,9 @@ Architecture (see PROJECT_DECISIONS.md — Stage 4B Admin Dashboard Architecture
 - status update matching 0 rows is `not found`, not silently treated as success
 - cross-studio detail access and a genuinely missing request both return the same uniform
   not-found behavior — no distinguishing signal
+- status update validates only that the requested value is one of the five allowed values —
+  no transition graph, no terminal-state enforcement, same-status updates are valid (see
+  PROJECT_DECISIONS.md — Request Status Semantics)
 
 Exit Criteria:
 

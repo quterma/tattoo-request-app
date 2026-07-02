@@ -17,7 +17,7 @@ Status: In progress
 
 Current focus:
 
-- Stage 4A closed (see Stage 4A completion history below) — Stage 4B.0 (architecture/data-access audit) complete — Stage 4B.1 (documentation + architecture foundation) complete — proceeding to Stage 4B implementation
+- Stage 4A closed (see Stage 4A completion history below) — Stage 4B.0 (architecture/data-access audit) complete — Stage 4B.1 (documentation + architecture foundation) complete — Stage 4B.2 (domain contracts + request list data access) complete — proceeding to Stage 4B.3
 
 Completed stages:
 
@@ -67,6 +67,80 @@ Completed in Stage 3:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-07-02 — Stage 4B.2 — Domain Contracts + Request List Data Access
+
+Status: Completed (not yet committed)
+
+Completed:
+
+- `src/services/db.ts`: `REQUEST_STATUS_OPTIONS` (readonly tuple `"new" | "active" | "booked" |
+  "completed" | "rejected"`, source of truth, mirrors the `requests.status` DB `CHECK`
+  constraint), `RequestStatus` type, `AdminRequestListItem` DTO (`id`, `referenceCode`,
+  `clientName`, `placement`, `size`, `color`, `status`, `createdAt` — no `studioId`, no raw row,
+  no file data, no notes/unread/metrics fields), internal `mapRequestListRow()` (snake_case →
+  camelCase, narrows/validates `status`, throws on an unrecognized value), `listRequestsForStudio
+  (studioId)` (selects only list-DTO columns, scoped by `.eq("studio_id", studioId)`, ordered
+  `created_at` descending, throws on Supabase error, returns mapped DTOs) — no `request_files`
+  query in this step, per scope
+- `src/services/index.ts`: exports `listRequestsForStudio`, `REQUEST_STATUS_OPTIONS`,
+  `AdminRequestListItem`, `RequestStatus` alongside existing `db.ts` exports
+- `src/features/admin/types/index.ts` and `src/features/admin/config/index.ts` created —
+  re-export the above from `@/services` (the barrel, not a deep `@/services/db` import); no
+  top-level `src/features/admin/index.ts`, matching the existing `features/request/` pattern
+  which also has none
+- **Layering decision (approved before implementation):** `AdminRequestListItem`,
+  `RequestStatus`, `REQUEST_STATUS_OPTIONS` are defined in `services/db.ts`, not in
+  `features/admin/types`/`config`, because `services` must not import from `features` per
+  PROJECT_STRUCTURE.md's Dependency Direction, while `db.ts` owns the query and row→DTO
+  mapping. `features/admin/types`/`config` re-export from `@/services` as the feature-facing
+  import point. Recorded in PROJECT_DECISIONS.md — Stage 4B Admin Dashboard Architecture
+- No eslint allowlist change needed — `@/services` (the barrel) was already the standard import
+  path used everywhere else in the codebase; no deep import introduced
+- **Status model alignment (internal audit + external architecture/product review, before
+  commit):** `contacted` replaced with `active`. `in_progress` was proposed and rejected —
+  `in_progress` and `booked` are orthogonal dimensions that a single exclusive status field
+  cannot encode together. Full semantics, rationale, Stage 4B validation behavior (allowed-value
+  check only, no transition graph, no terminal-state enforcement, same-status updates valid),
+  future domain direction (appointments/calendar, task/design workflow, notes/activity history —
+  all explicitly non-binding, not implemented), and a post-launch discovery checkpoint (~4–8
+  weeks after real usage) recorded in PROJECT_DECISIONS.md — Request Status Semantics
+- `supabase/migrations/20260702114509_update_request_status_values.sql` created (via
+  `pnpm exec supabase migration new`, following the documented migration workflow): backfills any
+  existing `status = 'contacted'` rows to `'active'`, then drops and re-adds the
+  `requests.status` CHECK constraint (now explicitly named `requests_status_check`) to allow
+  `'new', 'active', 'booked', 'completed', 'rejected'`. Does not modify
+  `20260622000000_create_requests.sql` or any other previously applied migration.
+- **Applied and verified** via `pnpm exec supabase db push` (developer-approved step, separate
+  from the implementation pass above): `pnpm exec supabase migration list` confirms Local =
+  Remote for all five migrations including `20260702114509`. Post-push verification via
+  `pnpm exec supabase db query --linked`: `requests_status_check` exists with exactly
+  `CHECK ((status = ANY (ARRAY['new', 'active', 'booked', 'completed', 'rejected'])))`; live row
+  counts by status show all 4 existing rows at `status = 'new'` (no other statuses populated
+  yet); `SELECT COUNT(*) FROM requests WHERE status = 'contacted'` returns 0. Satisfies
+  PROJECT_DECISIONS.md — Database Stage Completion Criteria (migration applied to the real
+  Supabase project, affected DB objects verified).
+- 7 new tests in `src/services/__tests__/db.test.ts`: studio_id scoping, exact column selection,
+  `created_at` descending order, snake_case→camelCase mapping, empty array on no results, throws
+  on Supabase error (with message propagation), throws on an unrecognized status value
+- 6 additional tests added during the status-model alignment: throws for the retired `'contacted'`
+  value specifically (regression guard, not just the generic unknown-status case), and one
+  parameterized test per accepted value (`new`, `active`, `booked`, `completed`, `rejected`)
+- No detail data access, signed URL helper, admin pages/UI, Server Actions, status update
+  endpoint, or Stage 4C work performed — out of scope for this step
+- Total tests: 130 (was 117) — all pass
+- lint / typecheck / build — all PASS
+- `PROJECT_STRUCTURE.md`, `PROJECT_DECISIONS.md`, `PROJECT_CONTEXT.md`,
+  `PROJECT_IMPLEMENTATION_PLAN.md`, `docs/files-structure.md`: updated
+- Repository-wide search for stale `contacted` status references performed: only remaining hit
+  is the historical Stage 3D.5 log entry below (dated 2026-06-06, describing status values as
+  they were corrected to match the DB constraint at that time) — left unchanged as an accurate
+  historical record, clearly dated and not describing current state. The original
+  `20260622000000_create_requests.sql` migration still contains `'contacted'` in its `CHECK`
+  clause text — this is expected and correct: old applied migrations are not modified; the new
+  migration supersedes it at the DB level.
+
+---
 
 ### 2026-07-02 — Stage 4B.1 — Documentation + Architecture Foundation
 

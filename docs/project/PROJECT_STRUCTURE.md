@@ -179,6 +179,15 @@ Current features:
 - validation/ — zod schema with all form fields, cross-field rules, and VALIDATION_KEYS constants
 - ui/ — RequestForm (RHF + zodResolver, submit state machine, server error mapping) and form primitives
 
+#### features/admin/
+
+Stage 4B (reduced scope) — see PROJECT_DECISIONS.md, Stage 4B Admin Dashboard Architecture.
+
+- types/ — `AdminRequestListItem`, `RequestStatus` re-exported from `@/services` (owned by `services/db.ts` — see the layering note there; `features/admin/types` is the feature-facing import point, not the owner)
+- config/ — `REQUEST_STATUS_OPTIONS` re-exported from `@/services`, same reasoning as types/
+- ui/ — planned, not yet implemented (admin list/detail components)
+- No top-level `features/admin/index.ts` — matches the existing `features/request/` pattern, which also has no top-level public API file; each subfolder (`types/`, `config/`, `ui/`) is its own import point
+
 ---
 
 ### shared/
@@ -233,6 +242,11 @@ Current modules:
 - `createRequest(params)` — calls `create_request` RPC; atomically inserts request + files, returns `{ id, referenceCode }`
 - `getRequestByClientSubmissionId(clientSubmissionId)` — looks up existing request by `clientSubmissionId`; returns `referenceCode` string or `null`
 - `CreatedRequest` — exported type
+- `REQUEST_STATUS_OPTIONS` — readonly tuple of allowed `requests.status` values (`"new" | "active" | "booked" | "completed" | "rejected"`), source of truth for the `RequestStatus` type; mirrors the DB `CHECK` constraint on `requests.status`. See PROJECT_DECISIONS.md — Request Status Semantics for what each value means and why `in_progress` was rejected.
+- `RequestStatus` — exported type, derived from `REQUEST_STATUS_OPTIONS`
+- `AdminRequestListItem` — exported DTO type for the admin request list (`id`, `referenceCode`, `clientName`, `placement`, `size`, `color`, `status`, `createdAt`); intentionally excludes `studioId`, raw DB row fields not needed by the list UI, file data, and any Stage 4C fields (notes, unread, metrics)
+- `listRequestsForStudio(studioId)` — queries `requests` filtered by `studio_id = studioId`, ordered by `created_at` descending, selecting only the columns needed for the list DTO; maps each row through an internal `mapRequestListRow()` (snake_case → camelCase, narrows `status` to `RequestStatus`, throws on an unrecognized status value); throws on Supabase error
+- **Layering note:** `AdminRequestListItem`, `RequestStatus`, and `REQUEST_STATUS_OPTIONS` are defined here, not in `src/features/admin/types`/`config`, because `services` must not import from `features` (see Dependency Direction below) while `db.ts` owns the query and the row→DTO mapping. `src/features/admin/types` and `src/features/admin/config` re-export these from `@/services` for feature-facing consumption — see those entries below.
 
 ---
 

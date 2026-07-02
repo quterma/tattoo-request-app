@@ -6,6 +6,73 @@ export interface CreatedRequest {
   referenceCode: string
 }
 
+export const REQUEST_STATUS_OPTIONS = [
+  "new",
+  "active",
+  "booked",
+  "completed",
+  "rejected",
+] as const
+
+export type RequestStatus = (typeof REQUEST_STATUS_OPTIONS)[number]
+
+function isRequestStatus(value: string): value is RequestStatus {
+  return (REQUEST_STATUS_OPTIONS as readonly string[]).includes(value)
+}
+
+export interface AdminRequestListItem {
+  id: string
+  referenceCode: string
+  clientName: string
+  placement: string
+  size: string
+  color: string
+  status: RequestStatus
+  createdAt: string
+}
+
+interface RequestListRow {
+  id: string
+  reference_code: string
+  client_name: string
+  placement: string
+  size: string
+  color: string
+  status: string
+  created_at: string
+}
+
+function mapRequestListRow(row: RequestListRow): AdminRequestListItem {
+  if (!isRequestStatus(row.status)) {
+    throw new Error(`Unknown request status: ${row.status}`)
+  }
+
+  return {
+    id: row.id,
+    referenceCode: row.reference_code,
+    clientName: row.client_name,
+    placement: row.placement,
+    size: row.size,
+    color: row.color,
+    status: row.status,
+    createdAt: row.created_at,
+  }
+}
+
+export async function listRequestsForStudio(studioId: string): Promise<AdminRequestListItem[]> {
+  const { data, error } = await supabase
+    .from("requests")
+    .select("id, reference_code, client_name, placement, size, color, status, created_at")
+    .eq("studio_id", studioId)
+    .order("created_at", { ascending: false })
+
+  if (error) {
+    throw new Error(`DB list query failed: ${error.message}`)
+  }
+
+  return (data as RequestListRow[]).map(mapRequestListRow)
+}
+
 export async function getRequestByClientSubmissionId(
   clientSubmissionId: string,
 ): Promise<string | null> {

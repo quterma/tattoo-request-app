@@ -675,6 +675,18 @@ reduction explicit and authoritative.
 - DTO/types live in `src/features/admin/types`; admin UI components live in
   `src/features/admin/ui` — matching the existing `features/request` folder shape.
 
+**Clarification (added Stage 4B.2):** `AdminRequestListItem`, `RequestStatus`, and
+`REQUEST_STATUS_OPTIONS` are *defined* in `src/services/db.ts`, not in
+`src/features/admin/types`/`config`. Reason: `services` must not import from `features` (see
+PROJECT_STRUCTURE.md — Dependency Direction), but `db.ts` owns the `requests` query and the
+DB-row-to-DTO mapping, including status narrowing/validation — that mapping logic needs the
+type at the point it's produced. `src/features/admin/types/index.ts` and
+`src/features/admin/config/index.ts` re-export these from `@/services` (the service barrel, not
+a deep `@/services/db` import) so the rest of the admin feature still imports them from the
+documented feature-local location. This is a narrow, one-directional exception: the type is
+owned by the service layer; the feature layer only re-exports for its own consumers'
+convenience. It does not create a `services → features` dependency in either direction.
+
 ## Signed URLs
 
 - Signed URLs are generated server-side, only from file records returned by an already
@@ -685,6 +697,97 @@ reduction explicit and authoritative.
   signed URL is exposed.
 - Continues the existing File Access Decisions above (signed URLs, ~1 hour expiry, admin-only,
   BFF/service-layer generation) — Stage 4B is the first real caller of that decision.
+
+---
+
+# Request Status Semantics
+
+Decided 2026-07-02, following an internal audit and external architecture/product review,
+before the Stage 4B.2 implementation was committed. Replaces `contacted` with `active` in
+`REQUEST_STATUS_OPTIONS`/`RequestStatus` (`src/services/db.ts`) and in the `requests.status` DB
+`CHECK` constraint.
+
+## Approved Status Values
+
+- `new` — received; not yet reviewed or responded to.
+- `active` — ongoing relationship; no concrete next appointment scheduled.
+- `booked` — a concrete next appointment exists, whether a consultation or a tattoo session.
+- `completed` — the work/request is considered finished.
+- `rejected` — closed without proceeding.
+
+`in_progress` was proposed and explicitly rejected — see below.
+
+## Why `active` Replaces `contacted`, and Why Not `in_progress`
+
+`requests.status` is a coarse operational summary / next-action field — it answers "what does
+the artist need to do next about this request," not "what stage of tattoo work is this at."
+
+`in_progress` and `booked` are orthogonal dimensions and can both be true at once (a request can
+be "in progress" on design work while also having a booked appointment, or have no appointment
+booked yet while still being actively worked). A single exclusive status field must not try to
+encode two independent dimensions at once — adding `in_progress` alongside `booked` would force
+an artificial priority ordering between two things that are not mutually exclusive in reality.
+`active` avoids this: it means only "ongoing relationship, no concrete next appointment yet,"
+which is a single, unambiguous condition.
+
+## What `requests.status` Must Not Encode
+
+This field is intentionally coarse. It must not attempt to represent:
+
+- appointment/session lifecycle (scheduling, rescheduling, cancellation)
+- multi-session tattoo work progress (session 1 of N, healing between sessions, etc.)
+- sketch/design work state
+- task deadlines
+- notes or activity history
+
+These are separate domain concerns — see Future Domain Direction below.
+
+## Stage 4B Validation Behavior
+
+- The server validates only that a requested status value is one of the five allowed values.
+- No transition graph or transition validation is implemented in Stage 4B — any allowed value
+  may be set from any other allowed value.
+- No terminal-state enforcement in Stage 4B — e.g., updating a `rejected` or `completed` request
+  back to `new` is not blocked at this stage.
+- Same-status updates are valid (setting a request's status to the value it already has is not
+  an error).
+- This is a deliberate scope boundary, not an oversight: Stage 4B is a coarse operational tool,
+  and transition rules are workflow modeling that requires more real usage context than exists
+  today (see Post-Launch Discovery Checkpoint below).
+
+## Future Domain Direction (Explicitly Non-Binding, Not Implemented)
+
+The following are named to record product direction and prevent scope from silently drifting
+into Stage 4B/4C. None of this is architecture, schema, or implementation — no DB tables,
+columns, or field shapes are committed here. Each requires its own dedicated planning phase
+before any implementation begins.
+
+**Appointment / Calendar Model** — appointments for consultation and tattoo sessions; create,
+move, cancel; multi-session support; a future admin calendar view; later evaluate external
+calendar sync and whether to surface full/external/internal calendar availability. This belongs
+on the post-launch roadmap as its own named item — see PROJECT_IMPLEMENTATION_PLAN.md — Post-
+Launch Roadmap. It must not be silently folded into Stage 4C.
+
+**Task / Design Workflow Model** — sketch/design/preparation tasks and their deadlines, tracked
+separately from `requests.status`.
+
+**Notes / Activity History** — Stage 4C begins with plain internal notes (already scoped there).
+Structured activity history and any status-transition rules are deferred until there is enough
+real workflow context to design them well — not part of Stage 4C's current scope.
+
+## Post-Launch Discovery Checkpoint
+
+Add a review checkpoint roughly 4–8 weeks after real production usage begins, to revisit:
+
+- whether `active` needs to be split into more specific states
+- terminal-state and reopen policy (should `rejected`/`completed` be revisable, and under what
+  rule)
+- appointment/calendar priority and integration needs
+- task visibility and deadline handling
+- the actual shape of multi-session workflows observed in real use
+
+This checkpoint is a scheduling note, not a commitment to build any of the above — the point is
+to decide with real data instead of speculating now.
 
 ---
 
