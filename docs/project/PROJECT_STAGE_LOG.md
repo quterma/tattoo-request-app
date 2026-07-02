@@ -12,12 +12,12 @@ AI agents and developers working on the project.
 
 ## Current Stage
 
-Stage: Stage 4A — Admin Authentication
+Stage: Stage 4B — Admin Dashboard
 Status: In progress
 
 Current focus:
 
-- Stage 4A.1 complete — Stage 4A.2 complete — Stage 4A.3 complete — Stage 4A.4 complete — Stage 4A.5 complete — Stage 4A.6 complete — Stage 4A.7.1 (documentation) complete — Stage 4A.7.2 (implementation) complete — Stage 4A.8 audit complete — Stage 4A.8 fix pass complete — Stage 4A closed — proceeding to Stage 4B
+- Stage 4A closed (see Stage 4A completion history below) — Stage 4B.0 (architecture/data-access audit) complete — Stage 4B.1 (documentation + architecture foundation) complete — proceeding to Stage 4B implementation
 
 Completed stages:
 
@@ -67,6 +67,58 @@ Completed in Stage 3:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-07-02 — Stage 4B.1 — Documentation + Architecture Foundation
+
+Status: Completed (documentation only — no implementation)
+
+Completed:
+
+- Stage 4B.0 read-only architecture/data-access audit completed (no code changes): smallest
+  clean server-side architecture for list/detail/signed-URLs/status-update; service vs. route
+  vs. Server Component/Server Action responsibility boundaries; DTO shapes; signed URL strategy;
+  status-update flow; schema verified directly against migration files (not assumed from docs);
+  test strategy; and the Stage 4B scope documentation gap (PROJECT_IMPLEMENTATION_PLAN.md and
+  PROJECT_CONTEXT.md still described the original larger Stage 4B task list)
+- External architecture review completed on the 4B.0 audit findings; decisions approved
+- Stage 4B scope reduced: dashboard metrics, admin notes, and unread/read tracking deferred to
+  a new explicit Stage 4C — Admin Dashboard Enhancements (not started, no architecture decided)
+- Stage 4B now scoped to: admin request list, request detail, private request images via
+  server-generated signed URLs, request status update, empty/loading/error states
+- Architecture decisions recorded in `PROJECT_DECISIONS.md` — Stage 4B Admin Dashboard
+  Architecture: DB UUID route param (not `referenceCode`, which is sequential/enumerable);
+  every page/action calls `getAuthenticatedStudioMember()` independently before any data
+  access; every DB read/update scoped by `studio_id = studioId`; Server Components for reads,
+  Server Action for status update; `src/services/db.ts` and `src/services/storage.ts` extended
+  directly, no `services/admin.ts`; DTO/types in `src/features/admin/types`, UI in
+  `src/features/admin/ui`; signed URLs generated only from already studio-scoped file records,
+  raw `storagePath` never in a UI DTO; 0-row status update treated as not-found, not success;
+  cross-studio access and missing-request both return uniform not-found
+- `PROJECT_IMPLEMENTATION_PLAN.md`: Stage 4B task list and exit criteria rewritten to match
+  reduced scope; 4B.0 and 4B.1 recorded as completed sub-stages; new Stage 4C added for the
+  deferred items; UI-architecture-audit requirement satisfied via a concise note (reuse
+  `src/shared/ui`, admin-only UI under `src/features/admin/ui`, no new design system/deps)
+  rather than a separate audit stage, since scope is now small enough not to need one
+- `PROJECT_CONTEXT.md`: Admin Interface section aligned with reduced current scope; notes/
+  unread/metrics marked deferred to Stage 4C
+- `PROJECT_ARCHITECTURE.md`: stale generic "Admin Flow" section (implied client-side fetching,
+  mentioned notes) replaced with a concrete Stage 4B flow (list / detail+images / status update)
+  matching the approved architecture
+- No implementation performed: no pages, UI, status action, signed URL logic, or data queries
+  added. No optional `src/features/admin/types`/`config` scaffold added either — see rationale
+  below
+- Total tests: 117 (unchanged — no code touched)
+- lint / typecheck / test / build — all PASS (`pnpm qg`)
+
+Note on the optional type/config foundation offered in scope: not added in this pass. The
+approved DTO/config shapes (`RequestStatus`, `REQUEST_STATUS_OPTIONS`, list/detail/file DTOs)
+are recorded in prose in `PROJECT_DECISIONS.md`/this entry, but creating the actual
+`src/features/admin/types` and `src/features/admin/config` files was deferred to the first
+implementation step so that adding those files and wiring `PROJECT_STRUCTURE.md`/
+`docs/files-structure.md` happens together with their first real usage, rather than landing an
+empty scaffold in a documentation-only step.
+
+---
 
 ### 2026-07-01 — Stage 4A.8 — Audit fix pass; Stage 4A closed
 

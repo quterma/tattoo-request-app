@@ -391,16 +391,83 @@ Result:
 
 Goal: implement request management interface.
 
-**Before implementation: conduct a UI architecture audit** to confirm component structure,
-data-fetching patterns, and how the existing design system and UI primitives will be applied
-consistently across the admin surface.
+**Reduced approved scope** (recorded 2026-07-02, see PROJECT_DECISIONS.md — Stage 4B Admin
+Dashboard Architecture): dashboard metrics, admin notes, and unread/read tracking are deferred
+out of Stage 4B — see Stage 4C below. Stage 4B delivers the minimal request-management loop only.
+
+**UI architecture note** (satisfies the "UI architecture audit before implementation"
+requirement without a separate audit stage, given the reduced scope): use existing shared UI
+primitives/design system (`src/shared/ui`) wherever they fit; add admin-specific UI only under
+`src/features/admin/ui`. No new design system, no broad visual polish, no new dependencies.
+
+### 4B.0 — Architecture & Data-Access Audit ✓ completed
+
+Read-only audit (no code changes) of the smallest clean server-side architecture for list,
+detail, signed URLs, and status update; service/route responsibility boundaries; DTO shape;
+route/data-fetching pattern; signed URL strategy; status-update flow; schema verification
+against real migrations; test strategy; and the Stage 4B scope documentation gap (this stage's
+task list and PROJECT_CONTEXT.md still described notes/unread/metrics as in-scope). Findings
+reviewed externally; approved decisions recorded in PROJECT_DECISIONS.md and applied to this
+stage's task list and exit criteria below.
+
+### 4B.1 — Documentation + Architecture Foundation ✓ completed
+
+Documentation-only step (this entry). Updates Stage 4B scope, exit criteria, and cross-doc
+consistency (PROJECT_CONTEXT.md, PROJECT_ARCHITECTURE.md, PROJECT_DECISIONS.md) to match the
+reduced approved scope and the 4B.0 audit's approved architecture decisions. No pages, UI,
+status action, signed URL logic, or data queries implemented yet.
 
 Tasks:
 
-- request list with unread/new indicators
-- request details page (data + images via signed URLs)
+- admin request list (all requests for the authenticated member's studio)
+- request detail page (data + images via server-generated signed URLs)
 - status management (new / contacted / booked / completed / rejected)
-- admin notes
+- empty / loading / error states for list and detail
+
+Architecture (see PROJECT_DECISIONS.md — Stage 4B Admin Dashboard Architecture for full detail):
+
+- route param is the DB UUID `id` (`/[locale]/admin/requests/[id]`), not `referenceCode`
+  (sequential/enumerable) — UI displays `referenceCode`, UUID stays technical/internal
+- Server Components for list/detail reads; Server Action for status update
+- every page/action calls `getAuthenticatedStudioMember()` before any data access
+- every DB read/update includes `studio_id = studioId` scoping
+- `src/services/db.ts` and `src/services/storage.ts` extended directly — no `services/admin.ts`
+- DTO/types in `src/features/admin/types`; admin UI components in `src/features/admin/ui`
+- signed URLs generated only from file records returned by an already studio-scoped request
+  query; raw `storagePath` never enters a UI DTO
+- status update matching 0 rows is `not found`, not silently treated as success
+- cross-studio detail access and a genuinely missing request both return the same uniform
+  not-found behavior — no distinguishing signal
+
+Exit Criteria:
+
+- admin can view the request list, scoped to their own studio only
+- admin can open a request's detail page with images (signed URLs), scoped to their own studio
+- admin can update a request's status, scoped to their own studio; cross-studio update is
+  rejected as not-found, not silently ignored or misreported as success
+- list and detail pages handle empty, loading, and error states
+- UI uses existing design system and primitives where applicable; admin-only UI lives under
+  `src/features/admin/ui`
+- `pnpm qg` passes (lint + typecheck + tests + build)
+
+Result:
+
+- admin can view and triage requests for their own studio
+
+---
+
+## Stage 4C — Admin Dashboard Enhancements (deferred from Stage 4B)
+
+Goal: extend the Stage 4B request-management loop with tracking and visibility features that
+are not required for the minimal admin loop to function.
+
+Deferred here on 2026-07-02 — see PROJECT_DECISIONS.md — Stage 4B Admin Dashboard Architecture.
+Not started; no architecture decided yet for this stage.
+
+Tasks:
+
+- unread/read tracking (`read_at` column already exists on `requests`, unused until this stage)
+- admin notes (internal notes per request — no DB column exists yet; schema change required)
 - basic dashboard metrics:
   - total request count
   - count by status
@@ -409,16 +476,13 @@ Tasks:
 
 Exit Criteria:
 
-- admin can view all requests
-- admin can open request details with images
-- admin can update status and notes
 - unread indicator reflects read/unread state
+- admin can add and view internal notes per request
 - dashboard metrics display correctly
-- UI uses existing design system and primitives
 
 Result:
 
-- admin can manage requests
+- admin has richer visibility into request volume and history
 
 ---
 

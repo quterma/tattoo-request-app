@@ -187,13 +187,36 @@ Password reset flow:
 
 ---
 
-### Admin Flow
+### Admin Dashboard Flow (Stage 4B)
 
-1. admin opens request list
-2. client fetches request data from backend
-3. admin views request details
-4. admin updates status or notes
-5. backend persists changes
+Reduced approved scope: list, detail with images, status update. See PROJECT_DECISIONS.md —
+Stage 4B Admin Dashboard Architecture for the full decision record.
+
+**List:**
+1. admin opens the request list page (Server Component)
+2. page calls `getAuthenticatedStudioMember()`; unauthenticated/unauthorized handled by the
+   existing `(protected)` layout gate
+3. page calls the list query in `src/services/db.ts`, scoped to `studio_id = studioId`
+4. list renders directly from the Server Component — no client-side fetch
+
+**Detail + image access:**
+1. admin opens a request's detail page at `/[locale]/admin/requests/[id]` (DB UUID, not
+   `referenceCode` — see PROJECT_DECISIONS.md)
+2. page calls `getAuthenticatedStudioMember()` again — every entry point re-verifies
+   independently, it does not trust a value passed down from the layout
+3. page calls the detail query in `src/services/db.ts`, scoped to `studio_id = studioId AND id
+   = requestId`; a request that exists but belongs to a different studio returns the same
+   not-found result as a request that does not exist at all
+4. for each file on the (already studio-scoped) result, a signed URL is generated server-side
+   via `src/services/storage.ts`; raw storage paths never leave the service layer
+
+**Status update:**
+1. admin submits a new status via a Server Action
+2. action calls `getAuthenticatedStudioMember()` before any write
+3. action validates the submitted status against the allowed set
+4. update query in `src/services/db.ts` is scoped to `studio_id = studioId AND id = requestId`;
+   0 matched rows is treated as not-found, not success
+5. on success, the page revalidates/redirects to reflect the new status
 
 ---
 

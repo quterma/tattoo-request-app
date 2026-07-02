@@ -71,11 +71,17 @@ Instead of chat-based communication, users provide all necessary information upf
 
 ### Admin Interface
 
-- request list
-- request details view (data + images)
+Current Stage 4B scope (reduced, see PROJECT_DECISIONS.md — Stage 4B Admin Dashboard Architecture):
+
+- request list, scoped to the admin's own studio
+- request details view (data + images via signed URLs)
 - status management (new / contacted / booked / completed / rejected)
+
+Deferred to Stage 4C (see PROJECT_IMPLEMENTATION_PLAN.md):
+
 - internal notes
 - unread tracking
+- dashboard metrics
 
 ---
 

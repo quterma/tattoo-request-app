@@ -612,6 +612,82 @@ Until Stage 5 RLS, admin authorization is enforced at the application layer only
 
 ---
 
+# Stage 4B Admin Dashboard Architecture
+
+Decided 2026-07-02, following the 4B.0 read-only architecture/data-access audit and external
+review. Reduces Stage 4B scope and records the approved architecture before implementation.
+
+## Reduced Scope
+
+Stage 4B delivers only: admin request list, request detail, private request images via
+server-generated signed URLs, request status update, and empty/loading/error states.
+
+Deferred to Stage 4C (see PROJECT_IMPLEMENTATION_PLAN.md): dashboard metrics, admin notes,
+unread/read tracking. Also out of scope, unchanged from earlier decisions: RBAC, invite flow,
+RLS/Storage policies (Stage 5), SaaS onboarding.
+
+Reason: the 4B.0 audit found PROJECT_IMPLEMENTATION_PLAN.md and PROJECT_CONTEXT.md still
+described the larger original Stage 4B task list (list + detail + status + notes + unread +
+metrics) after this narrower scope had already been informally agreed. This decision makes the
+reduction explicit and authoritative.
+
+## Route Param: DB UUID, Not `referenceCode`
+
+- Detail route is `/[locale]/admin/requests/[id]` where `id` is the DB UUID.
+- `referenceCode` (`REQ-YYYY-NNNN`) is sequential and enumerable — using it as a route param
+  would let anyone guess adjacent requests' URLs. The DB UUID is not guessable.
+- UI displays `referenceCode` to the admin; the UUID stays a technical/internal identifier used
+  only for routing and DB lookups — consistent with the existing Identifier Roles table (see
+  Reference Code Decision above), which already designates the UUID as internal-only.
+
+## Authorization Pattern
+
+- Every Stage 4B page and Server Action calls `getAuthenticatedStudioMember()` before any data
+  access — no exceptions, even where a parent layout already performed the check. Each
+  entry point re-verifies independently rather than trusting a value passed down from a
+  parent render.
+- Every DB read and update includes `studio_id = studioId` scoping, using the `studioId` from
+  that call's own `getAuthenticatedStudioMember()` result — never a client-supplied value.
+- Status update matching 0 rows (wrong studio, or request does not exist) is treated as
+  `not found`, not silently treated as success. The application must check the affected row
+  count and branch on it, not assume a Supabase update without an error means a row changed.
+- Cross-studio detail access and a genuinely missing request both produce the same uniform
+  not-found response. The app must not leak whether a request exists in a different studio —
+  no distinguishing error message, status code, or timing difference between the two cases.
+
+## Server Components for Reads, Server Action for Writes
+
+- List and detail pages fetch data directly in Server Components via service-layer calls —
+  no Route Handler needed for reads, consistent with `PROJECT_ARCHITECTURE.md`'s BFF guidance
+  ("used only when required").
+- Status update is a Server Action, matching the existing pattern from Stage 4A
+  (`loginAction`, `logoutAction`, `resetPasswordAction`).
+
+## Service Layer: Extend Existing Modules, No `services/admin.ts`
+
+- `src/services/db.ts` gains the list/detail/status-update query functions.
+- `src/services/storage.ts` gains the signed-URL generation function.
+- No new `services/admin.ts` module. The operations are plain scoped reads/writes on
+  `requests`/`request_files`, the same category of work already living in `db.ts`; splitting
+  services by feature instead of by external system would be a new organizing principle not
+  used anywhere else in this codebase, and contradicts the Service Layer Decisions above
+  ("keep service layer simple and YAGNI-compliant").
+- DTO/types live in `src/features/admin/types`; admin UI components live in
+  `src/features/admin/ui` — matching the existing `features/request` folder shape.
+
+## Signed URLs
+
+- Signed URLs are generated server-side, only from file records returned by an already
+  studio-scoped request query (i.e., only after the detail lookup has confirmed the request
+  belongs to the authenticated member's studio) — never generated from an unscoped or
+  client-supplied storage path.
+- Raw `storagePath` must never be included in a DTO returned to UI code. Only the resulting
+  signed URL is exposed.
+- Continues the existing File Access Decisions above (signed URLs, ~1 hour expiry, admin-only,
+  BFF/service-layer generation) — Stage 4B is the first real caller of that decision.
+
+---
+
 # Rule for Future Changes
 
 All architectural, product, or behavioral decisions MUST be recorded in this document.
