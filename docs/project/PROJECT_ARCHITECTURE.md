@@ -204,11 +204,18 @@ Stage 4B Admin Dashboard Architecture for the full decision record.
    `referenceCode` — see PROJECT_DECISIONS.md)
 2. page calls `getAuthenticatedStudioMember()` again — every entry point re-verifies
    independently, it does not trust a value passed down from the layout
-3. page calls the detail query in `src/services/db.ts`, scoped to `studio_id = studioId AND id
-   = requestId`; a request that exists but belongs to a different studio returns the same
-   not-found result as a request that does not exist at all
-4. for each file on the (already studio-scoped) result, a signed URL is generated server-side
-   via `src/services/storage.ts`; raw storage paths never leave the service layer
+3. page calls `getAdminRequestDetail(studioId, requestId)` in `src/services/requests.ts` — the
+   orchestration layer, not `db.ts`/`storage.ts` directly
+4. `requests.ts` calls `getRequestForStudio(studioId, requestId)` in `db.ts`, scoped to
+   `studio_id = studioId AND id = requestId`; a request that exists but belongs to a different
+   studio returns the same not-found (`null`) result as a request that does not exist at all —
+   `requests.ts` returns `null` immediately in that case, without attempting to sign any files
+5. for each file on the (already studio-scoped) result, `requests.ts` calls
+   `createSignedRequestFileUrl()` in `storage.ts`; each file is signed independently — one
+   file's signing failure marks only that file `"unavailable"` and does not fail the rest of
+   the detail page
+6. raw storage paths never leave `src/services/`; the DTO returned to the page contains only
+   `signedUrl` (or no URL, for an unavailable file) — never `storagePath`
 
 **Status update:**
 1. admin submits a new status via a Server Action

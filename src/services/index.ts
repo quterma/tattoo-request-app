@@ -8,3 +8,5 @@ export {
   REQUEST_STATUS_OPTIONS,
 } from "./db"
 export type { CreatedRequest, AdminRequestListItem, RequestStatus } from "./db"
+export { getAdminRequestDetail } from "./requests"
+export type { AdminRequestDetail, AdminRequestFile } from "./requests"

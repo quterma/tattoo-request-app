@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 
 const mockRemove = vi.fn()
 const mockUpload = vi.fn()
+const mockCreateSignedUrl = vi.fn()
 
 vi.mock("../supabase", () => ({
   supabase: {
@@ -9,12 +10,13 @@ vi.mock("../supabase", () => ({
       from: vi.fn(() => ({
         upload: mockUpload,
         remove: mockRemove,
+        createSignedUrl: mockCreateSignedUrl,
       })),
     },
   },
 }))
 
-import { uploadRequestFiles } from "../storage"
+import { BUCKET, createSignedRequestFileUrl, uploadRequestFiles } from "../storage"
 
 const STUDIO_ID = "a1b2c3d4-0000-4000-8000-000000000001"
 const CLIENT_ID = "f47ac10b-58cc-4372-a567-0e02b2c3d479"
@@ -210,5 +212,63 @@ describe("uploadRequestFiles", () => {
     ).rejects.toThrow()
 
     expect(mockRemove).not.toHaveBeenCalled()
+  })
+})
+
+describe("createSignedRequestFileUrl", () => {
+  const STORAGE_PATH = `${STUDIO_ID}/${CLIENT_ID}/reference/reference-01.jpg`
+
+  it("calls Supabase Storage createSignedUrl with the bucket, path, and 3600s expiry", async () => {
+    mockCreateSignedUrl.mockResolvedValue({
+      data: { signedUrl: "https://signed.example/reference-01.jpg" },
+      error: null,
+    })
+
+    await createSignedRequestFileUrl(STORAGE_PATH)
+
+    expect(mockCreateSignedUrl).toHaveBeenCalledWith(STORAGE_PATH, 3600)
+  })
+
+  it("uses the request-images bucket", async () => {
+    const { supabase } = await import("../supabase")
+    mockCreateSignedUrl.mockResolvedValue({
+      data: { signedUrl: "https://signed.example/reference-01.jpg" },
+      error: null,
+    })
+
+    await createSignedRequestFileUrl(STORAGE_PATH)
+
+    expect(supabase.storage.from).toHaveBeenCalledWith(BUCKET)
+  })
+
+  it("returns the signed URL", async () => {
+    mockCreateSignedUrl.mockResolvedValue({
+      data: { signedUrl: "https://signed.example/reference-01.jpg" },
+      error: null,
+    })
+
+    const result = await createSignedRequestFileUrl(STORAGE_PATH)
+
+    expect(result).toBe("https://signed.example/reference-01.jpg")
+  })
+
+  it("throws when Supabase returns a signing error", async () => {
+    mockCreateSignedUrl.mockResolvedValue({
+      data: null,
+      error: { message: "Object not found" },
+    })
+
+    await expect(createSignedRequestFileUrl(STORAGE_PATH)).rejects.toThrow(
+      "Signed URL creation failed",
+    )
+  })
+
+  it("throws with the supabase error message", async () => {
+    mockCreateSignedUrl.mockResolvedValue({
+      data: null,
+      error: { message: "Object not found" },
+    })
+
+    await expect(createSignedRequestFileUrl(STORAGE_PATH)).rejects.toThrow("Object not found")
   })
 })

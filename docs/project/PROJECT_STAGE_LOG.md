@@ -17,7 +17,7 @@ Status: In progress
 
 Current focus:
 
-- Stage 4A closed (see Stage 4A completion history below) — Stage 4B.0 (architecture/data-access audit) complete — Stage 4B.1 (documentation + architecture foundation) complete — Stage 4B.2 (domain contracts + request list data access) complete — proceeding to Stage 4B.3
+- Stage 4A closed (see Stage 4A completion history below) — Stage 4B.0 (architecture/data-access audit) complete — Stage 4B.1 (documentation + architecture foundation) complete — Stage 4B.2 (domain contracts + request list data access) complete — Stage 4B.3 (request detail data access + signed image URLs) complete — proceeding to Stage 4B.4
 
 Completed stages:
 
@@ -67,6 +67,102 @@ Completed in Stage 3:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-07-02 — Stage 4B.3 — Request Detail Data Access + Signed Image URLs
+
+Status: Completed
+
+Completed:
+
+- `src/services/db.ts`: `getRequestForStudio(studioId, requestId)` — queries a single `requests`
+  row filtered by both `id = requestId` and `studio_id = studioId`, with a nested
+  `request_files(...)` relationship select in one query; returns `null` uniformly for a missing
+  request and a cross-studio request (the `.eq("studio_id", ...)` filter simply excludes
+  non-matching rows — there is no separate branch that could leak which case occurred); does not
+  query by `referenceCode`; internal `RequestDetailDbRecord`/`RequestFileDbRecord` types and
+  `mapRequestDetailRow()` mapper (snake_case → camelCase, narrows/validates `status`, throws on
+  an unrecognized value) — **not exported** from `src/services/index.ts`; throws on Supabase error
+- `src/services/storage.ts`: `createSignedRequestFileUrl(storagePath)` — calls Supabase Storage
+  `createSignedUrl()` against the `request-images` bucket via the service_role client, explicit
+  3600-second (~1 hour) expiry, throws on signing error — **not exported** from
+  `src/services/index.ts`; the only caller is `services/requests.ts`
+- `src/services/requests.ts` (new module): thin server-only orchestration composing `db.ts` +
+  `storage.ts`. `getAdminRequestDetail(studioId, requestId)` calls `getRequestForStudio()`,
+  returns `null` immediately without attempting any signing if that returns `null`; otherwise
+  signs every file via `Promise.all`, with each file's signing wrapped in its own try/catch so
+  one file's failure cannot reject the whole detail result. Failed files become
+  `{ status: "unavailable", id, originalName, type }` (no `signedUrl`); failures are logged as
+  `console.warn("[requests] file signing failed", { fileId, reason })` with `reason` classified
+  into `"not_found" | "permission_denied" | "unknown"` — the raw Supabase error message and the
+  raw `storagePath` are never logged. Exports the public DTOs `AdminRequestDetail` (no
+  `storagePath` anywhere in its shape — verified by a dedicated test) and `AdminRequestFile`
+  (discriminated union on `status`)
+- **This is the one approved exception to "no `services/admin.ts`"** (see
+  PROJECT_DECISIONS.md — Stage 4B Admin Dashboard Architecture): `requests.ts` is not a
+  feature-oriented service split — `db.ts` and `storage.ts` still own all DB/Storage access
+  respectively. The exception is narrow: this operation spans two external providers in one
+  logical result and must hide one provider's internal identifiers (`storagePath`) from
+  anything crossing out of `src/services/`
+- `src/services/index.ts`: exports only the public-safe surface — `getAdminRequestDetail`,
+  `AdminRequestDetail`, `AdminRequestFile`. `getRequestForStudio`, `createSignedRequestFileUrl`,
+  and all internal DB detail/file types remain unexported, matching the requested export
+  boundary
+- `src/features/admin/types/index.ts`: re-exports `AdminRequestDetail`, `AdminRequestFile`
+  alongside the existing `AdminRequestListItem`/`RequestStatus` re-exports, from `@/services`
+- Budget field: `AdminRequestDetail.budget: string | null` included even though the task's field
+  list omitted it — confirmed with the developer that this was an oversight in the task spec,
+  not a deliberate exclusion; `budget` is a real nullable `requests` column and part of the
+  original request form, unlike notes/unread/metrics which are explicitly deferred elsewhere
+- 12 new tests in `src/services/__tests__/db.test.ts` for `getRequestForStudio`: queries by both
+  `id` and `studio_id`, returns `null` for missing request, returns `null` (same code path) for
+  cross-studio request, maps snake_case detail + nested `request_files` to camelCase, maps empty
+  files array, throws on unrecognized status, throws on Supabase error (+ message propagation)
+- 5 new tests in `src/services/__tests__/storage.test.ts` for `createSignedRequestFileUrl`:
+  calls `createSignedUrl` with the exact path and `3600`, uses the `request-images` bucket,
+  returns the signed URL, throws on signing error (+ message propagation)
+- New `src/services/__tests__/requests.test.ts` (13 tests) for `getAdminRequestDetail`: returns
+  `null` without signing when DB detail is `null`, calls `getRequestForStudio` with the right
+  args, all-files-succeed → all available, one-of-several-fails → only that file unavailable
+  (others still available), a failure does not reject the whole result, logs safe `fileId`/
+  `reason` and never the raw `storagePath` or Supabase error text, classifies error messages
+  into the three safe reason buckets (parameterized), the returned DTO never contains
+  `storagePath` anywhere (JSON-stringified check), non-file fields map through unchanged, DB
+  errors propagate uncaught
+- No pages/UI, Server Actions, status update, notes/unread/metrics, appointments/calendar,
+  tasks, or migrations — out of scope for this step, none needed
+- Total tests: 156 (was 130) — all pass
+- lint / typecheck / build — all PASS
+
+**Pre-commit cleanup and real Supabase verification (same day, before commit):**
+
+- `RequestDetailDbRecord` and `RequestFileDbRecord` in `src/services/db.ts` changed from
+  `export interface` to plain (non-exported) `interface`. Confirmed neither was imported by name
+  anywhere outside `db.ts` — `requests.ts` consumes `getRequestForStudio()`'s return type by
+  inference only, and `services/index.ts` never re-exported them. `pnpm typecheck` passes
+  unchanged, confirming structural typing across the module boundary does not require the named
+  export. These internal DB shapes are now fully private to `db.ts`, matching the documented
+  "internal DB detail/file types are not exported" boundary.
+- Real Supabase verification performed via a temporary, non-committed Vitest test
+  (`src/services/__tests__/_tmp-4b3-verify.test.ts`, deleted immediately after the run) that
+  called the actual `getAdminRequestDetail()` against the linked project (env loaded from
+  `.env.local` via `process.loadEnvFile()`, no new dependency added). Confirmed against one real
+  existing request (studio `2617c7d8-...`, 4 real request rows exist, each with 2 real files):
+  - the `request_files(...)` Postgrest relationship-select used by `getRequestForStudio()`
+    executes correctly against the real database (previously only exercised against mocks)
+  - `getAdminRequestDetail()` returns a non-null DTO with exactly the expected top-level keys
+    (no extra, no missing)
+  - the DTO contains no `storagePath` key anywhere (verified via `JSON.stringify` substring
+    check, not a manual read)
+  - both real files signed successfully (`status: "available"` for both) and the signed URL had
+    a plausible signed-URL shape (`https://` prefix) — the URL value itself was never printed or
+    recorded, only a boolean check
+  - cross-studio/missing-request behavior was not re-verified against real infra in this pass —
+    mocked tests already cover both cases and the task did not require it
+- No temporary files remain in the working tree — confirmed via `git status` after deletion.
+- `PROJECT_STRUCTURE.md`, `PROJECT_DECISIONS.md`, `PROJECT_ARCHITECTURE.md`,
+  `docs/files-structure.md`: updated
+
+---
 
 ### 2026-07-02 — Stage 4B.2 — Domain Contracts + Request List Data Access
 

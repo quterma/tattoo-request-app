@@ -125,6 +125,25 @@ async function cleanupFiles(paths: string[]): Promise<void> {
   }
 }
 
+const SIGNED_URL_EXPIRY_SECONDS = 3600
+
+/**
+ * Generates a short-lived signed URL for a private request-images file.
+ * Admin-only access; storagePath must already be known to belong to the
+ * caller's studio before this is invoked (see services/requests.ts).
+ */
+export async function createSignedRequestFileUrl(storagePath: string): Promise<string> {
+  const { data, error } = await supabase.storage
+    .from(BUCKET)
+    .createSignedUrl(storagePath, SIGNED_URL_EXPIRY_SECONDS)
+
+  if (error) {
+    throw new Error(`Signed URL creation failed: ${error.message}`)
+  }
+
+  return data.signedUrl
+}
+
 export async function uploadRequestFiles(
   files: { referenceImages: File[]; placementImages: File[] },
   studioId: string,

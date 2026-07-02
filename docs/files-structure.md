@@ -149,12 +149,14 @@ tattoo-request-app/
 │   │   ├── auth.ts
 │   │   ├── db.ts
 │   │   ├── index.ts
+│   │   ├── requests.ts
 │   │   ├── storage.ts
 │   │   ├── supabase.ts
 │   │   ├── supabaseAuth.ts
 │   │   └── __tests__/
 │   │       ├── auth.test.ts
 │   │       ├── db.test.ts
+│   │       ├── requests.test.ts
 │   │       └── storage.test.ts
 │   ├── shared/
 │   │   ├── index.ts

@@ -73,6 +73,120 @@ export async function listRequestsForStudio(studioId: string): Promise<AdminRequ
   return (data as RequestListRow[]).map(mapRequestListRow)
 }
 
+/** Internal — DB-owned file record. Never leaves src/services/ (storagePath is raw). */
+interface RequestFileDbRecord {
+  id: string
+  storagePath: string
+  originalName: string
+  type: string
+  mimeType: string
+  size: number
+}
+
+/** Internal — DB-owned request detail shape. Never leaves src/services/. */
+interface RequestDetailDbRecord {
+  id: string
+  referenceCode: string
+  clientName: string
+  description: string
+  placement: string
+  size: string
+  color: string
+  budget: string | null
+  email: string | null
+  phone: string | null
+  contactOther: string | null
+  consent: boolean
+  status: RequestStatus
+  createdAt: string
+  files: RequestFileDbRecord[]
+}
+
+interface RequestFileRow {
+  id: string
+  storage_path: string
+  original_name: string
+  type: string
+  mime_type: string
+  size: number
+}
+
+interface RequestDetailRow {
+  id: string
+  reference_code: string
+  client_name: string
+  description: string
+  placement: string
+  size: string
+  color: string
+  budget: string | null
+  email: string | null
+  phone: string | null
+  contact_other: string | null
+  consent: boolean
+  status: string
+  created_at: string
+  request_files: RequestFileRow[]
+}
+
+function mapRequestDetailRow(row: RequestDetailRow): RequestDetailDbRecord {
+  if (!isRequestStatus(row.status)) {
+    throw new Error(`Unknown request status: ${row.status}`)
+  }
+
+  return {
+    id: row.id,
+    referenceCode: row.reference_code,
+    clientName: row.client_name,
+    description: row.description,
+    placement: row.placement,
+    size: row.size,
+    color: row.color,
+    budget: row.budget,
+    email: row.email,
+    phone: row.phone,
+    contactOther: row.contact_other,
+    consent: row.consent,
+    status: row.status,
+    createdAt: row.created_at,
+    files: row.request_files.map((file) => ({
+      id: file.id,
+      storagePath: file.storage_path,
+      originalName: file.original_name,
+      type: file.type,
+      mimeType: file.mime_type,
+      size: file.size,
+    })),
+  }
+}
+
+/**
+ * Returns request detail scoped to a studio, or null if the request does not exist
+ * or belongs to a different studio — both cases are indistinguishable by design.
+ * Internal DB record only; storagePath and other raw fields must not cross src/services/.
+ */
+export async function getRequestForStudio(
+  studioId: string,
+  requestId: string,
+): Promise<RequestDetailDbRecord | null> {
+  const { data, error } = await supabase
+    .from("requests")
+    .select(
+      "id, reference_code, client_name, description, placement, size, color, budget, email, phone, contact_other, consent, status, created_at, request_files(id, storage_path, original_name, type, mime_type, size)",
+    )
+    .eq("id", requestId)
+    .eq("studio_id", studioId)
+    .maybeSingle()
+
+  if (error) {
+    throw new Error(`DB detail query failed: ${error.message}`)
+  }
+
+  if (!data) return null
+
+  return mapRequestDetailRow(data as RequestDetailRow)
+}
+
 export async function getRequestByClientSubmissionId(
   clientSubmissionId: string,
 ): Promise<string | null> {

@@ -12,7 +12,12 @@ vi.mock("../supabase", () => ({
   },
 }))
 
-import { createRequest, getRequestByClientSubmissionId, listRequestsForStudio } from "../db"
+import {
+  createRequest,
+  getRequestByClientSubmissionId,
+  getRequestForStudio,
+  listRequestsForStudio,
+} from "../db"
 import type { UploadedFile } from "../storage"
 
 const baseParams = {
@@ -291,4 +296,140 @@ describe("listRequestsForStudio", () => {
       expect(result[0].status).toBe(status)
     },
   )
+})
+
+describe("getRequestForStudio", () => {
+  const STUDIO_ID = "a1b2c3d4-0000-4000-8000-000000000001"
+  const REQUEST_ID = "req-uuid-1"
+
+  function makeDetailChain(result: { data: unknown; error: unknown }) {
+    const maybeSingle = vi.fn().mockResolvedValue(result)
+    const eqStudio = vi.fn().mockReturnValue({ maybeSingle })
+    const eqId = vi.fn().mockReturnValue({ eq: eqStudio })
+    const select = vi.fn().mockReturnValue({ eq: eqId })
+    mockFrom.mockReturnValue({ select })
+    return { select, eqId, eqStudio, maybeSingle }
+  }
+
+  const sampleDetailRow = {
+    id: REQUEST_ID,
+    reference_code: "REQ-2026-0001",
+    client_name: "Alex",
+    description: "A wolf on my forearm",
+    placement: "forearm",
+    size: "medium",
+    color: "black",
+    budget: "500-800",
+    email: "alex@example.com",
+    phone: null,
+    contact_other: null,
+    consent: true,
+    status: "new",
+    created_at: "2026-07-01T10:00:00.000Z",
+    request_files: [
+      {
+        id: "file-uuid-1",
+        storage_path: `${STUDIO_ID}/sub-id/reference/reference-01.jpg`,
+        original_name: "ref.jpg",
+        type: "reference",
+        mime_type: "image/jpeg",
+        size: 512000,
+      },
+    ],
+  }
+
+  it("queries by both id and studio_id", async () => {
+    const { select, eqId, eqStudio } = makeDetailChain({ data: sampleDetailRow, error: null })
+
+    await getRequestForStudio(STUDIO_ID, REQUEST_ID)
+
+    expect(mockFrom).toHaveBeenCalledWith("requests")
+    expect(select).toHaveBeenCalledWith(
+      "id, reference_code, client_name, description, placement, size, color, budget, email, phone, contact_other, consent, status, created_at, request_files(id, storage_path, original_name, type, mime_type, size)",
+    )
+    expect(eqId).toHaveBeenCalledWith("id", REQUEST_ID)
+    expect(eqStudio).toHaveBeenCalledWith("studio_id", STUDIO_ID)
+  })
+
+  it("returns null when the request does not exist", async () => {
+    makeDetailChain({ data: null, error: null })
+
+    const result = await getRequestForStudio(STUDIO_ID, REQUEST_ID)
+
+    expect(result).toBeNull()
+  })
+
+  it("returns null (indistinguishable from missing) when the request belongs to a different studio", async () => {
+    // The .eq("studio_id", ...) filter means a cross-studio request simply
+    // never matches the query — Supabase returns the same null/data:null
+    // shape as a genuinely missing request. No separate code path exists.
+    makeDetailChain({ data: null, error: null })
+
+    const result = await getRequestForStudio("other-studio-id", REQUEST_ID)
+
+    expect(result).toBeNull()
+  })
+
+  it("maps snake_case detail row and nested request_files to camelCase", async () => {
+    makeDetailChain({ data: sampleDetailRow, error: null })
+
+    const result = await getRequestForStudio(STUDIO_ID, REQUEST_ID)
+
+    expect(result).toEqual({
+      id: REQUEST_ID,
+      referenceCode: "REQ-2026-0001",
+      clientName: "Alex",
+      description: "A wolf on my forearm",
+      placement: "forearm",
+      size: "medium",
+      color: "black",
+      budget: "500-800",
+      email: "alex@example.com",
+      phone: null,
+      contactOther: null,
+      consent: true,
+      status: "new",
+      createdAt: "2026-07-01T10:00:00.000Z",
+      files: [
+        {
+          id: "file-uuid-1",
+          storagePath: `${STUDIO_ID}/sub-id/reference/reference-01.jpg`,
+          originalName: "ref.jpg",
+          type: "reference",
+          mimeType: "image/jpeg",
+          size: 512000,
+        },
+      ],
+    })
+  })
+
+  it("maps a request with no files to an empty files array", async () => {
+    makeDetailChain({ data: { ...sampleDetailRow, request_files: [] }, error: null })
+
+    const result = await getRequestForStudio(STUDIO_ID, REQUEST_ID)
+
+    expect(result?.files).toEqual([])
+  })
+
+  it("throws when a detail row has an unrecognized status value", async () => {
+    makeDetailChain({ data: { ...sampleDetailRow, status: "archived" }, error: null })
+
+    await expect(getRequestForStudio(STUDIO_ID, REQUEST_ID)).rejects.toThrow(
+      "Unknown request status",
+    )
+  })
+
+  it("throws when supabase returns an error", async () => {
+    makeDetailChain({ data: null, error: { message: "relation does not exist" } })
+
+    await expect(getRequestForStudio(STUDIO_ID, REQUEST_ID)).rejects.toThrow(
+      "DB detail query failed",
+    )
+  })
+
+  it("throws with the supabase error message", async () => {
+    makeDetailChain({ data: null, error: { message: "connection timeout" } })
+
+    await expect(getRequestForStudio(STUDIO_ID, REQUEST_ID)).rejects.toThrow("connection timeout")
+  })
 })

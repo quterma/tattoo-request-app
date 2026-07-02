@@ -687,14 +687,40 @@ documented feature-local location. This is a narrow, one-directional exception: 
 owned by the service layer; the feature layer only re-exports for its own consumers'
 convenience. It does not create a `services → features` dependency in either direction.
 
+**`services/requests.ts` — the one exception to "no `services/admin.ts`" (added Stage 4B.3):**
+`src/services/requests.ts` is a thin server-only orchestration module that composes `db.ts`
+(request detail) and `storage.ts` (signed URLs) into the final admin detail DTO. This does not
+reverse the "no `services/admin.ts`" decision above — `requests.ts` is not a feature-oriented
+service split; `db.ts` still owns all DB access and `storage.ts` still owns all Storage access.
+The exception is narrow and justified by a different concern: this one operation spans two
+external providers in a single logical result, and it is the layer responsible for ensuring
+`storagePath` (an internal DB/Storage implementation detail) never crosses into `app/`/
+`features/` code. Composing two providers and hiding one provider's internal identifiers from
+the rest of the request is orchestration, not a second "domain service" — if a third operation
+ever needs only DB access or only Storage access, it still belongs directly in `db.ts` or
+`storage.ts`, not funneled through `requests.ts`.
+
 ## Signed URLs
 
 - Signed URLs are generated server-side, only from file records returned by an already
   studio-scoped request query (i.e., only after the detail lookup has confirmed the request
   belongs to the authenticated member's studio) — never generated from an unscoped or
-  client-supplied storage path.
+  client-supplied storage path. Enforced structurally: `getRequestForStudio()` (the only source
+  of file records with a `storagePath`) is only ever called from `services/requests.ts`, and
+  only that module calls `createSignedRequestFileUrl()`.
 - Raw `storagePath` must never be included in a DTO returned to UI code. Only the resulting
-  signed URL is exposed.
+  signed URL is exposed. `AdminRequestDetail`/`AdminRequestFile` (the public DTOs) have no
+  `storagePath` field anywhere in their shape — verified by a dedicated test in
+  `requests.test.ts`.
+- Expiry: 3600 seconds (~1 hour), matching the existing File Access Decisions above.
+- **Per-file signing failure (Stage 4B.3):** each file is signed independently; one file's
+  signing failure does not fail the whole detail request. A failed file is represented in the
+  result as `{ status: "unavailable", id, originalName, type }` (no `signedUrl`) rather than
+  omitted or causing the whole page to error. The failure is logged as
+  `console.warn("[requests] file signing failed", { fileId, reason })`, where `reason` is
+  classified into one of `"not_found" | "permission_denied" | "unknown"` from the Supabase error
+  message — the raw error message and the raw `storagePath` are never logged, to avoid leaking
+  internal storage layout details into application logs.
 - Continues the existing File Access Decisions above (signed URLs, ~1 hour expiry, admin-only,
   BFF/service-layer generation) — Stage 4B is the first real caller of that decision.
 

@@ -1,1 +1,1 @@
-export type { AdminRequestListItem, RequestStatus } from "@/services"
+export type { AdminRequestListItem, RequestStatus, AdminRequestDetail, AdminRequestFile } from "@/services"

@@ -183,7 +183,7 @@ Current features:
 
 Stage 4B (reduced scope) — see PROJECT_DECISIONS.md, Stage 4B Admin Dashboard Architecture.
 
-- types/ — `AdminRequestListItem`, `RequestStatus` re-exported from `@/services` (owned by `services/db.ts` — see the layering note there; `features/admin/types` is the feature-facing import point, not the owner)
+- types/ — `AdminRequestListItem`, `RequestStatus` (owned by `services/db.ts`), `AdminRequestDetail`, `AdminRequestFile` (owned by `services/requests.ts`) — all re-exported from `@/services`; `features/admin/types` is the feature-facing import point, not the owner of any of these
 - config/ — `REQUEST_STATUS_OPTIONS` re-exported from `@/services`, same reasoning as types/
 - ui/ — planned, not yet implemented (admin list/detail components)
 - No top-level `features/admin/index.ts` — matches the existing `features/request/` pattern, which also has no top-level public API file; each subfolder (`types/`, `config/`, `ui/`) is its own import point
@@ -236,6 +236,7 @@ Current modules:
 
 - `uploadRequestFiles(files, clientSubmissionId)` — uploads reference and placement images to Supabase Storage; per-file retry, cleanup on failure
 - `UploadedFile`, `FileType` — exported types
+- `createSignedRequestFileUrl(storagePath)` — generates a signed URL for a private `request-images` file via the service_role client; explicit 3600-second (~1 hour) expiry; throws on Supabase signing error. Internal-only — not re-exported from `src/services/index.ts`; the only caller is `services/requests.ts`, which is responsible for ensuring `storagePath` came from an already studio-scoped query before calling this
 
 #### services/db.ts
 
@@ -246,7 +247,17 @@ Current modules:
 - `RequestStatus` — exported type, derived from `REQUEST_STATUS_OPTIONS`
 - `AdminRequestListItem` — exported DTO type for the admin request list (`id`, `referenceCode`, `clientName`, `placement`, `size`, `color`, `status`, `createdAt`); intentionally excludes `studioId`, raw DB row fields not needed by the list UI, file data, and any Stage 4C fields (notes, unread, metrics)
 - `listRequestsForStudio(studioId)` — queries `requests` filtered by `studio_id = studioId`, ordered by `created_at` descending, selecting only the columns needed for the list DTO; maps each row through an internal `mapRequestListRow()` (snake_case → camelCase, narrows `status` to `RequestStatus`, throws on an unrecognized status value); throws on Supabase error
+- `getRequestForStudio(studioId, requestId)` — queries a single `requests` row filtered by both `id = requestId` and `studio_id = studioId`, with a nested `request_files(...)` relationship select; returns `null` for both a missing request and a request belonging to a different studio — the two cases are indistinguishable at this layer by design (the `.eq("studio_id", ...)` filter simply excludes cross-studio rows from matching at all, there is no separate branch to distinguish them); maps the row (and nested files) through an internal `mapRequestDetailRow()`; throws on Supabase error. Does not query by `referenceCode`
+- `RequestDetailDbRecord`, `RequestFileDbRecord` — **internal-only** types, not `export`ed even from `db.ts` itself (module-private); `RequestDetailDbRecord.files[].storagePath` is a raw Storage path and must never cross the service-layer boundary. `services/requests.ts` consumes `getRequestForStudio()`'s return type by inference only and is its only caller
 - **Layering note:** `AdminRequestListItem`, `RequestStatus`, and `REQUEST_STATUS_OPTIONS` are defined here, not in `src/features/admin/types`/`config`, because `services` must not import from `features` (see Dependency Direction below) while `db.ts` owns the query and the row→DTO mapping. `src/features/admin/types` and `src/features/admin/config` re-export these from `@/services` for feature-facing consumption — see those entries below.
+
+#### services/requests.ts
+
+- Thin server-only orchestration module — composes `db.ts` (data) + `storage.ts` (signed URLs) into the final safe admin-facing DTO. This is the one exception to "no `services/admin.ts`" (see PROJECT_DECISIONS.md — Stage 4B Admin Dashboard Architecture): it exists specifically because this operation spans two external providers (DB + Storage) and must hide internal Storage data (`storagePath`) from anything crossing out of `src/services/`. It is not a feature-oriented service split — `db.ts`/`storage.ts` still own their respective external systems
+- `getAdminRequestDetail(studioId, requestId)` — calls `getRequestForStudio(studioId, requestId)`; returns `null` immediately if that returns `null` (no signing attempted); otherwise signs each file via `createSignedRequestFileUrl()` through `Promise.all`, where each file's signing has its own internal try/catch so one file's failure cannot reject the whole detail result
+- On a per-file signing failure: returns `{ status: "unavailable", id, originalName, type }` for that file (no `signedUrl`), logs `console.warn("[requests] file signing failed", { fileId, reason })` where `reason` is one of `"not_found" | "permission_denied" | "unknown"` (classified from the error message) — the raw `storagePath` and the raw Supabase error message are never logged
+- `AdminRequestDetail`, `AdminRequestFile`, `AdminRequestFileFailureReason` — exported public types; `AdminRequestDetail` has no `storagePath` anywhere in its shape; `AdminRequestFile` is a discriminated union (`"available"` | `"unavailable"`) on `status`
+- DB errors from `getRequestForStudio()` propagate uncaught — only per-file Storage signing failures are absorbed
 
 ---
 
