@@ -458,6 +458,31 @@ Result:
 
 - admin can view and triage requests for their own studio
 
+### 4B.4 — Admin Request List UI ✓ completed
+
+Mobile-first card list at `/[locale]/admin`; see PROJECT_STAGE_LOG.md for the full completion
+record.
+
+### 4B.5 — Admin Request Detail UI ✓ completed
+
+`/[locale]/admin/requests/[id]`, Server Component, independent `getAuthenticatedStudioMember()`
+call, `getAdminRequestDetail()`, uniform `notFound()` for invalid id/missing/cross-studio,
+mobile-first single-column layout, plain `<img>` at natural aspect ratio with no crop and no
+click behavior, route-level loading/error/not-found states. Excludes status update, notes,
+unread, filters, calendar, and any image viewer/zoom — see PROJECT_STAGE_LOG.md for the full
+completion record.
+
+### 4B.5.1 — Minimal Image Viewer / Zoom (planned, not yet implemented)
+
+Small follow-up step immediately after 4B.5, before status update. Full decisions recorded
+2026-07-03 in PROJECT_DECISIONS.md — Minimal Image Viewer / Zoom (under Stage 4B Admin Dashboard
+Architecture). Summary: tap an available image → fullscreen in-app viewer (no new tab); native
+`<dialog>`/lightweight Client Component preferred; accessible close control + Escape; reuses the
+already-signed URL; no gallery/download/animation/custom zoom controls. Pinch-zoom reliability
+must be verified on real iPhone Safari and Android Chrome before shipping; a narrowly scoped
+zoom dependency may be evaluated only if native/CSS zoom proves unreliable there, and only after
+separate discussion/approval.
+
 ---
 
 ## Stage 4C — Admin Dashboard Enhancements (deferred from Stage 4B)
@@ -544,6 +569,10 @@ Tasks:
 - request flow optimization (reduce friction, improve guidance)
 - onboarding and conversion improvements
 - mobile polish (spacing, touch targets, scroll behavior)
+  - candidate (noted 2026-07-03, not decided): admin request list in mobile landscape /
+    tablet-width view could move to a two-column card grid if it improves use of horizontal
+    space; the Stage 4B.4 list stays single-column mobile-first until this visual review —
+    not a functional blocker, no change made now
 - design system refinement (typography, color, spacing consistency)
 - animations and micro-interactions
 - accessibility and readability improvements

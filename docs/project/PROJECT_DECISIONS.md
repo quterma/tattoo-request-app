@@ -724,6 +724,62 @@ ever needs only DB access or only Storage access, it still belongs directly in `
 - Continues the existing File Access Decisions above (signed URLs, ~1 hour expiry, admin-only,
   BFF/service-layer generation) — Stage 4B is the first real caller of that decision.
 
+## Request Detail UI (Stage 4B.5 — planned, not yet implemented)
+
+Decided 2026-07-03, after architecture/UI review, before implementation. Documentation only —
+see PROJECT_IMPLEMENTATION_PLAN.md for the task list this expands on.
+
+- Route `/[locale]/admin/requests/[id]`; Server Component; independently calls
+  `getAuthenticatedStudioMember()` (same rule as every Stage 4B entry point above — does not
+  trust the `(protected)` layout's check); calls `getAdminRequestDetail(studioId, requestId)`.
+- An invalid UUID or a `null` result from `getAdminRequestDetail` both resolve to Next.js
+  `notFound()` — no separate handling and no distinguishing signal between "malformed id",
+  "does not exist", and "belongs to a different studio", consistent with the existing uniform
+  not-found decision above.
+- Content, top to bottom: reference code + text-visible status; client name plus compact quick
+  contact links near the top (`mailto:`/`tel:` rendered only when `email`/`phone` are present;
+  `contactOther` stays plain text, not a link — no protocol to build a link from); tattoo brief
+  (description, placement, size, color, budget); a full contact block repeating only the contact
+  values that are actually present; reference images, then placement images; created date and
+  consent as lower-priority metadata; a back link to the request list.
+- Layout: mobile-first, single column — no desktop-specific layout added in this step.
+- Images: one column, full content width, natural aspect ratio — no crop, no `object-fit:
+  cover`; plain `<img>`, not `next/image` (avoids Next's remote-image allowlist/optimization
+  config for private signed URLs that expire); no new-tab link; no click/tap behavior yet (that
+  is Stage 4B.5.1, below). An `"unavailable"` file (per-file signing failure, see the Signed
+  URLs section above) renders a same-width placeholder showing the original filename and a safe,
+  generic "unavailable" label — never the raw error or storage path.
+- Route-level `loading.tsx`/`error.tsx`, matching the pattern already established for the list
+  route in Stage 4B.4; all user-visible strings through the existing `admin` i18n namespace.
+- Manual verification must include both portrait and landscape on a real mobile viewport:
+  layout must not break, and horizontal (landscape-oriented) images must fit within the column
+  width without cropping.
+- Explicitly out of scope for 4B.5: status update, notes, unread tracking, filters, calendar,
+  any image modification, and any lightbox/viewer/zoom interaction.
+
+## Minimal Image Viewer / Zoom (Stage 4B.5.1 — planned, not yet implemented)
+
+Decided 2026-07-03, alongside the 4B.5 decisions above. A separate, small follow-up step
+immediately after 4B.5 and before status update — not part of 4B.5 itself.
+
+- Goal: tapping an available image opens a fullscreen in-app viewer. No browser new-tab
+  navigation.
+- Must work well in both portrait and landscape on mobile, including horizontal images.
+- Initial preferred approach: a native `<dialog>` or an equivalent lightweight Client Component;
+  dark fullscreen overlay; an explicit, accessible close button with a minimum 44px tap target;
+  Escape-to-close; tap-outside-to-close only if it can be implemented simply and reliably; reuse
+  the already-signed URL fetched for the detail page (no new signing call). No gallery
+  navigation (next/previous), no download control, no animation, no custom zoom buttons.
+- Pinch-to-zoom is important, but native/CSS pinch-zoom behavior inside a custom fullscreen
+  overlay is inconsistent across mobile browsers and must be verified on real iPhone Safari and
+  real Android Chrome before being considered acceptable.
+- If native/CSS zoom proves unreliable on those real devices, do not ship broken zoom. Evaluate
+  a narrowly scoped dependency (e.g. `react-medium-image-zoom`) at that point only, and only
+  after discussion/approval — no dependency is pre-approved by this entry.
+- Manual verification must cover all four combinations: portrait + landscape, each with both a
+  vertical and a horizontal image.
+- This viewer is not implemented as of this entry — do not treat 4B.5 as including it.
+
 ---
 
 # Request Status Semantics

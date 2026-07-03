@@ -72,6 +72,41 @@ The project follows a feature-oriented structure with shared modules and clear b
   DB/internal details exposed
 - Includes a reset/retry button wired to the `reset` prop Next.js provides to error boundaries
 
+#### app/[locale]/(admin)/admin/(protected)/requests/[id]/page.tsx
+
+- Admin request detail page — Server Component, route `/[locale]/admin/requests/[id]`
+- Independently calls `getAuthenticatedStudioMember()` (re-verifies rather than trusting the
+  layout); redirects to `/${locale}/admin/login` on `unauthenticated`
+- Validates the route `id` param as a UUID via `isUuid()` (`@/shared/utils`) before any data
+  access — invalid UUID → `notFound()`
+- Calls `getAdminRequestDetail(studioId, id)` only after a successful auth check and UUID check;
+  `null` result → `notFound()` (uniform for missing request and cross-studio request — no
+  distinguishing signal); does not catch DB/service errors — they propagate to `error.tsx`
+- Renders `RequestDetail` (from `@/features/admin/ui`) inside `Page` (`@/shared/ui`)
+- All UI strings routed through `getTranslations({ locale, namespace: "admin" })`, passed down
+  as props (`t`, `locale`) to `RequestDetail`
+
+#### app/[locale]/(admin)/admin/(protected)/requests/[id]/loading.tsx
+
+- Route-level loading state — Server Component, data-free
+- Renders `RequestDetailSkeleton` (from `@/features/admin/ui`) inside `Page`
+
+#### app/[locale]/(admin)/admin/(protected)/requests/[id]/error.tsx
+
+- Route-level error boundary — Client Component (required by Next.js)
+- Generic translated message only (`admin.requestDetailErrorTitle`/`requestDetailErrorMessage`);
+  no DB/internal details exposed
+- Includes a reset/retry button and a link back to the request list
+
+#### app/[locale]/(admin)/admin/(protected)/requests/[id]/not-found.tsx
+
+- Route-level not-found boundary — Server Component
+- Reached both for a syntactically invalid UUID and for a missing/cross-studio request (the page
+  calls `notFound()` in both cases)
+- Generic translated message (`admin.requestNotFoundTitle`/`requestNotFoundMessage`) plus a link
+  back to the request list; nearest suitable boundary — the global `app/not-found.tsx` is not
+  locale/i18n-aware and could not be reused here
+
 #### app/[locale]/(admin)/admin/(protected)/actions.ts
 
 - `logoutAction(locale)` — server action
@@ -208,7 +243,8 @@ Stage 4B (reduced scope) — see PROJECT_DECISIONS.md, Stage 4B Admin Dashboard 
 
 - types/ — `AdminRequestListItem`, `RequestStatus` (owned by `services/db.ts`), `AdminRequestDetail`, `AdminRequestFile` (owned by `services/requests.ts`) — all re-exported from `@/services`; `features/admin/types` is the feature-facing import point, not the owner of any of these
 - config/ — `REQUEST_STATUS_OPTIONS` re-exported from `@/services`, same reasoning as types/
-- ui/ — admin request list components (Stage 4B.4); detail/status-update UI still planned
+- ui/ — admin request list components (Stage 4B.4) and request detail components (Stage 4B.5);
+  status-update UI still planned
 - No top-level `features/admin/index.ts` — matches the existing `features/request/` pattern, which also has no top-level public API file; each subfolder (`types/`, `config/`, `ui/`) is its own import point
 
 #### features/admin/ui/
@@ -227,7 +263,22 @@ Stage 4B (reduced scope) — see PROJECT_DECISIONS.md, Stage 4B Admin Dashboard 
   used by both `RequestList`'s loading equivalent and the route's `loading.tsx`
 - `EmptyState` — generic message-only empty state; local to `features/admin/ui` since no
   suitable shared equivalent exists in `src/shared/ui`
-- Barrel: `features/admin/ui/index.ts` exports all four
+- `RequestDetail` — receives a single `AdminRequestDetail` plus `locale` and a server-obtained `t`
+  as props; mobile-first single-column layout: back link to `/admin`, reference code as `<h1>`,
+  text-visible status badge; client name + compact `mailto:`/`tel:` quick-action links (only when
+  `email`/`phone` present; `contactOther` stays plain text); tattoo brief via a `<dl>`
+  (description never truncated); a full contact `<dl>` section rendering only present fields;
+  reference/placement `RequestImageGroup`s; footer metadata (created date via
+  `Intl.DateTimeFormat`, consent as text)
+- `RequestImageGroup` — a `<section>` with an `<h2>` heading and a list of `RequestImageCard`s;
+  renders nothing if given an empty file list
+- `RequestImageCard` — renders a plain `<img>` (not `next/image`) at natural aspect ratio for an
+  `"available"` file, or a same-width placeholder showing the original filename and a generic
+  "unavailable" label for an `"unavailable"` file; no click/tap behavior (planned for Stage
+  4B.5.1)
+- `RequestDetailSkeleton` — data-free placeholder mirroring the header/client/brief/images
+  structure, `aria-hidden="true"`; used by the detail route's `loading.tsx`
+- Barrel: `features/admin/ui/index.ts` exports all eight components
 - **Label ownership note:** `admin.placementLabels`/`sizeLabels`/`colorLabels` are presentation
   text only, keyed by the value strings already owned by `features/request/config`
   (`PLACEMENT_OPTIONS`/`SIZE_OPTIONS`/`COLOR_OPTIONS`); `features/admin` does not import
@@ -245,7 +296,9 @@ Stage 4B (reduced scope) — see PROJECT_DECISIONS.md, Stage 4B Admin Dashboard 
 - styles
 - test helpers
 
-`shared/i18n/messages/en.json` namespaces include `admin` — all admin/auth UI strings (login, forgot-password, reset-password, protected-layout header/unauthorized message). Server Components use `getTranslations({ locale, namespace: "admin" })` from `next-intl/server`; Server Actions call it the same way, keyed by the `locale` param already passed to every action; Client Components receive translated strings as props from their Server Component parent rather than calling `useTranslations` themselves.
+`shared/i18n/messages/en.json` namespaces include `admin` — all admin/auth UI strings (login, forgot-password, reset-password, protected-layout header/unauthorized message, request list, request detail). Server Components use `getTranslations({ locale, namespace: "admin" })` from `next-intl/server`; Server Actions call it the same way, keyed by the `locale` param already passed to every action; Client Components receive translated strings as props from their Server Component parent rather than calling `useTranslations` themselves.
+
+`shared/utils/uuid.ts` — `isUuid(value)`, a small regex-based UUID v1–v5 validator, exported from the `shared/utils` barrel. First consumer: the admin request detail route, to validate the `[id]` route param before any data access.
 
 ---
 

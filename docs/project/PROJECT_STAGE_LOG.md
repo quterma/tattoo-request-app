@@ -17,7 +17,7 @@ Status: In progress
 
 Current focus:
 
-- Stage 4A closed (see Stage 4A completion history below) — Stage 4B.0 (architecture/data-access audit) complete — Stage 4B.1 (documentation + architecture foundation) complete — Stage 4B.2 (domain contracts + request list data access) complete — Stage 4B.3 (request detail data access + signed image URLs) complete — Stage 4B.4 (admin request list UI) complete — proceeding to Stage 4B.5 (request detail UI)
+- Stage 4A closed (see Stage 4A completion history below) — Stage 4B.0 (architecture/data-access audit) complete — Stage 4B.1 (documentation + architecture foundation) complete — Stage 4B.2 (domain contracts + request list data access) complete — Stage 4B.3 (request detail data access + signed image URLs) complete — Stage 4B.4 (admin request list UI) complete and committed — Stage 4B.5 (admin request detail UI) complete (not yet committed) — Stage 4B.5.1 (minimal image viewer/zoom) planned and documented in PROJECT_DECISIONS.md, implementation not yet started
 
 Completed stages:
 
@@ -68,9 +68,126 @@ Completed in Stage 3:
 
 ## Log Entries (reverse chronological)
 
-### 2026-07-02 — Stage 4B.4 — Admin Request List UI
+### 2026-07-03 — Stage 4B.5 — Admin Request Detail UI
 
 Status: Completed (not yet committed)
+
+Pre-implementation inspection: an empty `requests/` directory already existed under
+`(protected)/`, so the new dynamic route slotted in without restructuring. No shared UUID
+validation utility existed anywhere in the codebase. No admin-scoped `not-found.tsx` existed —
+only the global `app/not-found.tsx` (hardcoded English, own `<html>/<body>`, not locale/i18n
+aware), which could not be reused as-is for a locale-aware, i18n-driven, list-linking message.
+
+Completed:
+
+- `app/[locale]/(admin)/admin/(protected)/requests/[id]/page.tsx`: Server Component; calls
+  `getAuthenticatedStudioMember()` independently (same rule as every other Stage 4B entry point);
+  redirects to login on `unauthenticated`; validates route `id` as a UUID via the new `isUuid()`
+  helper before any data access — invalid UUID → `notFound()`; calls
+  `getAdminRequestDetail(studioId, id)` — `null` → `notFound()` (uniform for missing and
+  cross-studio, matching the existing decision; no distinguishing signal); DB/service errors are
+  not caught, they propagate to `error.tsx`
+- `src/shared/utils/uuid.ts`: `isUuid(value)` — small regex-based UUID v1–v5 validator, exported
+  from the existing `src/shared/utils/index.ts` barrel (first cross-boundary consumer of
+  `@/shared/utils` from `app/`; `**/shared/utils` added to the `import/no-internal-modules`
+  eslint allow-list, matching the existing `**/shared/ui` entry, to keep the barrel import
+  warning-free)
+- `src/features/admin/ui/RequestDetail.tsx`: composes the full mobile-first single-column detail
+  layout — back link to `/admin`, reference code as `<h1>`, text-visible status badge; client name
+  plus compact `mailto:`/`tel:` quick-action links (rendered only when `email`/`phone` are
+  present; `contactOther` stays plain text, never a link); tattoo brief (description never
+  truncated, plus placement/size/color via a `<dl>`, budget only when present); a repeated full
+  contact `<dl>` section rendering only present fields (no empty rows, whole section omitted if no
+  contact fields exist); reference then placement image groups; footer metadata (created date via
+  `Intl.DateTimeFormat`, not string-slicing; consent as text, not color-only)
+- `src/features/admin/ui/RequestImageGroup.tsx` / `RequestImageCard.tsx`: image groups are `
+  <section>`s with an `<h2>`; one column, full width, natural aspect ratio, no crop, plain `<img>`
+  (not `next/image`, consistent with the private-signed-URL decision), no click/tap behavior (that
+  remains Stage 4B.5.1); an unavailable file renders a same-width placeholder with the original
+  filename and a generic "unavailable" label — never hidden, never the raw error
+- `src/features/admin/ui/RequestDetailSkeleton.tsx`: data-free, `aria-hidden`, mirrors the
+  header/client/brief/images structure; wired into a new
+  `.../requests/[id]/loading.tsx` (no auth check, matching the list route's `loading.tsx`)
+- `.../requests/[id]/error.tsx`: Client Component (required by Next.js), generic translated
+  message, retry button, and a link back to the list — same pattern as the list route's
+  `error.tsx`, extended with the back link
+- `.../requests/[id]/not-found.tsx`: new admin-scoped boundary (nearest existing one, the global
+  `app/not-found.tsx`, could not satisfy the locale-aware/i18n/list-link requirements); generic
+  "request not found" message plus a link back to `/admin`
+- i18n: all new user-visible strings added to the existing `admin` namespace in `en.json`
+  (`backToRequests`, `emailAction`, `phoneAction`, brief/contact labels, image-group titles,
+  `imageUnavailable`, metadata labels, and the detail route's own error/not-found strings) — no
+  new namespace, no hardcoded copy
+- 11 new tests: `RequestDetail` (7 — core sections/fields, mailto/tel quick actions, only-present
+  contact fields with `contactOther` rendered as plain text, available image alt+src, unavailable
+  image placeholder with filename, no raw storage path anywhere in rendered output, back link
+  target) and `isUuid` (4 — valid UUID, non-UUID string, malformed UUID-like string, empty
+  string). No route-level test added for the page itself — same category as the existing list
+  page (`(protected)/page.tsx`), which also has no dedicated test; it is Next.js Server Component
+  orchestration of already-tested `getAuthenticatedStudioMember`/`getAdminRequestDetail`, not
+  project-owned logic
+- No status update, notes, unread tracking, filters, calendar, or any image viewer/zoom/lightbox
+  added — all remain out of scope, deferred to Stage 4C / Stage 4B.5.1 as documented
+- Total tests: 178 (was 163) — all pass
+- `pnpm qg` — structure / lint / typecheck / test / build all PASS
+- `PROJECT_STRUCTURE.md`, `docs/files-structure.md`, `PROJECT_IMPLEMENTATION_PLAN.md`: updated
+
+Manual verification performed: confirmed (via `curl` against the already-running local dev
+server) that an unauthenticated request to the new detail route still redirects to
+`/en/admin/login` (200 after redirect) — the new route does not bypass or break the existing auth
+gate. Real authenticated rendering against seeded Supabase data, the true not-found page, portrait/
+landscape mobile viewport rendering, and available/unavailable image states in a live browser were
+**not** verified end-to-end in this session (no interactive browser session available) — flagged
+as a limitation, not claimed as verified.
+
+---
+
+### 2026-07-03 — Stage 4B.5 / 4B.5.1 — Request Detail UI + Image Viewer planning
+
+Status: Documentation only — implementation not started
+
+Completed:
+
+- Architecture/UI review completed for Stage 4B.5 (Admin Request Detail UI) and a new small
+  follow-up Stage 4B.5.1 (Minimal Image Viewer / Zoom); decisions recorded in
+  `PROJECT_DECISIONS.md` under Stage 4B Admin Dashboard Architecture — Request Detail UI and
+  Minimal Image Viewer / Zoom
+- 4B.5 scope recorded: route `/[locale]/admin/requests/[id]`; independent
+  `getAuthenticatedStudioMember()` call; `getAdminRequestDetail(studioId, requestId)`; uniform
+  `notFound()` for invalid UUID / missing / cross-studio (no distinguishing signal, matching the
+  existing Stage 4B not-found decision); content order (reference code + status, client name +
+  quick contact links, tattoo brief, full contact block, reference images, placement images,
+  date/consent as metadata, back link); mobile-first single column; images as plain `<img>` at
+  natural aspect ratio, no crop, no new-tab link, no click behavior in this step; unavailable
+  file → same-width placeholder with filename + safe label; route-level loading/error states;
+  admin i18n namespace only
+- 4B.5.1 scope recorded as a separate, smaller follow-up immediately after 4B.5 and before
+  status update: tap-to-fullscreen viewer, no new tab, native `<dialog>`/lightweight Client
+  Component preferred, accessible close + Escape, reuses the already-signed URL, no
+  gallery/download/animation/custom zoom controls; pinch-zoom reliability must be verified on
+  real iPhone Safari and real Android Chrome before shipping; a narrowly scoped zoom dependency
+  (e.g. `react-medium-image-zoom`) may only be evaluated later, after separate approval, if
+  native/CSS zoom proves unreliable on those real devices
+- A later Stage 6 visual-polish candidate noted in `PROJECT_IMPLEMENTATION_PLAN.md` (Stage 6 —
+  mobile polish task): admin request list could move to a two-column card grid in mobile
+  landscape / tablet-width views. Not decided, not a functional blocker, no change to the
+  Stage 4B.4 list — it remains single-column mobile-first until that later review
+- `PROJECT_IMPLEMENTATION_PLAN.md`: Stage 4B section gained `### 4B.4` (completed, pointer to
+  the stage-log record) and `### 4B.5` / `### 4B.5.1` (planned, pointer to the new
+  `PROJECT_DECISIONS.md` entries) headers, following the same sub-stage-header convention
+  already used for 4B.0/4B.1; Stage 6's "mobile polish" task gained the two-column-grid
+  candidate note
+- Corrected stale status on the existing Stage 4B.4 log entry below (was "Completed (not yet
+  committed)"; Stage 4B.4 was committed as `11e256c` after that entry was written) and updated
+  "Current focus" above
+- No pages, components, routes, viewer, dependencies, or migrations added — documentation only
+- `pnpm qg` run after doc changes (no source changed) — lint / typecheck / test / build all PASS
+
+---
+
+### 2026-07-02 — Stage 4B.4 — Admin Request List UI
+
+Status: Completed (committed as `11e256c` — feat(4B.4): add admin request list UI)
 
 Inspection performed before implementation: existing `(protected)/layout.tsx` already renders a
 header (admin label + sign-out) for both authorized and unauthorized branches, so no shell

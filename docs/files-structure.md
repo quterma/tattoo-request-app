@@ -36,7 +36,13 @@ tattoo-request-app/
 │   │   │       │   ├── layout.tsx
 │   │   │       │   ├── loading.tsx
 │   │   │       │   ├── page.tsx
-│   │   │       │   └── SignOutButton.tsx
+│   │   │       │   ├── SignOutButton.tsx
+│   │   │       │   └── requests/
+│   │   │       │       └── [id]/
+│   │   │       │           ├── error.tsx
+│   │   │       │           ├── loading.tsx
+│   │   │       │           ├── not-found.tsx
+│   │   │       │           └── page.tsx
 │   │   │       ├── forgot-password/
 │   │   │       │   ├── actions.ts
 │   │   │       │   ├── ForgotPasswordForm.tsx
@@ -116,6 +122,7 @@ tattoo-request-app/
 │   │   ├── admin/
 │   │   │   ├── __tests__/
 │   │   │   │   ├── RequestCard.test.tsx
+│   │   │   │   ├── RequestDetail.test.tsx
 │   │   │   │   ├── RequestList.test.tsx
 │   │   │   │   └── RequestListSkeleton.test.tsx
 │   │   │   ├── config/
@@ -126,6 +133,10 @@ tattoo-request-app/
 │   │   │       ├── EmptyState.tsx
 │   │   │       ├── index.ts
 │   │   │       ├── RequestCard.tsx
+│   │   │       ├── RequestDetail.tsx
+│   │   │       ├── RequestDetailSkeleton.tsx
+│   │   │       ├── RequestImageCard.tsx
+│   │   │       ├── RequestImageGroup.tsx
 │   │   │       ├── RequestList.tsx
 │   │   │       └── RequestListSkeleton.tsx
 │   │   └── request/
@@ -200,7 +211,10 @@ tattoo-request-app/
 │   │   └── utils/
 │   │       ├── cn.ts
 │   │       ├── index.ts
-│   │       └── validation.ts
+│   │       ├── uuid.ts
+│   │       ├── validation.ts
+│   │       └── __tests__/
+│   │           └── uuid.test.ts
 │   └── types/
 │       ├── css.d.ts
 │       └── index.ts
