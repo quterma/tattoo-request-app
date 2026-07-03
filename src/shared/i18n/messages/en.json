@@ -194,7 +194,46 @@
     "updatePasswordButtonLoading": "Updating…",
     "resetPasswordFieldsRequired": "Please fill in both password fields.",
     "resetPasswordMismatch": "Passwords do not match.",
-    "resetPasswordFailed": "Could not update password. Please try again."
+    "resetPasswordFailed": "Could not update password. Please try again.",
+
+    "requestListTitle": "Requests",
+    "requestListEmpty": "No requests received yet.",
+    "requestListErrorTitle": "Something went wrong",
+    "requestListErrorMessage": "Could not load requests. Please try again.",
+    "requestListRetry": "Try again",
+
+    "statuses": {
+      "new": "New",
+      "active": "Active",
+      "booked": "Booked",
+      "completed": "Completed",
+      "rejected": "Rejected"
+    },
+
+    "placementLabels": {
+      "arm": "Arm",
+      "leg": "Leg",
+      "back": "Back",
+      "chest": "Chest",
+      "ribs": "Ribs",
+      "neck": "Neck",
+      "hand": "Hand",
+      "foot": "Foot",
+      "other": "Other"
+    },
+
+    "sizeLabels": {
+      "small": "Small (up to 5 cm)",
+      "medium": "Medium (5–10 cm)",
+      "large": "Large (10–20 cm)",
+      "extra-large": "Extra large (20 cm+)"
+    },
+
+    "colorLabels": {
+      "black": "Black",
+      "color": "Color",
+      "mixed": "Mixed"
+    }
   },
   "footer": {
     "studio": "Studio Name",

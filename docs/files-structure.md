@@ -32,7 +32,9 @@ tattoo-request-app/
 │   │   │   └── admin/
 │   │   │       ├── (protected)/
 │   │   │       │   ├── actions.ts
+│   │   │       │   ├── error.tsx
 │   │   │       │   ├── layout.tsx
+│   │   │       │   ├── loading.tsx
 │   │   │       │   ├── page.tsx
 │   │   │       │   └── SignOutButton.tsx
 │   │   │       ├── forgot-password/
@@ -112,10 +114,20 @@ tattoo-request-app/
 │   ├── features/
 │   │   ├── index.ts
 │   │   ├── admin/
+│   │   │   ├── __tests__/
+│   │   │   │   ├── RequestCard.test.tsx
+│   │   │   │   ├── RequestList.test.tsx
+│   │   │   │   └── RequestListSkeleton.test.tsx
 │   │   │   ├── config/
 │   │   │   │   └── index.ts
-│   │   │   └── types/
-│   │   │       └── index.ts
+│   │   │   ├── types/
+│   │   │   │   └── index.ts
+│   │   │   └── ui/
+│   │   │       ├── EmptyState.tsx
+│   │   │       ├── index.ts
+│   │   │       ├── RequestCard.tsx
+│   │   │       ├── RequestList.tsx
+│   │   │       └── RequestListSkeleton.tsx
 │   │   └── request/
 │   │       ├── __tests__/
 │   │       │   ├── RequestForm.submission.test.tsx

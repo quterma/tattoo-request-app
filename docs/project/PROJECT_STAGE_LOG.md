@@ -17,7 +17,7 @@ Status: In progress
 
 Current focus:
 
-- Stage 4A closed (see Stage 4A completion history below) — Stage 4B.0 (architecture/data-access audit) complete — Stage 4B.1 (documentation + architecture foundation) complete — Stage 4B.2 (domain contracts + request list data access) complete — Stage 4B.3 (request detail data access + signed image URLs) complete — proceeding to Stage 4B.4
+- Stage 4A closed (see Stage 4A completion history below) — Stage 4B.0 (architecture/data-access audit) complete — Stage 4B.1 (documentation + architecture foundation) complete — Stage 4B.2 (domain contracts + request list data access) complete — Stage 4B.3 (request detail data access + signed image URLs) complete — Stage 4B.4 (admin request list UI) complete — proceeding to Stage 4B.5 (request detail UI)
 
 Completed stages:
 
@@ -67,6 +67,86 @@ Completed in Stage 3:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-07-02 — Stage 4B.4 — Admin Request List UI
+
+Status: Completed (not yet committed)
+
+Inspection performed before implementation: existing `(protected)/layout.tsx` already renders a
+header (admin label + sign-out) for both authorized and unauthorized branches, so no shell
+adjustment was needed. The route `/[locale]/admin` already resolves to `(protected)/page.tsx`
+(a placeholder) — extended in place.
+
+Completed:
+
+- `app/[locale]/(admin)/admin/(protected)/page.tsx`: now a Server Component that independently
+  calls `getAuthenticatedStudioMember()` (in addition to the layout's own check, per the
+  documented "every entry point re-verifies independently" rule); redirects to login on
+  `unauthenticated`; renders nothing on `unauthorized` (unreachable in practice — the layout's
+  own unauthorized branch does not render `{children}` — but the page does not assume that);
+  calls `listRequestsForStudio(studioId)` only after a successful auth check; does not catch
+  DB errors — they propagate to the new route `error.tsx`
+- `src/features/admin/ui/` created: `RequestCard` (one semantic `Link` — from `@/shared/i18n`,
+  locale-aware — per card, no clickable div; shows referenceCode + status first, client name
+  prominent, placement/size/color compact, date secondary — matches the approved mobile-first
+  compact-card layout), `RequestList` (maps DTOs to cards, renders `EmptyState` when empty),
+  `RequestListSkeleton` (data-free, 5 skeleton cards, `aria-hidden`), `EmptyState` (no shared
+  equivalent existed); barrel at `src/features/admin/ui/index.ts`
+- `RequestCard`/`RequestList` are plain (Server Component–compatible) functions that receive a
+  server-obtained `t` (`getTranslations` return value) and `locale` as props from the page,
+  following the same "Server Component translates, passes strings/fn down" pattern already used
+  by the login/reset-password pages — avoids making the list a Client Component
+- Date formatting: `Intl.DateTimeFormat(locale, { year: "numeric", month: "short", day:
+  "numeric" })` — no string slicing
+- Status label: looked up via `t.has("statuses.<value>")` with a raw-value fallback if missing —
+  status remains text-visible (not color-only), and `REQUEST_STATUS_OPTIONS`
+  (`services/db.ts`) remains the sole source of truth for which values are valid; the new
+  `admin.statuses.*` i18n keys are presentation-only labels, not a second source of truth
+- Placement/size/color labels: **explicit developer decision** — `features/admin` may not import
+  `features/request` directly (PROJECT_STRUCTURE.md, "features must not depend on other features
+  directly"), and `features/request/config` exports only value lists, not label text (labels live
+  only inside the `request` i18n namespace). Rather than a cross-namespace i18n read (rejected —
+  would silently couple `admin` to `request`'s key shape with no import-time guardrail), new
+  `admin.placementLabels.*` / `admin.sizeLabels.*` / `admin.colorLabels.*` i18n maps were added,
+  keyed by the same value strings already owned by `features/request/config`
+  (`PLACEMENT_OPTIONS`/`SIZE_OPTIONS`/`COLOR_OPTIONS`). Same raw-value-fallback behavior as
+  status for any unrecognized value. This duplicates label *text* once (English words only) but
+  not the source of truth for valid *values*
+- `app/[locale]/(admin)/admin/(protected)/loading.tsx`: data-free skeleton via
+  `RequestListSkeleton` — first `loading.tsx` in the app
+- `app/[locale]/(admin)/admin/(protected)/error.tsx`: Client Component (required by Next.js),
+  generic translated message only (no DB/internal details), includes reset/retry — first
+  `error.tsx` in the app, no prior pattern to match or contradict
+- i18n: `admin.requestListTitle`, `requestListEmpty`, `requestListErrorTitle`,
+  `requestListErrorMessage`, `requestListRetry`, `statuses.*`, `placementLabels.*`,
+  `sizeLabels.*`, `colorLabels.*` added to `en.json` under the existing `admin` namespace — no
+  new namespace, no hardcoded UI copy
+- 7 new tests: `RequestCard` (4 — required fields render incl. status as text, links to the UUID
+  detail route, falls back to raw value for an unrecognized placement/size/color, locale-aware
+  date formatting not string-slicing), `RequestList` (2 — one card per request, empty-state
+  message with no links rendered), `RequestListSkeleton` (1 — data-free, `aria-hidden`). `next-
+  intl`'s `Link` is mocked the same way `RequestForm.submission.test.tsx` already mocks
+  `next-intl` (real `next-intl/navigation` `Link` fails under plain jsdom/vitest — needs Next.js
+  navigation internals not present in the test environment)
+- No request detail UI, status update, filters/search/pagination, unread/read behavior, metrics,
+  or appointment/calendar work — out of scope, none added
+- `PROJECT_IMPLEMENTATION_PLAN.md` — Stage 4C tasks/exit criteria extended: unread indicator
+  clarified as list-card-relevant; new "list UI enhancements deferred from 4B.4" bullet (status
+  tabs/hide-closed, filters/search, configurable sorting; appointment-date sorting noted as
+  belonging to a future Appointment/Calendar model, not this list) — no change to Stage 4B's own
+  scope/exit criteria, which already only required "admin can view the request list"
+- Total tests: 163 (was 156) — all pass
+- lint / typecheck / test / build — all PASS (`pnpm qg`)
+- `PROJECT_STRUCTURE.md`, `docs/files-structure.md`: updated
+
+Manual verification performed: dev server started; unauthenticated request to `/en/admin`
+confirmed to redirect to `/en/admin/login` (200 after redirect) — the new page code does not
+break the existing auth gate. No real authenticated Supabase session was available in this
+session, so real card rendering against seeded data, the empty state, and the detail-route link
+in a live browser were **not** verified end-to-end — flagged as a limitation, not claimed as
+verified.
+
+---
 
 ### 2026-07-02 — Stage 4B.3 — Request Detail Data Access + Signed Image URLs
 

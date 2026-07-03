@@ -49,6 +49,29 @@ The project follows a feature-oriented structure with shared modules and clear b
 - Login page is intentionally outside this route group to prevent redirect loops
 - All UI strings routed through `getTranslations({ locale, namespace: "admin" })`
 
+#### app/[locale]/(admin)/admin/(protected)/page.tsx
+
+- Admin request list page — Server Component, route `/[locale]/admin`
+- Independently calls `getAuthenticatedStudioMember()` (re-verifies rather than trusting the
+  layout); redirects to `/${locale}/admin/login` on `unauthenticated`
+- Calls `listRequestsForStudio(studioId)` only after a successful auth check; does not catch
+  DB/service errors — they propagate to `error.tsx`
+- Renders `RequestList` (from `@/features/admin/ui`) inside `Page`/`Section` (`@/shared/ui`)
+- All UI strings routed through `getTranslations({ locale, namespace: "admin" })`, passed down
+  as props (`t`, `locale`) to `RequestList`/`RequestCard`
+
+#### app/[locale]/(admin)/admin/(protected)/loading.tsx
+
+- Route-level loading state — Server Component, data-free
+- Renders `RequestListSkeleton` (from `@/features/admin/ui`) inside `Page`/`Section`
+
+#### app/[locale]/(admin)/admin/(protected)/error.tsx
+
+- Route-level error boundary — Client Component (required by Next.js)
+- Generic translated message only (`admin.requestListErrorTitle`/`requestListErrorMessage`); no
+  DB/internal details exposed
+- Includes a reset/retry button wired to the `reset` prop Next.js provides to error boundaries
+
 #### app/[locale]/(admin)/admin/(protected)/actions.ts
 
 - `logoutAction(locale)` — server action
@@ -185,8 +208,31 @@ Stage 4B (reduced scope) — see PROJECT_DECISIONS.md, Stage 4B Admin Dashboard 
 
 - types/ — `AdminRequestListItem`, `RequestStatus` (owned by `services/db.ts`), `AdminRequestDetail`, `AdminRequestFile` (owned by `services/requests.ts`) — all re-exported from `@/services`; `features/admin/types` is the feature-facing import point, not the owner of any of these
 - config/ — `REQUEST_STATUS_OPTIONS` re-exported from `@/services`, same reasoning as types/
-- ui/ — planned, not yet implemented (admin list/detail components)
+- ui/ — admin request list components (Stage 4B.4); detail/status-update UI still planned
 - No top-level `features/admin/index.ts` — matches the existing `features/request/` pattern, which also has no top-level public API file; each subfolder (`types/`, `config/`, `ui/`) is its own import point
+
+#### features/admin/ui/
+
+- `RequestCard` — receives a single `AdminRequestListItem` plus `locale` and a server-obtained
+  `t` (`getTranslations` return value) as props; the whole card is one semantic `Link` (from
+  `@/shared/i18n`, locale-aware) to `/admin/requests/[id]` (DB UUID) — not a clickable div; shows
+  referenceCode + status first, client name prominent, placement/size/color compact, created date
+  secondary; status/placement/size/color are looked up via `t.has(...)` against
+  `admin.statuses.*`/`admin.placementLabels.*`/`admin.sizeLabels.*`/`admin.colorLabels.*`, falling
+  back to the raw stored value if a label is missing; created date formatted via
+  `Intl.DateTimeFormat(locale, {...})`, not string slicing
+- `RequestList` — maps `AdminRequestListItem[]` to `RequestCard`s inside a `<ul>`; renders
+  `EmptyState` when the list is empty; receives `locale`/`t` and passes them through to each card
+- `RequestListSkeleton` — data-free placeholder list (5 skeleton cards), `aria-hidden="true"`;
+  used by both `RequestList`'s loading equivalent and the route's `loading.tsx`
+- `EmptyState` — generic message-only empty state; local to `features/admin/ui` since no
+  suitable shared equivalent exists in `src/shared/ui`
+- Barrel: `features/admin/ui/index.ts` exports all four
+- **Label ownership note:** `admin.placementLabels`/`sizeLabels`/`colorLabels` are presentation
+  text only, keyed by the value strings already owned by `features/request/config`
+  (`PLACEMENT_OPTIONS`/`SIZE_OPTIONS`/`COLOR_OPTIONS`); `features/admin` does not import
+  `features/request` (forbidden — features must not depend on other features directly) and does
+  not read the `request` i18n namespace either, to avoid a silent cross-feature coupling
 
 ---
 

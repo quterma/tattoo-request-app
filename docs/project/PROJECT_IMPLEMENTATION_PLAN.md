@@ -470,19 +470,27 @@ Not started; no architecture decided yet for this stage.
 
 Tasks:
 
-- unread/read tracking (`read_at` column already exists on `requests`, unused until this stage)
+- unread/read tracking (`read_at` column already exists on `requests`, unused until this stage) —
+  includes an unread/new indicator on list cards (deferred from Stage 4B.4 list UI)
 - admin notes (internal notes per request — no DB column exists yet; schema change required)
 - basic dashboard metrics:
   - total request count
   - count by status
   - requests this week / month
   - last request received timestamp
+- list UI enhancements deferred from Stage 4B.4 (list is currently a fixed, unfiltered,
+  newest-first feed with no per-card controls):
+  - status tabs / hide-closed toggle
+  - filters and search
+  - configurable sorting
+  - appointment-date sorting belongs to a future Appointment/Calendar model, not this list
 
 Exit Criteria:
 
 - unread indicator reflects read/unread state
 - admin can add and view internal notes per request
 - dashboard metrics display correctly
+- list supports status filtering/tabs and search, with configurable sorting
 
 Result:
 
