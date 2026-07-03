@@ -193,7 +193,8 @@ Reduced approved scope: list, detail with images, status update. See PROJECT_DEC
 Stage 4B Admin Dashboard Architecture for the full decision record.
 
 **List:**
-1. admin opens the request list page (Server Component)
+1. admin opens the request list page at `/[locale]/admin/requests` (Server Component);
+   `/[locale]/admin` is a thin redirect to this route
 2. page calls `getAuthenticatedStudioMember()`; unauthenticated/unauthorized handled by the
    existing `(protected)` layout gate
 3. page calls the list query in `src/services/db.ts`, scoped to `studio_id = studioId`

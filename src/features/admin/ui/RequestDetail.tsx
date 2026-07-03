@@ -39,7 +39,7 @@ export function RequestDetail({ request, locale, t }: RequestDetailProps) {
   return (
     <main>
       <Link
-        href="/admin"
+        href="/admin/requests"
         className="inline-flex min-h-11 items-center text-sm font-medium text-foreground hover:underline"
       >
         &larr; {t("backToRequests")}

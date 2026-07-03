@@ -20,7 +20,7 @@ export default function AdminRequestDetailError({ reset }: { error: Error & { di
           {t("requestDetailRetry")}
         </button>
         <Link
-          href="/admin"
+          href="/admin/requests"
           className="inline-flex min-h-11 items-center text-sm font-medium text-foreground hover:underline"
         >
           {t("backToRequests")}

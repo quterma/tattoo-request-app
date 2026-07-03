@@ -17,7 +17,7 @@ Status: In progress
 
 Current focus:
 
-- Stage 4A closed (see Stage 4A completion history below) — Stage 4B.0 (architecture/data-access audit) complete — Stage 4B.1 (documentation + architecture foundation) complete — Stage 4B.2 (domain contracts + request list data access) complete — Stage 4B.3 (request detail data access + signed image URLs) complete — Stage 4B.4 (admin request list UI) complete and committed — Stage 4B.5 (admin request detail UI) complete (not yet committed) — Stage 4B.5.1 (minimal image viewer/zoom) planned and documented in PROJECT_DECISIONS.md, implementation not yet started
+- Stage 4A closed (see Stage 4A completion history below) — Stage 4B.0 (architecture/data-access audit) complete — Stage 4B.1 (documentation + architecture foundation) complete — Stage 4B.2 (domain contracts + request list data access) complete — Stage 4B.3 (request detail data access + signed image URLs) complete — Stage 4B.4 (admin request list UI) complete and committed — Stage 4B.5 (admin request detail UI) complete and committed — routing cleanup (request list moved to `/[locale]/admin/requests`, `/[locale]/admin` now redirects) complete (not yet committed) — Stage 4B.5.1 (minimal image viewer/zoom) planned and documented in PROJECT_DECISIONS.md, implementation not yet started
 
 Completed stages:
 
@@ -68,9 +68,72 @@ Completed in Stage 3:
 
 ## Log Entries (reverse chronological)
 
-### 2026-07-03 — Stage 4B.5 — Admin Request Detail UI
+### 2026-07-03 — Routing cleanup — request list moved to `/[locale]/admin/requests`
 
 Status: Completed (not yet committed)
+
+Problem: after Stage 4B.5, `/[locale]/admin` rendered the request list while
+`/[locale]/admin/requests/[id]` was the detail route — an inconsistent URL hierarchy with no
+list page at the intermediate `/[locale]/admin/requests` path.
+
+Approved target IA: `/[locale]/admin` → redirects to `/[locale]/admin/requests` (request list) →
+`/[locale]/admin/requests/[id]` (detail). Reason: requests are the current primary admin
+workspace; this removes the missing intermediate route and leaves `/admin` available as a future
+dashboard/home once metrics/calendar/settings exist (not built now).
+
+Pre-edit inspection: confirmed `(protected)/layout.tsx` is the sole auth gate (independent
+`getAuthenticatedStudioMember()` call, wraps all `(protected)` children) and is unaffected by
+moving pages beneath it; confirmed `RequestCard`'s link to `/admin/requests/[id]` was already
+correct and needed no change; found three stale `/admin` links needing update
+(`RequestDetail.tsx` back link, detail route's `error.tsx` and `not-found.tsx`); confirmed
+login/OAuth/reset-password success redirects intentionally keep targeting `/${locale}/admin`
+(now a valid one-hop redirect stub, not a broken link) — out of scope to change per the task's
+own constraint ("`/admin` itself remains valid and redirects").
+
+Completed:
+
+- `app/[locale]/(admin)/admin/(protected)/page.tsx`, `loading.tsx`, `error.tsx` moved (via
+  `git mv`) to `app/[locale]/(admin)/admin/(protected)/requests/{page,loading,error}.tsx` —
+  same auth/data logic, no behavior change; exported function names renamed
+  `AdminPage`/`AdminLoading`/`AdminError` → `AdminRequestsPage`/`AdminRequestsLoading`/
+  `AdminRequestsError` for clarity now that a separate `(protected)/page.tsx` exists
+- New `app/[locale]/(admin)/admin/(protected)/page.tsx`: minimal Server Component that reads
+  `locale` from params and calls `redirect(`/${locale}/admin/requests`)` — no client-side
+  redirect, no business logic; still rendered only after `(protected)/layout.tsx`'s auth gate
+  passes, so unauthenticated/unauthorized users never reach it (same as every other page in this
+  route group)
+- Internal links updated: `src/features/admin/ui/RequestDetail.tsx` back link, detail route's
+  `error.tsx` and `not-found.tsx` back links — all `/admin` → `/admin/requests`;
+  `RequestCard.tsx`'s link to `/admin/requests/[id]` required no change (already correct)
+- `RequestDetail.test.tsx`: back-link assertion updated from `/en/admin` to `/en/admin/requests`
+- Repo-wide search for stale bare `/admin` href/route references in source: none remaining
+  outside the intentionally-unchanged login/OAuth/reset-password redirect targets
+- No new test added for the `(protected)/page.tsx` redirect itself — same category as every
+  other Server Component page/redirect in this codebase (login page's authenticated-redirect
+  branch, OAuth callback, etc.), none of which have dedicated tests; would require introducing a
+  new App Router page-testing pattern not otherwise used in this project
+- No auth weakening: the redirect stub is still a child of `(protected)/layout.tsx`; no
+  independent-auth-check pages had their auth logic touched; UUID/not-found behavior on the
+  detail route unchanged; no status-update, viewer/zoom, or visual redesign work performed
+- Total tests: 174 (unchanged — one assertion updated, no tests added or removed)
+- `pnpm qg` — structure / lint / typecheck / test / build all PASS; build output confirms both
+  `/[locale]/admin` and `/[locale]/admin/requests` are registered routes
+- `PROJECT_ARCHITECTURE.md`, `PROJECT_STRUCTURE.md`, `PROJECT_IMPLEMENTATION_PLAN.md`,
+  `docs/files-structure.md`: updated; corrected the previous 4B.5 log entry's stale "not yet
+  committed" status (it was committed as a prior step in this session)
+
+Manual verification: not performed against a live browser in this session. A dev server was
+already running locally from an earlier session on port 3000, started outside this task; it was
+left untouched rather than restarted, since restarting/killing a process not started by this
+task is a side-effecting action beyond this routing cleanup's scope. `pnpm build`'s successful
+compilation of the moved/new route files, plus the registered-route list in its output, is the
+verification performed instead. Flagged as a limitation, not claimed as full manual verification.
+
+---
+
+### 2026-07-03 — Stage 4B.5 — Admin Request Detail UI
+
+Status: Completed (committed as `b50535b` — feat(4B.5): add admin request detail UI)
 
 Pre-implementation inspection: an empty `requests/` directory already existed under
 `(protected)/`, so the new dynamic route slotted in without restructuring. No shared UUID

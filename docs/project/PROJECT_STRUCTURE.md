@@ -51,7 +51,17 @@ The project follows a feature-oriented structure with shared modules and clear b
 
 #### app/[locale]/(admin)/admin/(protected)/page.tsx
 
-- Admin request list page — Server Component, route `/[locale]/admin`
+- Admin index redirect — Server Component, route `/[locale]/admin`
+- Minimal: reads `locale` from params and calls `redirect(`/${locale}/admin/requests`)`; no
+  business logic, no data access, no client-side redirect
+- Still nested under `(protected)/layout.tsx`, so the existing auth gate runs first —
+  unauthenticated/unauthorized visitors never reach this redirect
+- Reserved as the future dashboard/home route once metrics/calendar/settings exist (not built —
+  see the routing-cleanup entry in PROJECT_STAGE_LOG.md)
+
+#### app/[locale]/(admin)/admin/(protected)/requests/page.tsx
+
+- Admin request list page — Server Component, route `/[locale]/admin/requests`
 - Independently calls `getAuthenticatedStudioMember()` (re-verifies rather than trusting the
   layout); redirects to `/${locale}/admin/login` on `unauthenticated`
 - Calls `listRequestsForStudio(studioId)` only after a successful auth check; does not catch
@@ -60,12 +70,12 @@ The project follows a feature-oriented structure with shared modules and clear b
 - All UI strings routed through `getTranslations({ locale, namespace: "admin" })`, passed down
   as props (`t`, `locale`) to `RequestList`/`RequestCard`
 
-#### app/[locale]/(admin)/admin/(protected)/loading.tsx
+#### app/[locale]/(admin)/admin/(protected)/requests/loading.tsx
 
 - Route-level loading state — Server Component, data-free
 - Renders `RequestListSkeleton` (from `@/features/admin/ui`) inside `Page`/`Section`
 
-#### app/[locale]/(admin)/admin/(protected)/error.tsx
+#### app/[locale]/(admin)/admin/(protected)/requests/error.tsx
 
 - Route-level error boundary — Client Component (required by Next.js)
 - Generic translated message only (`admin.requestListErrorTitle`/`requestListErrorMessage`); no
@@ -264,7 +274,7 @@ Stage 4B (reduced scope) — see PROJECT_DECISIONS.md, Stage 4B Admin Dashboard 
 - `EmptyState` — generic message-only empty state; local to `features/admin/ui` since no
   suitable shared equivalent exists in `src/shared/ui`
 - `RequestDetail` — receives a single `AdminRequestDetail` plus `locale` and a server-obtained `t`
-  as props; mobile-first single-column layout: back link to `/admin`, reference code as `<h1>`,
+  as props; mobile-first single-column layout: back link to `/admin/requests`, reference code as `<h1>`,
   text-visible status badge; client name + compact `mailto:`/`tel:` quick-action links (only when
   `email`/`phone` present; `contactOther` stays plain text); tattoo brief via a `<dl>`
   (description never truncated); a full contact `<dl>` section rendering only present fields;

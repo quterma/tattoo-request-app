@@ -137,6 +137,6 @@ describe("RequestDetail", () => {
     render(<RequestDetail request={baseRequest} locale="en" t={makeT()} />)
 
     const backLink = screen.getByRole("link", { name: /back to requests/i })
-    expect(backLink).toHaveAttribute("href", "/en/admin")
+    expect(backLink).toHaveAttribute("href", "/en/admin/requests")
   })
 })

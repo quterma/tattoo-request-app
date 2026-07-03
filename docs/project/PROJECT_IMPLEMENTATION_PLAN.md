@@ -460,8 +460,9 @@ Result:
 
 ### 4B.4 — Admin Request List UI ✓ completed
 
-Mobile-first card list at `/[locale]/admin`; see PROJECT_STAGE_LOG.md for the full completion
-record.
+Mobile-first card list, originally at `/[locale]/admin`, moved to `/[locale]/admin/requests` in
+a post-4B.5 routing cleanup (`/[locale]/admin` now redirects there — see PROJECT_STAGE_LOG.md);
+see PROJECT_STAGE_LOG.md for the full completion record.
 
 ### 4B.5 — Admin Request Detail UI ✓ completed
 

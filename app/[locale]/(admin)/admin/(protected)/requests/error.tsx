@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl"
 import { Page, Section } from "@/shared/ui"
 
-export default function AdminError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
+export default function AdminRequestsError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
   const t = useTranslations("admin")
 
   return (
