@@ -50,6 +50,14 @@ Larger post-launch initiatives are tracked in PROJECT_IMPLEMENTATION_PLAN.md —
 
 - Replace split("\n") in i18n with string arrays
 
+- Admin image viewer (`RequestImageViewer`, YARL Zoom): low-resolution images (e.g. 450×321
+  landscape) barely zoom, since default `maxZoomPixelRatio: 1` caps max zoom near the image's
+  native pixel size. Not a bug — expected YARL behavior refusing to upscale past 1:1 pixel
+  density. Does not block Stage 4B closure. If tuned, use a single global option
+  (`zoom={{ maxZoomPixelRatio: 2 }}` on the `Lightbox` in `RequestImageViewer.tsx`) — no
+  resolution-based/conditional logic. Verify together with physical mobile viewer testing
+  (pinch-to-zoom), not from desktop devtools alone.
+
 ---
 
 ## MIME Type Verification (post-MVP)

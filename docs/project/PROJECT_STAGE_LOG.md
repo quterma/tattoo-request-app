@@ -13,11 +13,11 @@ AI agents and developers working on the project.
 ## Current Stage
 
 Stage: Stage 4B — Admin Dashboard
-Status: In progress
+Status: Final documentation sync / closure prep — one item outstanding (see below)
 
 Current focus:
 
-- Stage 4A closed (see Stage 4A completion history below) — Stage 4B.0 (architecture/data-access audit) complete — Stage 4B.1 (documentation + architecture foundation) complete — Stage 4B.2 (domain contracts + request list data access) complete — Stage 4B.3 (request detail data access + signed image URLs) complete — Stage 4B.4 (admin request list UI) complete and committed — Stage 4B.5 (admin request detail UI) complete and committed — routing cleanup (request list moved to `/[locale]/admin/requests`, `/[locale]/admin` now redirects) complete and committed — Stage 4B.5.1 (minimal image viewer/zoom) implemented using `yet-another-react-lightbox` + Zoom plugin, committed as `202c1f3`; desktop manual verification passed; **physical mobile-device verification (iPhone Safari, Android Chrome) still pending, blocked on deployment/preview access**; swipe-down-to-close intentionally deferred pending that verification — post-4B.5.1 debugging pass complete: admin list/detail React-DevTools-only console warning investigated and attributed to a known dev-tooling/React-internals interaction (not app code, viewer not implicated, no fix applied); pre-existing file-upload accumulation bug found and fixed, plus a follow-up UX polish (ignored-extras warning, per-file remove), both committed in `202c1f3` — Stage 4B.6 (request status update) implemented (code complete, not yet committed); **manual verification of the live status-update flow against real Supabase data still pending**
+- Stage 4A closed (see Stage 4A completion history below) — Stage 4B.0 (architecture/data-access audit) complete — Stage 4B.1 (documentation + architecture foundation) complete — Stage 4B.2 (domain contracts + request list data access) complete — Stage 4B.3 (request detail data access + signed image URLs) complete — Stage 4B.4 (admin request list UI) complete and committed — Stage 4B.5 (admin request detail UI) complete and committed — routing cleanup (request list moved to `/[locale]/admin/requests`, `/[locale]/admin` now redirects) complete and committed — Stage 4B.5.1 (minimal image viewer/zoom) implemented using `yet-another-react-lightbox` + Zoom plugin, committed as `202c1f3`; desktop manual verification passed; **physical mobile-device verification (iPhone Safari, Android Chrome) still pending, blocked on deployment/preview access**; swipe-down-to-close intentionally deferred pending that verification — post-4B.5.1 debugging pass complete: admin list/detail React-DevTools-only console warning investigated and attributed to a known dev-tooling/React-internals interaction (not app code, viewer not implicated, no fix applied); pre-existing file-upload accumulation bug found and fixed, plus a follow-up UX polish (ignored-extras warning, per-file remove), both committed in `202c1f3` — Stage 4B.6 (request status update) implemented and **committed as `44f11c4`**; **manual verification of the live status-update flow completed successfully** (status change succeeds, detail reflects the new status, list reflects the new status after navigation, same-status update works) — remaining before full Stage 4B closure: **physical mobile-device verification of the 4B.5.1 image viewer is still pending**, unchanged from above
 
 Completed stages:
 
@@ -70,8 +70,9 @@ Completed in Stage 3:
 
 ### 2026-07-04 — Stage 4B.6 — Request Status Update
 
-Status: Code complete, not yet committed. Manual verification against real Supabase data not yet
-performed in this session (no browser/live-session available).
+Status: Completed. Committed as `44f11c4` (feat(4B.6): add admin request status update). Manual
+verification against real Supabase data completed successfully before commit — see the closure
+note at the end of this entry.
 
 Implemented as one small vertical slice, following a read-only audit and a pre-implementation
 confirmation pass (both completed earlier the same day) that resolved all open questions before
@@ -173,11 +174,15 @@ boundary, since an invalid/tampered submitted value is still rejected server-sid
   entry under `services/db.ts`)
 - `docs/files-structure.md`: updated via `pnpm structure`
 
-**Manual verification NOT performed in this session** (no browser/live Supabase session
-available): submitting a real status change as the authenticated studio member end-to-end,
-confirming the list and detail pages reflect the new status after `revalidatePath()`, and
-attempting a cross-studio/manipulated request id. Flagged as an outstanding requirement per the
-MVP Quality Standard, not claimed as done.
+**Manual verification completed before commit:** submitting a real status change as the
+authenticated studio member end-to-end succeeds; the detail page reflects the new status; the
+list page reflects the new status after navigation; a same-status update also succeeds (not
+blocked). Committed as `44f11c4` after this verification passed.
+
+**Stage 4B closure note (added after this entry, same day):** with 4B.6 verified and committed,
+the only outstanding item before Stage 4B can be considered fully closed is the 4B.5.1 image
+viewer's physical mobile-device verification (iPhone Safari, Android Chrome — see the 4B.5.1
+entry above), which remains pending, unchanged.
 
 ---
 

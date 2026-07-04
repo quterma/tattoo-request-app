@@ -491,6 +491,26 @@ follow-up once real-device testing is possible. No gallery/download/animation/cu
 controls. Physical iPhone Safari / Android Chrome / desktop manual verification has not yet been
 performed — the stage is not considered fully complete until that happens.
 
+### 4B.6 — Request Status Update ✓ completed
+
+Committed as `44f11c4` (feat(4B.6): add admin request status update). Full implementation and
+decision record in PROJECT_STAGE_LOG.md (2026-07-04 entry) and PROJECT_DECISIONS.md — Request
+Status Semantics. Summary: Server Action (`updateRequestStatusAction`) independently calls
+`getAuthenticatedStudioMember()` before any write, validates the submitted status against
+`REQUEST_STATUS_OPTIONS`, and calls `updateRequestStatusForStudio(studioId, requestId, status)` —
+one query scoped to `id = requestId AND studio_id = studioId`; 0 matched rows (missing or
+cross-studio request) returns a generic inline not-found error, not silent success. New
+`RequestStatusForm` Client Component (the only new client boundary this stage) renders a `<select>`
++ submit button via `useActionState`, mirroring the existing `LoginForm`/`ResetPasswordForm`
+pattern. No status transition graph, no terminal-state enforcement, no notes, no activity history,
+no route changes, no DB schema changes, no new dependencies — same-status submission remains
+valid, all explicitly out of scope per the confirmed plan.
+
+Manual verification of the live status-update flow was completed successfully before commit:
+status change succeeds, detail page reflects the new status, list page reflects the new status
+after navigation, and same-status update works. `pnpm qg` — structure / lint / typecheck / test /
+build all PASS (202/202 tests).
+
 ---
 
 ## Stage 4C — Admin Dashboard Enhancements (deferred from Stage 4B)
