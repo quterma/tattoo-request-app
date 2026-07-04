@@ -79,16 +79,18 @@
     "ideaDescriptionHint": "Minimum 10 characters",
 
     "referenceImagesLabel": "Reference images",
-    "referenceImagesHint": "Up to 3 images. Photos of tattoos, artwork, or anything that captures the style or feel you want.",
+    "referenceImagesHint": "Up to {maxFiles} images. Photos of tattoos, artwork, or anything that captures the style or feel you want.",
     "uploadFormatsHint": "JPG, PNG, WEBP, HEIC/HEIF · max 10 MB per image",
 
     "placementLabel": "Placement",
     "placementPlaceholder": "Select placement",
 
     "placementImagesLabel": "Placement photos",
-    "placementImagesHint": "Up to 3 photos of the area where you want the tattoo.",
+    "placementImagesHint": "Up to {maxFiles} photos of the area where you want the tattoo.",
 
     "uploadButtonText": "Choose up to {maxFiles} images.",
+    "uploadMaxFilesWarning": "You can upload up to {maxFiles} images. Extra files were not added.",
+    "uploadRemoveFile": "Remove {fileName}",
 
     "sizeLabel": "Size",
     "sizePlaceholder": "Select size",
@@ -218,6 +220,7 @@
     "referenceImagesTitle": "Reference images",
     "placementImagesTitle": "Placement images",
     "imageUnavailable": "Image unavailable",
+    "imageViewerClose": "Close",
     "createdAtLabel": "Submitted",
     "consentGivenLabel": "Consent given",
     "consentNotGivenLabel": "Consent not given",

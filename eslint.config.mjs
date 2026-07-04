@@ -36,6 +36,8 @@ const eslintConfig = defineConfig([
             "zod/v3",
             "zod/v4",
             "zod/v4/*",
+            "yet-another-react-lightbox/*",
+            "yet-another-react-lightbox/**",
             "**/services/supabaseAuth",
             "**/services/auth",
             "@testing-library/jest-dom/*",

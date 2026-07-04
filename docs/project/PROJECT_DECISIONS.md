@@ -762,9 +762,17 @@ see PROJECT_IMPLEMENTATION_PLAN.md for the task list this expands on.
 Decided 2026-07-03, alongside the 4B.5 decisions above. A separate, small follow-up step
 immediately after 4B.5 and before status update — not part of 4B.5 itself.
 
-- Goal: tapping an available image opens a fullscreen in-app viewer. No browser new-tab
-  navigation.
-- Must work well in both portrait and landscape on mobile, including horizontal images.
+**Superseded 2026-07-03 (same day):** the original direction below — native `<dialog>`/custom
+lightweight Client Component first, with any dependency evaluated only after real-device testing
+proved native/CSS zoom unreliable — is superseded by the approved dependency decision recorded
+in the subsection immediately below. The original direction's scope boundaries (no gallery
+navigation, no download, no custom zoom buttons, reuse the already-signed URL, no new signing
+call, 44px close target, Escape-to-close, portrait/landscape verification) remain in force; only
+the "native-first, dependency-only-as-fallback" implementation strategy is replaced.
+
+<details>
+<summary>Original direction (superseded, kept for history)</summary>
+
 - Initial preferred approach: a native `<dialog>` or an equivalent lightweight Client Component;
   dark fullscreen overlay; an explicit, accessible close button with a minimum 44px tap target;
   Escape-to-close; tap-outside-to-close only if it can be implemented simply and reliably; reuse
@@ -776,9 +784,95 @@ immediately after 4B.5 and before status update — not part of 4B.5 itself.
 - If native/CSS zoom proves unreliable on those real devices, do not ship broken zoom. Evaluate
   a narrowly scoped dependency (e.g. `react-medium-image-zoom`) at that point only, and only
   after discussion/approval — no dependency is pre-approved by this entry.
-- Manual verification must cover all four combinations: portrait + landscape, each with both a
-  vertical and a horizontal image.
-- This viewer is not implemented as of this entry — do not treat 4B.5 as including it.
+
+</details>
+
+### Approved Decision: `yet-another-react-lightbox` (YARL) + Zoom Plugin
+
+Decided 2026-07-03. Supersedes the native-first direction above. **Implemented 2026-07-04** — see
+PROJECT_STAGE_LOG.md for the implementation record. `yet-another-react-lightbox@3.32.0` installed;
+no React 19.2.3 / Next 16.1.6 incompatibility found (peer range `react`/`react-dom`
+`^16.8.0 || ^17 || ^18 || ^19` explicitly covers React 19), so the `react-photo-view` fallback was
+not needed.
+
+**Library choice:**
+
+- Use `yet-another-react-lightbox` with its official Zoom plugin for the fullscreen viewer.
+- Do not build custom pinch/pan gesture handling — the native-first approach above is abandoned
+  precisely to avoid hand-rolled touch-gesture math, which is where cross-browser reliability
+  problems tend to originate.
+- Do not use `react-medium-image-zoom` — evaluated and rejected as insufficient for reliable
+  touch pan after zoom (it targets a simpler hover/click-to-zoom interaction, not sustained
+  pinch+pan on mobile).
+- **Fallback:** `react-photo-view`, and only if YARL has a real, confirmed React 19 / Next 16
+  compatibility issue discovered during implementation. Not pre-approved as a co-dependency —
+  an either/or choice, not both installed speculatively.
+- No dependency is installed by this entry. Installation happens in the implementation step, not
+  in documentation.
+
+**Scope (as implemented):**
+
+- Tapping/clicking an available image opens a fullscreen in-app viewer at that exact image. No
+  browser new-tab navigation.
+- All available images from the whole request (reference images, then placement images, in that
+  order) form one combined viewer slide set, enabling swipe/arrow navigation across the full
+  image set rather than per-group. This combined-ordering detail was not explicit in the original
+  decision text above and is recorded here as the as-implemented behavior.
+- Reuses the signed URL already present in the server-provided DTO — no new signed-URL request
+  is triggered by opening the viewer.
+- Dark fullscreen background (`rgba(0, 0, 0, 0.95)` container background); image remains
+  uncropped, naturally letterboxed (no forced crop or `object-fit: cover` inside the viewer).
+- Pinch-to-zoom, pan while zoomed, and double-tap to zoom/reset are provided by the Zoom plugin —
+  not custom-built. Swipe left/right navigates between slides (YARL's own default behavior); the
+  Zoom plugin's pointer handling distinguishes pan-while-zoomed from slide-swipe internally.
+- Visual prev/next arrow buttons are hidden (via `render.buttonPrev`/`render.buttonNext`
+  returning `null`) when only one available image exists; swipe/keyboard navigation itself is not
+  disabled (`controller.disableSwipeNavigation` is left at its default, i.e. navigation remains
+  active) — matching "hide arrows without disabling swipe navigation."
+- Orientation changes (portrait ↔ landscape) reflow naturally via the library's own layout; no
+  special orientation-handling code was added.
+- Required close methods implemented: a close button (YARL's default toolbar close button, which
+  meets the 44px tap-target requirement), Escape-to-close (`controller.closeOnEscape`, on by
+  default), and backdrop-tap-to-close (`controller.closeOnBackdropClick: true`, explicitly set —
+  YARL defaults this to `false`).
+- **Swipe-down-to-close (`controller.closeOnPullDown`) was evaluated as a real, documented,
+  non-custom YARL option but was deliberately NOT enabled in this implementation pass.** It could
+  not be verified against real-device pinch/pan behavior in this session (no physical iPhone
+  Safari / Android Chrome available), and the approved instruction was to enable it only if
+  confirmed not to conflict with zoom/pan. Left disabled (YARL's default) until a future pass
+  confirms it is safe on real devices — see Deferred/Follow-up below. This is a deliberate
+  scope-narrowing, not an oversight.
+- Unavailable files (per-file signing failure) remain non-interactive — no viewer opens for them,
+  matching their existing non-clickable placeholder behavior from Stage 4B.5.
+- Out of scope, unchanged from the original direction: next/previous UI controls beyond the
+  library's own (hidden arrows; swipe/keyboard still work), thumbnails, captions, metadata
+  overlay, download control, status update, custom gesture math, signed-URL refresh/re-signing on
+  open, and any visual redesign beyond the viewer itself.
+
+**Accepted signed-URL-expiry limitation:** signed URLs expire ~1 hour after generation (see File
+Access Decisions above). The viewer intentionally does not request a fresh signed URL on open —
+it reuses whatever URL is already present in the detail page's DTO. If an admin leaves the detail
+page open past expiry and then opens the viewer, the reused URL may fail to load. This is an
+accepted limitation carried over from the existing signed-URL strategy, not something 4B.5.1
+introduces or is responsible for fixing; no re-signing/refresh mechanism is in scope here.
+
+**Required manual verification (not yet performed — no physical device available in the
+implementation session):**
+
+- Physical iPhone Safari: open, pinch zoom, pan after zoom, double tap, swipe left/right, close
+  button, backdrop tap, portrait → landscape rotation.
+- Physical Android Chrome: same core checks; additionally confirm the browser's own page-pinch
+  gesture does not conflict with the in-viewer pinch handling.
+- Desktop secondary check: open, Escape-to-close, backdrop-tap-to-close, optionally keyboard
+  left/right slide navigation.
+- Browser network check: confirm opening the viewer does not trigger a new signed-URL request.
+
+**Deferred / follow-up:** enabling `controller.closeOnPullDown` (swipe-down-to-close), gated on
+the manual device verification above showing no conflict with pinch/pan. Not scheduled as its own
+stage — a small follow-up change once device testing is possible.
+
+Implemented 2026-07-04 (code) — manual real-device verification above still outstanding before
+this can be considered fully complete per the MVP Quality Standard.
 
 ---
 

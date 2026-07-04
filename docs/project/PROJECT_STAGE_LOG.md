@@ -17,7 +17,7 @@ Status: In progress
 
 Current focus:
 
-- Stage 4A closed (see Stage 4A completion history below) — Stage 4B.0 (architecture/data-access audit) complete — Stage 4B.1 (documentation + architecture foundation) complete — Stage 4B.2 (domain contracts + request list data access) complete — Stage 4B.3 (request detail data access + signed image URLs) complete — Stage 4B.4 (admin request list UI) complete and committed — Stage 4B.5 (admin request detail UI) complete and committed — routing cleanup (request list moved to `/[locale]/admin/requests`, `/[locale]/admin` now redirects) complete (not yet committed) — Stage 4B.5.1 (minimal image viewer/zoom) planned and documented in PROJECT_DECISIONS.md, implementation not yet started
+- Stage 4A closed (see Stage 4A completion history below) — Stage 4B.0 (architecture/data-access audit) complete — Stage 4B.1 (documentation + architecture foundation) complete — Stage 4B.2 (domain contracts + request list data access) complete — Stage 4B.3 (request detail data access + signed image URLs) complete — Stage 4B.4 (admin request list UI) complete and committed — Stage 4B.5 (admin request detail UI) complete and committed — routing cleanup (request list moved to `/[locale]/admin/requests`, `/[locale]/admin` now redirects) complete (not yet committed) — Stage 4B.5.1 (minimal image viewer/zoom) implemented using `yet-another-react-lightbox` + Zoom plugin (not yet committed); physical-device manual verification (iPhone Safari, Android Chrome) still outstanding; swipe-down-to-close intentionally deferred pending that verification — post-4B.5.1 debugging pass complete: admin list/detail React-DevTools-only console warning investigated and attributed to a known dev-tooling/React-internals interaction (not app code, viewer not implicated, no fix applied); unrelated pre-existing file-upload accumulation bug found and fixed in `FileUploadInput`
 
 Completed stages:
 
@@ -67,6 +67,336 @@ Completed in Stage 3:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-07-04 — Follow-up — FileUploadInput selection UX polish
+
+Status: Completed. Not committed.
+
+Small follow-up to the file-upload accumulation fix (see the debugging entry below): improves
+public request form upload UX without changing `MAX_FILES_PER_FIELD` or any server/storage/DB
+behavior.
+
+- `src/features/request/ui/FileUploadInput.tsx`: added a non-blocking warning (`role="alert"`,
+  styled as `text-muted-foreground` — same tone as `FieldHint`, not `FieldError`'s destructive
+  styling, since this is a warning, not a validation error) shown when a picker selection would
+  exceed `maxFiles`; the extra files are still silently capped (existing accumulation behavior),
+  the warning only makes that capping visible. Warning clears on any subsequent change to the
+  selected-files list (add within the remaining limit, or remove) — simplest predictable rule,
+  developer-confirmed over a more conservative "only clears once back under the limit" variant.
+  Added a small remove button (`&times;`, `type="button"`, `aria-label` via the new
+  `removeFileLabel(fileName)` prop — never an icon-only unlabeled control) next to each selected
+  filename; removing a file updates the list immediately and frees a slot for another pick.
+- `maxFilesWarning: string` and `removeFileLabel: (fileName: string) => string` are required
+  props (not optional) — both call sites in `RequestForm.tsx` always supply them, and making them
+  required removes any hardcoded-English fallback string from the component, keeping all
+  user-visible text i18n-driven with no exceptions.
+- `RequestForm.tsx`: `referenceImagesHint`/`placementImagesHint` now interpolate `{maxFiles}`
+  (previously hardcoded "Up to 3 images/photos" in the English source, inconsistent with
+  `uploadButtonText`, which already interpolated it) — passes `MAX_FILES_PER_FIELD` the same way
+  as the existing `buttonText` prop, no new source of truth introduced. `maxFilesWarning` and
+  `removeFileLabel` passed the same way for both `referenceImages` and `placementImages` fields.
+- `src/shared/i18n/messages/en.json`: added `uploadMaxFilesWarning` ("You can upload up to
+  {maxFiles} images. Extra files were not added.") and `uploadRemoveFile` ("Remove {fileName}");
+  changed `referenceImagesHint`/`placementImagesHint` to use `{maxFiles}` interpolation instead of
+  a hardcoded "3".
+- No new color token added: no "warning" semantic color exists in this theme (only
+  `foreground`/`muted-foreground`/`destructive`/`accent`/`primary`/`secondary`/`sidebar-*`);
+  introducing a raw Tailwind palette color (e.g. `amber-600`) not tied to the theme's CSS
+  variables was considered and rejected — developer confirmed reusing `text-muted-foreground`
+  (same as `FieldHint`) instead, avoiding a new, undocumented styling pattern outside the existing
+  token system.
+- No new icon dependency added — remove control uses a plain `&times;` glyph with an `aria-label`,
+  per the task's constraint.
+- Tests: `src/features/request/__tests__/FileUploadInput.test.tsx` extended from 3 to 7 tests —
+  added: warning appears when a pick would exceed `maxFiles` (extras dropped); no warning when a
+  pick stays within the limit; warning clears when a selected file is removed; removing a file
+  updates the rendered list and allows adding another file afterward. All 3 existing accumulation/
+  cap tests unchanged and still passing.
+- No changes to `RequestForm.submission.test.tsx` (48 tests total in `src/features/request/`, all
+  passing) — the new props are additive and don't change the form's submission/FormData behavior.
+- No server, storage, DB, validation-schema, or admin-viewer changes. `MAX_FILES_PER_FIELD` value
+  itself unchanged.
+- `PROJECT_BACKLOG.md` checked for an existing upload delete/replace UX item to update or
+  remove — none found (only a MIME-verification and an unrelated form-fields backlog item exist
+  under "Request Form Improvements"); left unchanged.
+- `docs/files-structure.md`: no new files added (only existing `FileUploadInput.tsx` and its test
+  modified in place) — refreshed via `pnpm structure` as part of the mandatory pre-commit step,
+  no structural entries changed.
+
+Total tests: 187 (was 183) — all pass. `pnpm qg` — structure / lint / typecheck / test / build all
+PASS.
+
+---
+
+### 2026-07-04 — Post-4B.5.1 debugging — route-transition console warning + file-upload regression check
+
+Status: Completed. Not committed.
+
+Two issues investigated after Stage 4B.5.1:
+
+**Issue A — admin list ↔ detail client navigation React DevTools warning**
+
+Reported symptom: `We are cleaning up async info that was not on the parent Suspense boundary.
+This is a bug in React.`, stack pointing at React DevTools' `installHook.js`. Only appears on
+admin `/admin/requests` ↔ `/admin/requests/[id]` client-side navigation (card click, back link);
+never on direct load of either route, never on public route transitions, never on
+viewer open/close, never with React DevTools disabled.
+
+Diagnostic steps performed (temporary, non-committed toggles, each reverted after test and
+confirmed reverted via `git diff HEAD`):
+
+- Conditionally mounted `<Lightbox>` only when `open === true` (was previously always mounted
+  with `open={false}`) — retested by the developer; did not remove the warning.
+- **Round 1 (initial report, later found ambiguous):** temporarily removed the entire
+  `RequestImageViewer` client-component boundary from `RequestDetail.tsx`, with no visible marker
+  to confirm hot-reload had actually applied the change. The developer's result ("error still
+  appears") was recorded, but there was no independent confirmation the diagnostic build was
+  actually being served — flagged and redone.
+- **Round 2 (precise, marker-confirmed):** repeated the same removal (`RequestImageViewer` →
+  direct `RequestImageGroup` rendering, no click-to-open, no client component in the image area),
+  this time with an unmissable visible banner ("DIAGNOSTIC: viewer disabled") rendered above the
+  images. Developer confirmed the banner was visible (hot-reload verified) and the warning **still
+  appeared** on the first list → detail navigation after a page reload. **This conclusively rules
+  out YARL/Zoom and the `RequestImageViewer` client boundary as the trigger.**
+- **New precise behavior established in Round 2:** the warning fires only **once per fresh page
+  reload**, on the first client-side list ↔ detail navigation after that reload. Repeated
+  navigation back and forth after that first occurrence does not reproduce it again. Reloading
+  either route resets this — the next first navigation shows it once more.
+- Compared `RequestCard`'s link and `RequestDetail`'s back link: both use the same locale-aware
+  `Link` from `@/shared/i18n` (`next-intl/navigation`), no raw `<a>`/`next/link` mismatch; neither
+  passes through the `/admin` redirect stub (`RequestCard` already targets `/admin/requests/[id]`
+  directly).
+- Compared route shapes: `app/[locale]/(admin)/admin/(protected)/requests/page.tsx` and
+  `.../requests/[id]/page.tsx` are both genuinely `async function` Server Components (`await
+  params`, `await cookies()`, `await getAuthenticatedStudioMember()`, `await
+  listRequestsForStudio()`/`await getAdminRequestDetail()`), each with a sibling `loading.tsx`
+  (Next.js's own implicit per-route-segment Suspense boundary). By contrast, every public route
+  (`(public)/page.tsx`, `request/page.tsx`, etc.) is a fully synchronous Server Component — no
+  `await` anywhere — confirmed via repo-wide search (zero matches for `async function`/`await
+  params`/`await cookies` under `(public)`).
+- Inspected `proxy.ts` (Next.js middleware): runs `await supabase.auth.getUser()` on every
+  matched request (matcher excludes only `api|auth|_next|_vercel|.*\..*`), including client-side
+  RSC navigation requests, for both admin and public routes alike. Ruled out as the sole
+  differentiator — it runs identically on public route transitions, which never show the warning.
+- Checked for explicit `prefetch` props: none found anywhere in the codebase (`grep` for
+  `prefetch` under `src/`/`app/` returns no matches), meaning every `Link` (`RequestCard`'s card
+  links, `RequestDetail`'s back link, and every public-page `Link`) uses Next.js's App Router
+  default prefetch behavior — viewport-visible links are automatically prefetched shortly after
+  the containing page mounts.
+
+**Strongest current theory (evidence-based, not independently browser-verified):** the detail
+route is a genuinely dynamic (`ƒ`, confirmed in the `next build` route table — not statically
+generated) async Server Component. On a fresh page load, `/admin/requests`' card `Link`s (and,
+symmetrically, the detail page's back `Link`) are not yet in the Router Cache, so Next.js's
+default auto-prefetch performs one real dynamic RSC fetch of the counterpart route shortly after
+mount. That first fetch-and-stream-in of a genuinely async segment is the one moment new "async
+info" is created and can be torn down against a Suspense boundary in a way React's internal
+bookkeeping — as instrumented by React DevTools' `installHook.js` — flags as unexpected. Once
+that segment is in the Router Cache, subsequent navigations reuse the cached payload and never
+repeat the same first-fetch code path, which matches the observed "fires once per reload, never
+again until reload" behavior exactly. This is consistent with every other constraint gathered:
+never on public routes (their target routes are static, not dynamic, so no comparable first
+dynamic-fetch event occurs), never on direct load (prefetch requires the page to have mounted and
+a `Link` to become viewport-visible first — a direct load of the detail page has no counterpart
+link to prefetch anything from), never without DevTools (the instrumentation that surfaces the
+warning is DevTools' own hook).
+
+**This has not been independently verified against Next.js's Router Cache internals or a
+minimal non-admin dynamic-route repro** — no browser-automation tool is available in this
+session to trace network/prefetch activity directly. It remains the strongest theory consistent
+with 100% of the reproduction evidence gathered so far, not a confirmed root cause.
+
+**Conclusion:** Viewer/YARL is **conclusively excluded** (Round 2, marker-confirmed). Routing
+cleanup and `Link` component choice are **not implicated** (identical `Link` on both sides,
+neither goes through the `/admin` redirect). The warning is most likely a one-time interaction
+between Next.js's default link-prefetch behavior and a genuinely dynamic async Server Component
+route, surfaced only by React DevTools' Suspense-adjacent instrumentation — a known class of
+React 19 + Next.js App Router + DevTools interaction, not an application logic bug. No concrete
+app-level fix is being proposed: per the task's explicit constraint, no `<Suspense>` wrapper or
+admin architecture change was made speculatively on the basis of a DevTools-only warning with no
+observed UI impact.
+
+**Fix kept:** conditional `<Lightbox open={open} .../>` mounting in `RequestImageViewer.tsx`
+(only mounts when `open === true`, previously always mounted with `open={false}`). This is kept
+strictly on its own merits (no unmounted-but-present dialog component sitting in the tree) — it is
+explicitly **not** presented as a fix for this warning, since Round 2 confirmed the warning
+occurs even with the entire viewer removed.
+
+Recommendation: leave as a known dev-tooling/React-internals warning, visible only with React
+DevTools attached; UI behavior is unaffected; no data, auth, or navigation correctness issue
+observed. If full confirmation of the prefetch theory is wanted later, the concrete test is: open
+Chrome DevTools' Network tab filtered to Fetch/XHR, reload `/admin/requests`, watch for an RSC
+fetch of `/admin/requests/[id]` firing shortly after load (before any click) — its timing should
+line up with the moment the console warning appears. Re-evaluate this whole finding if the
+warning starts appearing without DevTools, in a production build, or after a React/Next.js
+upgrade.
+
+**Issue B — file upload only accepted one image instead of up to `MAX_FILES_PER_FIELD` (3)**
+
+Root cause found in `src/features/request/ui/FileUploadInput.tsx`'s `handleChange`: each file-
+picker selection **replaced** the field's entire value (`onChange(selected.slice(0, maxFiles))`)
+instead of merging with the existing `value` prop. Selecting multiple files within one picker
+dialog (Ctrl/Shift-click) already worked correctly up to 3; the observed regression reproduces
+whenever a user opens the picker, selects one file, then reopens the picker and selects another —
+the second pick silently discarded the first.
+
+Confirmed via `git diff --stat HEAD -- src/features/request/` (empty) and `git log` (last touch:
+Stage 3C.3.5) that no code in `src/features/request/` changed in this branch — this is
+**pre-existing behavior, not a regression introduced by 4B.5.1** or any other change in this
+diff; it was newly observed during manual testing, not newly broken.
+
+Fix: `handleChange` now does `const combined = [...value, ...selected].slice(0, maxFiles)` —
+accumulates newly picked files onto the existing selection, still capped at `maxFiles`.
+
+Tests added: `src/features/request/__tests__/FileUploadInput.test.tsx` (new, 3 tests) — selecting
+multiple files in one pick keeps all of them up to `maxFiles`; accumulates files across separate
+single-file picks instead of replacing (the regression's exact repro); caps accumulated files at
+`maxFiles` when the existing selection plus a new pick would exceed it. Uses
+`@testing-library/user-event`'s `upload()` (already a project dependency) rather than firing a raw
+`change` event, and an explicit `afterEach(() => cleanup())` (matching the existing pattern in
+`RequestCard.test.tsx`) — needed because `vitest.config.ts` does not set `globals: true`, so
+RTL's automatic per-test cleanup is not registered implicitly in this project.
+
+No changes to `RequestForm.tsx`, `MAX_FILES_PER_FIELD`, server-side `validateFiles()`, or the
+FormData-append loop — all already correct (form already loops over the full array and appends
+every file; server already allows up to 3).
+
+Total tests: 183 (was 180) — all pass. `pnpm qg` — structure / lint / typecheck / test / build all
+PASS.
+
+Remaining manual checks (not performed in this session — no browser-automation tool available):
+live confirmation in an actual browser that Issue B's fix resolves the symptom exactly as
+described (accumulate across repeated single-file picks, still capped at 3, for both
+reference and placement fields); all previously-outstanding Stage 4B.5.1 physical-device
+verification (iPhone Safari, Android Chrome, swipe-down-to-close) remains outstanding, unchanged
+by this session.
+
+---
+
+### 2026-07-04 — Stage 4B.5.1 — Minimal Image Viewer / Zoom implementation
+
+Status: Completed (code); not yet committed. Physical-device manual verification outstanding.
+
+Pre-implementation verification performed (against real shipped package artifacts, not just
+prose docs): downloaded and inspected `yet-another-react-lightbox@3.32.0`'s type definitions
+directly. Confirmed `peerDependencies` (`react`/`react-dom` `^16.8.0 || ^17 || ^18 || ^19`)
+explicitly cover React 19.2.3 — no incompatibility found, so the `react-photo-view` fallback was
+not needed and not installed. Confirmed via the shipped `.d.ts` files and official Zoom plugin
+docs: pinch-to-zoom/pan/double-tap-zoom-reset are native Zoom plugin behavior (no custom gesture
+code); `render.buttonPrev`/`buttonNext` are independent `RenderFunction` props that can return
+`null` to hide arrows, structurally decoupled from `controller.disableSwipeNavigation` (left
+unset, so swipe/keyboard navigation stays active); `controller.closeOnEscape` defaults `true`;
+`controller.closeOnBackdropClick` defaults `false` (explicitly enabled); `controller.
+closeOnPullDown` is a real, first-class documented boolean, not custom gesture code, but no
+documented interaction with the Zoom plugin was found in either module's type augmentation —
+meaning its real-device safety could only be confirmed by physical testing, not by reading docs.
+Confirmed only one CSS file ships (`dist/styles.css` / `yet-another-react-lightbox/styles.css`);
+the Zoom plugin itself ships no separate stylesheet (unlike captions/counter/thumbnails plugins).
+
+Developer decision point: whether to enable `closeOnPullDown` now (flagged unverified) or omit it
+this pass pending real-device testing. **Decided: omit.** Prioritizes reliable pinch/pan over an
+unverified close gesture; no custom pull-down code was written either way.
+
+Completed:
+
+- `yet-another-react-lightbox@3.32.0` installed (single new dependency; no `react-photo-view`)
+- `src/features/admin/ui/RequestImageViewer.tsx` (new): the sole new Client Component
+  (`"use client"`), the one narrow client boundary added for this stage. Receives reference and
+  placement file DTOs as props, renders both existing `RequestImageGroup`s unchanged in layout,
+  builds one combined available-only slide list (reference images first, then placement images),
+  and owns `open`/`initialIndex` local state (`useState`, no global state). Renders YARL's
+  `<Lightbox>` with the `Zoom` plugin, `closeOnBackdropClick: true`, default `closeOnEscape`,
+  default close button, and `render.buttonPrev`/`buttonNext` returning `null` when only one
+  available image exists (so a single-image request never shows dead-end arrows)
+- `src/features/admin/ui/RequestImageCard.tsx`: added an optional `onClick` prop; when present
+  and the file is `"available"`, renders the image inside a `<button type="button">` instead of a
+  bare `<img>`; unavailable files are unaffected (still never interactive)
+- `src/features/admin/ui/RequestImageGroup.tsx`: added an optional `onImageClick(fileId)` prop,
+  threaded down to each `RequestImageCard`
+- `src/features/admin/ui/RequestDetail.tsx`: replaced the two direct `RequestImageGroup` renders
+  with a single `RequestImageViewer` call, passing both file arrays and translated labels. Remains
+  a Server Component — the client boundary starts inside `RequestImageViewer`, not at `
+  RequestDetail` or the route's `page.tsx`. Server data-fetching path (`getAdminRequestDetail`,
+  signed URLs) untouched
+- `src/features/admin/ui/index.ts`: added `RequestImageViewer` export
+- `src/shared/i18n/messages/en.json`: added `admin.imageViewerClose` ("Close") — used only for
+  YARL's `labels.Close` override; no other new UI copy needed since YARL's own controls (nav
+  arrows aside) are not otherwise re-labeled
+- `eslint.config.mjs`: added `yet-another-react-lightbox/*` and `yet-another-react-lightbox/**` to
+  the `import/no-internal-modules` allow-list — required for the library's own public subpath
+  exports (`/plugins/zoom`, `/styles.css`), same rationale as the existing `**/shared/utils`/
+  `**/shared/ui` entries (public API surface, not a deep internal reach)
+- `src/features/admin/__tests__/RequestImageViewer.test.tsx` (new, 6 tests): viewer dialog does
+  not render until an available image is clicked; opens at the clicked reference image with the
+  correct signed `src`; opens at the clicked placement image at the correct combined index;
+  combined slide count is reference-then-placement (2, from 1 available reference + 1 available
+  placement in the fixture); unavailable files are visible but not rendered as a `button` (not
+  interactive) and excluded from the slide set; close control closes the dialog. YARL itself is
+  mocked (including its CSS and Zoom plugin subpath imports) per the task's own instruction not to
+  turn library internals into brittle tests
+- Existing `RequestDetail.test.tsx` (7 tests) required no changes and all still pass unmodified,
+  including the signed-URL `src`/alt assertion and the no-`storagePath`/`storage_path`-leakage
+  check — YARL's `<Lightbox>` renders `null`-equivalent output while `open` is `false` (the
+  default), so its presence in the tree doesn't disturb the existing closed-state assertions
+- No changes to `RequestDetailSkeleton`, route `page.tsx`/`loading.tsx`/`error.tsx`/
+  `not-found.tsx`, `services/requests.ts`, `services/storage.ts`, signing logic, or any DB/
+  Supabase code — server detail page and data-fetching path fully unchanged, per the architecture
+  constraint
+- Total tests: 180 (was 174) — all pass
+- `pnpm qg` — structure / lint / typecheck / test / build all PASS
+- `PROJECT_DECISIONS.md`: Minimal Image Viewer / Zoom section updated to record the as-implemented
+  behavior (combined slide-set ordering, hidden single-image arrows, `closeOnPullDown` explicitly
+  NOT enabled this pass with rationale, updated manual-verification and deferred/follow-up notes)
+- No status update, notes, unread tracking, filters, thumbnails, captions, metadata overlay,
+  download control, or visual redesign added — all remain out of scope per the approved decision
+
+Manual verification NOT performed in this session (no physical devices available): iPhone Safari
+(open, pinch zoom, pan after zoom, double tap, swipe left/right, close button, backdrop tap,
+portrait → landscape), Android Chrome (same, plus confirm no browser-pinch conflict), desktop
+(open, Escape, backdrop, optional keyboard arrows), and a browser network check confirming viewer
+open triggers no new signed-URL request. `pnpm build`'s successful compilation is not a substitute
+for this — flagged as an outstanding requirement, not claimed as done.
+
+---
+
+### 2026-07-03 — Stage 4B.5.1 — Image viewer decision update (documentation only)
+
+Status: Planned — decision updated, implementation not started
+
+Problem: the existing Stage 4B.5.1 entry in `PROJECT_DECISIONS.md` (recorded earlier the same
+day) preferred a native `<dialog>`/lightweight Client Component first, with any zoom dependency
+evaluated only after real-device testing showed native/CSS zoom unreliable. That direction is
+now superseded by a developer-approved dependency decision, made before implementation began.
+
+Completed:
+
+- `PROJECT_DECISIONS.md` — Minimal Image Viewer / Zoom section: the original native-first
+  direction is explicitly marked superseded (kept in a collapsed `<details>` block for history,
+  not deleted) and replaced with an approved decision: use `yet-another-react-lightbox` (YARL) +
+  its official Zoom plugin; no custom pinch/pan gesture handling; `react-medium-image-zoom`
+  evaluated and rejected (insufficient for reliable touch pan after zoom); `react-photo-view` as
+  fallback only if YARL has a real, confirmed React 19/Next 16 compatibility issue found during
+  implementation — not pre-approved as a co-install. Scope boundaries restated against the
+  approved library (reuse existing signed URL, no new signing call, dark uncropped/letterboxed
+  background, pinch/pan/double-tap via the Zoom plugin, natural orientation reflow, 44px close
+  button + Escape + backdrop-tap required). Swipe-down-to-close documented as conditional —
+  enabled only if YARL actually supports it and only after device testing confirms no conflict
+  with zoom/pan, not claimed as guaranteed. Accepted signed-URL-expiry limitation (~1 hour, no
+  refresh-on-open) recorded explicitly. Required manual verification checklist (iPhone Safari,
+  Android Chrome, desktop, network-level no-new-signing check) recorded.
+- `PROJECT_IMPLEMENTATION_PLAN.md` — Stage 4B section's `### 4B.5.1` summary rewritten to match:
+  names YARL + Zoom plugin, the `react-medium-image-zoom` rejection, the `react-photo-view`
+  fallback condition, and that no dependency has been installed yet.
+- `PROJECT_STAGE_LOG.md` — "Current focus" line above updated to name the superseding decision.
+- `PROJECT_CONTEXT.md` — checked; contains no Stage 4B.5.1-specific wording (only the general
+  Admin Interface scope section, already accurate), so left unchanged per this task's own scope
+  limit.
+- No source code, tests, `package.json`, lockfile, dependencies, routes, database schema, or
+  Supabase configuration changed. No package installed. Stage 4B.5.1 remains **not implemented**.
+- `pnpm qg` run after documentation changes (no source changed) — structure / lint / typecheck /
+  test / build all PASS.
+
+---
 
 ### 2026-07-03 — Routing cleanup — request list moved to `/[locale]/admin/requests`
 

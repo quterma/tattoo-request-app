@@ -172,8 +172,10 @@ export function RequestForm() {
       <FileUploadInput
         id="referenceImages"
         label={t("referenceImagesLabel")}
-        hint={`${t("referenceImagesHint")} ${t("uploadFormatsHint")}`}
+        hint={`${t("referenceImagesHint", { maxFiles: MAX_FILES_PER_FIELD })} ${t("uploadFormatsHint")}`}
         buttonText={t("uploadButtonText", { maxFiles: MAX_FILES_PER_FIELD })}
+        maxFilesWarning={t("uploadMaxFilesWarning", { maxFiles: MAX_FILES_PER_FIELD })}
+        removeFileLabel={(fileName) => t("uploadRemoveFile", { fileName })}
         error={err("referenceImages")}
         value={referenceImages.field.value ?? []}
         onChange={referenceImages.field.onChange}
@@ -194,8 +196,10 @@ export function RequestForm() {
       <FileUploadInput
         id="placementImages"
         label={t("placementImagesLabel")}
-        hint={`${t("placementImagesHint")} ${t("uploadFormatsHint")}`}
+        hint={`${t("placementImagesHint", { maxFiles: MAX_FILES_PER_FIELD })} ${t("uploadFormatsHint")}`}
         buttonText={t("uploadButtonText", { maxFiles: MAX_FILES_PER_FIELD })}
+        maxFilesWarning={t("uploadMaxFilesWarning", { maxFiles: MAX_FILES_PER_FIELD })}
+        removeFileLabel={(fileName) => t("uploadRemoveFile", { fileName })}
         error={err("placementImages")}
         value={placementImages.field.value ?? []}
         onChange={placementImages.field.onChange}

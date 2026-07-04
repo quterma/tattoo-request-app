@@ -1,7 +1,7 @@
 import type { getTranslations } from "next-intl/server"
 import { Link } from "@/shared/i18n"
 import type { AdminRequestDetail } from "../types"
-import { RequestImageGroup } from "./RequestImageGroup"
+import { RequestImageViewer } from "./RequestImageViewer"
 
 type RequestDetailProps = {
   request: AdminRequestDetail
@@ -119,16 +119,14 @@ export function RequestDetail({ request, locale, t }: RequestDetailProps) {
         </section>
       )}
 
-      <div className="mt-6 flex flex-col gap-6">
-        <RequestImageGroup
-          title={t("referenceImagesTitle")}
-          files={referenceFiles}
+      <div className="mt-6">
+        <RequestImageViewer
+          referenceFiles={referenceFiles}
+          placementFiles={placementFiles}
+          referenceImagesTitle={t("referenceImagesTitle")}
+          placementImagesTitle={t("placementImagesTitle")}
           unavailableLabel={t("imageUnavailable")}
-        />
-        <RequestImageGroup
-          title={t("placementImagesTitle")}
-          files={placementFiles}
-          unavailableLabel={t("imageUnavailable")}
+          closeLabel={t("imageViewerClose")}
         />
       </div>
 

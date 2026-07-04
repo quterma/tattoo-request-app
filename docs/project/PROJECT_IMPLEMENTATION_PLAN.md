@@ -473,16 +473,23 @@ click behavior, route-level loading/error/not-found states. Excludes status upda
 unread, filters, calendar, and any image viewer/zoom — see PROJECT_STAGE_LOG.md for the full
 completion record.
 
-### 4B.5.1 — Minimal Image Viewer / Zoom (planned, not yet implemented)
+### 4B.5.1 — Minimal Image Viewer / Zoom (code complete; manual device verification outstanding)
 
-Small follow-up step immediately after 4B.5, before status update. Full decisions recorded
-2026-07-03 in PROJECT_DECISIONS.md — Minimal Image Viewer / Zoom (under Stage 4B Admin Dashboard
-Architecture). Summary: tap an available image → fullscreen in-app viewer (no new tab); native
-`<dialog>`/lightweight Client Component preferred; accessible close control + Escape; reuses the
-already-signed URL; no gallery/download/animation/custom zoom controls. Pinch-zoom reliability
-must be verified on real iPhone Safari and Android Chrome before shipping; a narrowly scoped
-zoom dependency may be evaluated only if native/CSS zoom proves unreliable there, and only after
-separate discussion/approval.
+Small follow-up step immediately after 4B.5, before status update. Full decisions and the
+implementation record are in PROJECT_DECISIONS.md — Minimal Image Viewer / Zoom (under Stage 4B
+Admin Dashboard Architecture) and PROJECT_STAGE_LOG.md (2026-07-04 entry). Summary: tap an
+available image → fullscreen in-app viewer (no new tab), built with `yet-another-react-lightbox`
+3.32.0 (YARL) + its official Zoom plugin — no custom pinch/pan gesture handling; `react-photo-
+view` fallback was not needed (no React 19/Next 16 incompatibility found). All available images
+across the request (reference then placement) form one combined swipeable slide set. Reuses the
+already-signed URL, no new signed-URL request on open; dark uncropped/letterboxed background;
+pinch-zoom, pan, double-tap zoom/reset via the Zoom plugin; close button, Escape, and
+backdrop-tap all enabled; nav arrows hidden when only one image exists, swipe navigation left
+active. `closeOnPullDown` (swipe-down-to-close) intentionally left disabled this pass — no
+physical device available to verify it doesn't conflict with pinch/pan; deferred as a small
+follow-up once real-device testing is possible. No gallery/download/animation/custom zoom-button
+controls. Physical iPhone Safari / Android Chrome / desktop manual verification has not yet been
+performed — the stage is not considered fully complete until that happens.
 
 ---
 

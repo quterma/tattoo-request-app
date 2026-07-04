@@ -124,6 +124,7 @@ tattoo-request-app/
 │   │   │   ├── __tests__/
 │   │   │   │   ├── RequestCard.test.tsx
 │   │   │   │   ├── RequestDetail.test.tsx
+│   │   │   │   ├── RequestImageViewer.test.tsx
 │   │   │   │   ├── RequestList.test.tsx
 │   │   │   │   └── RequestListSkeleton.test.tsx
 │   │   │   ├── config/
@@ -138,10 +139,12 @@ tattoo-request-app/
 │   │   │       ├── RequestDetailSkeleton.tsx
 │   │   │       ├── RequestImageCard.tsx
 │   │   │       ├── RequestImageGroup.tsx
+│   │   │       ├── RequestImageViewer.tsx
 │   │   │       ├── RequestList.tsx
 │   │   │       └── RequestListSkeleton.tsx
 │   │   └── request/
 │   │       ├── __tests__/
+│   │       │   ├── FileUploadInput.test.tsx
 │   │       │   ├── RequestForm.submission.test.tsx
 │   │       │   └── schema.test.ts
 │   │       ├── config/

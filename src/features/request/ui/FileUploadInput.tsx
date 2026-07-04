@@ -1,4 +1,4 @@
-import type { ChangeEvent } from "react"
+import { useState, type ChangeEvent } from "react"
 import { FormFieldLayout } from "./field/FormFieldLayout"
 
 type FileUploadInputProps = {
@@ -10,6 +10,8 @@ type FileUploadInputProps = {
   value: File[]
   onChange: (files: File[]) => void
   maxFiles?: number
+  maxFilesWarning: string
+  removeFileLabel: (fileName: string) => string
 }
 
 export function FileUploadInput({
@@ -21,19 +23,38 @@ export function FileUploadInput({
   value,
   onChange,
   maxFiles = 3,
+  maxFilesWarning,
+  removeFileLabel,
 }: FileUploadInputProps) {
+  const [showMaxFilesWarning, setShowMaxFilesWarning] = useState(false)
+
   function handleChange(e: ChangeEvent<HTMLInputElement>) {
     const selected = Array.from(e.target.files ?? [])
-    onChange(selected.slice(0, maxFiles))
+    const combined = [...value, ...selected].slice(0, maxFiles)
+    setShowMaxFilesWarning(value.length + selected.length > maxFiles)
+    onChange(combined)
     e.target.value = ""
+  }
+
+  function handleRemove(index: number) {
+    setShowMaxFilesWarning(false)
+    onChange(value.filter((_, i) => i !== index))
   }
 
   const fileList =
     value.length > 0 ? (
       <ul className="flex flex-col gap-0.5">
         {value.map((file, i) => (
-          <li key={i} className="text-xs text-muted-foreground truncate">
-            {file.name}
+          <li key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span className="truncate">{file.name}</span>
+            <button
+              type="button"
+              onClick={() => handleRemove(i)}
+              aria-label={removeFileLabel(file.name)}
+              className="shrink-0 text-destructive hover:underline"
+            >
+              &times;
+            </button>
           </li>
         ))}
       </ul>
@@ -55,6 +76,11 @@ export function FileUploadInput({
       >
         {buttonText}
       </label>
+      {showMaxFilesWarning && (
+        <p role="alert" className="text-xs text-muted-foreground">
+          {maxFilesWarning}
+        </p>
+      )}
     </FormFieldLayout>
   )
 }
