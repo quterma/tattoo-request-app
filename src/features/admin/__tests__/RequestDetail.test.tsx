@@ -2,8 +2,10 @@ import { describe, it, expect, afterEach, vi } from "vitest"
 import { render, screen, cleanup } from "@testing-library/react"
 import type { ComponentProps } from "react"
 import { RequestDetail } from "../ui/RequestDetail"
-import type { AdminRequestDetail } from "../types"
+import type { AdminRequestDetail, UpdateRequestStatusResult } from "../types"
 import messages from "@/shared/i18n/messages/en.json"
+
+const noopUpdateStatusAction = async (): Promise<UpdateRequestStatusResult> => ({ ok: true })
 
 vi.mock("@/shared/i18n", () => ({
   Link: ({ href, ...props }: ComponentProps<"a"> & { href: string }) => (
@@ -72,10 +74,19 @@ describe("RequestDetail", () => {
   })
 
   it("renders core sections and fields", () => {
-    render(<RequestDetail request={baseRequest} locale="en" t={makeT()} />)
+    render(
+      <RequestDetail
+        request={baseRequest}
+        locale="en"
+        t={makeT()}
+        updateStatusAction={noopUpdateStatusAction}
+      />,
+    )
 
     expect(screen.getByRole("heading", { level: 1, name: "REQ-2026-0007" })).toBeInTheDocument()
-    expect(screen.getByText("New")).toBeInTheDocument()
+    expect(
+      screen.getByText("New", { selector: "span" }),
+    ).toBeInTheDocument()
     expect(screen.getByText("Alex Doe")).toBeInTheDocument()
     expect(screen.getByText(/wolf on the forearm/)).toBeInTheDocument()
     expect(screen.getByText("Arm")).toBeInTheDocument()
@@ -85,7 +96,14 @@ describe("RequestDetail", () => {
   })
 
   it("renders mailto/tel quick actions when email/phone are present", () => {
-    render(<RequestDetail request={baseRequest} locale="en" t={makeT()} />)
+    render(
+      <RequestDetail
+        request={baseRequest}
+        locale="en"
+        t={makeT()}
+        updateStatusAction={noopUpdateStatusAction}
+      />,
+    )
 
     expect(screen.getByRole("link", { name: "Email" })).toHaveAttribute(
       "href",
@@ -103,7 +121,14 @@ describe("RequestDetail", () => {
       email: null,
       phone: null,
     }
-    render(<RequestDetail request={request} locale="en" t={makeT()} />)
+    render(
+      <RequestDetail
+        request={request}
+        locale="en"
+        t={makeT()}
+        updateStatusAction={noopUpdateStatusAction}
+      />,
+    )
 
     expect(screen.queryByRole("link", { name: "Email" })).not.toBeInTheDocument()
     expect(screen.queryByRole("link", { name: "Call" })).not.toBeInTheDocument()
@@ -112,7 +137,14 @@ describe("RequestDetail", () => {
   })
 
   it("renders an available image with a meaningful alt and its signed URL as src", () => {
-    render(<RequestDetail request={baseRequest} locale="en" t={makeT()} />)
+    render(
+      <RequestDetail
+        request={baseRequest}
+        locale="en"
+        t={makeT()}
+        updateStatusAction={noopUpdateStatusAction}
+      />,
+    )
 
     const img = screen.getByAltText("reference-01.jpg")
     expect(img).toHaveAttribute(
@@ -122,19 +154,40 @@ describe("RequestDetail", () => {
   })
 
   it("renders a same-width placeholder with filename for an unavailable image, not hidden", () => {
-    render(<RequestDetail request={baseRequest} locale="en" t={makeT()} />)
+    render(
+      <RequestDetail
+        request={baseRequest}
+        locale="en"
+        t={makeT()}
+        updateStatusAction={noopUpdateStatusAction}
+      />,
+    )
 
     expect(screen.getByText("placement-01.jpg")).toBeInTheDocument()
     expect(screen.getByText("Image unavailable")).toBeInTheDocument()
   })
 
   it("never renders a raw storage path", () => {
-    const { container } = render(<RequestDetail request={baseRequest} locale="en" t={makeT()} />)
+    const { container } = render(
+      <RequestDetail
+        request={baseRequest}
+        locale="en"
+        t={makeT()}
+        updateStatusAction={noopUpdateStatusAction}
+      />,
+    )
     expect(container.innerHTML).not.toMatch(/storagePath|storage_path/i)
   })
 
   it("links back to the requests list", () => {
-    render(<RequestDetail request={baseRequest} locale="en" t={makeT()} />)
+    render(
+      <RequestDetail
+        request={baseRequest}
+        locale="en"
+        t={makeT()}
+        updateStatusAction={noopUpdateStatusAction}
+      />,
+    )
 
     const backLink = screen.getByRole("link", { name: /back to requests/i })
     expect(backLink).toHaveAttribute("href", "/en/admin/requests")

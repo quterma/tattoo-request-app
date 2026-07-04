@@ -17,7 +17,7 @@ Status: In progress
 
 Current focus:
 
-- Stage 4A closed (see Stage 4A completion history below) — Stage 4B.0 (architecture/data-access audit) complete — Stage 4B.1 (documentation + architecture foundation) complete — Stage 4B.2 (domain contracts + request list data access) complete — Stage 4B.3 (request detail data access + signed image URLs) complete — Stage 4B.4 (admin request list UI) complete and committed — Stage 4B.5 (admin request detail UI) complete and committed — routing cleanup (request list moved to `/[locale]/admin/requests`, `/[locale]/admin` now redirects) complete and committed — Stage 4B.5.1 (minimal image viewer/zoom) implemented using `yet-another-react-lightbox` + Zoom plugin, committed as `202c1f3`; desktop manual verification passed; **physical mobile-device verification (iPhone Safari, Android Chrome) still pending, blocked on deployment/preview access**; swipe-down-to-close intentionally deferred pending that verification — post-4B.5.1 debugging pass complete: admin list/detail React-DevTools-only console warning investigated and attributed to a known dev-tooling/React-internals interaction (not app code, viewer not implicated, no fix applied); pre-existing file-upload accumulation bug found and fixed, plus a follow-up UX polish (ignored-extras warning, per-file remove), both committed in `202c1f3`
+- Stage 4A closed (see Stage 4A completion history below) — Stage 4B.0 (architecture/data-access audit) complete — Stage 4B.1 (documentation + architecture foundation) complete — Stage 4B.2 (domain contracts + request list data access) complete — Stage 4B.3 (request detail data access + signed image URLs) complete — Stage 4B.4 (admin request list UI) complete and committed — Stage 4B.5 (admin request detail UI) complete and committed — routing cleanup (request list moved to `/[locale]/admin/requests`, `/[locale]/admin` now redirects) complete and committed — Stage 4B.5.1 (minimal image viewer/zoom) implemented using `yet-another-react-lightbox` + Zoom plugin, committed as `202c1f3`; desktop manual verification passed; **physical mobile-device verification (iPhone Safari, Android Chrome) still pending, blocked on deployment/preview access**; swipe-down-to-close intentionally deferred pending that verification — post-4B.5.1 debugging pass complete: admin list/detail React-DevTools-only console warning investigated and attributed to a known dev-tooling/React-internals interaction (not app code, viewer not implicated, no fix applied); pre-existing file-upload accumulation bug found and fixed, plus a follow-up UX polish (ignored-extras warning, per-file remove), both committed in `202c1f3` — Stage 4B.6 (request status update) implemented (code complete, not yet committed); **manual verification of the live status-update flow against real Supabase data still pending**
 
 Completed stages:
 
@@ -67,6 +67,119 @@ Completed in Stage 3:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-07-04 — Stage 4B.6 — Request Status Update
+
+Status: Code complete, not yet committed. Manual verification against real Supabase data not yet
+performed in this session (no browser/live-session available).
+
+Implemented as one small vertical slice, following a read-only audit and a pre-implementation
+confirmation pass (both completed earlier the same day) that resolved all open questions before
+any file was touched.
+
+Completed:
+
+- `src/services/db.ts`: `updateRequestStatusForStudio(studioId, requestId, status)` — updates
+  `requests.status` in one query scoped to `id = requestId AND studio_id = studioId`, with
+  `.select("id")` chained after `.update()` so the response reflects actually-matched rows; returns
+  `true` if ≥1 row matched, `false` if 0 rows matched (missing request or cross-studio request —
+  indistinguishable, same convention as `getRequestForStudio`); throws on Supabase infrastructure
+  error. Exported from `src/services/index.ts` (unlike `getRequestForStudio`) since the Server
+  Action calls it directly — no DB+Storage orchestration needed here
+- `app/[locale]/(admin)/admin/(protected)/requests/[id]/actions.ts` (new): `updateRequestStatusAction(locale, requestId, prev, formData)`
+  — independently calls `getAuthenticatedStudioMember()` before any write; validates the submitted
+  `status` form field against `REQUEST_STATUS_OPTIONS` before calling
+  `updateRequestStatusForStudio()`, scoped to the authenticated member's own `studioId` (never a
+  client-supplied value); 0 rows affected returns a generic inline error
+  (`admin.requestStatusUpdateNotFound`), not `notFound()` — this is a form submission, not a
+  navigation, and must not blow away the admin's current view; on success calls `revalidatePath()`
+  for both the detail route and the list route and returns `{ ok: true }`, no redirect
+- `src/features/admin/types/index.ts`: added `UpdateRequestStatusResult` (`{ ok: true } | { ok: false; error: string }`)
+  — feature-owned, not a `@/services` re-export, since it is the Server Action's own result
+  contract, not a DB/service DTO
+- `src/features/admin/ui/RequestStatusForm.tsx` (new): the only new Client Component for this
+  stage, mirroring the narrow-client-boundary precedent already set by `RequestImageViewer`.
+  Renders a `<select>` (defaulted to `currentStatus`) populated from `REQUEST_STATUS_OPTIONS`, a
+  submit button (disabled while pending), and uses `useActionState` (same pattern as
+  `LoginForm`/`ResetPasswordForm`) for inline `role="alert"` error / `role="status"` success
+  messaging. Status remains text-visible throughout, never color-only
+- `src/features/admin/ui/RequestDetail.tsx`: renders `RequestStatusForm` beneath the existing
+  reference-code/status-badge header, receiving a `locale`+`requestId`-bound action from the page
+  as a new required `updateStatusAction` prop; the existing read-only status badge is unchanged
+  (still shows the persisted status; the form is the separate control to change it)
+- `app/[locale]/(admin)/admin/(protected)/requests/[id]/page.tsx`: binds
+  `updateRequestStatusAction` via `.bind(null, locale, id)` and passes it to `RequestDetail`
+- `src/features/admin/ui/index.ts`: exports `RequestStatusForm`
+- `src/shared/i18n/messages/en.json`: added `admin.requestStatusLabel`,
+  `requestStatusUpdateButton`, `requestStatusUpdateButtonLoading`, `requestStatusUpdateSuccess`,
+  `requestStatusUpdateFailed`, `requestStatusUpdateNotFound`
+
+**Deviation found and corrected during implementation — `features/admin/config`'s
+`REQUEST_STATUS_OPTIONS` re-export:** the pre-implementation confirmation pass had incorrectly
+assumed `src/features/admin/config/index.ts`'s existing `export { REQUEST_STATUS_OPTIONS } from "@/services"`
+re-export was safe for `RequestStatusForm` (a Client Component) to use directly. Implementing and
+running tests revealed this was wrong: `@/services`' runtime exports transitively import the live
+Supabase client (`services/supabase.ts` → `@/config`), whose `requireEnv()` throws immediately
+without real `SUPABASE_URL`/`SUPABASE_SECRET_KEY`/etc. env vars — safe for Server
+Components/Actions (which already run with real env vars), but not for a Client Component or its
+Vitest tests (no env vars set under Vitest, by design — every other test mocks `../supabase`
+directly rather than relying on real env vars). This broke `RequestDetail.test.tsx` (previously
+7/7 passing) the moment `RequestDetail` started importing the runtime value. Every existing admin
+UI component only ever imported **types** from this chain, never a runtime value — confirmed via a
+repo-wide check before deciding on a fix, and flagged to the developer rather than silently worked
+around. Developer decision: `features/admin/config/index.ts` no longer re-exports
+`REQUEST_STATUS_OPTIONS` from `@/services`; it now defines a local literal tuple (typed against
+the `RequestStatus` type, a type-only import, which is safe), duplicating the five status string
+values. This mirrors the existing precedent of `admin.placementLabels`/`sizeLabels`/`colorLabels`
+already duplicating label text from `features/request`'s config for an analogous reason. The DB
+source of truth (`REQUEST_STATUS_OPTIONS` in `services/db.ts`) is unchanged and still the only
+thing the Server Action validates against — the UI-facing duplication cannot become a security
+boundary, since an invalid/tampered submitted value is still rejected server-side
+- `RequestDetail.test.tsx`: all 7 existing tests updated to pass a `noopUpdateStatusAction` stub
+  for the newly-required `updateStatusAction` prop (no behavioral change to existing assertions);
+  one assertion (`getByText("New")`) scoped to `{ selector: "span" }` since the new status
+  `<select>` now also renders a `New` `<option>`, making the unscoped query ambiguous
+- New `src/features/admin/__tests__/RequestStatusForm.test.tsx` (4 tests): current status
+  preselected, all five options render, success message shown on `{ ok: true }`, generic inline
+  error shown on `{ ok: false, error }` — via injected action props, no `next/headers`/`next/cache`
+  mocking
+- New tests in `src/services/__tests__/db.test.ts` for `updateRequestStatusForStudio` (8 tests):
+  correct `id` + `studio_id` scoping, success (true) result, 0-rows-affected (false) result
+  including the cross-studio case, Supabase error throws (+ message propagation), all five status
+  values accepted
+- **No Server Action tests added** — confirmed during the pre-implementation pass and unchanged
+  during implementation: no test in this codebase mocks `next/headers`/`next/cache` directly (not
+  even for the pre-existing login/logout/reset-password actions, which have zero tests), and the
+  action's actual logic (status validation, scoped update, 0-row handling) is already covered by
+  the `db.ts` unit tests above. The action itself is thin, mechanical composition — same category
+  as untested page-level Server Component orchestration elsewhere in this codebase
+- `eslint.config.mjs`: added `**/features/*/types` to the `import/no-internal-modules` allow-list
+  — first time `app/` needs to import a feature's `types/` module directly (the new
+  `actions.ts`); mirrors the existing `**/features/*/validation` entry. `app → features` was
+  already an allowed dependency direction in `PROJECT_STRUCTURE.md`; this only silences a lint
+  warning for an already-permitted import, it does not change any dependency rule
+- `src/services/index.ts`: now also exports `updateRequestStatusForStudio` (unlike
+  `getRequestForStudio`, which stays unexported) — the Server Action calls it directly, and there
+  is no DB+Storage orchestration step needed for a plain scoped status write
+- No status transition graph, terminal-state enforcement, notes, activity history, route changes,
+  DB schema changes, new dependencies, or optimistic UI updates — all explicitly out of scope per
+  the confirmed plan, none added. Same-status submission remains valid (not blocked)
+- Total tests: 202 (was 187 at last commit) — `updateRequestStatusForStudio` (8 new tests in
+  `db.test.ts`), `RequestStatusForm` (4 new tests); all previously-passing tests still pass.
+  `pnpm qg` — structure / lint / typecheck / test / build all
+  PASS (lint: 0 errors, 1 pre-existing unrelated warning carried over from Stage 4B.5.1)
+- `PROJECT_STRUCTURE.md`: updated (new `actions.ts` entry, `RequestDetail`/`page.tsx` wiring notes,
+  `RequestStatusForm` entry, `features/admin/config` re-export correction, `updateRequestStatusForStudio`
+  entry under `services/db.ts`)
+- `docs/files-structure.md`: updated via `pnpm structure`
+
+**Manual verification NOT performed in this session** (no browser/live Supabase session
+available): submitting a real status change as the authenticated studio member end-to-end,
+confirming the list and detail pages reflect the new status after `revalidatePath()`, and
+attempting a cross-studio/manipulated request id. Flagged as an outstanding requirement per the
+MVP Quality Standard, not claimed as done.
+
+---
 
 ### 2026-07-04 — Follow-up — FileUploadInput selection UX polish
 

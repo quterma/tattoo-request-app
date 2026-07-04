@@ -17,6 +17,7 @@ import {
   getRequestByClientSubmissionId,
   getRequestForStudio,
   listRequestsForStudio,
+  updateRequestStatusForStudio,
 } from "../db"
 import type { UploadedFile } from "../storage"
 
@@ -432,4 +433,83 @@ describe("getRequestForStudio", () => {
 
     await expect(getRequestForStudio(STUDIO_ID, REQUEST_ID)).rejects.toThrow("connection timeout")
   })
+})
+
+describe("updateRequestStatusForStudio", () => {
+  const STUDIO_ID = "a1b2c3d4-0000-4000-8000-000000000001"
+  const REQUEST_ID = "req-uuid-1"
+
+  function makeUpdateChain(result: { data: unknown; error: unknown }) {
+    const select = vi.fn().mockResolvedValue(result)
+    const eqStudio = vi.fn().mockReturnValue({ select })
+    const eqId = vi.fn().mockReturnValue({ eq: eqStudio })
+    const update = vi.fn().mockReturnValue({ eq: eqId })
+    mockFrom.mockReturnValue({ update })
+    return { update, eqId, eqStudio, select }
+  }
+
+  it("scopes the update by both id and studio_id", async () => {
+    const { update, eqId, eqStudio } = makeUpdateChain({
+      data: [{ id: REQUEST_ID }],
+      error: null,
+    })
+
+    await updateRequestStatusForStudio(STUDIO_ID, REQUEST_ID, "active")
+
+    expect(mockFrom).toHaveBeenCalledWith("requests")
+    expect(update).toHaveBeenCalledWith({ status: "active" })
+    expect(eqId).toHaveBeenCalledWith("id", REQUEST_ID)
+    expect(eqStudio).toHaveBeenCalledWith("studio_id", STUDIO_ID)
+  })
+
+  it("returns true when a row is matched and updated", async () => {
+    makeUpdateChain({ data: [{ id: REQUEST_ID }], error: null })
+
+    const result = await updateRequestStatusForStudio(STUDIO_ID, REQUEST_ID, "booked")
+
+    expect(result).toBe(true)
+  })
+
+  it("returns false (safe not-found) when 0 rows are matched", async () => {
+    makeUpdateChain({ data: [], error: null })
+
+    const result = await updateRequestStatusForStudio(STUDIO_ID, REQUEST_ID, "booked")
+
+    expect(result).toBe(false)
+  })
+
+  it("returns false (same result) for a cross-studio request as for a missing one", async () => {
+    makeUpdateChain({ data: [], error: null })
+
+    const result = await updateRequestStatusForStudio("other-studio-id", REQUEST_ID, "booked")
+
+    expect(result).toBe(false)
+  })
+
+  it("throws when supabase returns an error", async () => {
+    makeUpdateChain({ data: null, error: { message: "relation does not exist" } })
+
+    await expect(updateRequestStatusForStudio(STUDIO_ID, REQUEST_ID, "new")).rejects.toThrow(
+      "DB status update failed",
+    )
+  })
+
+  it("throws with the supabase error message", async () => {
+    makeUpdateChain({ data: null, error: { message: "connection timeout" } })
+
+    await expect(updateRequestStatusForStudio(STUDIO_ID, REQUEST_ID, "new")).rejects.toThrow(
+      "connection timeout",
+    )
+  })
+
+  it.each(["new", "active", "booked", "completed", "rejected"] as const)(
+    "accepts the '%s' status value",
+    async (status) => {
+      makeUpdateChain({ data: [{ id: REQUEST_ID }], error: null })
+
+      const result = await updateRequestStatusForStudio(STUDIO_ID, REQUEST_ID, status)
+
+      expect(result).toBe(true)
+    },
+  )
 })

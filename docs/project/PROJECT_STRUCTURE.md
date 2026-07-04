@@ -95,6 +95,26 @@ The project follows a feature-oriented structure with shared modules and clear b
 - Renders `RequestDetail` (from `@/features/admin/ui`) inside `Page` (`@/shared/ui`)
 - All UI strings routed through `getTranslations({ locale, namespace: "admin" })`, passed down
   as props (`t`, `locale`) to `RequestDetail`
+- Binds `updateRequestStatusAction` (from the sibling `actions.ts`) to `locale` and `id` via
+  `.bind(null, locale, id)`; passes the bound action to `RequestDetail` as `updateStatusAction`
+
+#### app/[locale]/(admin)/admin/(protected)/requests/[id]/actions.ts
+
+- `updateRequestStatusAction(locale, requestId, prev, formData)` — server action (Stage 4B.6)
+- Independently calls `getAuthenticatedStudioMember()` — same rule as every Stage 4B entry point;
+  unauthenticated/unauthorized returns a generic translated error, no distinguishing detail
+- Validates the submitted `status` form field against `REQUEST_STATUS_OPTIONS` (from `@/services`)
+  before any write; an invalid/missing value returns the same generic error
+- Calls `updateRequestStatusForStudio(studioId, requestId, status)` (from `@/services`), scoped to
+  the authenticated member's own `studioId` — never a client-supplied value
+- 0 rows affected (missing request or cross-studio request — indistinguishable) returns a generic
+  inline error (`admin.requestStatusUpdateNotFound`), not `notFound()` — this is a form submission,
+  not a navigation
+- On success: calls `revalidatePath()` for both the detail route and the list route, returns
+  `{ ok: true }` — no redirect, admin stays on the same page
+- Result type `UpdateRequestStatusResult` (`{ ok: true } | { ok: false; error: string }`) is
+  defined in `src/features/admin/types`, not colocated with the action — the Client Component
+  consuming it lives in `src/features/admin/ui`, and `features/` must not import from `app/`
 
 #### app/[locale]/(admin)/admin/(protected)/requests/[id]/loading.tsx
 
@@ -251,10 +271,17 @@ Current features:
 
 Stage 4B (reduced scope) — see PROJECT_DECISIONS.md, Stage 4B Admin Dashboard Architecture.
 
-- types/ — `AdminRequestListItem`, `RequestStatus` (owned by `services/db.ts`), `AdminRequestDetail`, `AdminRequestFile` (owned by `services/requests.ts`) — all re-exported from `@/services`; `features/admin/types` is the feature-facing import point, not the owner of any of these
-- config/ — `REQUEST_STATUS_OPTIONS` re-exported from `@/services`, same reasoning as types/
-- ui/ — admin request list components (Stage 4B.4) and request detail components (Stage 4B.5);
-  status-update UI still planned
+- types/ — `AdminRequestListItem`, `RequestStatus` (owned by `services/db.ts`), `AdminRequestDetail`, `AdminRequestFile` (owned by `services/requests.ts`) — all re-exported from `@/services`; `features/admin/types` is the feature-facing import point, not the owner of any of these. Also defines `UpdateRequestStatusResult` (`{ ok: true } | { ok: false; error: string }`, Stage 4B.6) — this one is feature-owned, not a re-export, since it is the Server Action's result contract, not a DB/service DTO
+- config/ — `REQUEST_STATUS_OPTIONS` (Stage 4B.6: a **local literal tuple**, typed against
+  `RequestStatus`, not re-exported from `@/services` as it was before Stage 4B.6). This changed
+  because `@/services`' runtime exports transitively import the live Supabase client
+  (`services/supabase.ts` → `@/config`), which throws without real env vars — safe for Server
+  Components/Actions to import, but not for a Client Component (`RequestStatusForm`) or its tests.
+  The DB source of truth (`REQUEST_STATUS_OPTIONS` in `services/db.ts`) is unchanged; this is a
+  UI-safe mirror of its values, duplicated the same way `admin.placementLabels`/`sizeLabels`/
+  `colorLabels` already duplicate label text from `features/request`'s config
+- ui/ — admin request list components (Stage 4B.4), request detail components (Stage 4B.5), and
+  the status-update form (Stage 4B.6, see below)
 - No top-level `features/admin/index.ts` — matches the existing `features/request/` pattern, which also has no top-level public API file; each subfolder (`types/`, `config/`, `ui/`) is its own import point
 
 #### features/admin/ui/
@@ -273,13 +300,22 @@ Stage 4B (reduced scope) — see PROJECT_DECISIONS.md, Stage 4B Admin Dashboard 
   used by both `RequestList`'s loading equivalent and the route's `loading.tsx`
 - `EmptyState` — generic message-only empty state; local to `features/admin/ui` since no
   suitable shared equivalent exists in `src/shared/ui`
-- `RequestDetail` — receives a single `AdminRequestDetail` plus `locale` and a server-obtained `t`
-  as props; mobile-first single-column layout: back link to `/admin/requests`, reference code as `<h1>`,
-  text-visible status badge; client name + compact `mailto:`/`tel:` quick-action links (only when
-  `email`/`phone` present; `contactOther` stays plain text); tattoo brief via a `<dl>`
-  (description never truncated); a full contact `<dl>` section rendering only present fields;
-  reference/placement `RequestImageGroup`s; footer metadata (created date via
-  `Intl.DateTimeFormat`, consent as text)
+- `RequestDetail` — receives a single `AdminRequestDetail` plus `locale`, a server-obtained `t`,
+  and (Stage 4B.6) a bound `updateStatusAction` as props; mobile-first single-column layout: back
+  link to `/admin/requests`, reference code as `<h1>`, text-visible status badge, and (Stage 4B.6)
+  a `RequestStatusForm` beneath the header for changing status; client name + compact
+  `mailto:`/`tel:` quick-action links (only when `email`/`phone` present; `contactOther` stays
+  plain text); tattoo brief via a `<dl>` (description never truncated); a full contact `<dl>`
+  section rendering only present fields; reference/placement `RequestImageGroup`s; footer metadata
+  (created date via `Intl.DateTimeFormat`, consent as text)
+- `RequestStatusForm` (Stage 4B.6) — the only new Client Component for this stage, mirroring the
+  narrow-client-boundary precedent set by `RequestImageViewer`; receives `currentStatus`, the bound
+  Server Action, and translated label/message strings as props. Uses `useActionState` (same
+  pattern as `LoginForm`/`ResetPasswordForm`) for pending/error/success state. Renders a `<select>`
+  populated from `REQUEST_STATUS_OPTIONS` (`features/admin/config`'s local UI-safe tuple, not
+  `@/services`) defaulted to `currentStatus`, a submit button (disabled while pending), an inline
+  `role="alert"` generic error message, and an inline `role="status"` success message — status
+  remains text-visible throughout, never color-only
 - `RequestImageGroup` — a `<section>` with an `<h2>` heading and a list of `RequestImageCard`s;
   renders nothing if given an empty file list
 - `RequestImageCard` — renders a plain `<img>` (not `next/image`) at natural aspect ratio for an
@@ -288,7 +324,7 @@ Stage 4B (reduced scope) — see PROJECT_DECISIONS.md, Stage 4B Admin Dashboard 
   4B.5.1)
 - `RequestDetailSkeleton` — data-free placeholder mirroring the header/client/brief/images
   structure, `aria-hidden="true"`; used by the detail route's `loading.tsx`
-- Barrel: `features/admin/ui/index.ts` exports all eight components
+- Barrel: `features/admin/ui/index.ts` exports all nine components
 - **Label ownership note:** `admin.placementLabels`/`sizeLabels`/`colorLabels` are presentation
   text only, keyed by the value strings already owned by `features/request/config`
   (`PLACEMENT_OPTIONS`/`SIZE_OPTIONS`/`COLOR_OPTIONS`); `features/admin` does not import
@@ -358,6 +394,13 @@ Current modules:
 - `listRequestsForStudio(studioId)` — queries `requests` filtered by `studio_id = studioId`, ordered by `created_at` descending, selecting only the columns needed for the list DTO; maps each row through an internal `mapRequestListRow()` (snake_case → camelCase, narrows `status` to `RequestStatus`, throws on an unrecognized status value); throws on Supabase error
 - `getRequestForStudio(studioId, requestId)` — queries a single `requests` row filtered by both `id = requestId` and `studio_id = studioId`, with a nested `request_files(...)` relationship select; returns `null` for both a missing request and a request belonging to a different studio — the two cases are indistinguishable at this layer by design (the `.eq("studio_id", ...)` filter simply excludes cross-studio rows from matching at all, there is no separate branch to distinguish them); maps the row (and nested files) through an internal `mapRequestDetailRow()`; throws on Supabase error. Does not query by `referenceCode`
 - `RequestDetailDbRecord`, `RequestFileDbRecord` — **internal-only** types, not `export`ed even from `db.ts` itself (module-private); `RequestDetailDbRecord.files[].storagePath` is a raw Storage path and must never cross the service-layer boundary. `services/requests.ts` consumes `getRequestForStudio()`'s return type by inference only and is its only caller
+- `updateRequestStatusForStudio(studioId, requestId, status)` (Stage 4B.6) — updates `requests.status`
+  in one query scoped to `id = requestId AND studio_id = studioId`, with `.select("id")` chained
+  after `.update()` so the response reflects actually-matched rows; returns `true` if ≥1 row
+  matched, `false` if 0 rows matched (missing request or cross-studio request — indistinguishable,
+  same convention as `getRequestForStudio`); throws on Supabase infrastructure error. Exported from
+  `src/services/index.ts` (unlike `getRequestForStudio`) because the Server Action in `app/` calls
+  it directly — there is no orchestration step spanning DB + Storage here, so no `services/requests.ts`-style wrapper is needed
 - **Layering note:** `AdminRequestListItem`, `RequestStatus`, and `REQUEST_STATUS_OPTIONS` are defined here, not in `src/features/admin/types`/`config`, because `services` must not import from `features` (see Dependency Direction below) while `db.ts` owns the query and the row→DTO mapping. `src/features/admin/types` and `src/features/admin/config` re-export these from `@/services` for feature-facing consumption — see those entries below.
 
 #### services/requests.ts

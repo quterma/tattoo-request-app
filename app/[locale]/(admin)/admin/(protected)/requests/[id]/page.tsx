@@ -6,6 +6,7 @@ import { getAdminRequestDetail } from "@/services"
 import { isUuid } from "@/shared/utils"
 import { Page } from "@/shared/ui"
 import { RequestDetail } from "@/features/admin/ui"
+import { updateRequestStatusAction } from "./actions"
 
 export default async function AdminRequestDetailPage({
   params,
@@ -39,9 +40,16 @@ export default async function AdminRequestDetailPage({
     notFound()
   }
 
+  const boundUpdateStatusAction = updateRequestStatusAction.bind(null, locale, id)
+
   return (
     <Page>
-      <RequestDetail request={request} locale={locale} t={t} />
+      <RequestDetail
+        request={request}
+        locale={locale}
+        t={t}
+        updateStatusAction={boundUpdateStatusAction}
+      />
     </Page>
   )
 }

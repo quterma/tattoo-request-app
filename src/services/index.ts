@@ -5,6 +5,7 @@ export {
   createRequest,
   getRequestByClientSubmissionId,
   listRequestsForStudio,
+  updateRequestStatusForStudio,
   REQUEST_STATUS_OPTIONS,
 } from "./db"
 export type { CreatedRequest, AdminRequestListItem, RequestStatus } from "./db"

@@ -40,6 +40,7 @@ tattoo-request-app/
 │   │   │       │       ├── loading.tsx
 │   │   │       │       ├── page.tsx
 │   │   │       │       └── [id]/
+│   │   │       │           ├── actions.ts
 │   │   │       │           ├── error.tsx
 │   │   │       │           ├── loading.tsx
 │   │   │       │           ├── not-found.tsx
@@ -126,7 +127,8 @@ tattoo-request-app/
 │   │   │   │   ├── RequestDetail.test.tsx
 │   │   │   │   ├── RequestImageViewer.test.tsx
 │   │   │   │   ├── RequestList.test.tsx
-│   │   │   │   └── RequestListSkeleton.test.tsx
+│   │   │   │   ├── RequestListSkeleton.test.tsx
+│   │   │   │   └── RequestStatusForm.test.tsx
 │   │   │   ├── config/
 │   │   │   │   └── index.ts
 │   │   │   ├── types/
@@ -141,7 +143,8 @@ tattoo-request-app/
 │   │   │       ├── RequestImageGroup.tsx
 │   │   │       ├── RequestImageViewer.tsx
 │   │   │       ├── RequestList.tsx
-│   │   │       └── RequestListSkeleton.tsx
+│   │   │       ├── RequestListSkeleton.tsx
+│   │   │       └── RequestStatusForm.tsx
 │   │   └── request/
 │   │       ├── __tests__/
 │   │       │   ├── FileUploadInput.test.tsx

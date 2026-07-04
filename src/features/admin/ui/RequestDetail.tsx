@@ -1,12 +1,18 @@
 import type { getTranslations } from "next-intl/server"
 import { Link } from "@/shared/i18n"
-import type { AdminRequestDetail } from "../types"
+import { REQUEST_STATUS_OPTIONS } from "../config"
+import type { AdminRequestDetail, RequestStatus, UpdateRequestStatusResult } from "../types"
 import { RequestImageViewer } from "./RequestImageViewer"
+import { RequestStatusForm } from "./RequestStatusForm"
 
 type RequestDetailProps = {
   request: AdminRequestDetail
   locale: string
   t: Awaited<ReturnType<typeof getTranslations>>
+  updateStatusAction: (
+    prev: UpdateRequestStatusResult | null,
+    formData: FormData,
+  ) => Promise<UpdateRequestStatusResult>
 }
 
 function formatCreatedAt(isoDate: string, locale: string) {
@@ -19,10 +25,17 @@ function formatCreatedAt(isoDate: string, locale: string) {
   }).format(new Date(isoDate))
 }
 
-export function RequestDetail({ request, locale, t }: RequestDetailProps) {
+export function RequestDetail({ request, locale, t, updateStatusAction }: RequestDetailProps) {
   const statusLabel = t.has(`statuses.${request.status}`)
     ? t(`statuses.${request.status}`)
     : request.status
+  const statusOptionLabels = REQUEST_STATUS_OPTIONS.reduce(
+    (acc, option) => {
+      acc[option] = t.has(`statuses.${option}`) ? t(`statuses.${option}`) : option
+      return acc
+    },
+    {} as Record<RequestStatus, string>,
+  )
   const placementLabel = t.has(`placementLabels.${request.placement}`)
     ? t(`placementLabels.${request.placement}`)
     : request.placement
@@ -45,11 +58,22 @@ export function RequestDetail({ request, locale, t }: RequestDetailProps) {
         &larr; {t("backToRequests")}
       </Link>
 
-      <div className="mt-4 flex items-center justify-between gap-2">
-        <h1 className="text-xl font-semibold text-foreground">{request.referenceCode}</h1>
-        <span className="rounded-full border border-border px-2 py-0.5 text-xs font-medium">
-          {statusLabel}
-        </span>
+      <div className="mt-4 flex flex-col gap-2">
+        <div className="flex items-center justify-between gap-2">
+          <h1 className="text-xl font-semibold text-foreground">{request.referenceCode}</h1>
+          <span className="rounded-full border border-border px-2 py-0.5 text-xs font-medium">
+            {statusLabel}
+          </span>
+        </div>
+        <RequestStatusForm
+          currentStatus={request.status}
+          action={updateStatusAction}
+          statusLabel={t("requestStatusLabel")}
+          statusOptionLabels={statusOptionLabels}
+          submitLabel={t("requestStatusUpdateButton")}
+          submitLabelPending={t("requestStatusUpdateButtonLoading")}
+          successMessage={t("requestStatusUpdateSuccess")}
+        />
       </div>
 
       <section className="mt-4">

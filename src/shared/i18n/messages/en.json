@@ -231,6 +231,13 @@
     "requestNotFoundTitle": "Request not found",
     "requestNotFoundMessage": "This request does not exist or is no longer available.",
 
+    "requestStatusLabel": "Status",
+    "requestStatusUpdateButton": "Update status",
+    "requestStatusUpdateButtonLoading": "Updating…",
+    "requestStatusUpdateSuccess": "Status updated.",
+    "requestStatusUpdateFailed": "Could not update status. Please try again.",
+    "requestStatusUpdateNotFound": "This request is no longer available.",
+
     "statuses": {
       "new": "New",
       "active": "Active",

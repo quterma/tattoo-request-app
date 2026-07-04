@@ -187,6 +187,31 @@ export async function getRequestForStudio(
   return mapRequestDetailRow(data as RequestDetailRow)
 }
 
+/**
+ * Updates a request's status, scoped to a studio in one query.
+ * Returns false if 0 rows matched (missing request or cross-studio request —
+ * both cases indistinguishable by design, matching getRequestForStudio).
+ * Throws on Supabase infrastructure error.
+ */
+export async function updateRequestStatusForStudio(
+  studioId: string,
+  requestId: string,
+  status: RequestStatus,
+): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("requests")
+    .update({ status })
+    .eq("id", requestId)
+    .eq("studio_id", studioId)
+    .select("id")
+
+  if (error) {
+    throw new Error(`DB status update failed: ${error.message}`)
+  }
+
+  return (data as { id: string }[]).length > 0
+}
+
 export async function getRequestByClientSubmissionId(
   clientSubmissionId: string,
 ): Promise<string | null> {
