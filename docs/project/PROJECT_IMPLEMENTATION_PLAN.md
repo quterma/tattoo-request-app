@@ -659,10 +659,22 @@ Note: Telegram was originally planned for Stage 3E and Stage 5. Decision recorde
 
 ## File Upload UX
 
-- per-file delete and replace
-- accumulate files across multiple selections
+- ~~accumulate files across multiple selections~~ — done (see PROJECT_STAGE_LOG.md, 2026-07-04
+  file-upload regression fix, committed `202c1f3`)
+- ~~per-file delete (before submit)~~ — done (see PROJECT_STAGE_LOG.md, 2026-07-04 FileUploadInput
+  selection UX polish, committed `202c1f3`): a remove button next to each selected filename lets
+  the user drop a file from the pending selection before submitting. **Per-file replace, and any
+  delete/replace of an already-submitted file after submission, remain out of scope** — files are
+  immutable after submission per the existing Storage Decisions, and no in-place "swap this file
+  for another" interaction exists pre-submit either; removing and re-picking is the only supported
+  path today.
 - image previews (thumbnails)
 - drag-and-drop, progress indicator
+- prevent duplicate file selection before submit (nice-to-have; not blocking Stage 4B) — likely
+  via a file-identity heuristic (`name + size + lastModified + type`, since `File` objects from
+  separate picker selections are never `===`-equal even for the same underlying file) to silently
+  skip re-adding a file already in the current selection. Not implemented; small, optional,
+  post-release or pre-release-polish candidate.
 
 ## Other Planned Improvements
 

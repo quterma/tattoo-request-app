@@ -32,6 +32,13 @@ Larger post-launch initiatives are tracked in PROJECT_IMPLEMENTATION_PLAN.md —
   - budget range
   - willingness to wait
 
+- File upload: prevent selecting the same file twice before submit. Nice-to-have, small,
+  optional — post-release polish or an easy pre-release addition, not blocking Stage 4B. Likely
+  approach: a file-identity heuristic (`name + size + lastModified + type`) applied in
+  `FileUploadInput`'s `handleChange`, since two `File` objects from separate picker selections are
+  never reference-equal even when they represent the same underlying file. Not implemented — see
+  PROJECT_IMPLEMENTATION_PLAN.md — Post-Launch Roadmap — File Upload UX for the fuller note.
+
 ---
 
 ## Frontend Improvements

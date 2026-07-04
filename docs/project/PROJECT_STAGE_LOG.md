@@ -17,7 +17,7 @@ Status: In progress
 
 Current focus:
 
-- Stage 4A closed (see Stage 4A completion history below) — Stage 4B.0 (architecture/data-access audit) complete — Stage 4B.1 (documentation + architecture foundation) complete — Stage 4B.2 (domain contracts + request list data access) complete — Stage 4B.3 (request detail data access + signed image URLs) complete — Stage 4B.4 (admin request list UI) complete and committed — Stage 4B.5 (admin request detail UI) complete and committed — routing cleanup (request list moved to `/[locale]/admin/requests`, `/[locale]/admin` now redirects) complete (not yet committed) — Stage 4B.5.1 (minimal image viewer/zoom) implemented using `yet-another-react-lightbox` + Zoom plugin (not yet committed); physical-device manual verification (iPhone Safari, Android Chrome) still outstanding; swipe-down-to-close intentionally deferred pending that verification — post-4B.5.1 debugging pass complete: admin list/detail React-DevTools-only console warning investigated and attributed to a known dev-tooling/React-internals interaction (not app code, viewer not implicated, no fix applied); unrelated pre-existing file-upload accumulation bug found and fixed in `FileUploadInput`
+- Stage 4A closed (see Stage 4A completion history below) — Stage 4B.0 (architecture/data-access audit) complete — Stage 4B.1 (documentation + architecture foundation) complete — Stage 4B.2 (domain contracts + request list data access) complete — Stage 4B.3 (request detail data access + signed image URLs) complete — Stage 4B.4 (admin request list UI) complete and committed — Stage 4B.5 (admin request detail UI) complete and committed — routing cleanup (request list moved to `/[locale]/admin/requests`, `/[locale]/admin` now redirects) complete and committed — Stage 4B.5.1 (minimal image viewer/zoom) implemented using `yet-another-react-lightbox` + Zoom plugin, committed as `202c1f3`; desktop manual verification passed; **physical mobile-device verification (iPhone Safari, Android Chrome) still pending, blocked on deployment/preview access**; swipe-down-to-close intentionally deferred pending that verification — post-4B.5.1 debugging pass complete: admin list/detail React-DevTools-only console warning investigated and attributed to a known dev-tooling/React-internals interaction (not app code, viewer not implicated, no fix applied); pre-existing file-upload accumulation bug found and fixed, plus a follow-up UX polish (ignored-extras warning, per-file remove), both committed in `202c1f3`
 
 Completed stages:
 
@@ -70,7 +70,9 @@ Completed in Stage 3:
 
 ### 2026-07-04 — Follow-up — FileUploadInput selection UX polish
 
-Status: Completed. Not committed.
+Status: Completed. Committed as `202c1f3` (feat(4B.5.1): add image viewer + upload UX fixes —
+bundled with the Stage 4B.5.1 viewer commit below, since nothing from this session had been
+committed yet at the time).
 
 Small follow-up to the file-upload accumulation fix (see the debugging entry below): improves
 public request form upload UX without changing `MAX_FILES_PER_FIELD` or any server/storage/DB
@@ -130,7 +132,10 @@ PASS.
 
 ### 2026-07-04 — Post-4B.5.1 debugging — route-transition console warning + file-upload regression check
 
-Status: Completed. Not committed.
+Status: Completed. The code fixes from this entry (conditional `<Lightbox>` mounting, the
+`FileUploadInput` accumulation fix) are committed as part of `202c1f3`. This entry's DevTools
+warning investigation itself produced no code change — its conclusion (dev-tooling/React-internals
+interaction, not an app bug) stands as documentation only.
 
 Two issues investigated after Stage 4B.5.1:
 
@@ -275,7 +280,14 @@ by this session.
 
 ### 2026-07-04 — Stage 4B.5.1 — Minimal Image Viewer / Zoom implementation
 
-Status: Completed (code); not yet committed. Physical-device manual verification outstanding.
+Status: Completed (code). Committed as `202c1f3` (feat(4B.5.1): add image viewer + upload UX
+fixes). **Physical mobile-device verification (iPhone Safari, Android Chrome — pinch zoom, pan
+after zoom, double tap, swipe, portrait/landscape) remains pending** until the app is deployed or
+a mobile-accessible preview environment is available for real-device testing; desktop manual
+verification (open, close button, backdrop, Escape, double-click zoom/reset, drag/pan after zoom)
+is complete and passed (see the debugging entry above). Swipe-down-to-close
+(`controller.closeOnPullDown`) remains intentionally not enabled, gated on that same pending
+mobile verification.
 
 Pre-implementation verification performed (against real shipped package artifacts, not just
 prose docs): downloaded and inspected `yet-another-react-lightbox@3.32.0`'s type definitions
