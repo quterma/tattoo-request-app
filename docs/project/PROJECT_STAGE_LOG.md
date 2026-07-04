@@ -12,12 +12,46 @@ AI agents and developers working on the project.
 
 ## Current Stage
 
-Stage: Stage 4B — Admin Dashboard
-Status: Final documentation sync / closure prep — one item outstanding (see below)
+Stage: Stage 5 — Production Hardening (preparation / audit planning)
+Status: Stage 4B — Admin Dashboard is closed (implementation-complete, 2026-07-04). Stage 5 has not started.
 
 Current focus:
 
-- Stage 4A closed (see Stage 4A completion history below) — Stage 4B.0 (architecture/data-access audit) complete — Stage 4B.1 (documentation + architecture foundation) complete — Stage 4B.2 (domain contracts + request list data access) complete — Stage 4B.3 (request detail data access + signed image URLs) complete — Stage 4B.4 (admin request list UI) complete and committed — Stage 4B.5 (admin request detail UI) complete and committed — routing cleanup (request list moved to `/[locale]/admin/requests`, `/[locale]/admin` now redirects) complete and committed — Stage 4B.5.1 (minimal image viewer/zoom) implemented using `yet-another-react-lightbox` + Zoom plugin, committed as `202c1f3`; desktop manual verification passed; **physical mobile-device verification (iPhone Safari, Android Chrome) still pending, blocked on deployment/preview access**; swipe-down-to-close intentionally deferred pending that verification — post-4B.5.1 debugging pass complete: admin list/detail React-DevTools-only console warning investigated and attributed to a known dev-tooling/React-internals interaction (not app code, viewer not implicated, no fix applied); pre-existing file-upload accumulation bug found and fixed, plus a follow-up UX polish (ignored-extras warning, per-file remove), both committed in `202c1f3` — Stage 4B.6 (request status update) implemented and **committed as `44f11c4`**; **manual verification of the live status-update flow completed successfully** (status change succeeds, detail reflects the new status, list reflects the new status after navigation, same-status update works) — remaining before full Stage 4B closure: **physical mobile-device verification of the 4B.5.1 image viewer is still pending**, unchanged from above
+- Stage 4B — Admin Dashboard: **closed, implementation-complete.** Stage 4A closed (see Stage 4A
+  completion history below) — Stage 4B.0 (architecture/data-access audit) complete — Stage 4B.1
+  (documentation + architecture foundation) complete — Stage 4B.2 (domain contracts + request list
+  data access) complete — Stage 4B.3 (request detail data access + signed image URLs) complete —
+  Stage 4B.4 (admin request list UI) complete and committed — Stage 4B.5 (admin request detail UI)
+  complete and committed — routing cleanup (request list moved to `/[locale]/admin/requests`,
+  `/[locale]/admin` now redirects) complete and committed — Stage 4B.5.1 (minimal image
+  viewer/zoom) implemented using `yet-another-react-lightbox` + Zoom plugin, committed as
+  `202c1f3`; desktop manual verification passed — post-4B.5.1 debugging pass complete: admin
+  list/detail React-DevTools-only console warning investigated and attributed to a known
+  dev-tooling/React-internals interaction (not app code, viewer not implicated, no fix applied);
+  pre-existing file-upload accumulation bug found and fixed, plus a follow-up UX polish
+  (ignored-extras warning, per-file remove), both committed in `202c1f3` — Stage 4B.6 (request
+  status update) implemented and **committed as `44f11c4`**; **manual verification of the live
+  status-update flow completed successfully** (status change succeeds, detail reflects the new
+  status, list reflects the new status after navigation, same-status update works)
+- **Deferred, not a Stage 4B closure blocker:** physical mobile-device verification of the 4B.5.1
+  image viewer (iPhone Safari, Android Chrome — pinch zoom, pan after zoom, double tap, swipe,
+  close button, backdrop tap, portrait/landscape) was never performed during Stage 4B — no
+  physical device or deployment/preview access was available. This is honestly recorded as
+  **outstanding, not completed** — it does not block Stage 4B closure and is carried forward as a
+  Stage 6 mobile-polish / pre-release manual-QA item (see `PROJECT_IMPLEMENTATION_PLAN.md` Stage 6
+  and `PROJECT_BACKLOG.md`, Admin image viewer entry). `swipe-down-to-close`
+  (`controller.closeOnPullDown`) and the low-resolution-image zoom-cap follow-up
+  (`zoom={{ maxZoomPixelRatio: 2 }}`) both remain gated on that same real-device verification — no
+  resolution-based/conditional logic is to be added ahead of it.
+- Next: Stage 5 (Production Hardening) preparation/audit planning. No Stage 5 work has started;
+  this entry records Stage 4B closure and handoff, not a Stage 5 kickoff.
+- **Stage 5 planned sequence** (see PROJECT_IMPLEMENTATION_PLAN.md — Stage 5 for full detail):
+  5A (security / data-boundary planning) → 5B (production hardening implementation) → 5C (real
+  infrastructure and end-to-end verification) → **5D (Full Application Maturity Audit + targeted
+  fix pass)**, then Stage 6 (visual/product polish). 5D is a structured, evidence-based
+  whole-codebase audit (not just Stage 5's new code) that runs only after 5A–5C, with findings
+  classified and a documented fix/defer/reject outcome, before Stage 6 begins. None of 5A–5D have
+  started; no audit has been performed yet.
 
 Completed stages:
 
@@ -67,6 +101,30 @@ Completed in Stage 3:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-07-04 — Stage 4B — Admin Dashboard closed (documentation-only closure)
+
+Status: Completed. Documentation-only — no source, test, route, schema, or Supabase changes.
+
+Formal closure of Stage 4B, following developer decision that Stage 4B is
+implementation-complete and may be closed now, with the 4B.5.1 physical mobile-device viewer
+verification intentionally deferred (not a closure blocker).
+
+- All Stage 4B sub-stages (4B.0–4B.6) are implemented, committed, and (where applicable) manually
+  verified against real Supabase data — see the dated entries below for each.
+- The only outstanding item — physical mobile-device verification of the 4B.5.1 image viewer
+  (iPhone Safari, Android Chrome) — is explicitly **not** treated as a Stage 4B blocker. It is
+  moved to Stage 6 (mobile/visual polish) and pre-release manual QA, alongside the related
+  low-resolution-zoom follow-up (`zoom={{ maxZoomPixelRatio: 2 }}`, evaluate only after real-device
+  testing, no resolution-based logic) — see `PROJECT_IMPLEMENTATION_PLAN.md` (Stage 6) and
+  `PROJECT_BACKLOG.md` (Admin image viewer entry).
+- "Current Stage" above updated: Stage 4B marked closed; current focus moves to Stage 5
+  (Production Hardening) preparation/audit planning. Stage 5 itself has not been started — no
+  Stage 5 work performed in this entry.
+- No claim of production-readiness or release-readiness is made here — Stage 5 and Stage 6 remain
+  ahead of that, per `PROJECT_IMPLEMENTATION_PLAN.md`.
+
+---
 
 ### 2026-07-04 — Stage 4B.6 — Request Status Update
 

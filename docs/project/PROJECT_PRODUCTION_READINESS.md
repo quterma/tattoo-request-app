@@ -169,8 +169,40 @@ consistency gaps, stale references, and pre-launch risks before they compound.
 
 - After Stage 4A — Admin Authentication
 - After Stage 4B — Admin Dashboard
-- Stage 5 — Production Hardening (final pre-launch audit)
+- Stage 5D — Full Application Maturity Audit + Targeted Fix Pass (final pre-Stage-6 audit — see
+  below)
 - After major post-launch integrations (Telegram notifications, calendar, payments)
+
+## Stage 5D — Final Pre-Stage-6 / Post-Hardening Maturity Audit
+
+Canonical detailed scope, method, finding classification, deliverables, and exit criteria live in
+`PROJECT_IMPLEMENTATION_PLAN.md` — Stage 5D. This section only fixes the readiness-protocol
+framing; do not duplicate the full scope here.
+
+- **Timing:** after Stage 5A (security/data-boundary planning), 5B (hardening implementation),
+  and 5C (real-infrastructure and end-to-end verification) — i.e. after the production
+  architecture is actually complete — and before Stage 6 begins.
+- **Coverage:** the full application, not only files changed during Stage 5.
+- **Method:** primary repo-aware audit, plus an independent second-opinion audit where available
+  (e.g. a different agent/tool); if the second opinion cannot be run, that limitation must be
+  recorded explicitly rather than treated as satisfied.
+- Findings must be evidence-based (verified against actual code) and classified — see
+  PROJECT_IMPLEMENTATION_PLAN.md, Stage 5D, Finding classification.
+- No speculative refactor may start from an audit finding without a separately approved, bounded
+  implementation plan.
+- All "must fix before Stage 6" findings must be closed, verified, and covered by quality gates
+  before Stage 6 begins.
+- Deferred/accepted risks must be explicitly recorded (PROJECT_BACKLOG.md, with rationale and a
+  pointer to the audit report / Stage 5D closure entry) — not silently dropped.
+
+## Deferred from Stage 4B — pre-release manual QA item
+
+Physical mobile-device verification of the 4B.5.1 admin image viewer (iPhone Safari, Android
+Chrome — pinch zoom, pan after zoom, double tap, swipe, close button, backdrop tap,
+portrait/landscape) was never performed during Stage 4B (no device/deployment access) and does
+not block Stage 4B closure. Must be verified manually before public launch — see
+PROJECT_BACKLOG.md (Admin image viewer entry) and PROJECT_IMPLEMENTATION_PLAN.md (Stage 6) for
+the full item, including the gated low-resolution-zoom-cap follow-up.
 
 ## Audit protocol
 

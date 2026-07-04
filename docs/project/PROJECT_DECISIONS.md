@@ -871,8 +871,13 @@ implementation session):**
 the manual device verification above showing no conflict with pinch/pan. Not scheduled as its own
 stage — a small follow-up change once device testing is possible.
 
-Implemented 2026-07-04 (code) — manual real-device verification above still outstanding before
-this can be considered fully complete per the MVP Quality Standard.
+Implemented 2026-07-04 (code) — manual real-device verification above still outstanding.
+
+**Stage 4B closure note (added 2026-07-04):** Stage 4B was closed as implementation-complete with
+this verification still outstanding — it is not a Stage 4B blocker. Deferred to Stage 6 (mobile
+polish) and/or pre-release manual QA — see PROJECT_STAGE_LOG.md (2026-07-04 closure entry),
+PROJECT_IMPLEMENTATION_PLAN.md (Stage 6), and PROJECT_BACKLOG.md (Admin image viewer entry),
+which also carries the gated `closeOnPullDown` and low-resolution-zoom-cap follow-ups.
 
 ---
 

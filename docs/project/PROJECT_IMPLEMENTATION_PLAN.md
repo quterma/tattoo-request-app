@@ -387,9 +387,15 @@ Result:
 
 ---
 
-## Stage 4B — Admin Dashboard
+## Stage 4B — Admin Dashboard ✓ closed (implementation-complete, 2026-07-04)
 
 Goal: implement request management interface.
+
+Closed 2026-07-04 — see PROJECT_STAGE_LOG.md (2026-07-04 closure entry) for the formal closure
+record. All sub-stages below (4B.0–4B.6) are implemented and committed. Closure is an
+implementation closure: the one outstanding item, 4B.5.1's physical mobile-device viewer
+verification, is deferred to Stage 6 / pre-release manual QA (not completed, not a Stage 4B
+blocker) — see 4B.5.1 below and Stage 6.
 
 **Reduced approved scope** (recorded 2026-07-02, see PROJECT_DECISIONS.md — Stage 4B Admin
 Dashboard Architecture): dashboard metrics, admin notes, and unread/read tracking are deferred
@@ -473,7 +479,7 @@ click behavior, route-level loading/error/not-found states. Excludes status upda
 unread, filters, calendar, and any image viewer/zoom — see PROJECT_STAGE_LOG.md for the full
 completion record.
 
-### 4B.5.1 — Minimal Image Viewer / Zoom (code complete; manual device verification outstanding)
+### 4B.5.1 — Minimal Image Viewer / Zoom ✓ complete (implementation); physical mobile verification deferred to Stage 6 / pre-release QA
 
 Small follow-up step immediately after 4B.5, before status update. Full decisions and the
 implementation record are in PROJECT_DECISIONS.md — Minimal Image Viewer / Zoom (under Stage 4B
@@ -486,10 +492,15 @@ already-signed URL, no new signed-URL request on open; dark uncropped/letterboxe
 pinch-zoom, pan, double-tap zoom/reset via the Zoom plugin; close button, Escape, and
 backdrop-tap all enabled; nav arrows hidden when only one image exists, swipe navigation left
 active. `closeOnPullDown` (swipe-down-to-close) intentionally left disabled this pass — no
-physical device available to verify it doesn't conflict with pinch/pan; deferred as a small
-follow-up once real-device testing is possible. No gallery/download/animation/custom zoom-button
-controls. Physical iPhone Safari / Android Chrome / desktop manual verification has not yet been
-performed — the stage is not considered fully complete until that happens.
+physical device available to verify it doesn't conflict with pinch/pan. No gallery/download/
+animation/custom zoom-button controls.
+
+Implementation and desktop manual verification are complete; this sub-stage's code is done.
+**Physical iPhone Safari / Android Chrome device verification was not performed** (no device/
+deployment access during Stage 4B) and is **not** claimed as done. It does not block Stage 4B
+closure — it is deferred to Stage 6 (mobile polish) and/or pre-release manual QA, together with
+`closeOnPullDown` and the low-resolution-zoom follow-up — see Stage 6 below and
+PROJECT_BACKLOG.md.
 
 ### 4B.6 — Request Status Update ✓ completed
 
@@ -555,38 +566,168 @@ Result:
 
 Goal: verify readiness and deploy to production.
 
+Stage 5 is executed as four ordered sub-stages, **5A → 5B → 5C → 5D**, in that sequence. Each
+sub-stage builds on the previous one; Stage 5D (the final full-application maturity audit) is
+deliberately last, after security/data-boundary work and real-infrastructure verification, so it
+assesses a production architecture that is actually complete rather than a work-in-progress one.
+None of Stage 5's sub-stages have started as of Stage 4B's closure (2026-07-04) — see
+PROJECT_STAGE_LOG.md.
+
+## Stage 5A — Security / Data-Boundary Planning
+
+Goal: decide and document the security and data-boundary architecture before implementing it.
+
 Tasks:
 
-- full app-wide audit and fix pass (architecture, security, frontend/BFF, documentation, UX flows, accumulated tech debt) — see PROJECT_PRODUCTION_READINESS.md, Architecture & Documentation Audit Checkpoints
-- E2E / integration test coverage (see PROJECT_PRODUCTION_READINESS.md)
-- security review checklist (see PROJECT_PRODUCTION_READINESS.md)
-- RLS policies for `studios`, `studio_members`, `requests`, `request_files`, and Storage
-- environment separation: decide on and set up staging Supabase project and Vercel preview/staging environment before public launch
-- production environment setup: domain, production env vars, Google OAuth production redirect URI, backups, monitoring/logging (see PROJECT_PRODUCTION_READINESS.md, Production Environment Setup)
-- performance validation on deployed environment
-- logging and error handling review
-- dependency security audit (`pnpm audit`)
-- CI/CD: GitHub → Vercel preview/production deploy flow, `pnpm qg` gate before merge (see PROJECT_PRODUCTION_READINESS.md, CI/CD)
-- deployment (Vercel + Supabase production)
-- final release checklist — sign off on all quality gates
+- RLS policy design for `studios`, `studio_members`, `requests`, `request_files`, and Storage
+- security review checklist planning (see PROJECT_PRODUCTION_READINESS.md)
+- environment separation decision: staging Supabase project + Vercel preview/staging environment
+- dependency security audit planning (`pnpm audit` review cadence)
 
-Exit Criteria:
+Result: an approved security/data-boundary plan ready for implementation in 5B.
+
+## Stage 5B — Production Hardening Implementation
+
+Goal: implement the plan from 5A and the remaining hardening tasks.
+
+Tasks:
+
+- implement RLS policies for `studios`, `studio_members`, `requests`, `request_files`, and Storage
+- implement environment separation (staging Supabase project, Vercel preview/staging environment)
+- production environment setup: domain, production env vars, Google OAuth production redirect URI, backups, monitoring/logging (see PROJECT_PRODUCTION_READINESS.md, Production Environment Setup)
+- logging and error handling review
+- dependency security audit (`pnpm audit`) executed and resolved/documented
+- CI/CD: GitHub → Vercel preview/production deploy flow, `pnpm qg` gate before merge (see PROJECT_PRODUCTION_READINESS.md, CI/CD)
+
+Result: hardened application, ready for real-infrastructure verification.
+
+## Stage 5C — Real Infrastructure and End-to-End Verification
+
+Goal: verify the hardened application against real, deployed infrastructure.
+
+Tasks:
+
+- E2E / integration test coverage against real Supabase infrastructure (see PROJECT_PRODUCTION_READINESS.md)
+- performance validation on deployed environment
+- deployment (Vercel + Supabase production)
+- manual smoke test of full submission and admin flow against the deployed environment
+
+Result: a verified, deployed application — the completed production architecture that Stage 5D
+will audit.
+
+## Stage 5D — Full Application Maturity Audit + Targeted Fix Pass
+
+Goal: a structured, evidence-based final audit of the whole shipped MVP — not just Stage 5's own
+new code — to catch immature architecture, duplication, rough code, hidden security issues,
+stale docs, or avoidable technical debt before Stage 6 visual/product polish and release.
+
+This is a **codebase/product maturity audit**, not a visual redesign and not license to expand
+product scope. It runs after 5A–5C, once the production architecture is actually complete.
+
+It is designed to answer: *is there anything structurally weak, duplicated, inconsistent,
+insecure, under-tested, misleadingly documented, or unnecessarily immature that should be fixed
+before visual polish and release preparation?*
+
+### Audit scope
+
+Full-application review across these lenses:
+
+- architecture and layering / dependency boundaries
+- server/client boundaries and accidental client exposure
+- auth, authorization, tenant/studio scoping, RLS/service-role/storage-policy assumptions
+- API / Server Action / Route Handler contracts and error handling
+- duplication, competing sources of truth, inconsistent DTO/config/type ownership
+- component size, responsibility boundaries, naming, dead code, stale abstractions, unnecessary complexity
+- form/submission/upload/idempotency/error-state correctness
+- test strategy and meaningful regression-risk gaps
+- accessibility and semantic/UI correctness at the code level
+- i18n/locale-routing consistency and hardcoded user-visible copy
+- environment/config/secrets/deployment assumptions
+- documentation consistency, stale claims, mismatch between docs and code/migrations
+- production-readiness risks and "looks unfinished / junior / fragile" findings
+
+### Audit method
+
+Two-pass approach:
+
+1. **Primary repo-aware audit** by the main implementation agent (Claude Code or equivalent):
+   direct inspection of source, tests, migrations, configuration, and docs.
+2. **Independent second-opinion audit** by a different capable agent/tool where available (for
+   example Codex), using the same agreed audit brief, independently reviewing the repository.
+
+The second audit is recommended, not a hard blocker if unavailable. If it cannot be run, the
+primary audit's report must state that limitation explicitly, rather than silently proceeding as
+if two audits occurred.
+
+Then a human/lead synthesis step, required regardless of how many audits ran:
+
+- merge findings from all audits performed
+- remove duplicates/noise
+- verify each finding against the actual code (no finding is accepted on an agent's word alone)
+- classify each finding (see Finding classification below) before any implementation begins
+
+### Finding classification
+
+Every finding must be placed into exactly one of:
+
+- **Must fix before Stage 6** — correctness, security, data integrity, serious maintainability,
+  broken boundary, or release-risk issue
+- **Fix during Stage 5 if small** — clear improvement with bounded scope and low regression risk
+- **Defer deliberately** — valid but not justified before launch; must be added to
+  PROJECT_BACKLOG.md with rationale and a pointer back to the audit report / Stage 5D closure entry
+- **Reject / no action** — false positive, preference-only, speculative, or not worth the
+  complexity
+
+No broad refactor may start from an audit finding without a separately approved, bounded
+implementation plan. Finding something during the audit does not itself authorize fixing it.
+
+### Deliverables
+
+- a dated audit report (or reports) with evidence and affected files
+- a consolidated findings register with classification and rationale
+- a small approved remediation plan for accepted fixes
+- targeted implementation and regression tests/manual checks where appropriate
+- documentation updates for decisions, structure, architecture, backlog, and stage log as needed
+- a final Stage 5D closure note in PROJECT_STAGE_LOG.md stating what was fixed, deferred,
+  rejected, and what remains intentionally accepted
+
+### Exit Criteria
+
+Stage 5D is complete only when:
+
+- both audits have been completed, or the absence of the independent audit is explicitly recorded
+- findings are consolidated and classified
+- all "must fix before Stage 6" findings are resolved and verified
+- accepted small fixes are completed, or consciously moved to backlog with rationale
+- no unreviewed high-risk architecture/security/correctness concern remains
+- docs reflect the final state honestly
+- quality gates (`pnpm qg`) pass after the fix pass
+- Stage 6 begins from a documented, reviewed baseline
+
+Stage 5D is not a promise of zero technical debt — the goal is deliberate, reviewed debt, not
+perfection.
+
+## Stage 5 Exit Criteria
 
 - all items in PROJECT_PRODUCTION_READINESS.md are resolved or explicitly deferred
-- security checklist complete
-- application deployed and accessible
+- security checklist complete (5A/5B)
+- application deployed and accessible (5C)
 - no critical bugs or regressions
-- manual smoke test of full submission and admin flow passes
+- manual smoke test of full submission and admin flow passes (5C)
+- Stage 5D's exit criteria above are met
 
 Result:
 
-- production-ready application, publicly launched
+- production-ready application, publicly launched, reviewed via Stage 5D before Stage 6 begins
 
 ---
 
 # Stage 6 — Product Experience Polish
 
 Goal: elevate UI/UX quality after the initial release.
+
+Stage 6 begins only after Stage 5D's audit/fix pass is closed (see Stage 5D above) — visual
+polish should build on a reviewed, documented baseline, not on unreviewed accumulated debt.
 
 This stage does not ship new features — it improves what exists.
 
@@ -601,6 +742,13 @@ Tasks:
     tablet-width view could move to a two-column card grid if it improves use of horizontal
     space; the Stage 4B.4 list stays single-column mobile-first until this visual review —
     not a functional blocker, no change made now
+  - deferred from Stage 4B (see PROJECT_IMPLEMENTATION_PLAN.md — 4B.5.1, PROJECT_STAGE_LOG.md
+    2026-07-04 closure entry): physical mobile-device verification of the 4B.5.1 admin image
+    viewer — iPhone Safari + Android Chrome, pinch zoom, pan after zoom, double tap, swipe,
+    close button, backdrop tap, portrait/landscape. Never performed (no device/deployment access
+    during Stage 4B); not a Stage 4B blocker. Also gates `controller.closeOnPullDown`
+    (swipe-down-to-close) and the low-resolution-image zoom-cap follow-up
+    (`zoom={{ maxZoomPixelRatio: 2 }}`, no resolution-based logic) — see PROJECT_BACKLOG.md
 - design system refinement (typography, color, spacing consistency)
 - animations and micro-interactions
 - accessibility and readability improvements
