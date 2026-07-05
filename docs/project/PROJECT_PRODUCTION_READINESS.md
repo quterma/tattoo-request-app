@@ -64,9 +64,12 @@ Complete before public launch:
 - `request-images` bucket confirmed private (`public: false`)
 - No public bucket policies; RLS enabled with zero policies on `storage.objects`, same
   intentional deny-all-by-omission posture as the table RLS above
-- Bucket-level MIME-type/file-size limits are **not yet configured** in Supabase (currently
-  enforced only in app code via `validateFiles`) — configuring these via Dashboard is a Stage 5B
-  task, not yet done
+- **Bucket-level MIME-type/file-size limits configured 2026-07-05 (Stage 5B.2):**
+  `file_size_limit = 10485760` (10 MB), `allowed_mime_types` = `image/jpeg`, `image/png`,
+  `image/webp`, `image/heic`, `image/heif` — matching the existing app-layer `validateFiles`
+  allow-list exactly. Applied via the Supabase Storage API (`updateBucket()`), verified live by
+  re-reading the bucket config, plus a real smoke-test submission confirming upload and signed-URL
+  access still work. See PROJECT_STAGE_LOG.md (2026-07-05 entry) for the full record.
 - Signed URLs used for admin access only — never returned to public users
 - Storage path-prefix RLS policies considered and explicitly deferred (see PROJECT_DECISIONS.md)
 - Legacy (pre-`{studioId}/` prefix) storage paths were identified and cleaned up in Stage 5A.3/5A.4

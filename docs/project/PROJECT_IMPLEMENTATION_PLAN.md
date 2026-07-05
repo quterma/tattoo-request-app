@@ -624,9 +624,14 @@ Tasks:
   policy change. Verified live: advisor finding gone, signature/grants/security-mode unchanged,
   real smoke-test submission succeeded. See PROJECT_STAGE_LOG.md (2026-07-05 entry) for the full
   record.
-- Storage bucket (`request-images`) MIME-type and file-size limits configured via Supabase
-  Dashboard (10 MB per file, matching the existing app-layer `validateFiles` limit) — Dashboard
-  configuration, not a policy or migration
+- ✓ **completed 2026-07-05 (Stage 5B.2)** — Storage bucket (`request-images`) MIME-type and
+  file-size limits configured via the Supabase Storage API (`updateBucket()`, not a Dashboard
+  click-through and not a SQL migration): `file_size_limit` 10 MB, `allowed_mime_types` the same
+  five types `validateFiles` already enforces app-side (`image/jpeg`, `image/png`, `image/webp`,
+  `image/heic`, `image/heif`); `public` confirmed still `false`. Verified live: bucket config
+  re-read and matches exactly; real smoke-test submission with a valid non-blank image succeeded
+  and signed-URL access still works. See PROJECT_STAGE_LOG.md (2026-07-05 entry) for the full
+  record.
 - Auth Dashboard verification: confirm redirect URLs (OAuth callback, password-reset callback,
   including the production origin once known), custom SMTP configuration status, rate limits, and
   enable "Leaked Password Protection" (flagged by `supabase db advisors`) — Dashboard verification,

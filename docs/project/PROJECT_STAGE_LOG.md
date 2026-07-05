@@ -15,17 +15,24 @@ AI agents and developers working on the project.
 Stage: Stage 5 — Production Hardening (preparation / audit planning)
 Status: Stage 4B — Admin Dashboard is closed (implementation-complete, 2026-07-04). Stage 5A —
 Security / Data-Boundary Planning is closed (completed 2026-07-05). **Stage 5B — Production
-Hardening Implementation is in progress; 5B.1 (`create_request` search_path hardening) is
-complete (2026-07-05).**
+Hardening Implementation is in progress; 5B.1 (`create_request` search_path hardening) and 5B.2
+(Storage bucket MIME/size limits) are complete (2026-07-05).**
 
 Current focus:
 
+- **Stage 5B.2 — Storage bucket MIME/size limits: completed 2026-07-05.** Updated the
+  `request-images` bucket via the Supabase Storage API (`updateBucket()`, not a SQL migration —
+  bucket config is Storage-service-managed, not a plain table row to migrate): `file_size_limit`
+  set to `10485760` (10 MB), `allowed_mime_types` set to the five types
+  `validateFiles` already enforces in app code (`image/jpeg`, `image/png`, `image/webp`,
+  `image/heic`, `image/heif`); `public` confirmed unchanged (`false`). See the dated entry below
+  for the full verification record. Remaining Stage 5B items (Auth Dashboard verification,
+  environment separation, production environment setup, logging review, dependency audit, CI/CD)
+  are not started.
 - **Stage 5B.1 — `create_request` search_path hardening: completed 2026-07-05.** Applied
   migration `20260705155244_harden_create_request_search_path.sql` (`ALTER FUNCTION ... SET
   search_path = public, pg_temp`), fixing the `function_search_path_mutable` advisor finding from
-  Stage 5A.2. See the dated entry below for the full verification record. Remaining Stage 5B
-  items (bucket Dashboard limits, Auth Dashboard verification, environment separation, production
-  environment setup, logging review, dependency audit, CI/CD) are not started.
+  Stage 5A.2. See the dated entry below for the full verification record.
 - **Stage 5A — Security / Data-Boundary Planning: closed, completed 2026-07-05.** Sequence:
   5A.1 (read-only repo/migration/code security audit) → 5A.2 (live Supabase read-only
   verification via `supabase db advisors`/`db query`) → 5A.3 (read-only legacy-data cleanup plan)
@@ -121,6 +128,52 @@ Completed in Stage 3:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-07-05 — Stage 5B.2 — Storage bucket MIME/size limits
+
+Status: Completed. One Storage-API bucket-config update applied and verified against the live
+Supabase project; no RLS/Storage policy, application code, route, dependency, migration, or env
+var change.
+
+Preflight (read-only): confirmed `request-images` bucket existed with `public: false` (already
+correct) but `file_size_limit: null` and `allowed_mime_types: null` (no restriction configured at
+the bucket level — matching the gap identified in Stage 5A.2).
+
+Completed:
+
+- Determined the bucket-config update should go through the Supabase Storage API's
+  `updateBucket()` (the same method the Dashboard uses internally), not a raw SQL `UPDATE` on
+  `storage.objects`/`storage.buckets` — bucket configuration is Storage-service-managed state, not
+  a plain table row safe to hand-edit outside the Storage API's own validation, and not something
+  the Supabase CLI's `storage` subcommand (object-level only: `ls`/`cp`/`mv`/`rm`) exposes directly
+- Applied via a small, temporary, uncommitted Node script using the existing service-role
+  credentials (same pattern as Stage 5A.4/5B.1), removed immediately after use: `updateBucket
+  ("request-images", { public: false, fileSizeLimit: 10485760, allowedMimeTypes: ["image/jpeg",
+  "image/png", "image/webp", "image/heic", "image/heif"] })`
+- Post-change verification (read-only): re-queried `storage.buckets` and confirmed `public: false`
+  (unchanged), `file_size_limit: 10485760` (10 MB, exact match), `allowed_mime_types` exactly the
+  five target values, in the exact order set — matches `validateFiles`'s existing app-layer
+  allow-list with no drift
+- **Real smoke test performed:** submitted one real request through the running local dev server's
+  public `POST /api/request` route with a genuine non-blank 64×64 generated PNG (~7.8 KB, well
+  under the new 10 MB limit) for both required image fields — received
+  `{"ok":true,"referenceCode":"REQ-2026-0011"}`. Verified directly (read-only): both
+  `request_files` rows persisted with the correct byte size and new-format storage paths; signed
+  URLs generated successfully for both files via the same `createSignedRequestFileUrl()` path
+  admin uses, both returned HTTP 200 with correct `content-type`/`content-length` matching the
+  uploaded file. Visual admin list/detail rendering left to the developer to confirm directly
+  in-browser, consistent with the Stage 5B.1 smoke test
+- No `pnpm qg` run — no `src/`/`app/`/test file was touched; this change is entirely external
+  Supabase Storage configuration, verified directly against the live project instead
+- `git status` after the change: clean — no repository file was modified or left behind by the
+  temporary script
+
+No RLS policy, Storage RLS policy, application code, route, dependency, migration, or environment
+variable was changed. Docs updated: this entry, plus PROJECT_IMPLEMENTATION_PLAN.md and
+PROJECT_PRODUCTION_READINESS.md (bucket limits marked configured). Stage 5B overall remains not
+complete — only 5B.1 and 5B.2 are done.
+
+---
 
 ### 2026-07-05 — Stage 5B.1 — `create_request` search_path hardening
 
