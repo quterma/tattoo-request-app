@@ -20,6 +20,15 @@ Hardening Implementation is in progress; 5B.1 (`create_request` search_path hard
 
 Current focus:
 
+- **Admin image viewer — fit-to-screen initial sizing + 2x zoom: completed 2026-07-06 (code);
+  manual browser/device verification not yet performed.** Follow-up to Stage 4B.5.1's
+  `RequestImageViewer` and the 2026-07-05 partial tuning attempt (which raised the zoom ceiling
+  but left the initial viewer image tiny — root cause: YARL's `ImageSlide` only applies
+  `max-width`/`max-height`, which never forces an `<img>` to grow past its natural size).
+  `carousel.imageProps` (a real, officially-typed YARL prop) now sets `width: "100%", height:
+  "100%"` on the slide image so it fills and fits its container via `imageFit: "contain"`; the
+  developer has confirmed they will verify this manually in-browser themselves. Not part of Stage
+  5B — a UI/UX fix, unrelated to Storage/DB/RLS hardening.
 - **Stage 5B.2 — Storage bucket MIME/size limits: completed 2026-07-05.** Updated the
   `request-images` bucket via the Supabase Storage API (`updateBucket()`, not a SQL migration —
   bucket config is Storage-service-managed, not a plain table row to migrate): `file_size_limit`
@@ -128,6 +137,149 @@ Completed in Stage 3:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-07-06 — Admin image viewer — fit-to-screen initial sizing + 2x zoom
+
+Status: Completed (code). Manual browser/device verification not performed in this session — the
+developer has confirmed they will check this themselves. No server/data/signing/upload/Storage/
+Supabase change; no new dependency.
+
+Follow-up to the 2026-07-05 viewer tuning entry below, which was found insufficient: manual testing
+showed the small 64×64 test image (`REQ-2026-0010`) gained *some* zoom range but still opened tiny
+in the fullscreen viewer — the expected fit-to-screen behavior was missing.
+
+Root cause, confirmed by reading `yet-another-react-lightbox@3.32.0`'s bundled source directly
+(`dist/index.js`, `dist/plugins/zoom/index.js`), not assumed: `ImageSlide`'s only sizing output is
+an inline style `{ maxWidth: min(imageWidthPx, 100%), maxHeight: min(imageHeightPx, 100%) }` — a
+**ceiling**, never a forced size. The 2026-07-05 fix (`slide.width/height = 4096`) correctly raised
+this ceiling and, separately, raised the Zoom plugin's own max-zoom-rect calculation (confirmed to
+read the identical `Math.max(slide.width, ..., naturalWidth)` value) — but a plain `<img>` with no
+`width`/`height` HTML attribute and only a `max-width`/`max-height` CSS cap still renders at its
+own intrinsic/natural size when that's smaller than the cap. CSS `max-*` properties cannot force a
+replaced element to grow past its natural size; only `ImageSlide`'s inline style existed, and it
+never set `width`/`height` as a forced value. Confirmed `carousel.imageFit` (`contain`/`cover`) has
+no effect on this — it only controls `object-fit` *within* whatever box the image already occupies,
+not the box's size.
+
+Confirmed the correct, officially-typed lever is `carousel.imageProps` (`ImageProps | ((slide) =>
+ImageProps)`, documented in `types.d.ts`) — merged **last** into the exact same inline style object
+`ImageSlide` builds (`{ ...defaultStyle, ...style, ...imagePropsStyle }`), and passed through
+unchanged by the Zoom plugin's `ZoomWrapper` to the underlying `ImageSlide` regardless of zoom
+state. Also confirmed the typed `styles` prop's slot list (`SlotType`) has no image-level slot at
+all — it cannot target the `<img>` element, ruling it out. No CSS override was needed or used.
+
+Completed (`src/features/admin/ui/RequestImageViewer.tsx`):
+
+- Existing `slide.width/height` ceiling (previously an inline `4096` local, now named
+  `VIEWER_IMAGE_MAX_DIMENSION`) kept — confirmed still necessary for the Zoom plugin's max-zoom
+  math, not redundant with the new fix; both address different parts of the same underlying clamp
+- New `viewerImageProps = { style: { width: "100%", height: "100%" } }` passed via
+  `carousel={{ imageFit: "contain", imageProps: viewerImageProps }}` — makes the image fill its
+  slide box; `imageFit: "contain"` (unchanged) then preserves aspect ratio with no crop, upscaling
+  small images to a useful size (blur on upscale is accepted per the stated policy, not treated as
+  a defect)
+- `maxZoomPixelRatio` renamed to a named `VIEWER_MAX_ZOOM_PIXEL_RATIO = 2` constant; value
+  unchanged — now correctly means "2x from the fitted display size" once initial sizing is fixed,
+  confirmed via the Zoom plugin's `useZoomImageRect` (`maxZoom = maxImageRect.width /
+  imageRect.width`, where `imageRect` is the already-contain-fitted box)
+- All three tuning values/objects consolidated into one named, commented config block above the
+  component, explaining the YARL sizing model and why each value exists — avoids unexplained magic
+  numbers
+- No resolution-based branching anywhere — the same fixed config applies uniformly to every slide,
+  small or large; a large real photo's `naturalWidth` already exceeds any reasonable `Math.max`
+  comparison here, so behavior for normal-sized photos is unaffected
+- Combined slide ordering, signed-URL reuse, unavailable-file exclusion, close/Escape/backdrop
+  close, and single-image arrow-hiding are all unchanged
+- `src/features/admin/__tests__/RequestImageViewer.test.tsx`: mock `Lightbox` now captures the
+  full props object passed to it (via a hoisted ref) so `carousel`/`zoom` config can be asserted
+  directly, not just slide content. One new test added: confirms `carousel.imageFit === "contain"`,
+  `carousel.imageProps.style === { width: "100%", height: "100%" }`, and
+  `zoom.maxZoomPixelRatio === 2` are all passed to `Lightbox`. This is explicitly a config/regression
+  assertion, not a claim that jsdom can verify real fit-to-screen rendering — it cannot; that
+  requires a real browser. All 7 previously-existing tests unchanged and passing
+- Total tests: 204 (was 203) — all pass. `pnpm qg` — structure / lint / typecheck / test / build
+  all PASS (lint: 0 errors, 1 pre-existing unrelated warning carried over from Stage 4B.5.1)
+
+**Manual verification required, not performed in this session** (no browser-automation tool
+available; developer has confirmed they will verify directly): open `REQ-2026-0010` (tiny 64×64
+image) and confirm it now visibly fills most of the available viewer area at open (not tiny),
+preserves aspect ratio with no crop, and reaches roughly 2× zoom from that fitted size with working
+pan; open `REQ-2026-0007` (real ~1–4 MB photos) and confirm display/zoom/pan/swipe/close are
+unaffected and not oddly oversized; confirm the admin detail page's inline (non-viewer) preview is
+unchanged; confirm opening the viewer still triggers no new signed-URL request. These checks are
+explicitly left to the developer, not claimed as done here.
+
+**Physical mobile-device verification (iPhone Safari, Android Chrome — pinch zoom, pan after zoom,
+double tap, swipe, portrait/landscape) remains outstanding, unchanged from Stage 4B.5.1/Stage 6** —
+this session made no attempt at it and does not claim it complete. `controller.closeOnPullDown`
+remains disabled, still gated on that same physical verification, unchanged by this fix.
+
+---
+
+### 2026-07-05 — Admin image viewer — small-image sizing/zoom tuning
+
+Status: Completed (code). Manual physical-device verification not performed in this session — see
+outstanding items below. No server/data/signing/upload/Storage/Supabase change; no new dependency.
+
+Trigger: the Stage 5B.1 smoke-test request (`REQ-2026-0010`) uploaded a genuine, valid, non-blank
+64×64 PNG. On the admin detail page's inline preview it rendered fine (natural size within its
+card), but opening it in the fullscreen `RequestImageViewer` showed it as a near-invisible tiny
+square with effectively no useful zoom. Investigated as a real admin UX gap, not a Storage/signing/
+upload defect (confirmed separately in the prior blank-image audit that the file itself was a
+correctly uploaded, correctly signed, valid image).
+
+Root cause, found by reading `yet-another-react-lightbox@3.32.0`'s actual bundled source
+(`dist/index.js`), not assumed from docs: `ImageSlide` applies an inline
+`maxWidth/maxHeight: min(imageWidthPx, 100%)` style, where `imageWidthPx` is
+`Math.max(slide.width ?? 0, ...srcSet widths, loaded <img>.naturalWidth)`. With no `width`/`height`
+set on the slide object (the case before this fix — `AdminRequestFile` has never carried image
+dimensions, per the Stage 4B DTO decisions), YARL falls back to the image's real natural pixel size
+as the display ceiling — 64px for this file — regardless of `carousel.imageFit` (`contain` vs
+`cover` only changes how the image fills that already-clamped box, not the box size). Confirmed the
+Zoom plugin's own max-zoom-rect calculation (`dist/plugins/zoom/index.js`) uses the exact same
+`Math.max(slide.width, srcSet widths)` value, multiplied by `maxZoomPixelRatio` — so
+`maxZoomPixelRatio` alone, without a `width`/`height` override, would still compute a max zoom
+relative to the tiny natural size and stay uselessly small. No dedicated "disable clamp" option
+exists in the library; `slide.width`/`height` is the documented, intended lever for this, not a
+workaround.
+
+Fix (`src/features/admin/ui/RequestImageViewer.tsx`):
+
+- Every slide now declares a fixed `width: 4096, height: 4096` alongside `src`/`alt`. This is a
+  ceiling only, not a forced/real size — per the `Math.max` logic above, a large real photo's
+  `naturalWidth` already exceeds this value, so behavior for normal-sized photos is unaffected;
+  only genuinely small source images (like the 64×64 fixture) get a materially larger display
+  ceiling than their own native pixels
+- `carousel={{ imageFit: "contain" }}` set explicitly (this was already the library default — no
+  visual change, added only for clarity/intent)
+- `zoom={{ maxZoomPixelRatio: 2 }}` added, now meaningful because it multiplies against the new
+  `width`/`height` ceiling rather than the tiny natural size
+- No per-image resolution branching, no CSS override, no custom gesture/pinch/pan code — the fix
+  is one uniform constant applied to every slide identically, small or large
+- Combined slide ordering (reference then placement), signed-URL reuse (no new signing on open),
+  unavailable-file exclusion, no-crop/natural-aspect-ratio behavior, close button/Escape/backdrop
+  close, and single-image arrow-hiding are all unchanged
+- `src/features/admin/__tests__/RequestImageViewer.test.tsx`: mock `Lightbox`'s stub now forwards
+  `width`/`height` onto the rendered `<img>` so behavior is actually assertable; one new test added
+  confirming every slide carries `width="4096" height="4096"`. All 6 existing tests unchanged and
+  passing
+- Total tests: 203 (was 202) — all pass. `pnpm qg` — structure / lint / typecheck / test / build
+  all PASS (lint: 0 errors, 1 pre-existing unrelated warning carried over from Stage 4B.5.1)
+
+**Manual verification required, not performed in this session** (no browser-automation tool
+available): open `REQ-2026-0010` (tiny 64×64 image) in the admin viewer and confirm it now opens at
+a usefully inspectable size with working zoom/pan; open `REQ-2026-0007` (real ~1–4 MB photos) and
+confirm normal display/zoom/swipe/close are unaffected; confirm the admin detail page's inline
+(non-viewer) preview images are unchanged; confirm opening the viewer still triggers no new
+signed-URL request. These checks were explicitly left to the developer to perform in a real
+browser rather than claimed as done here.
+
+**Physical mobile-device verification (iPhone Safari, Android Chrome — pinch zoom, pan after zoom,
+double tap, swipe, portrait/landscape) remains outstanding, unchanged from Stage 4B.5.1/Stage 6** —
+this session made no attempt at it and does not claim it complete. `controller.closeOnPullDown`
+remains disabled, still gated on that same physical verification, unchanged by this fix.
+
+---
 
 ### 2026-07-05 — Stage 5B.2 — Storage bucket MIME/size limits
 

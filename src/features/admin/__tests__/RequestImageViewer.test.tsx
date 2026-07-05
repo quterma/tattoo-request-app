@@ -5,18 +5,23 @@ import type { AdminRequestFile } from "../types"
 
 vi.mock("yet-another-react-lightbox/styles.css", () => ({}))
 vi.mock("yet-another-react-lightbox/plugins/zoom", () => ({ default: "zoom-plugin" }))
+type MockLightboxProps = {
+  open: boolean
+  index: number
+  slides: { src: string; alt: string; width?: number; height?: number }[]
+  close: () => void
+  carousel?: { imageFit?: string; imageProps?: { style?: { width?: string; height?: string } } }
+  zoom?: { maxZoomPixelRatio?: number }
+}
+
+const { mockLightboxProps } = vi.hoisted(() => ({
+  mockLightboxProps: { current: null as MockLightboxProps | null },
+}))
+
 vi.mock("yet-another-react-lightbox", () => ({
-  default: ({
-    open,
-    index,
-    slides,
-    close,
-  }: {
-    open: boolean
-    index: number
-    slides: { src: string; alt: string }[]
-    close: () => void
-  }) => {
+  default: (props: MockLightboxProps) => {
+    mockLightboxProps.current = props
+    const { open, index, slides, close } = props
     if (!open) return null
     const current = slides[index]
     return (
@@ -24,7 +29,7 @@ vi.mock("yet-another-react-lightbox", () => ({
         <button type="button" onClick={close}>
           close
         </button>
-        <img src={current.src} alt={current.alt} />
+        <img src={current.src} alt={current.alt} width={current.width} height={current.height} />
         <span data-testid="slide-count">{slides.length}</span>
       </div>
     )
@@ -124,5 +129,26 @@ describe("RequestImageViewer", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "close" }))
     expect(screen.queryByRole("dialog", { name: "image-viewer" })).not.toBeInTheDocument()
+  })
+
+  it("gives every slide a large fixed width/height so small images are not clamped to their native pixel size", () => {
+    renderViewer()
+    fireEvent.click(screen.getByRole("button", { name: /reference-01\.jpg/i }))
+
+    const dialog = screen.getByRole("dialog", { name: "image-viewer" })
+    const img = within(dialog).getByAltText("reference-01.jpg")
+    expect(img).toHaveAttribute("width", "4096")
+    expect(img).toHaveAttribute("height", "4096")
+  })
+
+  it("configures the carousel and zoom plugin for fit-to-screen initial sizing with 2x zoom", () => {
+    renderViewer()
+    fireEvent.click(screen.getByRole("button", { name: /reference-01\.jpg/i }))
+
+    expect(mockLightboxProps.current?.carousel).toMatchObject({
+      imageFit: "contain",
+      imageProps: { style: { width: "100%", height: "100%" } },
+    })
+    expect(mockLightboxProps.current?.zoom).toMatchObject({ maxZoomPixelRatio: 2 })
   })
 })

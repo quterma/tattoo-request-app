@@ -879,6 +879,56 @@ polish) and/or pre-release manual QA — see PROJECT_STAGE_LOG.md (2026-07-04 cl
 PROJECT_IMPLEMENTATION_PLAN.md (Stage 6), and PROJECT_BACKLOG.md (Admin image viewer entry),
 which also carries the gated `closeOnPullDown` and low-resolution-zoom-cap follow-ups.
 
+### Small-image sizing/zoom fix — two-part investigation (2026-07-05, then 2026-07-06)
+
+Triggered by a real Stage 5B.1 smoke request (`REQ-2026-0010`) uploading a genuine, valid 64×64
+test image that appeared near-invisible in the fullscreen viewer. Investigated both times by
+reading `yet-another-react-lightbox@3.32.0`'s actual bundled source directly (not assumed from
+docs) — see PROJECT_STAGE_LOG.md (2026-07-05 and 2026-07-06 entries) for the full root-cause
+traces and evidence.
+
+**2026-07-05 attempt (found insufficient by manual testing):** every slide was given a fixed
+`width: 4096, height: 4096`, plus `carousel={{ imageFit: "contain" }}` and
+`zoom={{ maxZoomPixelRatio: 2 }}`. This correctly raised the Zoom plugin's max-zoom ceiling (its
+calculation uses the identical `Math.max(slide.width, ..., naturalWidth)` value), so the small test
+image gained *some* zoom range — but manual verification showed the image still opened tiny in the
+fullscreen viewer. The gap: `ImageSlide`'s only sizing output is an inline
+`max-width`/`max-height` style — a ceiling, never a forced size — so a plain `<img>` with no
+`width`/`height` attribute still renders at its own natural pixel size when that's below the
+ceiling. `imageFit` has no effect on the box size itself, only on `object-fit` within it.
+
+**2026-07-06 fix (resolves it):** confirmed the correct, officially-typed lever is
+`carousel.imageProps` (`ImageProps | ((slide) => ImageProps)`, documented in the package's
+`types.d.ts`) — merged *last* into the exact same inline style object `ImageSlide` builds, and
+passed through unchanged by the Zoom plugin regardless of zoom state. Confirmed the typed `styles`
+prop cannot solve this at all (its slot list has no image-level target). Decision: `RequestImageViewer`
+now passes `carousel={{ imageFit: "contain", imageProps: { style: { width: "100%", height: "100%" } } }}`
+alongside the existing `slide.width/height = 4096` ceiling (kept — still needed for the Zoom
+plugin's max-zoom math; the two fixes address different parts of the same underlying clamp, not
+redundant) and `zoom={{ maxZoomPixelRatio: 2 }}` (value unchanged, now correctly means "2x from the
+fitted display size" once initial sizing is actually fixed). All three tuning values were
+consolidated into one named, commented config block in the component
+(`VIEWER_IMAGE_MAX_DIMENSION`, `VIEWER_MAX_ZOOM_PIXEL_RATIO`, `viewerImageProps`) to avoid
+unexplained magic numbers.
+
+This is one uniform constant configuration applied to every slide identically — **no
+resolution-based branching, no per-image conditional logic, no CSS override, no custom gesture
+code.** A large real photo's `naturalWidth` already exceeds the declared ceiling in realistic cases,
+so normal-sized photos are unaffected; `width: "100%"; height: "100%"` plus `imageFit: "contain"`
+simply makes the image fill and fit its slide box for images of any size, which is the same
+behavior a large photo already effectively has.
+
+**This resolves the previously-deferred low-resolution-zoom-cap follow-up** — see
+PROJECT_BACKLOG.md for the corresponding backlog update.
+
+**Still outstanding, unchanged by this fix:** physical mobile-device verification (iPhone Safari,
+Android Chrome — pinch zoom, pan after zoom, double tap, swipe, portrait/landscape) was not
+performed in either session and is not claimed as done; `controller.closeOnPullDown` remains
+disabled, still gated on that same physical verification. Manual browser verification of this
+specific fix (confirming the tiny-image and real-photo cases both look and zoom correctly) has also
+not yet been performed as of this entry — the developer has confirmed they will verify it directly,
+see PROJECT_STAGE_LOG.md (2026-07-06 entry).
+
 ---
 
 # Request Status Semantics

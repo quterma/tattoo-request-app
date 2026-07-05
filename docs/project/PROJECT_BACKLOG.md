@@ -63,14 +63,21 @@ not silently dropped. This is a placeholder rule only; no Stage 5D findings exis
   - Required verification: physical iPhone Safari + physical Android Chrome — open, pinch zoom,
     pan after zoom, double tap, swipe left/right, close button, backdrop tap, portrait ↔
     landscape rotation. Never performed during Stage 4B (no physical device / deployment access).
-  - Low-resolution images (e.g. 450×321 landscape) barely zoom, since default
-    `maxZoomPixelRatio: 1` caps max zoom near the image's native pixel size. Not a bug — expected
-    YARL behavior refusing to upscale past 1:1 pixel density. Optional follow-up, evaluate only
-    **after** the physical mobile verification above: a single global option
-    (`zoom={{ maxZoomPixelRatio: 2 }}` on the `Lightbox` in `RequestImageViewer.tsx`) — no
-    resolution-based/conditional logic.
-  - `controller.closeOnPullDown` (swipe-down-to-close) also remains gated on the same physical
-    verification (see PROJECT_DECISIONS.md — Minimal Image Viewer / Zoom).
+  - ~~Low-resolution images barely zoom / open tiny in the viewer~~ — **resolved 2026-07-06**: a
+    2026-07-05 attempt (`slide.width/height = 4096` + `maxZoomPixelRatio: 2`) fixed the zoom
+    ceiling but manual testing found the initial viewer image still opened tiny. The actual fix
+    (2026-07-06) adds `carousel.imageProps: { style: { width: "100%", height: "100%" } }`, the
+    officially-typed YARL lever for overriding the image element's own style — small source images
+    (e.g. the 64×64 Stage 5B.1 smoke-test image) now fit-to-screen on open via `imageFit:
+    "contain"`, with roughly 2x zoom available from that fitted size, without affecting
+    normal-resolution photos. See PROJECT_STAGE_LOG.md (2026-07-06 entry) and
+    PROJECT_DECISIONS.md — Minimal Image Viewer / Zoom for the full fix and rationale. Manual
+    real-browser verification of this fix is still pending (see the physical-device item above,
+    which remains separately outstanding) — the developer has confirmed they will check it
+    themselves.
+  - `controller.closeOnPullDown` (swipe-down-to-close) remains gated on the physical mobile-device
+    verification above, unchanged by the sizing/zoom fix (see PROJECT_DECISIONS.md — Minimal Image
+    Viewer / Zoom).
 
 ---
 

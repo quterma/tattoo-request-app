@@ -499,8 +499,11 @@ Implementation and desktop manual verification are complete; this sub-stage's co
 **Physical iPhone Safari / Android Chrome device verification was not performed** (no device/
 deployment access during Stage 4B) and is **not** claimed as done. It does not block Stage 4B
 closure — it is deferred to Stage 6 (mobile polish) and/or pre-release manual QA, together with
-`closeOnPullDown` and the low-resolution-zoom follow-up — see Stage 6 below and
-PROJECT_BACKLOG.md.
+`closeOnPullDown` — see Stage 6 below and PROJECT_BACKLOG.md. **The low-resolution-zoom follow-up
+was implemented 2026-07-06** (fit-to-screen initial sizing via `carousel.imageProps` +
+`maxZoomPixelRatio: 2`, after a 2026-07-05 attempt was found insufficient by manual testing; see
+PROJECT_STAGE_LOG.md 2026-07-06 entry and PROJECT_DECISIONS.md — Minimal Image Viewer / Zoom); only
+its manual real-browser verification and the physical-device checks above remain outstanding.
 
 ### 4B.6 — Request Status Update ✓ completed
 
@@ -793,8 +796,11 @@ Tasks:
     viewer — iPhone Safari + Android Chrome, pinch zoom, pan after zoom, double tap, swipe,
     close button, backdrop tap, portrait/landscape. Never performed (no device/deployment access
     during Stage 4B); not a Stage 4B blocker. Also gates `controller.closeOnPullDown`
-    (swipe-down-to-close) and the low-resolution-image zoom-cap follow-up
-    (`zoom={{ maxZoomPixelRatio: 2 }}`, no resolution-based logic) — see PROJECT_BACKLOG.md
+    (swipe-down-to-close) — see PROJECT_BACKLOG.md. The low-resolution-image zoom-cap follow-up
+    was implemented 2026-07-06 (fit-to-screen initial sizing via `carousel.imageProps` +
+    `maxZoomPixelRatio: 2`, after a 2026-07-05 attempt was found insufficient; see
+    PROJECT_STAGE_LOG.md 2026-07-06 entry) — only its manual real-browser verification remains,
+    tracked alongside the physical-device checks above
 - design system refinement (typography, color, spacing consistency)
 - animations and micro-interactions
 - accessibility and readability improvements
