@@ -13,11 +13,19 @@ AI agents and developers working on the project.
 ## Current Stage
 
 Stage: Stage 5 — Production Hardening (preparation / audit planning)
-Status: Stage 4B — Admin Dashboard is closed (implementation-complete, 2026-07-04). **Stage 5A —
-Security / Data-Boundary Planning is closed (completed 2026-07-05).** Stage 5B has not started.
+Status: Stage 4B — Admin Dashboard is closed (implementation-complete, 2026-07-04). Stage 5A —
+Security / Data-Boundary Planning is closed (completed 2026-07-05). **Stage 5B — Production
+Hardening Implementation is in progress; 5B.1 (`create_request` search_path hardening) is
+complete (2026-07-05).**
 
 Current focus:
 
+- **Stage 5B.1 — `create_request` search_path hardening: completed 2026-07-05.** Applied
+  migration `20260705155244_harden_create_request_search_path.sql` (`ALTER FUNCTION ... SET
+  search_path = public, pg_temp`), fixing the `function_search_path_mutable` advisor finding from
+  Stage 5A.2. See the dated entry below for the full verification record. Remaining Stage 5B
+  items (bucket Dashboard limits, Auth Dashboard verification, environment separation, production
+  environment setup, logging review, dependency audit, CI/CD) are not started.
 - **Stage 5A — Security / Data-Boundary Planning: closed, completed 2026-07-05.** Sequence:
   5A.1 (read-only repo/migration/code security audit) → 5A.2 (live Supabase read-only
   verification via `supabase db advisors`/`db query`) → 5A.3 (read-only legacy-data cleanup plan)
@@ -28,8 +36,6 @@ Current focus:
   bucket with no policies, legacy test data removed) ready for Stage 5B implementation — see
   PROJECT_DECISIONS.md, Stage 5A Security / Data-Boundary Decisions, and
   PROJECT_IMPLEMENTATION_PLAN.md, Stage 5B (revised scope).
-- Next: Stage 5B (Production Hardening Implementation), revised scope — see
-  PROJECT_IMPLEMENTATION_PLAN.md, Stage 5B. Not started.
 
 - Stage 4B — Admin Dashboard: **closed, implementation-complete.** Stage 4A closed (see Stage 4A
   completion history below) — Stage 4B.0 (architecture/data-access audit) complete — Stage 4B.1
@@ -115,6 +121,55 @@ Completed in Stage 3:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-07-05 — Stage 5B.1 — `create_request` search_path hardening
+
+Status: Completed. One narrow schema migration applied and verified against the live Supabase
+project; no RLS/Storage policy, application code, route, dependency, env var, or Dashboard change.
+
+Preflight (read-only): confirmed working tree clean; confirmed exactly one `create_request`
+overload live, matching the expected 13-argument signature; confirmed `proconfig` was still `null`
+(unchanged since Stage 5A.2).
+
+Completed:
+
+- New migration `supabase/migrations/20260705155244_harden_create_request_search_path.sql`:
+  `ALTER FUNCTION public.create_request(...) SET search_path = public, pg_temp;` — the narrow
+  `ALTER FUNCTION` form was used deliberately instead of `CREATE OR REPLACE FUNCTION`, since it
+  touches only `pg_proc.proconfig` and cannot affect the function body, parameters, return type,
+  or grants (`proacl`). Migration comment records the rollback SQL (`ALTER FUNCTION ... RESET
+  search_path`) inline.
+- Applied via `pnpm exec supabase db push` (not the SQL Editor). `pnpm exec supabase migration
+  list` confirmed Local = Remote for the new timestamp.
+- `pnpm exec supabase db advisors --linked --type security --level info`: the
+  `function_search_path_mutable` finding for `create_request` (present in Stage 5A.2) no longer
+  appears. Remaining findings are unchanged and already documented as intentional/deferred in
+  Stage 5A (`rls_enabled_no_policy` ×4, the Supabase-platform `rls_auto_enable` findings ×2,
+  leaked-password-protection).
+- Live metadata re-verified after the change: `prosecdef = false` (unchanged, still invoker mode),
+  `proconfig = ["search_path=public, pg_temp"]` (new), `EXECUTE` grants unchanged
+  (`service_role`/`postgres` only). RLS-enabled state and zero-policy count across all tables and
+  `storage.objects` were also re-checked and confirmed unchanged, as a defense-in-depth check since
+  this touched the same function inspected during Stage 5A.
+- **Real smoke test performed:** submitted one real request through the running local dev server's
+  public `POST /api/request` route (via `curl`, one generated 1×1 PNG per required image field) —
+  received `{"ok":true,"referenceCode":"REQ-2026-0010"}`. Verified directly in the DB (read-only):
+  the row persisted with the correct `studio_id`, 2 linked `request_files` rows, both in the
+  current `{studioId}/{clientSubmissionId}/...` storage-path format. Visual confirmation in the
+  admin list/detail UI was left to the developer to check directly in-browser rather than
+  performed in this session.
+- `pnpm qg` — structure / lint / typecheck / test / build all PASS (202/202 tests; lint: 0 errors,
+  1 pre-existing unrelated warning carried over from Stage 4B.5.1) — expected, since no
+  `src/`/`app/` file was touched by this migration; this run confirms no regression, not that the
+  gates were required by the change itself.
+- `git status` after the migration file was added: only the new migration file appears; no other
+  file was modified.
+
+No RLS policy, Storage policy, application code, route, dependency, or environment variable was
+changed. Docs updated: this entry, and PROJECT_IMPLEMENTATION_PLAN.md's Stage 5B task list (item
+marked complete). Stage 5B overall remains not complete — only this one sub-item.
+
+---
 
 ### 2026-07-05 — Stage 5A — Security / Data-Boundary Planning closed
 

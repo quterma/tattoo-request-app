@@ -617,9 +617,13 @@ access path is introduced.
 
 Tasks:
 
-- `create_request` hardening migration: fix the mutable `search_path` finding from
-  `supabase db advisors` (set an explicit `search_path` on the function) — a narrow, low-risk
-  migration, not a policy change
+- ✓ **completed 2026-07-05 (Stage 5B.1)** — `create_request` hardening migration: fixed the
+  mutable `search_path` finding from `supabase db advisors` via
+  `supabase/migrations/20260705155244_harden_create_request_search_path.sql`
+  (`ALTER FUNCTION ... SET search_path = public, pg_temp`) — a narrow, low-risk migration, not a
+  policy change. Verified live: advisor finding gone, signature/grants/security-mode unchanged,
+  real smoke-test submission succeeded. See PROJECT_STAGE_LOG.md (2026-07-05 entry) for the full
+  record.
 - Storage bucket (`request-images`) MIME-type and file-size limits configured via Supabase
   Dashboard (10 MB per file, matching the existing app-layer `validateFiles` limit) — Dashboard
   configuration, not a policy or migration

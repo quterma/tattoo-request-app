@@ -233,5 +233,6 @@ tattoo-request-app/
         ├── 20260622000001_add_client_submission_id_unique.sql
         ├── 20260623000000_make_client_name_not_null.sql
         ├── 20260629154719_domain_foundation.sql
-        └── 20260702114509_update_request_status_values.sql
+        ├── 20260702114509_update_request_status_values.sql
+        └── 20260705155244_harden_create_request_search_path.sql
 ```
