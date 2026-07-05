@@ -126,3 +126,16 @@ Generate Supabase TypeScript database types via the Supabase CLI (`supabase gen 
 Goal: improve query result typing across all service modules and remove narrow casts such as `membership.studio_id as string` in `services/auth.ts`.
 
 Suggested timing: Stage 5 Production Hardening, or earlier if Stage 4B introduces many Supabase queries that require similar casts.
+
+---
+
+## Orphaned Storage Objects (found during Stage 5A)
+
+During Stage 5A.2/5A.3 (live Supabase read-only verification, 2026-07-05), 2 objects were found in
+the `request-images` bucket with no corresponding `request_files` DB row — likely leftover from an
+upload that succeeded before a later step failed, prior to the DB row being created. Deliberately
+**not** deleted as part of the Stage 5A.4 legacy-path cleanup (that cleanup was scoped only to the
+6 legacy-format files tied to 3 confirmed test requests) — these 2 objects are a separate, smaller
+hygiene item requiring their own explicit owner confirmation before deletion, same protocol as
+5A.3/5A.4. See PROJECT_STAGE_LOG.md (2026-07-05 entry) and PROJECT_DECISIONS.md — Stage 5A
+Security / Data-Boundary Decisions, Storage Model, for the full context. Not blocking Stage 5B.

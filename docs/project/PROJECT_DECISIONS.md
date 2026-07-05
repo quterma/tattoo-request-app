@@ -972,6 +972,112 @@ to decide with real data instead of speculating now.
 
 ---
 
+# Stage 5A Security / Data-Boundary Decisions
+
+Decided 2026-07-05, following the 5A.1 repo/security audit, 5A.2 live Supabase read-only
+verification, 5A.3 legacy-data cleanup plan, 5A.4 owner-approved destructive cleanup, and an
+independent Claude review that reached consensus. Full evidence trail is in PROJECT_STAGE_LOG.md
+(2026-07-05 entry). This section records the resulting decisions only.
+
+## Access Model — Confirmed, Unchanged
+
+BFF + server-only `service_role` remains the primary and only operational data-access model:
+
+- the browser does not access Supabase DB or Storage directly, and no change introduces this
+- app-layer authorization remains primary: `getAuthenticatedStudioMember()` plus explicit
+  `studio_id` scoping on every query, exactly as established in Stage 4A/4B
+- this decision is a confirmation of the existing model after live verification, not a new
+  architecture
+
+## RLS Model — Zero Policies Is Intentional, Not a Gap
+
+Live verification (5A.2) confirmed RLS is enabled on all four application tables (`studios`,
+`studio_members`, `requests`, `request_files`) — `studios`/`studio_members` via a Supabase-managed
+event trigger (`rls_auto_enable`/`ensure_rls`), not an explicit project migration — and that zero
+`CREATE POLICY` statements exist anywhere, with zero `SELECT`/`INSERT`/`UPDATE`/`DELETE` grants to
+`anon`/`authenticated` on any table.
+
+**Decision: this is treated as intentional deny-all-by-omission, not an oversight to fix.** With
+every access path going through `service_role` (which bypasses RLS entirely), an explicit
+"deny-all" policy would be redundant — the absence of any `anon`/`authenticated` grant already
+achieves the same effect. Do not add explicit deny-all policies now; doing so would add
+maintenance surface without changing actual behavior.
+
+**Add RLS policies only when a real non-service-role access path exists** — for example, a future
+direct-from-browser authenticated read, a future Storage direct-upload flow, or a future
+multi-studio feature that needs row-level enforcement beyond what the BFF already provides. Until
+one of those is actually being built, policy design work would be speculative.
+
+**`studio_members` self-read policy** (a policy letting an authenticated user read their own
+membership row directly) was considered and **explicitly deferred**, not rejected — there is no
+current caller that would use it (`getAuthenticatedStudioMember()` already reads this via
+`service_role`); revisit if a client-side Supabase client is ever introduced.
+
+## Storage Model
+
+- `request-images` bucket remains private (confirmed via live verification, `public: false`)
+- Direct `anon`/`authenticated` Storage access remains deny-all / no policies — same rationale as
+  the table RLS decision above; `storage.objects` RLS is enabled with zero policies, confirmed live
+- **No path-prefix Storage policies now.** The `{studioId}/{clientSubmissionId}/...` path
+  convention (established in Stage 3D.6) remains the correct future-ready structure for such a
+  policy if one is ever needed, but writing one today would be speculative in the same way a table
+  RLS policy would be
+- **Legacy paths have been cleaned up:** the 6 `request_files` rows that predated the
+  `{studioId}/` prefix convention, belonging to 3 confirmed test/dev requests
+  (`REQ-2026-0002/0003/0004`), were deleted with owner approval (5A.3 plan, 5A.4 execution — see
+  PROJECT_STAGE_LOG.md). All remaining `request_files.storage_path` values now match the current
+  convention (12/12)
+- **2 orphaned Storage objects** (objects with no corresponding `request_files` row, found
+  incidentally during 5A.2/5A.3, unrelated to the legacy-path cleanup) remain untouched — tracked
+  as a separate hygiene item in PROJECT_BACKLOG.md, not part of RLS/Storage policy design
+
+## Staging Environment — Deferred, Not a Hard Blocker for Minimal 5B
+
+A separate staging Supabase project and Vercel preview/staging environment is **not required**
+before the minimal Stage 5B hardening pass (search_path fix, bucket Dashboard limits, Auth
+Dashboard verification) — these are small, reversible, and independently verifiable live changes.
+
+Staging **is required** before any future work that:
+
+- introduces real `authenticated`-role RLS policies on `requests`/`request_files`
+- introduces browser-side Supabase access of any kind
+- implements multi-studio behavior
+- changes the `create_request` RPC's signature or behavior
+
+Until one of those is scheduled, the single-project model continues, with each live change to the
+real project done carefully and verified immediately (as 5A.2–5A.4 did).
+
+## Backup Posture — Deferred, Not Claimed as Ready
+
+Full backup posture (a manual DB dump/export, Storage backup strategy, PITR configuration) is
+**deferred** until either real/valuable production data exists or the project reaches pre-launch —
+whichever comes first. Current data in the project remains test/dev data (confirmed during 5A.3's
+classification), so backup urgency is low today.
+
+A manual DB dump will be produced under explicit owner guidance later, not as part of Stage 5A or
+the current minimal Stage 5B scope. **This project does not claim production backup readiness at
+this time** — see PROJECT_PRODUCTION_READINESS.md, which is updated to reflect this as an open
+pre-launch item, not a completed one. Storage backup remains an accepted risk for now; revisit
+before real launch.
+
+## Revised Stage 5B Scope
+
+See PROJECT_IMPLEMENTATION_PLAN.md — Stage 5B for the full task list. Summary of what the Stage 5A
+consensus changed:
+
+- **No RLS or Storage policy implementation in Stage 5B** — see RLS Model and Storage Model above
+- **Added:** `create_request` `search_path` hardening migration (fixes the `function_search_path_
+  mutable` finding from `supabase db advisors`) — a narrow function-definition fix, not a policy
+  change
+- **Added:** Storage bucket MIME-type/file-size Dashboard limits (10 MB per file, matching the
+  existing app-layer `validateFiles` check) — Dashboard configuration, not code or policy
+- **Added:** Auth Dashboard verification (redirect URLs, custom SMTP status, rate limits, enabling
+  "Leaked Password Protection") — Dashboard verification, not code
+- Everything else previously planned for Stage 5B (environment separation, production environment
+  setup, logging review, dependency audit, CI/CD) is unchanged
+
+---
+
 # Rule for Future Changes
 
 All architectural, product, or behavioral decisions MUST be recorded in this document.

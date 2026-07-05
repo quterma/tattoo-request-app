@@ -570,34 +570,71 @@ Stage 5 is executed as four ordered sub-stages, **5A → 5B → 5C → 5D**, in 
 sub-stage builds on the previous one; Stage 5D (the final full-application maturity audit) is
 deliberately last, after security/data-boundary work and real-infrastructure verification, so it
 assesses a production architecture that is actually complete rather than a work-in-progress one.
-None of Stage 5's sub-stages have started as of Stage 4B's closure (2026-07-04) — see
-PROJECT_STAGE_LOG.md.
+**Stage 5A is complete (2026-07-05)** — see PROJECT_STAGE_LOG.md for the full dated record and
+PROJECT_DECISIONS.md, Stage 5A Security / Data-Boundary Decisions, for the decisions it produced.
+5B–5D have not started.
 
-## Stage 5A — Security / Data-Boundary Planning
+## Stage 5A — Security / Data-Boundary Planning ✓ completed (2026-07-05)
 
 Goal: decide and document the security and data-boundary architecture before implementing it.
 
-Tasks:
+Completed as four read-only sub-stages plus an independent review (5A.1 repo/security audit, 5A.2
+live Supabase read-only verification, 5A.3 legacy-data cleanup plan, 5A.4 owner-approved
+destructive cleanup of confirmed test data, independent Claude review/consensus) — see
+PROJECT_STAGE_LOG.md (2026-07-05 entry) for the full record and PROJECT_DECISIONS.md, Stage 5A
+Security / Data-Boundary Decisions, for the resulting decisions.
 
-- RLS policy design for `studios`, `studio_members`, `requests`, `request_files`, and Storage
-- security review checklist planning (see PROJECT_PRODUCTION_READINESS.md)
-- environment separation decision: staging Supabase project + Vercel preview/staging environment
-- dependency security audit planning (`pnpm audit` review cadence)
+Outcome (see PROJECT_DECISIONS.md for full rationale):
 
-Result: an approved security/data-boundary plan ready for implementation in 5B.
+- BFF + server-only `service_role` confirmed and retained as the primary access model; no
+  browser-side Supabase DB/Storage access exists or is planned for the current single-studio scope
+- RLS confirmed enabled on all four app tables (`studios`, `studio_members`, `requests`,
+  `request_files`) and on `storage.objects` for the `request-images` bucket; **zero policies is a
+  deliberate deny-all-by-omission decision, not a gap** — no policy is added until a real
+  non-service-role access path exists
+- `studio_members` self-read policy and Storage path-prefix policies were considered and
+  explicitly deferred, not rejected
+- 3 confirmed test/dev requests (`REQ-2026-0002/0003/0004`) and their 6 legacy-format Storage
+  objects were deleted with owner approval; legacy-path DB count is now 0; 2 unrelated orphaned
+  Storage objects were intentionally left untouched (tracked in PROJECT_BACKLOG.md)
+- Staging-environment setup is deferred — not required for the revised, minimal Stage 5B scope,
+  but required before any future change that adds real authenticated-role RLS policies, browser
+  Supabase access, multi-studio behavior, or a `create_request` signature/behavior change
+- Full backup posture (DB dump, Storage backup, PITR) is deferred until real data exists or
+  pre-launch — current data remains test data
+
+Result: an approved, documented security/data-boundary posture, with a revised Stage 5B scope
+below reflecting the "no RLS policy implementation yet" decision.
 
 ## Stage 5B — Production Hardening Implementation
 
-Goal: implement the plan from 5A and the remaining hardening tasks.
+Goal: implement the minimal hardening tasks approved coming out of Stage 5A, plus the remaining
+Stage 5 hardening tasks. **Revised scope (2026-07-05, see PROJECT_DECISIONS.md — Stage 5A Security
+/ Data-Boundary Decisions): no RLS or Storage policy implementation in this pass** — the Stage 5A
+consensus is that RLS-enabled-with-zero-policies is the intentional current posture, not a
+placeholder awaiting 5B. Policies are added only in a future stage when a real non-service-role
+access path is introduced.
 
 Tasks:
 
-- implement RLS policies for `studios`, `studio_members`, `requests`, `request_files`, and Storage
-- implement environment separation (staging Supabase project, Vercel preview/staging environment)
+- `create_request` hardening migration: fix the mutable `search_path` finding from
+  `supabase db advisors` (set an explicit `search_path` on the function) — a narrow, low-risk
+  migration, not a policy change
+- Storage bucket (`request-images`) MIME-type and file-size limits configured via Supabase
+  Dashboard (10 MB per file, matching the existing app-layer `validateFiles` limit) — Dashboard
+  configuration, not a policy or migration
+- Auth Dashboard verification: confirm redirect URLs (OAuth callback, password-reset callback,
+  including the production origin once known), custom SMTP configuration status, rate limits, and
+  enable "Leaked Password Protection" (flagged by `supabase db advisors`) — Dashboard verification,
+  not code
 - production environment setup: domain, production env vars, Google OAuth production redirect URI, backups, monitoring/logging (see PROJECT_PRODUCTION_READINESS.md, Production Environment Setup)
 - logging and error handling review
 - dependency security audit (`pnpm audit`) executed and resolved/documented
 - CI/CD: GitHub → Vercel preview/production deploy flow, `pnpm qg` gate before merge (see PROJECT_PRODUCTION_READINESS.md, CI/CD)
+
+Explicitly out of scope for this Stage 5B pass (deferred, see PROJECT_DECISIONS.md): RLS policy
+implementation on any table; Storage path-prefix policies; staging Supabase project / Vercel
+staging environment setup (not a hard blocker for this minimal pass); full backup/PITR posture.
 
 Result: hardened application, ready for real-infrastructure verification.
 

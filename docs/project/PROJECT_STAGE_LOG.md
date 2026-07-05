@@ -13,9 +13,23 @@ AI agents and developers working on the project.
 ## Current Stage
 
 Stage: Stage 5 — Production Hardening (preparation / audit planning)
-Status: Stage 4B — Admin Dashboard is closed (implementation-complete, 2026-07-04). Stage 5 has not started.
+Status: Stage 4B — Admin Dashboard is closed (implementation-complete, 2026-07-04). **Stage 5A —
+Security / Data-Boundary Planning is closed (completed 2026-07-05).** Stage 5B has not started.
 
 Current focus:
+
+- **Stage 5A — Security / Data-Boundary Planning: closed, completed 2026-07-05.** Sequence:
+  5A.1 (read-only repo/migration/code security audit) → 5A.2 (live Supabase read-only
+  verification via `supabase db advisors`/`db query`) → 5A.3 (read-only legacy-data cleanup plan)
+  → 5A.4 (owner-approved destructive cleanup of 3 confirmed test/dev requests and their 6 legacy
+  Storage objects) → independent Claude review, consensus reached. See the dated entries below
+  for the full record of each sub-stage. Result: an approved, documented security/data-boundary
+  posture (BFF/service-role primary, RLS enabled with intentional zero policies, private Storage
+  bucket with no policies, legacy test data removed) ready for Stage 5B implementation — see
+  PROJECT_DECISIONS.md, Stage 5A Security / Data-Boundary Decisions, and
+  PROJECT_IMPLEMENTATION_PLAN.md, Stage 5B (revised scope).
+- Next: Stage 5B (Production Hardening Implementation), revised scope — see
+  PROJECT_IMPLEMENTATION_PLAN.md, Stage 5B. Not started.
 
 - Stage 4B — Admin Dashboard: **closed, implementation-complete.** Stage 4A closed (see Stage 4A
   completion history below) — Stage 4B.0 (architecture/data-access audit) complete — Stage 4B.1
@@ -43,15 +57,15 @@ Current focus:
   (`controller.closeOnPullDown`) and the low-resolution-image zoom-cap follow-up
   (`zoom={{ maxZoomPixelRatio: 2 }}`) both remain gated on that same real-device verification — no
   resolution-based/conditional logic is to be added ahead of it.
-- Next: Stage 5 (Production Hardening) preparation/audit planning. No Stage 5 work has started;
-  this entry records Stage 4B closure and handoff, not a Stage 5 kickoff.
+- This entry records Stage 4B closure and handoff. Stage 5A has since been completed (2026-07-05
+  — see the "Current focus" note above and the dated 5A entries below); Stage 5B has not started.
 - **Stage 5 planned sequence** (see PROJECT_IMPLEMENTATION_PLAN.md — Stage 5 for full detail):
   5A (security / data-boundary planning) → 5B (production hardening implementation) → 5C (real
   infrastructure and end-to-end verification) → **5D (Full Application Maturity Audit + targeted
   fix pass)**, then Stage 6 (visual/product polish). 5D is a structured, evidence-based
   whole-codebase audit (not just Stage 5's new code) that runs only after 5A–5C, with findings
-  classified and a documented fix/defer/reject outcome, before Stage 6 begins. None of 5A–5D have
-  started; no audit has been performed yet.
+  classified and a documented fix/defer/reject outcome, before Stage 6 begins. 5A is now complete
+  (2026-07-05); 5B–5D have not started.
 
 Completed stages:
 
@@ -101,6 +115,81 @@ Completed in Stage 3:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-07-05 — Stage 5A — Security / Data-Boundary Planning closed
+
+Status: Completed. Read-only audits, live verification, an owner-approved cleanup, and an
+independent review — no application code, tests, routes, dependencies, or Supabase policy/schema
+changes. The only mutations performed anywhere in Stage 5A were the explicitly approved 5A.4
+deletions described below.
+
+**5A.1 — Repo/security/data-boundary audit (read-only).** Reviewed all migrations under
+`supabase/migrations/`, the full service layer (`services/supabase.ts`, `supabaseAuth.ts`,
+`auth.ts`, `db.ts`, `storage.ts`, `requests.ts`), the BFF (`bff/request.ts`,
+`app/api/request/route.ts`), and every admin route/action. Confirmed: the browser never accesses
+Supabase DB or Storage directly; the public request route is fully BFF/service-role mediated;
+every admin entry point independently calls `getAuthenticatedStudioMember()` and scopes queries
+by `studio_id`; raw `storagePath` never crosses into a UI DTO (structurally enforced); no
+`NEXT_PUBLIC_` secret exposure; no Client Component imports the service-role client. Found that
+migrations enable RLS on `requests`/`request_files` but no migration defines any policy, and that
+`studios`/`studio_members` had no RLS statement in migration history at all (later found in 5A.2
+to be RLS-enabled anyway, via a Supabase-platform mechanism — see below).
+
+**5A.2 — Live Supabase read-only verification.** Using `supabase db advisors --type security` and
+a series of read-only `supabase db query` `SELECT` statements against the linked project
+(`vjjvouihcvqmupjojgrs`, the only project — no separate staging project exists). Confirmed RLS is
+enabled on all four tables (`studios`/`studio_members` are enabled via a Supabase-managed event
+trigger, `rls_auto_enable`/`ensure_rls`, not a project migration) with zero policies anywhere,
+matching intentional deny-all-except-`service_role`. Confirmed zero `SELECT`/`INSERT`/`UPDATE`/
+`DELETE` grants to `anon`/`authenticated` on any table. Confirmed the `request-images` Storage
+bucket is private with no bucket-level MIME/size limits configured (enforced only in app code) and
+RLS-enabled-zero-policies on `storage.objects`, same posture as the DB tables. Confirmed
+`create_request` runs as invoker (not `SECURITY DEFINER`) with `EXECUTE` restricted to
+`service_role`/`postgres` only. Found 6 of 18 `request_files` rows used the pre-3D.6 legacy
+storage-path format (no `{studioId}/` prefix), and 2 Storage objects with no corresponding DB row
+(pre-existing orphans, unrelated to the legacy-path finding). Flagged Auth Dashboard settings
+(SMTP, redirect URLs, rate limits) as not inspectable via the available read-only CLI path in this
+session — still requires manual Dashboard verification.
+
+**5A.3 — Legacy-data cleanup plan (read-only planning only).** Identified the 6 legacy-path files
+belonged to exactly 3 requests (`REQ-2026-0002`, `REQ-2026-0003`, `REQ-2026-0004`), all created
+2026-06-22, before the studio/domain-foundation migration existed — `REQ-2026-0002` is explicitly
+named as a Stage 3C.3 test row in the `make_client_name_not_null` migration's own comment,
+corroborating the classification. Determined the safe deletion order (Storage objects first, then
+DB parent rows, relying on the existing `request_files` `ON DELETE CASCADE`) and that DB deletion
+does not cascade to Storage. Did not delete anything in this sub-stage — produced a plan only, and
+surfaced explicit owner-decision questions (confirm test-data classification; whether to touch the
+2 unrelated orphaned Storage objects; whether a pre-delete snapshot was wanted).
+
+**5A.4 — Owner-approved destructive cleanup.** Owner confirmed all 3 requests as test/dev data.
+Preflight re-verified the exact set (3 requests, 6 linked files, all legacy-format, no mixed
+paths, all 6 Storage objects present) immediately before acting. Deleted the 6 Storage objects via
+a temporary, uncommitted script using the existing service-role credentials (removed immediately
+after use); verified all 6 were gone; then deleted the 3 `requests` rows by exact reference code,
+which cascaded to remove the 6 `request_files` rows via the existing FK. Post-cleanup verification
+confirmed: 0 legacy-path `request_files` rows remain (was 6); all 12 remaining `request_files.
+storage_path` values match the `{studioId}/{clientSubmissionId}/...` convention; the 2 unrelated
+orphaned Storage objects were left untouched, as scoped. No RLS/policy/migration/code/env/
+Dashboard change was made as part of this cleanup.
+
+**Independent review.** A second, independent review of the 5A findings and the proposed
+security/data-boundary posture was performed; consensus was reached with no unresolved
+disagreement. See PROJECT_DECISIONS.md — Stage 5A Security / Data-Boundary Decisions for the full
+decision record this stage produced (access model, RLS posture, Storage posture, staging and
+backup deferrals, and the revised Stage 5B scope).
+
+Total tests: unchanged (202) — no application code was touched at any point in Stage 5A. No
+`pnpm qg` run — this stage made no source/test/build-relevant change; the only mutations were the
+explicitly-scoped 5A.4 data deletions, verified directly via Supabase queries, not via the test
+suite.
+
+Outstanding from Stage 5A, carried to Stage 5B or later (see PROJECT_DECISIONS.md and
+PROJECT_BACKLOG.md for full detail): Auth Dashboard verification (SMTP, redirect URLs, rate
+limits, leaked-password protection); `create_request`'s mutable `search_path` hardening; Storage
+bucket MIME/size limits (Dashboard); the 2 unrelated orphaned Storage objects; staging environment
+setup; backup/PITR posture.
+
+---
 
 ### 2026-07-04 — Stage 4B — Admin Dashboard closed (documentation-only closure)
 

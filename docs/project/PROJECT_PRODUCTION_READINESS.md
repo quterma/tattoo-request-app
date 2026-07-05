@@ -45,18 +45,32 @@ Complete before public launch:
 
 ## Supabase RLS Review
 
-- RLS enabled on all application tables (`requests`, `request_files`, `studios`, `studio_members`)
-- RLS policies written and verified for each table — deferred from Stage 3D.6 to Stage 5
-- No public policies exist — all access through BFF with `service_role`
-- Verify no accidental `anon` role grants were introduced
+**Verified live 2026-07-05 (Stage 5A.2, read-only) — see PROJECT_DECISIONS.md, Stage 5A Security
+/ Data-Boundary Decisions, for the full decision record:**
+
+- RLS confirmed enabled on all four application tables (`requests`, `request_files`, `studios`,
+  `studio_members`)
+- **Zero RLS policies exist on any table — confirmed intentional (deny-all-by-omission), not an
+  oversight.** All access goes through `service_role`, which bypasses RLS; no policy is planned
+  until a real non-service-role access path is introduced (see PROJECT_DECISIONS.md)
+- Confirmed live: no `anon`/`authenticated` grants for `SELECT`/`INSERT`/`UPDATE`/`DELETE` exist on
+  any table — no accidental public policy or grant found
+- `studio_members` self-read policy considered and explicitly deferred (see PROJECT_DECISIONS.md)
 
 ## Storage Permissions Review
 
-- `request-images` bucket confirmed private
-- No public bucket policies
+**Verified live 2026-07-05 (Stage 5A.2, read-only):**
+
+- `request-images` bucket confirmed private (`public: false`)
+- No public bucket policies; RLS enabled with zero policies on `storage.objects`, same
+  intentional deny-all-by-omission posture as the table RLS above
+- Bucket-level MIME-type/file-size limits are **not yet configured** in Supabase (currently
+  enforced only in app code via `validateFiles`) — configuring these via Dashboard is a Stage 5B
+  task, not yet done
 - Signed URLs used for admin access only — never returned to public users
-- Storage RLS policies written and verified — deferred from Stage 3D.6 to Stage 5
-- Verify storage policies in Supabase Dashboard before launch
+- Storage path-prefix RLS policies considered and explicitly deferred (see PROJECT_DECISIONS.md)
+- Legacy (pre-`{studioId}/` prefix) storage paths were identified and cleaned up in Stage 5A.3/5A.4
+  — 0 legacy-format `request_files` rows remain as of 2026-07-05
 
 ## Environment Separation
 
@@ -66,7 +80,12 @@ Before public launch, decide on and set up environment separation:
 - Vercel preview / staging environment pointed at staging Supabase
 - production Supabase project protected; no test data or preview deployments pointing at it
 
-Not required before Stage 3D.6 or Stage 4A. Address in Stage 5 as an explicit decision point.
+Not required before Stage 3D.6 or Stage 4A. **Decided in Stage 5A (2026-07-05, see
+PROJECT_DECISIONS.md): not a hard blocker for the minimal Stage 5B hardening pass** (search_path
+fix, bucket Dashboard limits, Auth Dashboard verification — all small, reversible, verifiable live
+changes). Staging **is required** before any future work introducing real authenticated-role RLS
+policies, browser-side Supabase access, multi-studio behavior, or a `create_request` signature/
+behavior change. Only one Supabase project exists today (confirmed live in 5A.2).
 
 ## Production Environment Setup
 
@@ -75,7 +94,11 @@ Before public launch:
 - production domain configured and pointed at the Vercel deployment
 - production env vars set in Vercel (not committed) — see `.env.example` for the required list
 - Google OAuth: production redirect URI added in Google Cloud Console and Supabase Dashboard (in addition to the dev URI already configured in Stage 4A.6) — see PROJECT_DECISIONS.md, Admin Authentication Architecture
-- Supabase automatic backups confirmed enabled on the production project (managed by Supabase; verify retention window in the dashboard)
+- Auth Dashboard verification (Stage 5B task, not yet done as of 2026-07-05): redirect URLs for
+  `/auth/callback` and `/auth/reset-callback`, custom SMTP configuration status, rate limits, and
+  enabling "Leaked Password Protection" (flagged by `supabase db advisors` during Stage 5A.2) — see
+  PROJECT_DECISIONS.md, Stage 5A Security / Data-Boundary Decisions
+- Supabase automatic backups confirmed enabled on the production project (managed by Supabase; verify retention window in the dashboard) — **not yet done; full backup posture (DB dump, Storage backup, PITR) is explicitly deferred until real/valuable data exists or pre-launch, per Stage 5A (see PROJECT_DECISIONS.md). Do not treat this as complete.**
 - basic monitoring/logging confirmed reachable (Vercel deployment logs / Supabase logs) — no new logging service required for MVP
 - manual smoke test of full submission and admin flow performed against the deployed production environment (not just local)
 
