@@ -15,11 +15,42 @@ AI agents and developers working on the project.
 Stage: Stage 5 — Production Hardening (preparation / audit planning)
 Status: Stage 4B — Admin Dashboard is closed (implementation-complete, 2026-07-04). Stage 5A —
 Security / Data-Boundary Planning is closed (completed 2026-07-05). **Stage 5B — Production
-Hardening Implementation is in progress; 5B.1 (`create_request` search_path hardening) and 5B.2
-(Storage bucket MIME/size limits) are complete (2026-07-05).**
+Hardening Implementation is in progress; 5B.1 (`create_request` search_path hardening), 5B.2
+(Storage bucket MIME/size limits), and dependency security remediation (`next`/`next-intl`/
+`vitest` version bumps) are complete (2026-07-05 / 2026-07-06).**
 
 Current focus:
 
+- **Stage 5B — dependency security remediation: completed 2026-07-06.** Narrow, owner-approved
+  `pnpm` version bumps of exactly three direct dependencies, following the read-only dependency
+  security audit performed earlier the same day: `next` `16.1.6` → `16.2.10` (resolves all 19
+  `next` advisories found by `pnpm audit`, including high-severity middleware/proxy-bypass and
+  Server Components DoS findings — no major version change, still Next 16), `next-intl` `4.8.2` →
+  `4.13.1` (resolves the 3 `next-intl` advisories, including an open-redirect and a prototype-
+  pollution finding — no major version change, still next-intl 4), and `vitest` `4.0.18` → `4.1.10`
+  (dev-only; resolves the sole critical-labeled advisory, a Vitest UI-server arbitrary-file-read
+  issue that was never reachable in this project since `test:ui` is a manual, localhost-only,
+  developer-invoked script never used in `pnpm qg`/CI — updated anyway since a safe minor fix was
+  available). Only `package.json` and `pnpm-lock.yaml` changed; the lockfile diff was entirely the
+  expected transitive footprint of these three packages (their own platform subpackages and
+  dependencies) — no unrelated direct dependency (React, TypeScript, ESLint, Vite, shadcn,
+  Supabase, Tailwind) was touched, per the approved narrow scope. No source-code change was
+  needed — `pnpm qg` passed cleanly on the first attempt after the bump (structure/lint/typecheck/
+  test/build all PASS; 204/204 tests; lint: 0 errors, 1 pre-existing unrelated warning carried over
+  from Stage 4B.5.1). Post-update `pnpm audit` confirmed: 98 → 75 advisories, critical count 1 → 0,
+  zero remaining `next`/`next-intl`/`vitest` advisories. The remaining 75 advisories are the same
+  dev-only, non-production-reachable chains already classified and deliberately deferred in the
+  read-only audit earlier this session: `shadcn`'s bundled `@modelcontextprotocol/sdk` (Express/
+  Hono/ajv/qs/path-to-regexp transitive tree, never executed as a server by this app), `eslint`/
+  `eslint-config-next` (transitive `minimatch`/`ajv`/`flatted`/`js-yaml`, lint-time only, no
+  external input), `@vitejs/plugin-react`'s `vite`/`esbuild`/`picomatch`/`@babel/core` chain
+  (Vite dev-server issues, not reachable since Vitest doesn't expose it as a server here), `jsdom`'s
+  `undici` chain (test-only, this suite mocks Supabase directly rather than making real network
+  calls), and `@tailwindcss/postcss`'s `postcss` (build-time CSS compilation of fixed local source
+  only). None of these were touched — updating them would require major-version bumps of `eslint`/
+  `vite`/`shadcn`/`typescript-eslint` or is entirely outside this app's control (`shadcn`'s own
+  bundled SDK), both explicitly out of the approved scope. `git status` after the update: only
+  `package.json` and `pnpm-lock.yaml` modified; not committed, per instruction.
 - **Admin image viewer — fit-to-screen initial sizing + 2x zoom: completed 2026-07-06 (code);
   manual browser/device verification not yet performed.** Follow-up to Stage 4B.5.1's
   `RequestImageViewer` and the 2026-07-05 partial tuning attempt (which raised the zoom ceiling
@@ -137,6 +168,68 @@ Completed in Stage 3:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-07-06 — Stage 5B — Dependency security remediation
+
+Status: Completed. Narrow `pnpm` version bumps of exactly three direct dependencies, approved by
+the owner following a read-only dependency-security audit performed earlier the same day (98
+`pnpm audit` advisories found: 1 critical, 36 high, 51 moderate, 11 low). No source-code, route,
+Supabase, env-var, CI, or migration change.
+
+Updated (via `pnpm add`, no `--latest`, no major-version jump for any package):
+
+- `next`: `16.1.6` → `16.2.10` (production, direct). Resolves all 19 `next` advisories, including
+  high-severity middleware/proxy-bypass, Server Components DoS, SSRF via WebSocket upgrades, and
+  CSRF-bypass findings — the only advisories in the prior audit confirmed reachable by the actual
+  served app.
+- `next-intl`: `4.8.2` → `4.13.1` (production, direct). Resolves all 3 `next-intl` advisories,
+  including an open-redirect and a prototype-pollution finding via translation-catalog keys.
+- `vitest`: `4.0.18` → `4.1.10` (dev-only, direct). Resolves the sole critical-labeled advisory
+  (Vitest UI-server arbitrary file read/execute) — not production-reachable in this project since
+  `test:ui` is a manual, developer-invoked, localhost-only script never run in `pnpm qg` or CI, but
+  updated anyway since a safe minor fix was available at no cost.
+
+Registry check performed before updating: confirmed `16.2.10`/`4.13.1`/`4.1.10` were each the
+latest stable version within the requested minor range (`16.2.x`, `4.x`, `4.1.x` respectively), and
+checked peer-dependency declarations for all three target versions plus `eslint-config-next`
+(unchanged) — no compatibility conflict found; proceeded without needing to flag a risk.
+
+Diff scope confirmed narrow: `git diff --stat` after the update showed only `package.json` (three
+lines: `next`, `next-intl`, `vitest` version fields) and `pnpm-lock.yaml` (130 insertions / 138
+deletions). Inspected the lockfile diff directly — every changed entry belonged to one of the three
+updated packages themselves (their own platform-specific subpackages, e.g. `@next/swc-*`,
+`@next/env`) or their own transitive dependencies (`use-intl`, `icu-minify`,
+`@formatjs/intl-localematcher`, `next-intl-swc-plugin-extractor` for next-intl; `@vitest/spy`,
+`@vitest/mocker`, `@vitest/runner`, `tinyrainbow`, `std-env`, `es-module-lexer` for vitest). No
+unrelated direct dependency (React, TypeScript, ESLint, Vite, shadcn, Supabase, Tailwind) appeared
+in the diff, matching the approved scope exactly.
+
+No source-code change was required — `pnpm qg` passed on the first attempt after the bump:
+structure (no changes — no structural file was affected by a version bump), lint (0 errors, 1
+pre-existing unrelated warning carried over from Stage 4B.5.1), typecheck (clean), test (204/204
+passing, unchanged count), build (`next build` succeeded under the new Next 16.2.10, all 14 routes
+compiled, same route table as before).
+
+Post-update `pnpm audit --json` re-run and diffed against the pre-update result: advisory count
+98 → 75, critical count 1 → 0. Confirmed zero remaining advisories naming `next`, `next-intl`, or
+`vitest` as the affected module. The remaining 75 advisories are exactly the same dev-only,
+non-production-reachable dependency chains already identified and classified "defer deliberately"
+in the read-only audit earlier this session — `shadcn`'s bundled `@modelcontextprotocol/sdk`
+(Express/Hono/ajv/qs/path-to-regexp, never executed as a server by this app; 39 advisories),
+`eslint`/`eslint-config-next`'s transitive `minimatch`/`ajv`/`flatted`/`js-yaml` (lint-time only,
+no external input; 14 advisories), `@vitejs/plugin-react`'s `vite`/`esbuild`/`picomatch`/
+`@babel/core` chain (Vite dev-server issues not exposed as a server here; 10 advisories), `jsdom`'s
+`undici` chain (test-only; this suite mocks Supabase directly rather than making real network
+calls; 11 advisories), and `@tailwindcss/postcss`'s `postcss` (build-time compilation of fixed
+local CSS source only; 1 advisory). None of these were touched — remediating them would require
+major-version bumps of `eslint`, `vite`, `typescript-eslint`, or `shadcn` itself (the last being
+entirely outside this repo's control, since the vulnerable code is bundled inside `shadcn`'s own
+dependency tree), both explicitly outside the approved narrow scope for this task.
+
+`git status` after the update: only `package.json` and `pnpm-lock.yaml` modified. Not committed,
+per instruction — the owner will review before any commit.
+
+---
 
 ### 2026-07-06 — Admin image viewer — fit-to-screen initial sizing + 2x zoom
 

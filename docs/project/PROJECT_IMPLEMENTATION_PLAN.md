@@ -641,7 +641,14 @@ Tasks:
   not code
 - production environment setup: domain, production env vars, Google OAuth production redirect URI, backups, monitoring/logging (see PROJECT_PRODUCTION_READINESS.md, Production Environment Setup)
 - logging and error handling review
-- dependency security audit (`pnpm audit`) executed and resolved/documented
+- ✓ **completed 2026-07-06** — dependency security audit (`pnpm audit`) executed and resolved:
+  read-only audit found 98 advisories; owner approved a narrow remediation bumping exactly three
+  direct dependencies (`next` `16.1.6`→`16.2.10`, `next-intl` `4.8.2`→`4.13.1`, `vitest` `4.0.18`→
+  `4.1.10`, no major-version jumps), resolving all `next`/`next-intl` advisories and the sole
+  critical-labeled advisory; `pnpm qg` passed with no source changes; remaining 75 advisories are
+  dev-only/non-reachable chains (`shadcn`'s bundled SDK, `eslint` transitive deps, Vite dev-server
+  chain, `jsdom`/`undici`, `postcss`), documented and deliberately deferred. See
+  PROJECT_STAGE_LOG.md (2026-07-06 entry) for the full record.
 - CI/CD: GitHub → Vercel preview/production deploy flow, `pnpm qg` gate before merge (see PROJECT_PRODUCTION_READINESS.md, CI/CD)
 
 Explicitly out of scope for this Stage 5B pass (deferred, see PROJECT_DECISIONS.md): RLS policy
