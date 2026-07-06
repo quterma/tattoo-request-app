@@ -640,6 +640,13 @@ Tasks:
   enable "Leaked Password Protection" (flagged by `supabase db advisors`) — Dashboard verification,
   not code
 - production environment setup: domain, production env vars, Google OAuth production redirect URI, backups, monitoring/logging (see PROJECT_PRODUCTION_READINESS.md, Production Environment Setup)
+  - ✓ **completed 2026-07-06** — Node runtime floor declared: `package.json` now has
+    `"engines": { "node": ">=20" }`, closing a small deployment-readiness risk (local dev Node 24,
+    no prior declared floor) found during the read-only Stage 5B environment/deployment audit.
+    `engines` documents the supported minimum; it does not replace manually checking/setting the
+    Vercel project's Node.js Version to 20+ before the first deployed E2E test — that check remains
+    an outstanding manual step. No `.nvmrc`, no `vercel.json`, no dependency/script/lockfile change.
+    See PROJECT_STAGE_LOG.md (2026-07-06 entry) for the full record.
 - logging and error handling review
 - ✓ **completed 2026-07-06** — dependency security audit (`pnpm audit`) executed and resolved:
   read-only audit found 98 advisories; owner approved a narrow remediation bumping exactly three

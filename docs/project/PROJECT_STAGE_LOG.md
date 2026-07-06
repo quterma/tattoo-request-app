@@ -21,6 +21,23 @@ version bumps), and the logging/error-handling fix pass are complete (2026-07-05
 
 Current focus:
 
+- **Stage 5B — Node runtime compatibility micro-fix: completed 2026-07-06.** Follow-up to a
+  read-only Stage 5B environment/deployment/CI-CD readiness audit performed earlier the same day
+  (verdict: ready after minor fixes; no security/architecture blocker for Stage 5C), which flagged
+  one small deployment risk: local development runs Node 24, `package.json` declared no Node
+  engine floor, and Vercel's configured/default Node version was unverified — risking silent
+  Node-version drift between local `pnpm qg` runs and the deployed build. Independent review
+  agreed on a narrow fix: `package.json` now declares `"engines": { "node": ">=20" }` (a floor, not
+  an exact pin — `20.x`/`22.x` are both acceptable) to document and warn about the supported
+  minimum, without adding `.nvmrc` or `vercel.json` in this pass. No dependency, script, package
+  manager field, or lockfile was touched — `pnpm-lock.yaml` diff confirmed empty. This does not
+  replace manually checking/setting the Vercel project's Node.js Version to 20+ before the first
+  deployed E2E test — that remains an outstanding manual step, not satisfied by this change. This
+  does not claim deployment, production domain, custom SMTP, staging, backups/PITR, monitoring, or
+  public-launch readiness. `pnpm qg` — structure / lint / typecheck / test / build all PASS (lint:
+  0 errors, 1 pre-existing unrelated warning carried over from Stage 4B.5.1; 214/214 tests,
+  unchanged count — no test/source file was touched). `git diff --check` reported no whitespace
+  issues. Committed as a standalone change — see commit history for the hash.
 - **Stage 5B — auth log label micro-fix: completed 2026-07-06.** Follow-up to a read-only
   inspection of the logging fix pass below, which found `src/services/authLog.ts`'s
   `classifyAuthError` reused the label `invalid_credentials` for the `400/401/422` status bucket
