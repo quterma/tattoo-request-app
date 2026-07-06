@@ -114,7 +114,7 @@ async function uploadWithRetry(item: FileToUpload): Promise<void> {
 async function cleanupFiles(paths: string[]): Promise<void> {
   if (paths.length === 0) return
 
-  console.log(`[storage] cleanup: deleting ${paths.length} file(s)`, paths)
+  console.log(`[storage] cleanup: deleting ${paths.length} file(s)`)
 
   const { error } = await supabase.storage.from(BUCKET).remove(paths)
 

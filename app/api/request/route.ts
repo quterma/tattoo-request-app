@@ -19,7 +19,7 @@ const PG_UNIQUE_VIOLATION = "23505"
 
 async function cleanupStorageFiles(paths: string[]): Promise<void> {
   if (paths.length === 0) return
-  console.log(`[route] cleanup: deleting ${paths.length} file(s) after DB failure`, paths)
+  console.log(`[route] cleanup: deleting ${paths.length} file(s) after DB failure`)
   const { error } = await supabase.storage.from(BUCKET).remove(paths)
   if (error) {
     console.error("[route] cleanup failed:", error.message)

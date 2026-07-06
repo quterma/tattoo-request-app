@@ -16,11 +16,65 @@ Stage: Stage 5 — Production Hardening (preparation / audit planning)
 Status: Stage 4B — Admin Dashboard is closed (implementation-complete, 2026-07-04). Stage 5A —
 Security / Data-Boundary Planning is closed (completed 2026-07-05). **Stage 5B — Production
 Hardening Implementation is in progress; 5B.1 (`create_request` search_path hardening), 5B.2
-(Storage bucket MIME/size limits), and dependency security remediation (`next`/`next-intl`/
-`vitest` version bumps) are complete (2026-07-05 / 2026-07-06).**
+(Storage bucket MIME/size limits), dependency security remediation (`next`/`next-intl`/`vitest`
+version bumps), and the logging/error-handling fix pass are complete (2026-07-05 / 2026-07-06).**
 
 Current focus:
 
+- **Stage 5B — auth log label micro-fix: completed 2026-07-06.** Follow-up to a read-only
+  inspection of the logging fix pass below, which found `src/services/authLog.ts`'s
+  `classifyAuthError` reused the label `invalid_credentials` for the `400/401/422` status bucket
+  across every auth operation sharing the helper, not just `login` — misleading for
+  `oauth_callback`/`reset_callback` (an invalid/consumed code, not a credential) and
+  `reset_password` (confirmed: `AuthWeakPasswordError` also carries `status: 400`, so a weak-
+  password rejection would have logged as `invalid_credentials`). Renamed the label to the neutral
+  `auth_request_rejected` in `AuthLogReason` and `classifyAuthError`'s return value only — no
+  change to the status-code mapping, log severity, operation-awareness (deliberately still not
+  operation-aware, per instruction), or any call site. Updated the 3 affected expected-value
+  occurrences in `src/services/__tests__/authLog.test.ts` (`it.each` table plus the two literal-
+  object assertions) to match. No other file touched. Total tests: 214 (unchanged count, values
+  only). `pnpm qg` — structure / lint / typecheck / test / build all PASS (lint: 0 errors, 1
+  pre-existing unrelated warning carried over from Stage 4B.5.1). Not committed — the owner will
+  review before any commit.
+- **Stage 5B — logging/error-handling fix pass: completed 2026-07-06.** Narrow, owner-approved
+  fix pass following a read-only logging/error-handling audit performed earlier the same day
+  (verdict: ready after minor fixes). Three tasks, no UX/route/schema/dependency change:
+  (1) **auth logging** — added `src/services/authLog.ts` (`logAuthFailure(operation, error, level)`),
+  a small server-only helper that classifies Supabase Auth errors using only the stable
+  `AuthError.status` field (400/401/422 → `invalid_credentials`, 429 → `rate_limited`, else
+  `unknown` — deliberately not using `error.code`/`error.message`, which are looser/less stable);
+  wired into `loginAction`, `googleLoginAction`, `forgotPasswordAction` (now also captures
+  `resetPasswordForEmail`'s previously-discarded error, still always returns `{ sent: true }` —
+  no enumeration change), `resetPasswordAction`, `logoutAction` (`"warn"` level, per instruction —
+  logout failure must not block the redirect), and both `/auth/callback`/`/auth/reset-callback`
+  routes. Never logs email/password/token/code/session/user payload/callback query string/raw
+  Supabase error message — verified via a dedicated test. (2) **status action hardening** —
+  `updateRequestStatusAction` now wraps `updateRequestStatusForStudio` in try/catch (`console.error`
+  with `operation`/`requestId`/generic `"unknown"` reason on infra failure, returns the existing
+  `requestStatusUpdateFailed` shape, does not rethrow) and logs `console.warn` for the two expected
+  rejection paths (`invalid_status`, `not_found`); unauthenticated/unauthorized is intentionally not
+  logged (routine session-expiry noise). `studioId` and session/user payloads are never logged.
+  (3) **cleanup log hygiene** — removed the raw Storage path array from the initial cleanup log
+  line in `services/storage.ts` and `app/api/request/route.ts` (now logs file count only); the
+  per-file upload-failure log (`storage.ts`, includes one file's own storage path to identify which
+  file failed) and the post-`remove()` `error.message` logs were left unchanged — both were out of
+  this pass's explicit scope (raw *paths* in cleanup logs, not error text or per-file failure
+  identification) and changing them would have required expanding scope or losing legitimate
+  debugging signal; deferred to Stage 5D if revisited. One incidental fix: `eslint.config.mjs`'s
+  `import/no-internal-modules` allow-list extended with `**/services/authLog`, mirroring the
+  existing `**/services/auth`/`**/services/supabaseAuth` entries — same established exception
+  family, not a new pattern. New test file `src/services/__tests__/authLog.test.ts` (10 tests:
+  status-to-reason classification table, warn/error level selection, non-`AuthError` input safety,
+  and an explicit assertion that email/message content never reaches the logged context). No
+  Server Action test was added — consistent with the existing, documented Stage 4B.6 precedent
+  that this codebase does not mock `next/headers`/`next/cache` for action tests; the underlying
+  `updateRequestStatusForStudio` throw path this action's new catch wraps was already covered in
+  `db.test.ts`. Total tests: 214 (was 204) — all pass. `pnpm qg` — structure / lint / typecheck /
+  test / build all PASS (lint: 0 errors, 1 pre-existing unrelated warning carried over from Stage
+  4B.5.1; the same run before the `eslint.config.mjs` fix showed 6 new `import/no-internal-modules`
+  warnings for the new deep import, resolved by the allow-list addition, re-run confirmed clean).
+  No UI message, redirect, auth flow, public request behavior, cleanup/retry behavior, route,
+  schema, or dependency was changed. Not committed — the owner will review before any commit.
 - **Stage 5B — dependency security remediation: completed 2026-07-06.** Narrow, owner-approved
   `pnpm` version bumps of exactly three direct dependencies, following the read-only dependency
   security audit performed earlier the same day: `next` `16.1.6` → `16.2.10` (resolves all 19

@@ -41,6 +41,7 @@ const eslintConfig = defineConfig([
             "yet-another-react-lightbox/**",
             "**/services/supabaseAuth",
             "**/services/auth",
+            "**/services/authLog",
             "@testing-library/jest-dom/*",
             "@vitejs/plugin-react",
             "vitest/*",

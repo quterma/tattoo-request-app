@@ -32,12 +32,20 @@ export async function updateRequestStatusAction(
   const status = formData.get("status")
 
   if (typeof status !== "string" || !isRequestStatus(status)) {
+    console.warn("[admin] status update rejected", { operation: "update_request_status", requestId, reason: "invalid_status" })
     return { ok: false, error: t("requestStatusUpdateFailed") }
   }
 
-  const updated = await updateRequestStatusForStudio(result.studioId, requestId, status)
+  let updated: boolean
+  try {
+    updated = await updateRequestStatusForStudio(result.studioId, requestId, status)
+  } catch {
+    console.error("[admin] status update failed", { operation: "update_request_status", requestId, reason: "unknown" })
+    return { ok: false, error: t("requestStatusUpdateFailed") }
+  }
 
   if (!updated) {
+    console.warn("[admin] status update rejected", { operation: "update_request_status", requestId, reason: "not_found" })
     return { ok: false, error: t("requestStatusUpdateNotFound") }
   }
 

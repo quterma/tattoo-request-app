@@ -1,6 +1,7 @@
 import { cookies } from "next/headers"
 import { NextRequest, NextResponse } from "next/server"
 import { createSupabaseAuthClient } from "@/services/supabaseAuth"
+import { logAuthFailure } from "@/services/authLog"
 import { defaultLocale, locales, type Locale } from "@/shared/i18n"
 
 function isSupportedLocale(value: string | null): value is Locale {
@@ -31,6 +32,7 @@ export async function GET(request: NextRequest) {
   const { error } = await supabase.auth.exchangeCodeForSession(code)
 
   if (error) {
+    logAuthFailure("oauth_callback", error)
     return NextResponse.redirect(`${origin}/${locale}/admin/login?error=oauth`)
   }
 

@@ -4,6 +4,7 @@ import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 import { createSupabaseAuthClient } from "@/services/supabaseAuth"
+import { logAuthFailure } from "@/services/authLog"
 
 export type ResetPasswordResult = { error: string } | null
 
@@ -39,6 +40,7 @@ export async function resetPasswordAction(
   const { error } = await supabase.auth.updateUser({ password })
 
   if (error) {
+    logAuthFailure("reset_password", error)
     return { error: t("resetPasswordFailed") }
   }
 

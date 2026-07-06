@@ -4,6 +4,7 @@ import { cookies, headers } from "next/headers"
 import { redirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 import { createSupabaseAuthClient, getRequestOrigin } from "@/services/supabaseAuth"
+import { logAuthFailure } from "@/services/authLog"
 
 export type LoginResult = { error: string } | null
 
@@ -29,6 +30,7 @@ export async function loginAction(
   const { error } = await supabase.auth.signInWithPassword({ email, password })
 
   if (error) {
+    logAuthFailure("login", error)
     const t = await getTranslations({ locale, namespace: "admin" })
     return { error: t("loginInvalidCredentials") }
   }
@@ -60,6 +62,7 @@ export async function googleLoginAction(locale: string): Promise<void> {
   })
 
   if (error || !data.url) {
+    logAuthFailure("google_login", error)
     redirect(`/${locale}/admin/login?error=oauth`)
   }
 

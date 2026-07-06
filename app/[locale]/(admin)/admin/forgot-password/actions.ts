@@ -2,6 +2,7 @@
 
 import { cookies, headers } from "next/headers"
 import { createSupabaseAuthClient, getRequestOrigin } from "@/services/supabaseAuth"
+import { logAuthFailure } from "@/services/authLog"
 
 export type ForgotPasswordResult = { sent: true } | { error: string }
 
@@ -26,9 +27,13 @@ export async function forgotPasswordAction(
 
   const origin = getRequestOrigin(headerList)
 
-  await supabase.auth.resetPasswordForEmail(email, {
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${origin}/auth/reset-callback?locale=${locale}`,
   })
+
+  if (error) {
+    logAuthFailure("forgot_password", error)
+  }
 
   return { sent: true }
 }

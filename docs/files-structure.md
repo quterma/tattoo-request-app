@@ -177,6 +177,7 @@ tattoo-request-app/
 │   │           └── validationKeys.ts
 │   ├── services/
 │   │   ├── auth.ts
+│   │   ├── authLog.ts
 │   │   ├── db.ts
 │   │   ├── index.ts
 │   │   ├── requests.ts
@@ -185,6 +186,7 @@ tattoo-request-app/
 │   │   ├── supabaseAuth.ts
 │   │   └── __tests__/
 │   │       ├── auth.test.ts
+│   │       ├── authLog.test.ts
 │   │       ├── db.test.ts
 │   │       ├── requests.test.ts
 │   │       └── storage.test.ts
