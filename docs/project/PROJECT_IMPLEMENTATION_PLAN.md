@@ -639,6 +639,11 @@ Tasks:
   including the production origin once known), custom SMTP configuration status, rate limits, and
   enable "Leaked Password Protection" (flagged by `supabase db advisors`) — Dashboard verification,
   not code
+  - ◐ **partially done, 2026-07-08** — Site URL and Redirect URLs updated to include the deployed
+    Vercel origin alongside localhost (see PROJECT_STAGE_LOG.md, 2026-07-08 entry); this fixed
+    deployed reset-password email behavior and is verified live. Custom SMTP configuration status,
+    rate limits, and "Leaked Password Protection" are **still not verified/enabled** — not done by
+    this entry.
 - production environment setup: domain, production env vars, Google OAuth production redirect URI, backups, monitoring/logging (see PROJECT_PRODUCTION_READINESS.md, Production Environment Setup)
   - ✓ **completed 2026-07-06** — Node runtime floor declared: `package.json` now has
     `"engines": { "node": ">=20" }`, closing a small deployment-readiness risk (local dev Node 24,
@@ -668,12 +673,34 @@ Result: hardened application, ready for real-infrastructure verification.
 
 Goal: verify the hardened application against real, deployed infrastructure.
 
+**In progress, started 2026-07-08 — not closed.** See PROJECT_STAGE_LOG.md (2026-07-08 entry) for
+the full findings record. A Vercel deployment from `main` exists and a manual smoke test of the
+core public/admin flows (submission, uploads, admin list/detail, signed images, status update,
+email/password auth, protected routes, password reset, Google OAuth for both authorized and
+unauthorized accounts) has passed against it. This is real-environment verification, not a
+production-readiness or public-launch claim.
+
 Tasks:
 
-- E2E / integration test coverage against real Supabase infrastructure (see PROJECT_PRODUCTION_READINESS.md)
-- performance validation on deployed environment
-- deployment (Vercel + Supabase production)
-- manual smoke test of full submission and admin flow against the deployed environment
+- E2E / integration test coverage against real Supabase infrastructure (see PROJECT_PRODUCTION_READINESS.md) — not started; the 2026-07-08 verification was manual, not automated
+- performance validation on deployed environment — **not done.** A qualitative observation
+  (deployed interactions feel slower than local) was recorded 2026-07-08, but no measurement was
+  taken and no performance claim is made — see PROJECT_PRODUCTION_READINESS.md, Performance
+  Validation
+- deployment (Vercel + Supabase production) — a Vercel deployment from `main` exists and Supabase
+  Auth URL configuration (Site URL, Redirect URLs) was updated to match it (2026-07-08); this is
+  not yet the separate staging/production environment split described in Stage 5B/Decision C below
+- manual smoke test of full submission and admin flow against the deployed environment — **done,
+  2026-07-08**, see PROJECT_STAGE_LOG.md for the full list of verified flows
+
+Still pending before this sub-stage can close:
+
+- local reset-password re-check, blocked on Supabase's built-in email rate-limit cooldown
+- a final written Stage 5C closure entry
+- the active locale-routing TODO (separate, in progress elsewhere) — not resolved by this stage
+- the OAuth locale-query redirect-allowlist design debt recorded 2026-07-08 (see
+  PROJECT_STAGE_LOG.md and PROJECT_BACKLOG.md) — a working workaround exists; the underlying design
+  is not fixed and is a candidate for Stage 5D or a later stage, not yet assigned
 
 Result: a verified, deployed application — the completed production architecture that Stage 5D
 will audit.

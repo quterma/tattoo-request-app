@@ -1128,6 +1128,83 @@ consensus changed:
 
 ---
 
+# Stage 5C Deployment Workflow and Environment Decisions
+
+Recorded 2026-07-08, following the first real Vercel/Supabase deployment verification (see
+PROJECT_STAGE_LOG.md, 2026-07-08 entry). These are target-direction decisions, not all
+operationalized yet — each says explicitly what is decided vs. what remains to be implemented.
+
+## A. Git / Vercel Workflow — Agreed Direction, Not Yet Implemented
+
+The first Vercel deployment was made directly from `main` rather than from a Preview-branch
+deployment. This was a real, useful verification step, but is not the intended ongoing workflow.
+
+Intended minimum workflow, going forward:
+
+- `main` is treated as the production branch only once a real production environment/release
+  policy exists (see Section C below) — until then, deploying from `main` remains a pragmatic,
+  acknowledged interim state, not a policy.
+- Feature work should happen on feature branches / PRs rather than committing directly to `main`.
+- Vercel Preview deployments should be used for controlled review/smoke testing before merge.
+- A Preview deployment URL can change per deployment/push. Since Supabase's Redirect URL allowlist
+  is keyed to exact URLs (see the OAuth locale-query finding in PROJECT_STAGE_LOG.md, 2026-07-08),
+  this has a direct implication for auth testing on Preview URLs: each new Preview URL would need
+  its own allowlist entry.
+- For a single controlled auth smoke test against a Preview deployment, use one stable deployment
+  URL for the duration of that test and avoid unnecessary pushes while it remains allowlisted, to
+  avoid Redirect URL churn.
+- If recurring Preview auth testing becomes necessary (not just one-off smoke tests), evaluate a
+  stable branch alias or a dedicated staging environment (see Section C) rather than repeatedly
+  editing Supabase Redirect URLs by hand.
+- `pnpm qg` remains required before merge for any source/config/dependency change, per the
+  Pre-Commit Checklist in `.claude/CLAUDE.md` — unchanged by this decision.
+
+This is a documented target workflow, not a claim that it is fully operationalized. It does not
+constitute CI/CD completion — see Section B below for that separate decision.
+
+## B. CI/CD — Explicit Decision and Trigger
+
+Current MVP baseline (unchanged, already in force): local `pnpm qg`, Husky pre-commit lint/
+typecheck, Vercel's Git-integration deploy (preview per PR, production per merge to `main`, once
+the Section A workflow above is actually in effect).
+
+**Decision:** a required remote CI check (e.g. GitHub Actions running `pnpm qg` or a justified
+CI-safe equivalent) is **not currently implemented**, and is not required at the current stage.
+
+**Trigger to add it:** before public launch, or whenever collaboration/PR volume makes
+local-only quality gates insufficient (e.g. a second contributor, or enough PR volume that manual
+discipline becomes unreliable) — whichever comes first. This is a pre-launch/maturity
+prerequisite to decide and implement deliberately when the trigger condition is met, not a claim
+that CI is already in place today.
+
+## C. Staging vs. Production Infrastructure — Pre-Launch Requirement
+
+**Current controlled-testing phase (in effect now):**
+
+- One Supabase project may continue to be used for controlled test data only, as it has been
+  since Stage 5A.
+- The current deployed Vercel environment is not claimed as real production — it is a real
+  deployed environment used for verification (see PROJECT_STAGE_LOG.md, 2026-07-08 entry).
+- Test-data cleanup remains optional while all data in the project remains test data (unchanged
+  from the Stage 5A posture).
+
+**Required before real users / public launch (not done, not started in this session):**
+
+- separate Supabase staging and production projects
+- separate Vercel environment variable values for staging and production
+- separate Auth Site URL / Redirect URLs / Google OAuth configuration per environment, as needed
+- a defined migration promotion/verification process from staging to production
+- staging must never be allowed to alter real client data
+- custom SMTP, a production domain, backups/PITR, monitoring, and final mobile QA remain separate
+  pre-launch decisions/checkpoints (see PROJECT_PRODUCTION_READINESS.md) — none of them are
+  claimed as complete by this entry or by the 2026-07-08 deployment work.
+
+No staging/production project split, no new Vercel environment configuration, and no new Supabase
+project were created in this documentation pass — this section records the decision and its
+trigger only.
+
+---
+
 # Rule for Future Changes
 
 All architectural, product, or behavioral decisions MUST be recorded in this document.

@@ -21,6 +21,10 @@ version bumps), and the logging/error-handling fix pass are complete (2026-07-05
 
 Current focus:
 
+- **Stage 5C — Real Infrastructure and End-to-End Verification: in progress, started 2026-07-08.**
+  Not closed — several findings verified against the live Vercel/Supabase deployment, but open
+  items remain (see below and the dated 2026-07-08 entry). No claim of Stage 5C closure,
+  production readiness, or public-launch readiness is made by this entry.
 - **Stage 5B — Node runtime compatibility micro-fix: completed 2026-07-06.** Follow-up to a
   read-only Stage 5B environment/deployment/CI-CD readiness audit performed earlier the same day
   (verdict: ready after minor fixes; no security/architecture blocker for Stage 5C), which flagged
@@ -239,6 +243,161 @@ Completed in Stage 3:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-07-08 — Stage 5C — Locale-prefix redirect audit + targeted fix
+
+Status: Completed. Narrow routing bug fix in `proxy.ts` plus focused unit tests; no change to
+supported locales, default locale, route structure, auth logic, Supabase/Google/Vercel settings,
+env vars, or dependencies.
+
+**Root cause.** `proxy.ts`'s no-locale-prefix branch computed the redirect target by slicing the
+original pathname using `firstSegment.length + 1` — this happened to equal the length of
+`/${firstSegment}` only when the first segment was treated as a value to strip, which is correct
+for a locale-swap but wrong here: the first path segment is real path content (e.g. `admin`, `foo`),
+not a locale slot, when no valid locale prefix is present. The slice silently dropped that first
+segment: `/foo/bar` (`firstSegment = "foo"`, length 3) sliced at index 4 removed `/foo`, leaving
+`rest = "/bar"`, redirected to `/en/bar` — losing `foo` entirely. `/admin/requests` was likewise
+redirected to `/en/requests`, a route that does not exist under `[locale]`, producing a 404.
+
+**Fix.** Removed the segment-slicing logic entirely. Extracted two pure helpers into
+`src/shared/i18n/localePath.ts` (no Next.js server-runtime imports, so they're importable under
+Vitest without the `next/server` resolution failure that occurs when importing `proxy.ts`
+directly, which transitively pulls in `next-intl/middleware`):
+
+- `hasSupportedLocalePrefix(pathname)` — first-segment membership check against the existing
+  `locales` config (unchanged source of truth; `src/shared/i18n/config.ts`, currently `["en"]`) —
+  automatically recognizes future locales (`ru`, `he`, ...) once added there, no hardcoding
+- `withDefaultLocalePrefix(pathname)` — prepends `/${defaultLocale}` to the **full, unmodified**
+  original pathname; no slicing, no segment replacement
+
+`proxy.ts` now: if `hasSupportedLocalePrefix` is true, delegates to the existing `next-intl`
+middleware unchanged (no double-prefixing, since the path already carries a valid locale); if
+false (empty path, or any non-locale first segment, including locale-like strings such as `ff` or
+`il` that are not in the configured list), redirects to `withDefaultLocalePrefix(pathname)`. Query
+string is preserved automatically since only `.pathname` is mutated on the cloned `request.nextUrl`
+(`.search` is untouched). The `config.matcher` (`/((?!api|auth|_next|_vercel|.*\..*).*)`) was not
+changed — `/api/*`, `/auth/*` (including `/auth/callback`, `/auth/reset-callback`), `/_next/*`,
+`/_vercel/*`, and static assets remain excluded from this middleware exactly as before.
+
+**Tests.** New `src/shared/i18n/__tests__/localePath.test.ts` (8 tests): valid locale prefix
+recognized (`/en/foo/bar`, `/en/admin/requests`); missing prefix rejected (`/foo/bar`,
+`/admin/requests`, `/`); invalid locale-like segment rejected (`/ff/admin/request`); prefixing
+preserves both path segments (`/foo/bar` → `/en/foo/bar`, `/admin/requests` → `/en/admin/requests`,
+`/ff/admin/request` → `/en/ff/admin/request`); root path (`/` → `/en/`). Total tests: 221 (was 214).
+No test mocks `next/server`/`next-intl` middleware internals, consistent with this codebase's
+existing precedent of not mocking Next internals.
+
+**Manual verification** against the local dev server (`pnpm dev`, no Supabase/Google/Vercel
+Dashboard change): `/` → `/en` (307); `/foo/bar` → `/en/foo/bar` (307, both segments preserved);
+`/admin` → `/en/admin` (307); `/admin/requests` → `/en/admin/requests` (307);
+`/admin/requests?page=2` → `/en/admin/requests?page=2` (307, query preserved); `/ff/admin/request`
+→ `/en/ff/admin/request` (307); `/en/foo/bar` → no redirect, 404 (route genuinely doesn't exist,
+not a routing bug — confirms no double-prefixing); `/en/admin/requests` → redirected to
+`/en/admin/login` by the existing (unchanged) auth gate, not by this fix; `/auth/callback` → no
+locale redirect, 404 (route requires a real OAuth `code` param — expected, confirms the auth
+exclusion still holds).
+
+`pnpm qg` — structure / lint / typecheck / test / build all PASS (lint: 0 errors, 1 pre-existing
+unrelated warning carried over from Stage 4B.5.1; 221/221 tests, up from 214; build succeeded,
+same 14-route table as before, `proxy.ts` still compiles as the sole Proxy/Middleware entry).
+
+Deferred, not part of this fix's scope: localized 404 page navigation-link improvement (owner
+observation, noted in the originating TODO) — carried forward as a Stage 5D/Stage 6 polish item,
+not implemented here since it was not naturally touched by this routing fix.
+
+Not committed — the owner will review before any commit.
+
+---
+
+### 2026-07-08 — Stage 5C — Real infrastructure verification: first deployment findings
+
+Status: In progress. Not a Stage 5C closure entry. No application code, tests, migrations, or
+dependency changes in this session — deployment configuration, Supabase Auth Dashboard
+configuration, and Google Cloud OAuth configuration only, plus this documentation.
+
+**Vercel deployment.**
+
+- First Vercel deployment was made from `main`, not a Preview-branch deployment. This is a real
+  deployed environment — it does not by itself mean the application is ready for public launch.
+- `package.json` already declares `"engines": { "node": ">=20" }` (Stage 5B, 2026-07-06). Before
+  any future deployed E2E run or real release, the Vercel Project's Node.js Version setting must
+  still be verified/set to 20+ — not yet independently re-confirmed as part of this session beyond
+  the prior engines declaration.
+- Vercel environment variables in use are the existing server-side project values: `SUPABASE_URL`,
+  `SUPABASE_SECRET_KEY`, `SUPABASE_PUBLISHABLE_KEY`, `DEPLOYMENT_STUDIO_ID`. No
+  `NEXT_PUBLIC_SUPABASE_URL` is used by current code, and none should be added without a real code
+  need — no such need exists today.
+
+**Supabase Auth URL configuration.**
+
+- Supabase Site URL changed from a localhost value to the deployed Vercel URL
+  (`https://tattoo-request-app-woad.vercel.app`). This fixed deployed reset-password email
+  fallback behavior (the email link previously defaulted to the wrong origin).
+- Redirect URLs (the allowlist for explicit `redirectTo` values, distinct from Site URL's role as
+  the default/fallback) now include both localhost and deployed callback routes:
+  `http://localhost:3000/auth/callback`, `http://localhost:3000/auth/reset-callback`,
+  `https://tattoo-request-app-woad.vercel.app/auth/callback`,
+  `https://tattoo-request-app-woad.vercel.app/auth/reset-callback`. Local development continues to
+  work via the localhost entries.
+
+**Deployed E2E findings — verified against the live Vercel deployment:**
+
+- public request submission (form → BFF → Storage → DB) works
+- uploads/Storage/DB persistence/admin list/admin detail/signed image URLs/status update all work
+- email/password admin auth works
+- protected admin route behavior (redirect/unauthorized/authorized) works
+- password reset works end-to-end, after the Site URL change above
+- Google OAuth works for both an authorized Google account (existing `studio_members` row) and an
+  unauthorized one (no row — correctly denied)
+
+**Observation, not a confirmed finding:** deployed interactions felt noticeably slower than local
+dev. No timeout or error was observed. This is recorded as an observation only — possible
+contributing factors include Vercel cold starts and region distance from the Supabase project, but
+no measurement was taken and no performance claim is made. See
+PROJECT_PRODUCTION_READINESS.md — Performance Validation for the pre-existing measurement
+requirement this observation feeds into; it does not satisfy that requirement.
+
+**Still pending, explicitly not resolved by this entry:**
+
+- local reset-password re-verification, blocked on Supabase's built-in email provider rate-limit
+  window from repeated testing (see PROJECT_PRODUCTION_READINESS.md — Email Delivery)
+- final written Stage 5C E2E result/closure — this entry is a findings record, not a closure
+- the active locale-routing TODO is being handled separately and must not be read as resolved here
+
+**Google OAuth cleanup and current state.**
+
+- A dedicated Google Cloud project (`Tattoo Request App`) now exists, containing exactly one
+  intended OAuth Web Client (`Supabase Auth`), whose authorized redirect URI is the Supabase
+  callback (`https://<project-ref>.supabase.co/auth/v1/callback`). The new Client ID/Secret were
+  saved in the Supabase Google provider configuration. Vercel Google OAuth was manually verified
+  working after this change (see Deployed E2E findings above).
+- Two older, unrelated Google Cloud projects (`UTI-shop`, `Tann Mann Gaadi Auth`) were deleted by
+  the owner after the new OAuth flow was verified working. No claim is made here about
+  deletion-recovery windows or any other status of those old projects beyond this factual owner
+  action. No secrets or Client IDs are recorded in this document.
+
+**OAuth locale-query technical debt (recorded, not resolved).**
+
+- Local Google OAuth initially fell back incorrectly to the Vercel Site URL. Browser inspection
+  confirmed the app actually sends `redirect_to=http://localhost:3000/auth/callback?locale=en`
+  (locale is appended as a query param, per the existing 4A.6/4A.7 mechanism).
+- Adding that exact query-bearing localhost URL to Supabase Redirect URLs made local OAuth work
+  again — a working workaround, verified live, **not the desired long-term design**:
+  - Supabase's Redirect URL allowlist matches full URLs, including the query string, so it should
+    not require one allowlisted entry per locale query value
+  - future `ru`/`he` locale expansion should not require manually adding
+    `...auth/callback?locale=ru`, `...auth/callback?locale=he`, etc. to the allowlist one at a time
+  - a deliberate auth/i18n redirect design cleanup is needed before locale expansion, or this
+    should be explicitly scoped into Stage 5D or a later stage
+- No eventual solution is invented or chosen here. This is recorded as an open architectural
+  finding with a working interim workaround — not resolved, not scheduled to a specific sub-stage
+  yet beyond the general Stage 5D candidacy noted above.
+
+No `pnpm qg` run in this session — no `src/`/`app/`/test/migration file was touched; all changes
+were Vercel/Supabase Dashboard/Google Cloud configuration, verified live. `git status`: clean, no
+repository file modified prior to this documentation pass.
+
+---
 
 ### 2026-07-06 — Stage 5B — Dependency security remediation
 

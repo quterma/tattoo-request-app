@@ -90,6 +90,14 @@ changes). Staging **is required** before any future work introducing real authen
 policies, browser-side Supabase access, multi-studio behavior, or a `create_request` signature/
 behavior change. Only one Supabase project exists today (confirmed live in 5A.2).
 
+**Phased pre-launch decision reinforced 2026-07-08** (see PROJECT_DECISIONS.md — Stage 5C
+Deployment Workflow and Environment Decisions, Section C): the current single-Supabase-project /
+single-Vercel-deployment setup continues to be used for controlled test data only during this
+verification phase — not claimed as production. Before real users / public launch: separate
+Supabase staging and production projects, separate Vercel environment values per environment,
+separate Auth Site URL/Redirect URLs/OAuth config per environment, and a defined migration
+promotion process from staging to production. None of this has been created yet.
+
 ## Production Environment Setup
 
 Before public launch:
@@ -97,9 +105,11 @@ Before public launch:
 - production domain configured and pointed at the Vercel deployment
 - production env vars set in Vercel (not committed) — see `.env.example` for the required list
 - Google OAuth: production redirect URI added in Google Cloud Console and Supabase Dashboard (in addition to the dev URI already configured in Stage 4A.6) — see PROJECT_DECISIONS.md, Admin Authentication Architecture
-- Auth Dashboard verification (Stage 5B task, not yet done as of 2026-07-05): redirect URLs for
-  `/auth/callback` and `/auth/reset-callback`, custom SMTP configuration status, rate limits, and
-  enabling "Leaked Password Protection" (flagged by `supabase db advisors` during Stage 5A.2) — see
+- Auth Dashboard verification (Stage 5B task): redirect URLs for `/auth/callback` and
+  `/auth/reset-callback` — **partially done, 2026-07-08**: Site URL and Redirect URLs now include
+  the deployed Vercel origin alongside localhost, verified live (see PROJECT_STAGE_LOG.md,
+  2026-07-08 entry). Custom SMTP configuration status, rate limits, and enabling "Leaked Password
+  Protection" (flagged by `supabase db advisors` during Stage 5A.2) remain **not done** — see
   PROJECT_DECISIONS.md, Stage 5A Security / Data-Boundary Decisions
 - Supabase automatic backups confirmed enabled on the production project (managed by Supabase; verify retention window in the dashboard) — **not yet done; full backup posture (DB dump, Storage backup, PITR) is explicitly deferred until real/valuable data exists or pre-launch, per Stage 5A (see PROJECT_DECISIONS.md). Do not treat this as complete.**
 - basic monitoring/logging confirmed reachable (Vercel deployment logs / Supabase logs) — no new logging service required for MVP
@@ -125,10 +135,27 @@ Before public launch:
 Goal: a practical, minimal deploy pipeline — not an over-engineered one.
 
 - GitHub connected to Vercel; every PR gets a Vercel preview deployment
-- `main` auto-deploys to production on merge (Vercel's default Git integration — no custom pipeline needed at this scale)
+- Vercel's default Git integration auto-deploys on merge to `main` — this is a deploy mechanism,
+  not a claim that `main` is the production branch today. See PROJECT_DECISIONS.md — Stage 5C
+  Deployment Workflow and Environment Decisions, Section A: the current deployment reached via this
+  mechanism is used for controlled verification/test data, not public production; `main` becomes
+  the production branch only once a real production environment and release policy exist,
+  including the environment separation below.
 - lint, typecheck, tests, and build (`pnpm qg`) must pass locally before merge, per the Pre-Commit Checklist in `.claude/CLAUDE.md`
 - no dedicated GitHub Actions workflow required for MVP unless `pnpm qg` needs to run as a required PR check — revisit only if manual discipline proves insufficient
 - staging environment (separate Supabase project + Vercel preview/staging) is a prerequisite decision — see Environment Separation above
+
+**Reinforced 2026-07-08** (see PROJECT_DECISIONS.md — Stage 5C Deployment Workflow and
+Environment Decisions, Section B): a required remote CI check (e.g. GitHub Actions running
+`pnpm qg`) is confirmed **not currently implemented** — the MVP baseline remains local `pnpm qg` +
+Husky pre-commit + Vercel's Git deploy. Add a required remote CI workflow before public launch, or
+whenever collaboration/PR volume makes local-only gates insufficient — whichever comes first. This
+is a decision with a defined trigger, not a claim that CI is already in place.
+
+The first Vercel deployment (2026-07-08) was made directly from `main` rather than via a
+Preview-branch review flow — see PROJECT_DECISIONS.md, Section A, for the intended feature-branch
++ Preview-deployment workflow this should move toward, and its implication for Supabase Redirect
+URL allowlisting when testing auth against Preview URLs.
 
 ---
 

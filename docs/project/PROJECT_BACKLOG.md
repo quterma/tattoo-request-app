@@ -136,6 +136,27 @@ Suggested timing: Stage 5 Production Hardening, or earlier if Stage 4B introduce
 
 ---
 
+## OAuth Locale-Query Redirect Allowlist Design Debt (found during Stage 5C, 2026-07-08)
+
+Local Google OAuth was found to send `redirect_to=http://localhost:3000/auth/callback?locale=en`
+(locale appended as a query param, per the existing 4A.6/4A.7 mechanism). Supabase's Redirect URL
+allowlist matches full URLs including the query string, so this exact query-bearing localhost URL
+had to be added to the allowlist to make local OAuth work again after the Site URL was changed to
+the deployed Vercel origin (see PROJECT_STAGE_LOG.md, 2026-07-08 entry, and PROJECT_DECISIONS.md —
+Stage 5C Deployment Workflow and Environment Decisions).
+
+This is a working workaround, verified live, **not the desired long-term design**:
+
+- the allowlist should not need one entry per locale query value
+- future `ru`/`he` locale expansion should not require manually adding
+  `...auth/callback?locale=ru`, `...auth/callback?locale=he`, etc. one at a time
+- a deliberate auth/i18n redirect design cleanup is needed before locale expansion
+
+No eventual solution is chosen here. Candidate for Stage 5D (Full Application Maturity Audit) or a
+later dedicated pass, not yet assigned to a specific stage. Not resolved as of this entry.
+
+---
+
 ## Orphaned Storage Objects (found during Stage 5A)
 
 During Stage 5A.2/5A.3 (live Supabase read-only verification, 2026-07-05), 2 objects were found in
