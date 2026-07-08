@@ -12,19 +12,25 @@ AI agents and developers working on the project.
 
 ## Current Stage
 
-Stage: Stage 5 — Production Hardening (preparation / audit planning)
+Stage: Stage 5 — Production Hardening
 Status: Stage 4B — Admin Dashboard is closed (implementation-complete, 2026-07-04). Stage 5A —
 Security / Data-Boundary Planning is closed (completed 2026-07-05). **Stage 5B — Production
 Hardening Implementation is in progress; 5B.1 (`create_request` search_path hardening), 5B.2
 (Storage bucket MIME/size limits), dependency security remediation (`next`/`next-intl`/`vitest`
 version bumps), and the logging/error-handling fix pass are complete (2026-07-05 / 2026-07-06).**
+**Stage 5C — Real Infrastructure and End-to-End Verification is closed (2026-07-08)** — see the
+closure entry immediately below. **Stage 5D — Full Application Maturity Audit is the next required
+stage; it has not started. Stage 6 must not begin until Stage 5D is complete.**
 
 Current focus:
 
-- **Stage 5C — Real Infrastructure and End-to-End Verification: in progress, started 2026-07-08.**
-  Not closed — several findings verified against the live Vercel/Supabase deployment, but open
-  items remain (see below and the dated 2026-07-08 entry). No claim of Stage 5C closure,
-  production readiness, or public-launch readiness is made by this entry.
+- **Stage 5C — closed 2026-07-08.** Closed as *real-infrastructure / manual end-to-end
+  verification complete* — this is not a public-launch-readiness claim and does not mean
+  production-environment setup is complete. See the dated 2026-07-08 closure entry below for the
+  full scope of what was verified and what remains deferred. Next: a DevOps/workflow decision
+  block (git-flow, CI/CD, staging/production split — see PROJECT_DECISIONS.md, Stage 5C Deployment
+  Workflow and Environment Decisions), then Stage 5D (Full Application Maturity Audit), before
+  Stage 6 may begin.
 - **Stage 5B — Node runtime compatibility micro-fix: completed 2026-07-06.** Follow-up to a
   read-only Stage 5B environment/deployment/CI-CD readiness audit performed earlier the same day
   (verdict: ready after minor fixes; no security/architecture blocker for Stage 5C), which flagged
@@ -243,6 +249,118 @@ Completed in Stage 3:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-07-08 — Stage 5C — closed: real-infrastructure / manual E2E verification complete
+
+Status: Stage 5C closed. This entry consolidates and closes the three dated 2026-07-08 entries
+below (deployment findings, locale-prefix fix, DevOps/workflow audit) — it does not repeat their
+detail, only records the closure decision and its exact meaning.
+
+**What Stage 5C closure means:**
+
+- Real Vercel deployment and real Supabase infrastructure were manually exercised end-to-end and
+  verified working — see the "Verified" list below.
+- This is real-infrastructure/manual-E2E-verification completion, **not** public-launch readiness.
+- This does **not** mean production-environment setup is complete (see
+  PROJECT_PRODUCTION_READINESS.md — Production Environment Setup: domain, custom SMTP, backups/
+  PITR, monitoring, and staging/production separation remain undone).
+- Closing 5C does **not** close any pre-launch checklist item in PROJECT_PRODUCTION_READINESS.md —
+  those remain open until explicitly resolved there.
+- Hands off to a DevOps/workflow decision block (git-flow, CI/CD trigger, staging/production
+  split — already framed in PROJECT_DECISIONS.md, Stage 5C Deployment Workflow and Environment
+  Decisions), then to **Stage 5D — Full Application Maturity Audit**, which has not started.
+- **Stage 6 must not begin until Stage 5D is complete.**
+
+**Verified (manually, against the live Vercel/Supabase deployment):**
+
+- Vercel deployment exists and was tested; public request submission works end-to-end
+  (form → BFF → Storage upload → DB persistence)
+- admin list/detail render correctly; signed image URLs load
+- status update persists and is visible after navigation
+- email/password admin auth works; protected routes behave correctly (redirect/unauthorized/
+  authorized)
+- password reset works on Vercel, after the Supabase Site URL update
+- Google OAuth works on Vercel for both an authorized and an unauthorized account
+- Google OAuth works locally after adding the exact query-bearing Redirect URL
+  (`http://localhost:3000/auth/callback?locale=en`)
+- local password reset works after adding the exact query-bearing Redirect URL
+  (`http://localhost:3000/auth/reset-callback?locale=en`)
+- the locale-prefix routing fix (see the dated entry below) was committed and verified both
+  locally and on Vercel: `/admin/requests` → `/en/admin/requests`; `/foo/bar` → `/en/foo/bar`;
+  `/en/admin/requests` does not double-prefix
+- the current Supabase project still contains test data; cleanup is intentionally not required to
+  close 5C, since this remains a controlled test environment, not real production data (unchanged
+  posture since Stage 5A)
+
+**Known observations / explicitly deferred, not resolved by this closure:**
+
+- deployed interactions felt slower than local dev; no timeout or error was measured — kept as an
+  observation only, not a performance bug (see PROJECT_PRODUCTION_READINESS.md — Performance
+  Validation, still open)
+- the OAuth/reset locale-query Redirect-URL workaround works but is architectural debt before
+  future `ru`/`he` locale expansion (see PROJECT_BACKLOG.md — OAuth Locale-Query Redirect Allowlist
+  Design Debt)
+- no public-production-readiness claim is made
+- no real staging/production environment split exists yet
+- no custom SMTP configured
+- no production domain configured
+- no backups/PITR posture confirmed
+- no external monitoring configured
+- no physical mobile-device viewer QA performed
+- git-flow / CI/CD / staging-production design is deferred to the next DevOps/workflow decision
+  block (see PROJECT_DECISIONS.md, Stage 5C Deployment Workflow and Environment Decisions)
+- **Stage 5D (Full Application Maturity Audit) remains the next required stage before Stage 6
+  begins — not started**
+
+No source code, tests, configs, dependencies, migrations, env files, or Vercel/Supabase/Google
+settings were changed in this documentation pass. No `pnpm qg` run — docs-only.
+
+---
+
+### 2026-07-08 — Stage 5C — DevOps/workflow read-only audit closure
+
+Status: Completed (audit + documentation only). No application code, package scripts, Husky
+hooks, GitHub/Vercel/Supabase settings, secrets, environment variables, or deployment
+configuration were changed in this pass.
+
+**Verified facts:**
+
+- `pnpm qg` runs `structure`, `lint`, `typecheck`, `test`, and `build`, in that order (unchanged
+  from prior entries).
+- `.husky/pre-commit` runs `lint` and `typecheck` only — a documented subset of `qg`, not the full
+  gate. This gap is accepted, not fixed, in this pass.
+- No GitHub Actions workflow or other remote CI configuration exists in this repository
+  (confirmed: no `.github/` directory). No `vercel.json` exists either — Vercel project
+  configuration (build settings, Node.js Version, env vars) is dashboard-managed only and not
+  visible from the repo.
+- **Vercel Project → Node.js Version was manually checked in the Vercel dashboard and confirmed as
+  `24.x`.** This is newer than the `>=20` floor declared in `package.json`'s `engines` field
+  (added Stage 5B, 2026-07-06) — the floor is satisfied, but the actual deployed runtime (24.x) is
+  not the same version documented as "the check still outstanding" in earlier entries this same
+  day. Recorded here as the first real confirmation of this previously-outstanding item; no
+  `package.json`/`engines` change was made in this pass since a floor (not an exact pin) is still
+  the intended check per Stage 5B decisions.
+- The current Vercel deployment (from `main`, live since 2026-07-08) remains controlled
+  test/verification usage, not public production — unchanged from the Stage 5C Deployment
+  Workflow and Environment Decisions (PROJECT_DECISIONS.md, Section C).
+
+**Decision reaffirmed (no new decision made — existing Stage 5C Section B decision confirmed
+still in force):**
+
+- Do not add a GitHub Actions workflow or change the pre-commit hook scope at this time.
+- Revisit remote CI before public launch, or whenever collaboration/PR volume makes local-only
+  `pnpm qg` discipline unreliable (e.g. a second contributor) — whichever comes first.
+
+**Explicitly still pending, not marked complete by this entry:** staging/production Supabase and
+Vercel environment separation, and the auth/i18n redirect redesign for locale-query-bearing
+`redirectTo` URLs (see PROJECT_STAGE_LOG.md, 2026-07-08 OAuth locale-query entry above) — both
+remain open pre-launch items, unchanged.
+
+No `pnpm qg` run in this session — no `src/`/`app/`/test/migration/config file was touched; this
+was a read-only audit plus documentation update only. `git status` confirmed only `README.md` and
+`PROJECT_STAGE_LOG.md` modified.
+
+---
 
 ### 2026-07-08 — Stage 5C — Locale-prefix redirect audit + targeted fix
 

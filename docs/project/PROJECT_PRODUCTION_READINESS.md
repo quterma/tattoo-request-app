@@ -10,6 +10,15 @@ AI agents and developers preparing the project for production release.
 
 ---
 
+**Stage 5C closure note (2026-07-08):** Stage 5C (real-infrastructure/manual end-to-end
+verification) is closed — see PROJECT_STAGE_LOG.md, 2026-07-08 closure entry. **This closes no
+checklist item on this page.** Every item below remains exactly as open/closed as stated in its
+own section; Stage 5C only confirmed that the deployed application's core flows work end-to-end
+against real Vercel/Supabase infrastructure, not that any production-environment, security-review,
+or launch checkpoint here is satisfied.
+
+---
+
 # Dependency Security
 
 ## Before Release

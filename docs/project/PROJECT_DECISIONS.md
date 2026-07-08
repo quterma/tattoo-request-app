@@ -1134,6 +1134,13 @@ Recorded 2026-07-08, following the first real Vercel/Supabase deployment verific
 PROJECT_STAGE_LOG.md, 2026-07-08 entry). These are target-direction decisions, not all
 operationalized yet — each says explicitly what is decided vs. what remains to be implemented.
 
+**Stage 5C itself closed 2026-07-08** as real-infrastructure/manual-E2E-verification complete (see
+PROJECT_STAGE_LOG.md closure entry) — that closure is not a production-readiness or public-launch
+decision, and does not supersede or resolve any of the three sections below. Sections A–C remain
+the standing decisions on workflow, CI/CD, and environment separation; they hand off to a
+DevOps/workflow decision block and then Stage 5D (Full Application Maturity Audit), which has not
+started.
+
 ## A. Git / Vercel Workflow — Agreed Direction, Not Yet Implemented
 
 The first Vercel deployment was made directly from `main` rather than from a Preview-branch

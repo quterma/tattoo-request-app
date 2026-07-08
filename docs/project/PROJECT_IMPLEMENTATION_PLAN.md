@@ -573,9 +573,11 @@ Stage 5 is executed as four ordered sub-stages, **5A → 5B → 5C → 5D**, in 
 sub-stage builds on the previous one; Stage 5D (the final full-application maturity audit) is
 deliberately last, after security/data-boundary work and real-infrastructure verification, so it
 assesses a production architecture that is actually complete rather than a work-in-progress one.
-**Stage 5A is complete (2026-07-05)** — see PROJECT_STAGE_LOG.md for the full dated record and
-PROJECT_DECISIONS.md, Stage 5A Security / Data-Boundary Decisions, for the decisions it produced.
-5B–5D have not started.
+**Stage 5A is complete (2026-07-05); Stage 5C is closed (2026-07-08, real-infrastructure/manual E2E
+verification — not a production-readiness claim)** — see PROJECT_STAGE_LOG.md for the full dated
+record and PROJECT_DECISIONS.md, Stage 5A Security / Data-Boundary Decisions, for the decisions
+5A produced. Stage 5B is in progress (several tasks complete, see below); **Stage 5D has not
+started and is the next required stage before Stage 6 may begin.**
 
 ## Stage 5A — Security / Data-Boundary Planning ✓ completed (2026-07-05)
 
@@ -669,38 +671,36 @@ staging environment setup (not a hard blocker for this minimal pass); full backu
 
 Result: hardened application, ready for real-infrastructure verification.
 
-## Stage 5C — Real Infrastructure and End-to-End Verification
+## Stage 5C — Real Infrastructure and End-to-End Verification ✓ closed (2026-07-08)
 
 Goal: verify the hardened application against real, deployed infrastructure.
 
-**In progress, started 2026-07-08 — not closed.** See PROJECT_STAGE_LOG.md (2026-07-08 entry) for
-the full findings record. A Vercel deployment from `main` exists and a manual smoke test of the
-core public/admin flows (submission, uploads, admin list/detail, signed images, status update,
-email/password auth, protected routes, password reset, Google OAuth for both authorized and
-unauthorized accounts) has passed against it. This is real-environment verification, not a
-production-readiness or public-launch claim.
+**Closed 2026-07-08 as real-infrastructure/manual-E2E-verification complete** — see
+PROJECT_STAGE_LOG.md (2026-07-08 closure entry) for the full verified-flow list and the explicit
+list of what remains deferred. A Vercel deployment from `main` exists; the core public/admin flows
+(submission, uploads, admin list/detail, signed images, status update, email/password auth,
+protected routes, password reset, Google OAuth for both authorized and unauthorized accounts) were
+manually verified against it, and the locale-prefix routing bug was fixed and verified both locally
+and on Vercel. **This closure is real-environment verification only — it is not a
+production-readiness or public-launch claim, and it does not close any PROJECT_PRODUCTION_READINESS.md
+checklist item** (domain, custom SMTP, backups/PITR, monitoring, staging/production split all
+remain open there).
 
-Tasks:
+Explicitly not done, carried forward (not blockers to this closure, but not resolved by it):
 
-- E2E / integration test coverage against real Supabase infrastructure (see PROJECT_PRODUCTION_READINESS.md) — not started; the 2026-07-08 verification was manual, not automated
-- performance validation on deployed environment — **not done.** A qualitative observation
-  (deployed interactions feel slower than local) was recorded 2026-07-08, but no measurement was
-  taken and no performance claim is made — see PROJECT_PRODUCTION_READINESS.md, Performance
-  Validation
-- deployment (Vercel + Supabase production) — a Vercel deployment from `main` exists and Supabase
-  Auth URL configuration (Site URL, Redirect URLs) was updated to match it (2026-07-08); this is
-  not yet the separate staging/production environment split described in Stage 5B/Decision C below
-- manual smoke test of full submission and admin flow against the deployed environment — **done,
-  2026-07-08**, see PROJECT_STAGE_LOG.md for the full list of verified flows
+- E2E/integration test coverage against real Supabase infrastructure — verification so far was
+  manual, not automated (see PROJECT_PRODUCTION_READINESS.md)
+- performance measurement on the deployed environment — only a qualitative "felt slower" observation
+  exists, no measurement taken (see PROJECT_PRODUCTION_READINESS.md, Performance Validation)
+- the separate staging/production environment split (still just one Supabase project / one Vercel
+  deployment, used for controlled test data — see Decision C below)
+- the OAuth/reset locale-query Redirect-URL allowlist design debt (working workaround in place;
+  see PROJECT_BACKLOG.md) — a candidate for Stage 5D or later, not yet assigned
 
-Still pending before this sub-stage can close:
-
-- local reset-password re-check, blocked on Supabase's built-in email rate-limit cooldown
-- a final written Stage 5C closure entry
-- the active locale-routing TODO (separate, in progress elsewhere) — not resolved by this stage
-- the OAuth locale-query redirect-allowlist design debt recorded 2026-07-08 (see
-  PROJECT_STAGE_LOG.md and PROJECT_BACKLOG.md) — a working workaround exists; the underlying design
-  is not fixed and is a candidate for Stage 5D or a later stage, not yet assigned
+Hands off to: a DevOps/workflow decision block (git-flow, CI/CD trigger, staging/production split
+— see PROJECT_DECISIONS.md, Stage 5C Deployment Workflow and Environment Decisions), then **Stage
+5D — Full Application Maturity Audit**, which has not started. Stage 6 must not begin until Stage
+5D is complete.
 
 Result: a verified, deployed application — the completed production architecture that Stage 5D
 will audit.
