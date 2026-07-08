@@ -1210,6 +1210,65 @@ No staging/production project split, no new Vercel environment configuration, an
 project were created in this documentation pass — this section records the decision and its
 trigger only.
 
+## D. DevOps/Environment Direction — Agreed 2026-07-08 (Read-Only Audit Follow-Up)
+
+Recorded following the read-only DevOps/workflow planning audit conducted the same day as Section
+A–C above. This subsection sharpens those sections' direction into agreed decisions; it does not
+supersede them, and none of the following has been implemented in this documentation pass.
+
+**Staging/production identity.** The current controlled-test Supabase project and Vercel
+deployment referenced in Section C is designated to become the future **staging** environment —
+it is not renamed or reconfigured by this entry, only its eventual role is decided. It still
+contains test data and is still not public production. Before accepting real client requests, a
+new, clean **production** Supabase project and Vercel production configuration must be created —
+they do not exist yet. This entry does not claim the staging conversion or the production
+environment already exist.
+
+**Environment separation model — decided, not a comparison anymore.** Separate Supabase projects
+for staging and production is the approved model, superseding the earlier open comparison in
+Section C. Each environment must have its own database, Storage bucket, Auth configuration (Site
+URL, Redirect URLs, OAuth client config, SMTP/rate-limit settings), and other project-level
+operational settings, as applicable. **One-project/multiple-schema separation is not an approved
+option** — Supabase Auth, Storage, and Realtime are project-wide, not schema-scoped, so a shared
+project cannot actually isolate the auth users and Storage bucket this app depends on. Vercel gets
+matching separate environment configuration/deployments per environment.
+
+**Target release flow after launch** (refines Section A; exact mechanics deliberately undecided —
+see Pending below):
+
+feature branch / PR → Preview deployment for ordinary review → stable staging deployment → manual
+smoke/QA → production deployment only after staging verification → production smoke verification
+after release.
+
+Branch names, the Vercel stable-alias mechanism, and any Redirect URL wildcard/pattern syntax are
+intentionally left unresolved until verified during implementation — no premature commitment.
+
+**CI/CD direction — reaffirms Section B, no change in substance.** Before public launch, add the
+smallest remote CI check that runs `pnpm qg`. Vercel's Git integration remains solely responsible
+for deployment — no duplicate deploy pipeline is planned. Migration promotion remains manual and
+deliberate: apply and verify on staging first, then apply to production — no automation is
+introduced now.
+
+**Explicitly pending, not decided by this entry:**
+
+- the stable staging URL mechanism (Vercel branch alias vs. another approach)
+- the OAuth/locale redirect redesign — goal is to remove the Redirect URL allowlist's dependence
+  on the `locale` query value; no solution is chosen (see PROJECT_BACKLOG.md, OAuth Locale-Query
+  Redirect Allowlist Design Debt)
+- exact Supabase/Vercel plan capabilities and pricing for running two environments
+- CI Node version policy (relative to the existing `package.json` `engines: ">=20"` floor and the
+  Vercel-confirmed `24.x` runtime)
+- a written migration promotion checklist
+- staging seed-data approach
+- production domain, custom SMTP, backups/PITR, and monitoring posture (unchanged open items, see
+  PROJECT_PRODUCTION_READINESS.md)
+
+**Multi-studio/custom-domain note.** Per-studio custom domains/subdomains remain out of current MVP
+scope — this is a single-studio product, not SaaS (see PROJECT_CONTEXT.md). The existing constraint
+that single-studio deployment resolution (`DEPLOYMENT_STUDIO_ID`) stays isolated in config rather
+than expanding into routing/middleware is preserved unchanged; this entry does not begin any SaaS
+design.
+
 ---
 
 # Rule for Future Changes

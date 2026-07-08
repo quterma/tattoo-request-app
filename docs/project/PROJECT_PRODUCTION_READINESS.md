@@ -107,6 +107,16 @@ Supabase staging and production projects, separate Vercel environment values per
 separate Auth Site URL/Redirect URLs/OAuth config per environment, and a defined migration
 promotion process from staging to production. None of this has been created yet.
 
+**Decided 2026-07-08** (see PROJECT_DECISIONS.md, Stage 5C Deployment Workflow and Environment
+Decisions, Section D): the current controlled-test project/deployment is designated to become the
+future **staging** environment — not yet converted, still test data, not production. A separate,
+new, clean **production** Supabase project and Vercel production configuration must be created
+before accepting real client requests. Separate Supabase projects for staging and production is
+the approved model; **one-project/multiple-schema separation is not an approved option**, since
+Supabase Auth/Storage/Realtime are project-wide, not schema-scoped. Pending, not yet decided: the
+stable staging URL mechanism, exact Supabase/Vercel plan capabilities and pricing, a written
+migration promotion checklist, and staging seed-data approach.
+
 ## Production Environment Setup
 
 Before public launch:
@@ -165,6 +175,15 @@ The first Vercel deployment (2026-07-08) was made directly from `main` rather th
 Preview-branch review flow — see PROJECT_DECISIONS.md, Section A, for the intended feature-branch
 + Preview-deployment workflow this should move toward, and its implication for Supabase Redirect
 URL allowlisting when testing auth against Preview URLs.
+
+**Target release flow, decided 2026-07-08** (see PROJECT_DECISIONS.md, Section D): feature branch
+/ PR → Preview deployment for ordinary review → stable staging deployment → manual smoke/QA →
+production deployment only after staging verification → production smoke verification after
+release. Exact branch names, the Vercel stable-alias mechanism, and any Redirect URL wildcard
+syntax remain undecided until verified during implementation. When a remote CI check is added, it
+runs the smallest possible `pnpm qg` job; Vercel's Git integration remains solely responsible for
+deployment, and migration promotion stays manual (staging first, verify, then production) — no CI,
+scripts, or migration automation is added now.
 
 ---
 

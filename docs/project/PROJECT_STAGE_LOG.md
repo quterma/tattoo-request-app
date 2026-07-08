@@ -24,6 +24,10 @@ stage; it has not started. Stage 6 must not begin until Stage 5D is complete.**
 
 Current focus:
 
+- **DevOps/environment direction documented 2026-07-08** — see PROJECT_DECISIONS.md, Stage 5C
+  Deployment Workflow and Environment Decisions, Section D, and the dated log entry below. Records
+  the agreed staging/production Supabase-project split, target release flow, and CI/CD direction
+  following the read-only DevOps audit. Documentation only — no infrastructure created yet.
 - **Stage 5C — closed 2026-07-08.** Closed as *real-infrastructure / manual end-to-end
   verification complete* — this is not a public-launch-readiness claim and does not mean
   production-environment setup is complete. See the dated 2026-07-08 closure entry below for the
@@ -249,6 +253,46 @@ Completed in Stage 3:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-07-08 — DevOps/Environment Direction documented (follow-up to DevOps/workflow audit)
+
+Status: Completed (documentation only). No application code, package scripts, Husky hooks, GitHub
+Actions, Vercel/Supabase/Google dashboards, secrets, environment variables, or deployment
+configuration were changed.
+
+Follows the same-day read-only DevOps/workflow planning audit. Records the agreed decisions in
+PROJECT_DECISIONS.md (new Stage 5C Section D) and PROJECT_PRODUCTION_READINESS.md (Environment
+Separation, CI/CD sections updated in place):
+
+- the current controlled-test Supabase project/Vercel deployment is designated to become the
+  future **staging** environment (not yet converted); a new, clean **production** environment must
+  be created before real client requests are accepted
+- separate Supabase projects for staging and production is the approved model; one-project/
+  multiple-schema separation is explicitly not approved, since Supabase Auth/Storage/Realtime are
+  project-wide, not schema-scoped
+- target release flow after launch: feature branch/PR → Preview → stable staging deployment →
+  manual smoke/QA → production deploy only after staging verification → production smoke check —
+  exact branch names, Vercel alias mechanism, and Redirect URL wildcard syntax deliberately left
+  undecided until implementation
+- CI/CD direction reaffirmed: smallest possible remote CI check (`pnpm qg`) before public launch;
+  Vercel Git integration remains the only deploy mechanism; migration promotion stays manual
+  (staging first, verify, then production)
+- explicit pending list carried forward: stable staging URL mechanism, OAuth/locale redirect
+  redesign (see PROJECT_BACKLOG.md — OAuth Locale-Query Redirect Allowlist Design Debt), Supabase/
+  Vercel plan capabilities and pricing, CI Node version policy, written migration promotion
+  checklist, staging seed-data approach, production domain/custom SMTP/backups-PITR/monitoring
+  posture
+- multi-studio/custom-domain note reaffirmed as out of current MVP scope; the existing
+  `DEPLOYMENT_STUDIO_ID` config-isolation constraint is preserved unchanged
+
+No conflict found with existing documentation — this pass sharpens the already-recorded Stage 5C
+Sections A–C target direction into decided specifics; it does not reverse or contradict them.
+
+`pnpm structure` run — no change to `docs/files-structure.md` (docs-only pass, no source file
+touched). `git status` confirmed only documentation files modified; nothing committed, per
+instruction.
+
+---
 
 ### 2026-07-08 — Stage 5C — closed: real-infrastructure / manual E2E verification complete
 
