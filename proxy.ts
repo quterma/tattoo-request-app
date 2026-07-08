@@ -1,27 +1,25 @@
 import { NextRequest, NextResponse } from "next/server"
 import createMiddleware from "next-intl/middleware"
-import { defaultLocale, locales, routing } from "@/shared/i18n"
+import {
+  hasSupportedLocalePrefix,
+  routing,
+  withDefaultLocalePrefix,
+} from "@/shared/i18n"
 import { createSupabaseAuthClient } from "@/services/supabaseAuth"
 
 const intlMiddleware = createMiddleware(routing)
 
-const supportedLocales = new Set<string>(locales)
-
 export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
-  const firstSegment = pathname.split("/")[1] ?? ""
 
   let response: NextResponse
 
-  if (supportedLocales.has(firstSegment)) {
+  if (hasSupportedLocalePrefix(pathname)) {
     response = intlMiddleware(request) as NextResponse
-  } else if (firstSegment !== "") {
-    const rest = pathname.slice(firstSegment.length + 1)
-    const url = request.nextUrl.clone()
-    url.pathname = `/${defaultLocale}${rest}`
-    return NextResponse.redirect(url)
   } else {
-    response = intlMiddleware(request) as NextResponse
+    const url = request.nextUrl.clone()
+    url.pathname = withDefaultLocalePrefix(pathname)
+    return NextResponse.redirect(url)
   }
 
   // Refresh the Supabase SSR session cookie if it is close to expiry.

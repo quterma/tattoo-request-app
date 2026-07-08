@@ -197,9 +197,12 @@ tattoo-request-app/
 │   │   ├── i18n/
 │   │   │   ├── config.ts
 │   │   │   ├── index.ts
+│   │   │   ├── localePath.ts
 │   │   │   ├── navigation.ts
 │   │   │   ├── request.ts
 │   │   │   ├── routing.ts
+│   │   │   ├── __tests__/
+│   │   │   │   └── localePath.test.ts
 │   │   │   └── messages/
 │   │   │       └── en.json
 │   │   ├── styles/
