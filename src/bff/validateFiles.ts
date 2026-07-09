@@ -1,5 +1,5 @@
 import { VALIDATION_KEYS as K } from "@/features/request/validation"
-import { API_ERROR_CODES, REQUEST_FIELDS } from "./request"
+import { API_ERROR_CODES, REQUEST_FIELDS } from "@/shared/api"
 import type { ValidationErrorResult } from "./request"
 
 const ALLOWED_MIME_TYPES = new Set([

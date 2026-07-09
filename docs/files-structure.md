@@ -192,6 +192,8 @@ tattoo-request-app/
 │   │       └── storage.test.ts
 │   ├── shared/
 │   │   ├── index.ts
+│   │   ├── api/
+│   │   │   └── index.ts
 │   │   ├── hooks/
 │   │   │   └── index.ts
 │   │   ├── i18n/

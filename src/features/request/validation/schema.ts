@@ -11,11 +11,12 @@ export const requestFormSchema = z
       .max(30, { message: K.CLIENT_NAME_TOO_LONG }),
     ideaDescription: z
       .string({ required_error: K.IDEA_REQUIRED })
-      .min(10, { message: K.IDEA_TOO_SHORT }),
+      .min(10, { message: K.IDEA_TOO_SHORT })
+      .max(2000, { message: K.IDEA_TOO_LONG }),
     referenceImages: z
       .array(z.instanceof(File))
       .min(1, { message: K.REFERENCE_IMAGES_REQUIRED })
-      .max(MAX_FILES_PER_FIELD),
+      .max(MAX_FILES_PER_FIELD, { message: K.REFERENCE_IMAGES_TOO_MANY }),
     placement: z
       .string()
       .refine((v) => (PLACEMENT_OPTIONS as readonly string[]).includes(v) && v !== "", {
@@ -24,7 +25,7 @@ export const requestFormSchema = z
     placementImages: z
       .array(z.instanceof(File))
       .min(1, { message: K.PLACEMENT_IMAGES_REQUIRED })
-      .max(MAX_FILES_PER_FIELD),
+      .max(MAX_FILES_PER_FIELD, { message: K.PLACEMENT_IMAGES_TOO_MANY }),
     size: z
       .string()
       .refine((v) => (SIZE_OPTIONS as readonly string[]).includes(v) && v !== "", {
@@ -37,6 +38,7 @@ export const requestFormSchema = z
       }),
     budget: z
       .string()
+      .max(50, { message: K.BUDGET_TOO_LONG })
       .optional()
       .transform((v) => v?.trim() || undefined),
     email: z
@@ -48,10 +50,12 @@ export const requestFormSchema = z
       }),
     phone: z
       .string()
+      .max(50, { message: K.PHONE_TOO_LONG })
       .optional()
       .transform((v) => v?.trim() || undefined),
     contactOther: z
       .string()
+      .max(50, { message: K.CONTACT_OTHER_TOO_LONG })
       .optional()
       .transform((v) => v?.trim() || undefined),
     consent: z.custom<true>((v) => v === true, { message: K.CONSENT_REQUIRED, fatal: false }),

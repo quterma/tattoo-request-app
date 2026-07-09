@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useTranslations } from "next-intl"
 import { useController, useForm, useWatch } from "react-hook-form"
-import { API_ERROR_CODES, REQUEST_FIELDS } from "@/bff"
+import { API_ERROR_CODES, REQUEST_FIELDS } from "@/shared/api"
 import { getContactGroupError, getFieldError } from "../lib/errors"
 import { COLOR_OPTIONS, MAX_FILES_PER_FIELD, PLACEMENT_OPTIONS, SIZE_OPTIONS } from "../config"
 import type { RequestFormData, RequestFormInput } from "../types"
@@ -232,6 +232,7 @@ export function RequestForm() {
         label={t("budgetLabel")}
         placeholder={t("budgetPlaceholder")}
         hint={t("budgetHint")}
+        error={err("budget")}
         {...register("budget")}
       />
 
@@ -257,12 +258,14 @@ export function RequestForm() {
           label={t("phoneLabel")}
           placeholder={t("phonePlaceholder")}
           type="tel"
+          error={err("phone")}
           {...register("phone")}
         />
         <TextInput
           id="contactOther"
           label={t("contactOtherLabel")}
           placeholder={t("contactOtherPlaceholder")}
+          error={err("contactOther")}
           {...register("contactOther")}
         />
       </div>

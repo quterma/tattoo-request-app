@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import { render, screen, cleanup } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { API_ERROR_CODES } from "@/bff"
+import { API_ERROR_CODES } from "@/shared/api"
 import { RequestForm } from "../ui/RequestForm"
 import messages from "@/shared/i18n/messages/en.json"
 
@@ -186,6 +186,28 @@ describe("RequestForm – submission flow", () => {
 
     expect(screen.queryByRole("alert")).not.toBeInTheDocument()
     expect(await screen.findByText(/at least 10 characters/i)).toBeInTheDocument()
+  })
+
+  it("maps a max-length server fieldError to its i18n message", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+      json: () =>
+        Promise.resolve({
+          ok: false,
+          error: {
+            code: API_ERROR_CODES.VALIDATION_ERROR,
+            fieldErrors: { budget: ["budget_too_long"] },
+            formErrors: [],
+          },
+        }),
+    }))
+
+    const user = userEvent.setup()
+    render(<RequestForm />)
+
+    await fillRequiredFields(user).fill()
+    await user.click(screen.getByRole("button", { name: /send request/i }))
+
+    expect(await screen.findByText(/budget must be 50 characters or less/i)).toBeInTheDocument()
   })
 
   it("shows generic error when VALIDATION_ERROR has no fieldErrors", async () => {

@@ -27,6 +27,7 @@ const eslintConfig = defineConfig([
             "**/shared/i18n/messages/*",
             "**/shared/ui",
             "**/shared/utils",
+            "**/shared/api",
             "**/features/*/ui",
             "**/features/*/ui/**",
             "**/features/*/lib/**",

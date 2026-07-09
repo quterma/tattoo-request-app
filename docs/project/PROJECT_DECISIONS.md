@@ -1271,6 +1271,33 @@ design.
 
 ---
 
+# Storage Upload-Failure Log Decision (Stage 5D Fix Pass 1)
+
+Decided 2026-07-08, during the Stage 5D fix pass. Server-side Storage upload-failure logs
+(`services/storage.ts`'s `uploadRequestFiles`/`cleanupFiles`, and the equivalent cleanup helper in
+`app/api/request/route.ts`) may continue to include the raw, UUID-based `storagePath`
+(`{studioId}/{clientSubmissionId}/{type}/{file}`) and the raw Supabase error message as diagnostic
+signal. This is intentionally not sanitized in this pass.
+
+**This does not reverse or weaken any existing hardening:**
+
+- Raw storage paths must still never appear in any DTO returned to `app/`/`features/` code (see
+  Signed URLs, above) — `AdminRequestDetail`/`AdminRequestFile` still have no `storagePath` field.
+- The Stage 5B cleanup-summary hardening (logging a file *count*, not the path array, on the
+  cleanup-start log line) is unchanged.
+- This decision covers only the *upload-failure* and *cleanup-result* log lines that were already
+  left out of the Stage 5B logging fix pass's scope — it does not newly add raw-path logging
+  anywhere it wasn't already present.
+
+**Reason:** the path segments are internal UUIDs (`studioId`, `clientSubmissionId`), not client
+PII — no email, phone, name, or other personal data is present in a storage path. Losing this
+detail from server logs would make diagnosing a real upload failure (which file, which
+studio/submission) meaningfully harder, for a privacy benefit that does not apply here. Revisit
+only if a concrete reason to strip it emerges (e.g. a stricter log-retention/compliance
+requirement).
+
+---
+
 # Rule for Future Changes
 
 All architectural, product, or behavioral decisions MUST be recorded in this document.

@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest"
-import { API_ERROR_CODES, validateRequestPayload } from "../request"
+import { API_ERROR_CODES } from "@/shared/api"
+import { validateRequestPayload } from "../request"
 import type { ParsedRequestPayload } from "../request"
 
 function makeFile(name = "photo.png"): File {

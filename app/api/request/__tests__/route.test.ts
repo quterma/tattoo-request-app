@@ -21,7 +21,6 @@ const {
 }))
 
 vi.mock("@/bff", () => ({
-  API_ERROR_CODES: { VALIDATION_ERROR: "VALIDATION_ERROR", SERVER_ERROR: "SERVER_ERROR" },
   ClientSubmissionIdError: class ClientSubmissionIdError extends Error {
     constructor(msg: string) {
       super(msg)
@@ -97,7 +96,7 @@ async function callPost(): Promise<{ status: number; body: unknown }> {
 beforeEach(() => {
   vi.clearAllMocks()
   mockParseRequestFormData.mockReturnValue(basePayload)
-  mockValidateRequestPayload.mockReturnValue({ ok: true })
+  mockValidateRequestPayload.mockReturnValue({ ok: true, data: basePayload })
   mockValidateFiles.mockReturnValue({ ok: true })
   mockGetRequestByClientSubmissionId.mockResolvedValue(null)
   mockUploadRequestFiles.mockResolvedValue(uploadedFiles)
@@ -136,6 +135,28 @@ describe("POST /api/request — normal flow", () => {
 
     expect(mockCreateRequest).toHaveBeenCalledWith(
       expect.objectContaining({ studioId: STUDIO_ID }),
+    )
+  })
+
+  it("passes validation.data (not the raw parsed payload) to createRequest", async () => {
+    mockValidateRequestPayload.mockReturnValue({
+      ok: true,
+      data: {
+        ...basePayload,
+        clientName: "Alex", // trimmed value, differs from raw payload below
+        budget: undefined, // empty optional trimmed to undefined
+      },
+    })
+    mockParseRequestFormData.mockReturnValue({
+      ...basePayload,
+      clientName: "  Alex  ", // raw untrimmed value from the form
+      budget: "   ", // raw whitespace-only value from the form
+    })
+
+    await callPost()
+
+    expect(mockCreateRequest).toHaveBeenCalledWith(
+      expect.objectContaining({ clientName: "Alex", budget: undefined }),
     )
   })
 })
@@ -252,5 +273,29 @@ describe("POST /api/request — validation", () => {
 
     expect(status).toBe(400)
     expect(mockUploadRequestFiles).not.toHaveBeenCalled()
+  })
+})
+
+// ── unexpected failures (outer catch) ──────────────────────────────────────
+
+describe("POST /api/request — unexpected submit failure", () => {
+  it("returns a generic 500 and logs only the error message, never the payload", async () => {
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {})
+    mockUploadRequestFiles.mockRejectedValue(new Error("upload transport exploded"))
+
+    const { status, body } = await callPost()
+
+    expect(status).toBe(500)
+    expect(body).toEqual({ ok: false, error: { code: "SERVER_ERROR" } })
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "[route] unexpected submit failure:",
+      "upload transport exploded",
+    )
+    const loggedArgs = consoleErrorSpy.mock.calls.flat().map(String)
+    expect(loggedArgs.join(" ")).not.toContain(basePayload.clientName)
+    expect(loggedArgs.join(" ")).not.toContain(basePayload.email)
+
+    consoleErrorSpy.mockRestore()
   })
 })

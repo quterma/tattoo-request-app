@@ -346,6 +346,8 @@ Stage 4B (reduced scope) — see PROJECT_DECISIONS.md, Stage 4B Admin Dashboard 
 
 `shared/utils/uuid.ts` — `isUuid(value)`, a small regex-based UUID v1–v5 validator, exported from the `shared/utils` barrel. First consumer: the admin request detail route, to validate the `[id]` route param before any data access.
 
+`shared/api/index.ts` — `API_ERROR_CODES`, `REQUEST_FIELDS` (and their derived types `ApiErrorCode`/`RequestField`), the client/server-shared request API contract. Moved out of `bff/` (Stage 5D fix pass) because `RequestForm.tsx` (a Client Component) needs these same values to build its submitted `FormData` and to read the response's error code — importing them from `@/bff` violated the documented "UI must not depend on BFF" rule. `bff/request.ts`/`bff/validateFiles.ts` now import these from here instead of owning them.
+
 ---
 
 ### services/
@@ -427,10 +429,12 @@ Current modules:
 - `ParsedRequestPayload` interface
 - `parseRequestFormData()` — parses multipart/form-data from POST /api/request
 - `validateRequestPayload()` — reuses requestFormSchema, returns typed ValidationResult
+- Imports `API_ERROR_CODES`/`REQUEST_FIELDS` from `@/shared/api` (does not own them — see `shared/` below)
 
 #### bff/validateFiles.ts
 
 - `validateFiles()` — checks MIME type and size per file field, returns FileValidationResult
+- Imports `API_ERROR_CODES`/`REQUEST_FIELDS` from `@/shared/api` (does not own them — see `shared/` below)
 
 ---
 
@@ -469,7 +473,7 @@ Allowed:
 
 - app → features, shared, config, types
 - features → shared, services, config, types
-- bff → services, config, types, features/*/validation
+- bff → services, shared, config, types, features/*/validation
 - services → config, types
 - shared → config, types
 - config → none

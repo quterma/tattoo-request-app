@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server"
 import {
-  API_ERROR_CODES,
   ClientSubmissionIdError,
   parseRequestFormData,
   validateFiles,
   validateRequestPayload,
 } from "@/bff"
+import { API_ERROR_CODES } from "@/shared/api"
 import { BUCKET, createRequest, getRequestByClientSubmissionId, uploadRequestFiles } from "@/services"
 import { supabase } from "@/services"
 import { config } from "@/config"
@@ -37,6 +37,7 @@ export async function POST(req: Request) {
     if (!validation.ok) {
       return NextResponse.json(validation, { status: 400 })
     }
+    const data = validation.data
 
     const fileValidation = validateFiles(payload)
     if (!fileValidation.ok) {
@@ -63,17 +64,16 @@ export async function POST(req: Request) {
       const result = await createRequest({
         studioId,
         clientSubmissionId: payload.clientSubmissionId,
-        clientName: payload.clientName,
-        description: payload.ideaDescription,
-        placement: payload.placement,
-        size: payload.size,
-        color: payload.color,
-        budget: payload.budget,
-        email: payload.email,
-        phone: payload.phone,
-        contactOther: payload.contactOther,
-        // consent is guaranteed true by validateRequestPayload above
-        consent: payload.consent as true,
+        clientName: data.clientName,
+        description: data.ideaDescription,
+        placement: data.placement,
+        size: data.size,
+        color: data.color,
+        budget: data.budget,
+        email: data.email,
+        phone: data.phone,
+        contactOther: data.contactOther,
+        consent: data.consent,
         files: uploadedFiles,
       })
       referenceCode = result.referenceCode
@@ -121,6 +121,8 @@ export async function POST(req: Request) {
         { status: 400 },
       )
     }
+    const message = err instanceof Error ? err.message : String(err)
+    console.error("[route] unexpected submit failure:", message)
     return NextResponse.json(
       { ok: false, error: { code: API_ERROR_CODES.SERVER_ERROR } },
       { status: 500 },

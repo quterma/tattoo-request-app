@@ -96,6 +96,26 @@ describe("requestFormSchema – required fields", () => {
     }
   })
 
+  it("rejects when ideaDescription exceeds 2000 characters", () => {
+    const result = requestFormSchema.safeParse({
+      ...validBase,
+      ideaDescription: "a".repeat(2001),
+    })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      const messages = result.error.issues.map((i) => i.message)
+      expect(messages).toContain("idea_too_long")
+    }
+  })
+
+  it("accepts ideaDescription at exactly 2000 characters", () => {
+    const result = requestFormSchema.safeParse({
+      ...validBase,
+      ideaDescription: "a".repeat(2000),
+    })
+    expect(result.success).toBe(true)
+  })
+
   it("rejects when referenceImages is empty", () => {
     const result = requestFormSchema.safeParse({ ...validBase, referenceImages: [] })
     expect(result.success).toBe(false)
@@ -231,12 +251,58 @@ describe("requestFormSchema – file upload constraints", () => {
     const files = [makeFile(), makeFile(), makeFile(), makeFile()]
     const result = requestFormSchema.safeParse({ ...validBase, referenceImages: files })
     expect(result.success).toBe(false)
+    if (!result.success) {
+      const messages = result.error.issues.map((i) => i.message)
+      expect(messages).toContain("reference_images_too_many")
+    }
   })
 
   it("rejects placementImages exceeding max files", () => {
     const files = [makeFile(), makeFile(), makeFile(), makeFile()]
     const result = requestFormSchema.safeParse({ ...validBase, placementImages: files })
     expect(result.success).toBe(false)
+    if (!result.success) {
+      const messages = result.error.issues.map((i) => i.message)
+      expect(messages).toContain("placement_images_too_many")
+    }
+  })
+})
+
+describe("requestFormSchema – contact/budget max-length constraints", () => {
+  it("rejects budget exceeding 50 characters", () => {
+    const result = requestFormSchema.safeParse({ ...validBase, budget: "a".repeat(51) })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      const messages = result.error.issues.map((i) => i.message)
+      expect(messages).toContain("budget_too_long")
+    }
+  })
+
+  it("accepts budget at exactly 50 characters", () => {
+    const result = requestFormSchema.safeParse({ ...validBase, budget: "a".repeat(50) })
+    expect(result.success).toBe(true)
+  })
+
+  it("rejects phone exceeding 50 characters", () => {
+    const result = requestFormSchema.safeParse({ ...validBase, phone: "1".repeat(51) })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      const messages = result.error.issues.map((i) => i.message)
+      expect(messages).toContain("phone_too_long")
+    }
+  })
+
+  it("rejects contactOther exceeding 50 characters", () => {
+    const result = requestFormSchema.safeParse({
+      ...validBase,
+      email: "",
+      contactOther: "a".repeat(51),
+    })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      const messages = result.error.issues.map((i) => i.message)
+      expect(messages).toContain("contact_other_too_long")
+    }
   })
 })
 

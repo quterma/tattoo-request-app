@@ -19,11 +19,27 @@ Hardening Implementation is in progress; 5B.1 (`create_request` search_path hard
 (Storage bucket MIME/size limits), dependency security remediation (`next`/`next-intl`/`vitest`
 version bumps), and the logging/error-handling fix pass are complete (2026-07-05 / 2026-07-06).**
 **Stage 5C — Real Infrastructure and End-to-End Verification is closed (2026-07-08)** — see the
-closure entry immediately below. **Stage 5D — Full Application Maturity Audit is the next required
-stage; it has not started. Stage 6 must not begin until Stage 5D is complete.**
+closure entry immediately below. **Stage 5D — Full Application Maturity Audit: the primary read-only
+audit is complete (2026-07-08); Fix Pass 1 (public submit correctness + small hardening) is complete
+(2026-07-08) — see the dated entry below. Further Stage 5D fix passes, if any, and formal Stage 5D
+closure have not happened yet. Stage 6 must not begin until Stage 5D is fully closed.**
 
 Current focus:
 
+- **Stage 5D Fix Pass 1 — completed 2026-07-08.** See the dated entry below for full detail:
+  fixed validated-data persistence in `POST /api/request` (was using the raw parsed payload instead
+  of `validation.data`, so Zod trims/transforms were silently discarded before reaching the DB);
+  added a safe outer-catch log for unexpected public submit failures; added max-length validation
+  (`ideaDescription` 2000, `budget`/`phone`/`contactOther` 50) plus stable validation keys/messages,
+  and fixed three form fields (`budget`, `phone`, `contactOther`) that were not wired to display any
+  inline validation error at all; moved `API_ERROR_CODES`/`REQUEST_FIELDS` out of `src/bff` into a
+  new `src/shared/api` module to resolve a UI→BFF import-direction violation; added `server-only` to
+  `src/services/supabase.ts` and `src/config/index.ts` (new `server-only` dependency, approved);
+  removed 3 confirmed-unused production dependencies (`class-variance-authority`, `lucide-react`,
+  `radix-ui`); documented the storage upload-failure raw-path logging decision in
+  PROJECT_DECISIONS.md. `pnpm qg` — structure/lint/typecheck/test/build all PASS (230/230 tests, up
+  from 224; lint: 0 errors, 1 pre-existing unrelated warning). Not committed — the owner will review
+  before any commit.
 - **DevOps/environment direction documented 2026-07-08** — see PROJECT_DECISIONS.md, Stage 5C
   Deployment Workflow and Environment Decisions, Section D, and the dated log entry below. Records
   the agreed staging/production Supabase-project split, target release flow, and CI/CD direction
@@ -253,6 +269,107 @@ Completed in Stage 3:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-07-08 — Stage 5D Fix Pass 1: Public Submit Correctness + Small Hardening
+
+Status: Completed. Narrow, approved fix pass following the Stage 5D primary maturity audit. Seven
+tasks, no broad refactor, no Stage 6 UI polish. Not committed — the owner will review before any
+commit.
+
+**1. Fixed validated data persistence.** `POST /api/request` (`app/api/request/route.ts`) was
+passing the raw `payload` (from `parseRequestFormData`) to `createRequest()`, not
+`validation.data` (the Zod-parsed/transformed result) — meaning trims (`clientName`) and
+empty-to-`undefined` transforms (`budget`/`email`/`phone`/`contactOther`) were computed by the
+schema but silently discarded before reaching the DB. Now uses `validation.data` for all
+schema-owned fields (`clientSubmissionId` still comes from `payload`, since it is not part of the
+Zod schema). Confirmed `src/services/db.ts`'s `createRequest` already maps `undefined` → `null` via
+`params.budget ?? null` (etc.) before the RPC call — so trimmed-to-`undefined` optional fields now
+correctly persist as DB `NULL`, as designed. Updated `mockValidateRequestPayload` in
+`route.test.ts` to return the real `{ ok: true, data }` success contract, and added a new
+regression test asserting `createRequest` receives the transformed `data`, not the raw payload.
+
+**2. Safe logging for unexpected public submit failures.** The outer `catch` in `POST /api/request`
+previously logged nothing for exceptions other than `ClientSubmissionIdError`. Added
+`console.error("[route] unexpected submit failure:", message)`, logging only the caught error's
+`.message` (never the raw request body, files, email, phone, client name, tokens, cookies, or full
+payload) — consistent with this file's existing logging pattern. Client response unchanged (generic
+`SERVER_ERROR`, no detail). New test asserts both the generic response and that the logged
+arguments never contain `clientName`/`email`.
+
+**3. Max-length validation.** Added to `src/features/request/validation/schema.ts`:
+`ideaDescription` max 2000, `budget`/`phone`/`contactOther` max 50 each — each with its own stable
+`VALIDATION_KEYS` entry (`idea_too_long`, `budget_too_long`, `phone_too_long`,
+`contact_other_too_long`) and English i18n message in `en.json`. Also added stable keys/messages
+for the pre-existing but previously-unmapped file-count limit (`.max(MAX_FILES_PER_FIELD)` on
+`referenceImages`/`placementImages` — confirmed it previously fell through to Zod's default
+"too many items" message, unmapped by `MESSAGE_TO_I18N_KEY`, for any direct API client bypassing
+the UI's own `FileUploadInput` cap): `reference_images_too_many`, `placement_images_too_many`.
+**Found and fixed while wiring this up:** `budget`, `phone`, and `contactOther` `TextInput`s in
+`RequestForm.tsx` were never passed an `error` prop at all — no inline validation message could
+ever have displayed for these three fields, for any error reason, not just the new max-length
+rule. Added `error={err(field)}` to all three, matching every other field in the form. This exposed
+a secondary bug: `getFieldError` was mapping `contact_required` (the shared contact-group error,
+already rendered once near the contact section heading) to the same message for `contactOther`
+individually, which would have duplicated the text on screen the moment `contactOther` became
+error-visible. Fixed by making `getFieldError` return `undefined` for `contact_required`
+specifically (that reason is exclusively `getContactGroupError`'s responsibility). New tests: 8
+schema tests (2000-char boundary, 50-char boundary for all three fields, file-count message keys),
+1 `RequestForm` integration test asserting a server-returned `budget_too_long` fieldError renders
+its i18n message. Total tests: 230 (was 224 before this task alone; 230 after all 7 tasks).
+
+**4. Resolved UI→BFF import direction.** `RequestForm.tsx` (a Client Component) was importing
+`API_ERROR_CODES`/`REQUEST_FIELDS` from `@/bff` — a direct violation of PROJECT_STRUCTURE.md's
+"UI must not depend on BFF" rule, since these constants are needed by the client to build submitted
+`FormData` and read the response error code. Moved both constants (and their derived
+`ApiErrorCode`/`RequestField` types) into a new `src/shared/api/index.ts` module. `src/bff/request.ts`
+and `src/bff/validateFiles.ts` now import them from `@/shared/api` instead of owning them;
+`src/bff/index.ts` no longer re-exports them (BFF's barrel now only exports what BFF actually owns:
+`ClientSubmissionIdError`, `parseRequestFormData`, `validateRequestPayload`, `validateFiles`, and
+their types). Updated all consumers (`RequestForm.tsx`, `app/api/request/route.ts`, and 4 test
+files) to import from `@/shared/api`. Added `**/shared/api` to `eslint.config.mjs`'s
+`import/no-internal-modules` allowlist (same treatment as the existing `**/shared/utils` entry).
+Updated PROJECT_STRUCTURE.md: new `shared/api/index.ts` entry, `bff/request.ts`/`bff/validateFiles.ts`
+entries note they import (not own) these constants, and the Dependency Direction table now lists
+`bff → services, shared, config, types, features/*/validation` (added `shared`).
+
+**5. Added `server-only` guards.** New direct dependency `server-only` (approved by the owner before
+adding, per the no-new-dependencies-without-request rule) added to `src/services/supabase.ts` (the
+service_role client) and `src/config/index.ts` (holds `SUPABASE_SECRET_KEY`) — both are genuinely
+server-only and have zero Client Component importers (confirmed by import-chain inspection before
+adding). **Deliberately not added** to `src/services/supabaseAuth.ts`: it is imported by `proxy.ts`
+(Next.js Edge Middleware), a non-RSC build target where `server-only`'s `"react-server"` export
+condition does not apply — bundling it there would resolve to the throwing `index.js` and break
+middleware. Not added to `services/db.ts`/`storage.ts`/`requests.ts`/`auth.ts` either: all of them
+import `services/supabase.ts` transitively, which now already throws first if ever pulled into a
+client bundle, making a guard on each of them redundant. Verified via `next build` (compiles all 14
+routes + middleware cleanly) and the full Vitest suite (230/230 pass) that both new guards do not
+break any existing server-side code path.
+
+**6. Removed unused production dependencies.** Confirmed via repo-wide grep (zero matches outside
+`package.json` itself) that `class-variance-authority`, `lucide-react`, and `radix-ui` were unused
+in `src/`, `app/`, and `scripts/`. Removed via `pnpm remove`; `pnpm-lock.yaml` updated accordingly.
+`next build` confirmed the app still compiles and all routes still generate correctly.
+
+**7. Documented the storage log decision.** Added "Storage Upload-Failure Log Decision (Stage 5D
+Fix Pass 1)" to PROJECT_DECISIONS.md: server-side Storage upload-failure/cleanup-result logs may
+continue to include the raw UUID-based `storagePath` and raw Supabase error message as diagnostic
+signal (unchanged from their pre-existing behavior, out of Stage 5B's original logging-fix scope) —
+this does not permit storage paths in any UI/client DTO and does not reverse the Stage 5B
+cleanup-summary (count-only) hardening.
+
+**Verification:** `pnpm qg` — structure/lint/typecheck/test/build all PASS. Lint: 0 errors, 1
+pre-existing unrelated warning (carried over from Stage 4B.5.1, `<img>` LCP warning in a test file).
+230/230 tests pass (was 224 before this pass; +6 net new: 1 route regression test, 1 route
+safe-logging test, 8 schema/RequestForm max-length tests, minus 3 pre-existing tests unaffected —
+exact delta driven by the new tests listed in tasks 1–3 above). Build succeeds, same 14-route table.
+`git diff`/`git status` confirmed changes are limited to the 7 approved tasks' files (route.ts and
+its test, bff/request.ts, bff/validateFiles.ts, bff/index.ts, the new shared/api module, the request
+feature's schema/validationKeys/errors/RequestForm/tests, services/supabase.ts, config/index.ts,
+eslint.config.mjs, package.json/pnpm-lock.yaml, en.json, PROJECT_STRUCTURE.md,
+PROJECT_DECISIONS.md) plus this log entry and the auto-generated `docs/files-structure.md`. No
+commit made.
+
+---
 
 ### 2026-07-08 — DevOps/Environment Direction documented (follow-up to DevOps/workflow audit)
 

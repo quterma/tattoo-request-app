@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { API_ERROR_CODES, REQUEST_FIELDS } from "../request"
+import { API_ERROR_CODES, REQUEST_FIELDS } from "@/shared/api"
 import { validateFiles } from "../validateFiles"
 
 const MB = 1024 * 1024
