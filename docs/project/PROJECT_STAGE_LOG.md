@@ -12,22 +12,30 @@ AI agents and developers working on the project.
 
 ## Current Stage
 
-Stage: Stage 5 — Production Hardening
+Stage: Stage 5 — Production Hardening — closed. Next: Stage 6 — Visual/Product Polish.
 Status: Stage 4B — Admin Dashboard is closed (implementation-complete, 2026-07-04). Stage 5A —
 Security / Data-Boundary Planning is closed (completed 2026-07-05). **Stage 5B — Production
-Hardening Implementation is in progress; 5B.1 (`create_request` search_path hardening), 5B.2
-(Storage bucket MIME/size limits), dependency security remediation (`next`/`next-intl`/`vitest`
-version bumps), and the logging/error-handling fix pass are complete (2026-07-05 / 2026-07-06).**
+Hardening Implementation is closed** — its core hardening scope (5B.1 `create_request` search_path
+hardening, 5B.2 Storage bucket MIME/size limits, dependency security remediation, the
+logging/error-handling fix pass) was completed 2026-07-05/2026-07-06; the Stage 5B task-list items
+that remain open (custom SMTP / rate limits / leaked-password-protection verification, production
+environment setup, CI/CD) are pre-launch work tracked in PROJECT_PRODUCTION_READINESS.md and
+PROJECT_IMPLEMENTATION_PLAN.md (Stage 5B task list), not open stage work.
 **Stage 5C — Real Infrastructure and End-to-End Verification is closed (2026-07-08)** — see the
-closure entry immediately below. **Stage 5D — Full Application Maturity Audit: the primary read-only
-audit is complete (2026-07-08); Fix Pass 1 (public submit correctness + small hardening) is complete
-and committed (2026-07-08, commit `9bc8e6f`); a read-only findings reconciliation and Fix Pass 2
-(small correctness/consistency/tests + deferred-findings documentation) are complete (2026-07-09) —
-see the dated entries below. Formal Stage 5D closure has not happened yet. Stage 6 must not begin
-until Stage 5D is fully closed.**
+closure entry immediately below. **Stage 5D — Full Application Maturity Audit is closed
+(2026-07-10)** — primary audit (2026-07-08), findings reconciliation, Fix Pass 1 (commit
+`9bc8e6f`), Fix Pass 2 (commit `043bcb7`), and an independent read-only closure verification
+(`STAGE_5D_READY_TO_CLOSE`) are all complete — see the dated 2026-07-10 closure entry below.
+**Stage 6 (visual/product polish) is unblocked and is the next development stage.** Stage 5D
+closure is not a public-launch or production-readiness claim — pre-launch items remain open in
+PROJECT_PRODUCTION_READINESS.md and PROJECT_BACKLOG.md.
 
 Current focus:
 
+- **Stage 5D — formally closed 2026-07-10.** See the dated closure entry below for the full
+  fixed/deferred/rejected record and explicit non-claims. Next: Stage 6 (visual/product polish) —
+  see PROJECT_IMPLEMENTATION_PLAN.md, Stage 6; pre-launch DevOps/infrastructure work remains
+  tracked separately in PROJECT_PRODUCTION_READINESS.md.
 - **Stage 5D Fix Pass 2 — completed 2026-07-09.** See the dated entry below for full detail:
   UUID validation of `requestId` in `updateRequestStatusAction` (reusing the existing `isUuid`
   shared utility; invalid ids now return the not-found result without reaching the DB); removed the
@@ -38,7 +46,7 @@ Current focus:
   `next/headers`/`next/cache`/`next-intl/server` — a deliberate, owner-approved extension of the
   Stage 4B.6 no-Next-mocking precedent); corrected the stale "not committed" Fix Pass 1 status
   wording; recorded all remaining Stage 5D deferred/rejected findings in PROJECT_BACKLOG.md.
-  239/239 tests (up from 230). Not committed — the owner will review before any commit.
+  239/239 tests (up from 230). Reviewed by the owner and committed as `043bcb7` (2026-07-10).
 - **Stage 5D Fix Pass 1 — completed 2026-07-08.** See the dated entry below for full detail:
   fixed validated-data persistence in `POST /api/request` (was using the raw parsed payload instead
   of `validation.data`, so Zod trims/transforms were silently discarded before reaching the DB);
@@ -283,12 +291,70 @@ Completed in Stage 3:
 
 ## Log Entries (reverse chronological)
 
+### 2026-07-10 — Stage 5D closed: Full Application Maturity Audit + Targeted Fix Passes complete
+
+Status: Stage 5D formally closed. Documentation-only entry — no application code, tests,
+dependencies, configuration, environment files, dashboards, migrations, or deployment settings
+were changed in this closure pass.
+
+**Process (per PROJECT_IMPLEMENTATION_PLAN.md — Stage 5D audit method and exit criteria):**
+
+- 2026-07-08 — primary read-only full-application maturity audit (findings F1–F15), plus
+  independent second-opinion findings (independent/Fable audit) — both reconciled together
+- 2026-07-08 — Fix Pass 1 (public submit correctness + small hardening), committed as `9bc8e6f`
+- 2026-07-09 — read-only reconciliation of every remaining finding against the post-Fix-Pass-1
+  code, producing the approved Fix Pass 2 scope
+- 2026-07-09/10 — Fix Pass 2 (small correctness/consistency/tests + deferred-findings
+  documentation), committed as `043bcb7`
+- 2026-07-10 — independent read-only closure verification (fresh-session agent, no access to prior
+  audit reports, verified against the repository and docs directly): verdict
+  `STAGE_5D_READY_TO_CLOSE`, all ten approved fixes confirmed present and correct with file-level
+  evidence, no blockers, commit scopes clean, classification judged honest
+
+**Fixed (across both passes — see the two dated Fix Pass entries below for full detail):**
+validated `validation.data` persistence in the public submit route; safe outer-catch submit
+logging; max-length validation with visible field errors (including three fields that never
+displayed errors at all); UI→BFF import-direction violation resolved via `src/shared/api`;
+`server-only` guards; three unused production dependencies removed; UUID validation in the admin
+status action; storage-cleanup duplication removed (`cleanupRequestFiles`); dead
+`config.supabase.publishableKey` removed; `import/no-internal-modules` raised to `error`;
+`getRequestOrigin()` and first Server Action tests added (230 → 239 tests).
+
+**Deferred — deliberately tracked, remain open after closure (PROJECT_BACKLOG.md, each with
+rationale and timing):** OAuth locale-query redirect redesign (pre-launch / before locale
+expansion); auth callback route edge-branch tests (pre-launch); generated Supabase DB types
+(pre-launch owner decision); orphaned Storage objects + absence of a reconciliation mechanism
+(post-launch/operational); public error & 404 UX (Stage 6).
+
+**Rejected / no action — with recorded rationale:** raw UUID storage paths in server-side
+upload-failure logs (PROJECT_DECISIONS.md — Storage Upload-Failure Log Decision); `/admin`
+redirect page auth re-check (covered by the `(protected)` layout gate); duplicated local
+`isRequestStatus` guard; trailing-slash `localePath` test. These are deliberate, reviewed
+acceptances, not oversights — consistent with Stage 5D's stated goal of deliberate, reviewed debt
+rather than zero debt.
+
+**Explicit non-claims — closing Stage 5D does NOT mean:**
+
+- public-launch readiness
+- production-environment readiness (domain, custom SMTP, backups/PITR, monitoring, and
+  staging/production separation remain undone — PROJECT_PRODUCTION_READINESS.md)
+- CI or staging completion (no remote CI exists; deferred per the Stage 5C decision)
+- closure of any pre-launch DevOps work or any other open item in
+  PROJECT_PRODUCTION_READINESS.md — those close only when explicitly resolved there
+- security hardening beyond what Stages 5A–5D actually verified and recorded
+
+**Stage 6 (visual/product polish) is unblocked** and begins from this documented, reviewed
+baseline. `pnpm structure` run; no `pnpm qg` — docs-only pass, no source file touched.
+
+---
+
 ### 2026-07-09 — Stage 5D Fix Pass 2: Small Correctness, Consistency, Tests, Deferred-Findings Documentation
 
 Status: Completed. Narrow, approved fix pass following the 2026-07-09 read-only reconciliation of
 all remaining Stage 5D audit findings (primary F1–F15 + independent/Fable findings) against the
-post-Fix-Pass-1 code. Six implementation tasks plus a deferred-findings documentation pass. Not
-committed — the owner will review before any commit.
+post-Fix-Pass-1 code. Six implementation tasks plus a deferred-findings documentation pass.
+Reviewed by the owner and committed as `043bcb7` (2026-07-10); the "No commit made" wording at the
+end of this entry reflects the session in which it was written, before that commit.
 
 **1. UUID validation in `updateRequestStatusAction`.** `requests/[id]/actions.ts` passed
 `requestId` (arbitrary route input) straight to `updateRequestStatusForStudio`, so a non-UUID value

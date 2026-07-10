@@ -574,10 +574,14 @@ sub-stage builds on the previous one; Stage 5D (the final full-application matur
 deliberately last, after security/data-boundary work and real-infrastructure verification, so it
 assesses a production architecture that is actually complete rather than a work-in-progress one.
 **Stage 5A is complete (2026-07-05); Stage 5C is closed (2026-07-08, real-infrastructure/manual E2E
-verification — not a production-readiness claim)** — see PROJECT_STAGE_LOG.md for the full dated
-record and PROJECT_DECISIONS.md, Stage 5A Security / Data-Boundary Decisions, for the decisions
-5A produced. Stage 5B is in progress (several tasks complete, see below); **Stage 5D has not
-started and is the next required stage before Stage 6 may begin.**
+verification — not a production-readiness claim); Stage 5D is closed (2026-07-10 — see the Stage 5D
+closure entry in PROJECT_STAGE_LOG.md)** — see PROJECT_STAGE_LOG.md for the full dated record and
+PROJECT_DECISIONS.md, Stage 5A Security / Data-Boundary Decisions, for the decisions 5A produced.
+Stage 5B's core hardening tasks are complete, but several of its listed items (custom SMTP / rate
+limits / leaked-password protection verification, production environment setup, CI/CD) remain open
+as pre-launch work — see the Stage 5B task list below and PROJECT_PRODUCTION_READINESS.md.
+**Stage 6 is the next development stage** — UI/content/polish work only; pre-launch requirements
+remain separately open and are not implied complete by Stage 5D closure.
 
 ## Stage 5A — Security / Data-Boundary Planning ✓ completed (2026-07-05)
 
@@ -699,13 +703,19 @@ Explicitly not done, carried forward (not blockers to this closure, but not reso
 
 Hands off to: a DevOps/workflow decision block (git-flow, CI/CD trigger, staging/production split
 — see PROJECT_DECISIONS.md, Stage 5C Deployment Workflow and Environment Decisions), then **Stage
-5D — Full Application Maturity Audit**, which has not started. Stage 6 must not begin until Stage
-5D is complete.
+5D — Full Application Maturity Audit** (since closed, 2026-07-10 — see below). Stage 6 must not
+begin until Stage 5D is complete — that condition is now satisfied.
 
 Result: a verified, deployed application — the completed production architecture that Stage 5D
 will audit.
 
-## Stage 5D — Full Application Maturity Audit + Targeted Fix Pass
+## Stage 5D — Full Application Maturity Audit + Targeted Fix Pass ✓ closed (2026-07-10)
+
+**Closed 2026-07-10** — primary audit (2026-07-08), findings reconciliation, Fix Pass 1 (commit
+`9bc8e6f`) and Fix Pass 2 (commit `043bcb7`) complete; independent read-only closure verification
+returned `STAGE_5D_READY_TO_CLOSE`. See PROJECT_STAGE_LOG.md, 2026-07-10 Stage 5D closure entry,
+for what was fixed/deferred/rejected. Closure is not a public-launch/production-readiness claim —
+pre-launch items remain open in PROJECT_PRODUCTION_READINESS.md and PROJECT_BACKLOG.md.
 
 Goal: a structured, evidence-based final audit of the whole shipped MVP — not just Stage 5's own
 new code — to catch immature architecture, duplication, rough code, hidden security issues,

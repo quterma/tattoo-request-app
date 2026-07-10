@@ -251,10 +251,17 @@ consistency gaps, stale references, and pre-launch risks before they compound.
 - After Stage 4A — Admin Authentication
 - After Stage 4B — Admin Dashboard
 - Stage 5D — Full Application Maturity Audit + Targeted Fix Pass (final pre-Stage-6 audit — see
-  below)
+  below) — ✓ completed/closed 2026-07-10
 - After major post-launch integrations (Telegram notifications, calendar, payments)
 
 ## Stage 5D — Final Pre-Stage-6 / Post-Hardening Maturity Audit
+
+**✓ Completed/closed 2026-07-10** — primary audit + fix passes (commits `9bc8e6f`, `043bcb7`) +
+independent closure verification (`STAGE_5D_READY_TO_CLOSE`); see PROJECT_STAGE_LOG.md, 2026-07-10
+Stage 5D closure entry. This closes the audit checkpoint only — every other pre-launch requirement
+in this document (production environment setup, custom SMTP, backups/PITR, monitoring, CI,
+staging/production split, performance validation, manual QA) remains separately open and is not
+affected by Stage 5D closure.
 
 Canonical detailed scope, method, finding classification, deliverables, and exit criteria live in
 `PROJECT_IMPLEMENTATION_PLAN.md` — Stage 5D. This section only fixes the readiness-protocol
