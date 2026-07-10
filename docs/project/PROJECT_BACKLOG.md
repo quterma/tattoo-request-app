@@ -7,7 +7,8 @@ Larger post-launch initiatives are tracked in PROJECT_IMPLEMENTATION_PLAN.md —
 PROJECT_IMPLEMENTATION_PLAN.md) will produce findings classified as must-fix / fix-if-small /
 defer / reject. Any finding classified as "defer deliberately" must be recorded here with a short
 rationale and a pointer to the audit report or Stage 5D closure entry (PROJECT_STAGE_LOG.md) —
-not silently dropped. This is a placeholder rule only; no Stage 5D findings exist yet.
+not silently dropped. Stage 5D deferred findings are recorded in the entries below (see the
+2026-07-09 Fix Pass 2 entry in PROJECT_STAGE_LOG.md for the full fix/defer/reject reconciliation).
 
 ---
 
@@ -55,6 +56,14 @@ not silently dropped. This is a placeholder rule only; no Stage 5D findings exis
   - BulletList
 
 - Replace split("\n") in i18n with string arrays
+
+- **Public error & 404 UX (Stage 5D finding, deferred to Stage 6, 2026-07-09):** the root
+  `app/not-found.tsx` shows a bare unlocalized "404" with no navigation link home, and the public
+  routes have no error boundary — no root `global-error.tsx` exists and `error.tsx` files exist
+  only under admin requests, so an unhandled public-page render error falls through to Next.js's
+  default screen. Deferred as Stage 6 visual/product polish (localized 404 with navigation, minimal
+  public error boundary / `global-error.tsx`), deliberately not implemented in the Stage 5D fix
+  passes. See PROJECT_STAGE_LOG.md, 2026-07-09 Stage 5D Fix Pass 2 entry.
 
 - Admin image viewer (`RequestImageViewer`, YARL Zoom) — physical mobile-device verification
   deferred from Stage 4B.5.1, carried into Stage 6 / pre-release manual QA (does not block Stage
@@ -134,6 +143,11 @@ Goal: improve query result typing across all service modules and remove narrow c
 
 Suggested timing: Stage 5 Production Hardening, or earlier if Stage 4B introduces many Supabase queries that require similar casts.
 
+**Stage 5D reconciliation (2026-07-09):** deliberately not implemented in the Stage 5D fix passes —
+introducing generated types is a tooling/pattern decision (codegen step, regeneration workflow),
+not a narrow fix. Remains a pre-launch owner-decision item: evaluate before public launch, adopt
+or explicitly reject with rationale.
+
 ---
 
 ## OAuth Locale-Query Redirect Allowlist Design Debt (found during Stage 5C, 2026-07-08)
@@ -152,8 +166,10 @@ This is a working workaround, verified live, **not the desired long-term design*
   `...auth/callback?locale=ru`, `...auth/callback?locale=he`, etc. one at a time
 - a deliberate auth/i18n redirect design cleanup is needed before locale expansion
 
-No eventual solution is chosen here. Candidate for Stage 5D (Full Application Maturity Audit) or a
-later dedicated pass, not yet assigned to a specific stage. Not resolved as of this entry.
+No eventual solution is chosen here. **Stage 5D reconciliation (2026-07-09):** deliberately not
+redesigned in the Stage 5D fix passes — this is a pre-launch design item: resolve before public
+launch or before any `ru`/`he` locale expansion, whichever comes first. The interim allowlist
+workaround remains in place and working. Not resolved as of this entry.
 
 ---
 
@@ -167,3 +183,22 @@ upload that succeeded before a later step failed, prior to the DB row being crea
 hygiene item requiring their own explicit owner confirmation before deletion, same protocol as
 5A.3/5A.4. See PROJECT_STAGE_LOG.md (2026-07-05 entry) and PROJECT_DECISIONS.md — Stage 5A
 Security / Data-Boundary Decisions, Storage Model, for the full context. Not blocking Stage 5B.
+
+**Stage 5D reconciliation (2026-07-09):** classified post-launch/operational — both the 2 known
+orphans (still awaiting explicit owner confirmation before deletion) and the general absence of an
+orphaned-object reconciliation/cleanup mechanism are accepted operational debt; best-effort
+in-request cleanup (`cleanupRequestFiles`) remains the only automatic mechanism. Revisit
+post-launch or if orphan volume grows.
+
+---
+
+## Auth Callback Route Edge-Branch Tests (Stage 5D finding, pre-launch, 2026-07-09)
+
+`app/auth/callback/route.ts` and `app/auth/reset-callback/route.ts` have no automated tests for
+their edge branches (missing `code`, unsupported `locale` fallback, `exchangeCodeForSession`
+failure). Deliberately not added in the Stage 5D fix passes: these route handlers require mocking
+`next/headers` cookies, and until 2026-07-09 the codebase avoided mocking Next internals entirely
+(Stage 4B.6 precedent). Stage 5D Fix Pass 2 introduced the first such test
+(`requests/[id]/__tests__/actions.test.ts`, mocking `next/headers`/`next/cache`/`next-intl/server`)
+— that pattern can be extended to the callback routes. Decide and implement the approach before
+public launch; the flows themselves are manually verified live (Stage 5C).

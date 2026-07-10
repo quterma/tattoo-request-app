@@ -103,6 +103,10 @@ The project follows a feature-oriented structure with shared modules and clear b
 - `updateRequestStatusAction(locale, requestId, prev, formData)` — server action (Stage 4B.6)
 - Independently calls `getAuthenticatedStudioMember()` — same rule as every Stage 4B entry point;
   unauthenticated/unauthorized returns a generic translated error, no distinguishing detail
+- Validates `requestId` with `isUuid` (from `@/shared/utils`) before any service/DB call (Stage 5D
+  Fix Pass 2); an invalid value returns the same not-found result as a missing/cross-studio request
+  and logs a `console.warn` with reason `invalid_request_id` — the raw `requestId` is deliberately
+  never logged (arbitrary route input)
 - Validates the submitted `status` form field against `REQUEST_STATUS_OPTIONS` (from `@/services`)
   before any write; an invalid/missing value returns the same generic error
 - Calls `updateRequestStatusForStudio(studioId, requestId, status)` (from `@/services`), scoped to
@@ -382,6 +386,7 @@ Current modules:
 #### services/storage.ts
 
 - `uploadRequestFiles(files, clientSubmissionId)` — uploads reference and placement images to Supabase Storage; per-file retry, cleanup on failure
+- `cleanupRequestFiles(paths)` (Stage 5D Fix Pass 2) — best-effort removal of uploaded Storage objects after a failed submit; logs the outcome (file count only, no paths in the initial line) and never throws; used internally by `uploadRequestFiles` on mid-batch failure and by `app/api/request/route.ts` after a DB insert failure (previously a duplicated local helper there)
 - `UploadedFile`, `FileType` — exported types
 - `createSignedRequestFileUrl(storagePath)` — generates a signed URL for a private `request-images` file via the service_role client; explicit 3600-second (~1 hour) expiry; throws on Supabase signing error. Internal-only — not re-exported from `src/services/index.ts`; the only caller is `services/requests.ts`, which is responsible for ensuring `storagePath` came from an already studio-scoped query before calling this
 
@@ -448,7 +453,7 @@ Current modules:
 
 #### config/index.ts
 
-- `config` — typed config object; reads `SUPABASE_URL` and `SUPABASE_SECRET_KEY` from env; throws at load time if any required var is missing
+- `config` — typed config object; reads `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, and `DEPLOYMENT_STUDIO_ID` from env; throws at load time if any required var is missing. `SUPABASE_PUBLISHABLE_KEY` is deliberately not part of `config` — its only consumer (`services/supabaseAuth.ts`) reads it from env directly to stay importable from middleware (the dead `config.supabase.publishableKey` field was removed in Stage 5D Fix Pass 2)
 
 ---
 

@@ -21,11 +21,24 @@ version bumps), and the logging/error-handling fix pass are complete (2026-07-05
 **Stage 5C — Real Infrastructure and End-to-End Verification is closed (2026-07-08)** — see the
 closure entry immediately below. **Stage 5D — Full Application Maturity Audit: the primary read-only
 audit is complete (2026-07-08); Fix Pass 1 (public submit correctness + small hardening) is complete
-(2026-07-08) — see the dated entry below. Further Stage 5D fix passes, if any, and formal Stage 5D
-closure have not happened yet. Stage 6 must not begin until Stage 5D is fully closed.**
+and committed (2026-07-08, commit `9bc8e6f`); a read-only findings reconciliation and Fix Pass 2
+(small correctness/consistency/tests + deferred-findings documentation) are complete (2026-07-09) —
+see the dated entries below. Formal Stage 5D closure has not happened yet. Stage 6 must not begin
+until Stage 5D is fully closed.**
 
 Current focus:
 
+- **Stage 5D Fix Pass 2 — completed 2026-07-09.** See the dated entry below for full detail:
+  UUID validation of `requestId` in `updateRequestStatusAction` (reusing the existing `isUuid`
+  shared utility; invalid ids now return the not-found result without reaching the DB); removed the
+  duplicated storage-cleanup helper from `app/api/request/route.ts` in favor of the (now exported)
+  `cleanupRequestFiles` from `services/storage.ts`; removed the dead `config.supabase.publishableKey`
+  field; raised `import/no-internal-modules` from `warn` to `error`; added `getRequestOrigin()`
+  unit tests and the first Server Action test file (invalid-UUID coverage, mocking
+  `next/headers`/`next/cache`/`next-intl/server` — a deliberate, owner-approved extension of the
+  Stage 4B.6 no-Next-mocking precedent); corrected the stale "not committed" Fix Pass 1 status
+  wording; recorded all remaining Stage 5D deferred/rejected findings in PROJECT_BACKLOG.md.
+  239/239 tests (up from 230). Not committed — the owner will review before any commit.
 - **Stage 5D Fix Pass 1 — completed 2026-07-08.** See the dated entry below for full detail:
   fixed validated-data persistence in `POST /api/request` (was using the raw parsed payload instead
   of `validation.data`, so Zod trims/transforms were silently discarded before reaching the DB);
@@ -38,8 +51,8 @@ Current focus:
   removed 3 confirmed-unused production dependencies (`class-variance-authority`, `lucide-react`,
   `radix-ui`); documented the storage upload-failure raw-path logging decision in
   PROJECT_DECISIONS.md. `pnpm qg` — structure/lint/typecheck/test/build all PASS (230/230 tests, up
-  from 224; lint: 0 errors, 1 pre-existing unrelated warning). Not committed — the owner will review
-  before any commit.
+  from 224; lint: 0 errors, 1 pre-existing unrelated warning). Reviewed by the owner and committed
+  as `9bc8e6f` (2026-07-09).
 - **DevOps/environment direction documented 2026-07-08** — see PROJECT_DECISIONS.md, Stage 5C
   Deployment Workflow and Environment Decisions, Section D, and the dated log entry below. Records
   the agreed staging/production Supabase-project split, target release flow, and CI/CD direction
@@ -270,11 +283,98 @@ Completed in Stage 3:
 
 ## Log Entries (reverse chronological)
 
+### 2026-07-09 — Stage 5D Fix Pass 2: Small Correctness, Consistency, Tests, Deferred-Findings Documentation
+
+Status: Completed. Narrow, approved fix pass following the 2026-07-09 read-only reconciliation of
+all remaining Stage 5D audit findings (primary F1–F15 + independent/Fable findings) against the
+post-Fix-Pass-1 code. Six implementation tasks plus a deferred-findings documentation pass. Not
+committed — the owner will review before any commit.
+
+**1. UUID validation in `updateRequestStatusAction`.** `requests/[id]/actions.ts` passed
+`requestId` (arbitrary route input) straight to `updateRequestStatusForStudio`, so a non-UUID value
+reached Postgres, threw, and was logged as an infrastructure `error`/`unknown` instead of being
+rejected as expected bad input. Now validated with the existing `isUuid` from `@/shared/utils`
+(same guard the detail page already uses) immediately after the auth check: an invalid id returns
+the existing not-found result (`requestStatusUpdateNotFound` — same response as a missing/
+cross-studio request, no new user-visible behavior) and logs `console.warn` with reason
+`invalid_request_id`, deliberately without the raw `requestId` value. New test file
+`app/[locale]/(admin)/admin/(protected)/requests/[id]/__tests__/actions.test.ts` (4 tests:
+invalid id returns not-found without touching the service layer; the warning never contains the
+raw id; a near-miss malformed UUID is rejected before the status check; a valid UUID still passes
+through and succeeds). **Precedent note:** this is the codebase's first Server Action test and it
+mocks `next/headers`/`next/cache`/`next-intl/server` — a deliberate, owner-approved extension of
+the Stage 4B.6 "don't mock Next internals" precedent, made because the UUID guard lives in the
+action itself and is untestable otherwise. The pattern is available for the deferred auth-callback
+route tests (see PROJECT_BACKLOG.md — Auth Callback Route Edge-Branch Tests).
+
+**2. Removed request-upload cleanup duplication (audit finding F1).** `app/api/request/route.ts`'s
+local `cleanupStorageFiles` duplicated `services/storage.ts`'s private `cleanupFiles` (same
+best-effort semantics, count-only initial log line, error/success logging). The storage helper is
+now exported as `cleanupRequestFiles` (renamed to match the module's `uploadRequestFiles`/
+`createSignedRequestFileUrl` naming; re-exported from `src/services/index.ts`) and the route's
+local copy is deleted — the route also no longer imports `supabase`/`BUCKET` at all. Log prefix
+for DB-failure cleanup changes from `[route]` to `[storage]`; behavior (best-effort, never throws,
+no paths in the initial line, no client/DTO exposure) is unchanged. `route.test.ts` now mocks
+`cleanupRequestFiles` instead of reaching through a mocked `supabase.storage` object, and both DB-
+failure paths (unique-violation race and non-unique error) now assert cleanup receives the exact
+uploaded paths.
+
+**3. Removed dead config field (audit finding F10).** `config.supabase.publishableKey` in
+`src/config/index.ts` had zero readers — its only intended consumer, `services/supabaseAuth.ts`,
+reads `SUPABASE_PUBLISHABLE_KEY` from env directly (by design, to stay importable from middleware
+without pulling in service-role config). Removed the field; the env var itself remains required
+and documented in `.env.example` (inspected — still accurate, no change needed).
+
+**4. `import/no-internal-modules` raised from `warn` to `error` (audit finding F6).** One-word
+severity change in `eslint.config.mjs`; no allow-list or other rule change. The repo was already
+clean under the rule (0 violations), so architectural deep-import drift now fails `pnpm qg`/CI
+instead of accumulating as warnings.
+
+**5. Added `getRequestOrigin()` unit tests (audit finding F13).** New
+`src/services/__tests__/supabaseAuth.test.ts` (5 tests) covering the security-relevant
+host/protocol derivation: forwarded host+proto preferred, https default when proto absent, raw
+`host` fallback, http+localhost local-dev shape, and forwarded-host-over-host precedence. Pure
+function, no Next/Supabase mocking.
+
+**6. Stale Fix Pass 1 status wording corrected.** The "Current focus" bullet and the 2026-07-08
+Fix Pass 1 entry's Status line said "Not committed — the owner will review"; Fix Pass 1 was
+committed as `9bc8e6f` on 2026-07-09 after owner review. Both now say so; the historical body of
+the entry (including its original "No commit made" verification wording) is preserved as written.
+
+**Deferred-findings documentation pass.** Verified each deferred/rejected reconciliation item is
+recorded with accurate timing; PROJECT_BACKLOG.md updated where absent or stale:
+
+- already documented, timing sharpened in place: OAuth locale-query redirect redesign (now
+  explicitly pre-launch / before locale expansion, not a 5D fix pass); Supabase generated DB types
+  (now explicitly a pre-launch owner-decision item); orphaned Storage objects (now explicitly
+  post-launch/operational, including the general absence of a reconciliation mechanism)
+- newly documented: public error & 404 UX (root not-found navigation + missing public error
+  boundary / `global-error.tsx`) — Stage 6; auth callback route edge-branch tests — pre-launch,
+  with the newly established mocking pattern noted
+- the backlog's Stage 5D placeholder rule text updated to point at the real entries
+- explicit no-action confirmations (not reopened, no code change): raw UUID storage paths in
+  server-side upload-failure logs (decision stands — PROJECT_DECISIONS.md, Storage Upload-Failure
+  Log Decision); `/admin` redirect page relies on the `(protected)` layout auth gate and exposes
+  no data (no redundant re-check added); the tiny duplicated local `isRequestStatus` guard in the
+  status action is deliberately left as-is this pass; the trailing-slash `localePath` test is
+  deliberately not added this pass.
+
+**Verification:** `pnpm qg` — structure/lint/typecheck/test/build all PASS. Lint: 0 errors under
+the now-`error`-level deep-import rule, 1 pre-existing unrelated warning (Stage 4B.5.1 `<img>` LCP
+warning in a test file). 239/239 tests pass (was 230; +9: 4 action tests, 5 `getRequestOrigin`
+tests). `git diff --check` clean apart from the known repository-wide CRLF noise (no
+`.gitattributes`; line-ending policy deliberately untouched this pass). Diff limited to the six
+tasks' files plus PROJECT_BACKLOG.md, PROJECT_STRUCTURE.md, PROJECT_DECISIONS.md, this log, and
+the auto-generated `docs/files-structure.md`. No commit made.
+
+---
+
 ### 2026-07-08 — Stage 5D Fix Pass 1: Public Submit Correctness + Small Hardening
 
 Status: Completed. Narrow, approved fix pass following the Stage 5D primary maturity audit. Seven
-tasks, no broad refactor, no Stage 6 UI polish. Not committed — the owner will review before any
-commit.
+tasks, no broad refactor, no Stage 6 UI polish. Reviewed by the owner and committed as `9bc8e6f`
+(2026-07-09); the "No commit made" wording at the end of this entry reflects the session in which
+it was written, before that commit.
 
 **1. Fixed validated data persistence.** `POST /api/request` (`app/api/request/route.ts`) was
 passing the raw `payload` (from `parseRequestFormData`) to `createRequest()`, not

@@ -1274,8 +1274,9 @@ design.
 # Storage Upload-Failure Log Decision (Stage 5D Fix Pass 1)
 
 Decided 2026-07-08, during the Stage 5D fix pass. Server-side Storage upload-failure logs
-(`services/storage.ts`'s `uploadRequestFiles`/`cleanupFiles`, and the equivalent cleanup helper in
-`app/api/request/route.ts`) may continue to include the raw, UUID-based `storagePath`
+(`services/storage.ts`'s `uploadRequestFiles`/`cleanupFiles` — since Stage 5D Fix Pass 2 exported
+as `cleanupRequestFiles` and reused by `app/api/request/route.ts`, whose duplicated local helper
+was removed) may continue to include the raw, UUID-based `storagePath`
 (`{studioId}/{clientSubmissionId}/{type}/{file}`) and the raw Supabase error message as diagnostic
 signal. This is intentionally not sanitized in this pass.
 
@@ -1295,6 +1296,31 @@ detail from server logs would make diagnosing a real upload failure (which file,
 studio/submission) meaningfully harder, for a privacy benefit that does not apply here. Revisit
 only if a concrete reason to strip it emerges (e.g. a stricter log-retention/compliance
 requirement).
+
+---
+
+# Stage 5D Fix Pass 2 Decisions (2026-07-09)
+
+## Server Action Tests May Mock Next Internals
+
+Until this pass, the codebase deliberately avoided mocking `next/headers`/`next/cache` (Stage 4B.6
+precedent — no Server Action tests). Fix Pass 2 introduces the first Server Action test file
+(`requests/[id]/__tests__/actions.test.ts`), mocking `next/headers`, `next/cache`, and
+`next-intl/server` via `vi.mock`, because the new `requestId` UUID guard lives inside
+`updateRequestStatusAction` and is untestable otherwise. Decision: this mocking pattern is now an
+accepted, deliberate option for action/route-handler tests **when the behavior under test lives in
+the action/handler itself** — it does not retroactively require tests for existing actions, and
+service-layer behavior should still be tested at the service layer. The deferred auth-callback
+route tests (PROJECT_BACKLOG.md) are the expected next user of this pattern.
+
+## Deep-Import Lint Rule Is Now Blocking
+
+`import/no-internal-modules` raised from `warn` to `error` in `eslint.config.mjs` (Stage 5D audit
+finding F6). The allow-list is unchanged; the repo had zero violations at flip time. Rationale:
+import-direction/public-API discipline is an architectural invariant in this project
+(PROJECT_STRUCTURE.md — Import Rules), and Stage 5D Fix Pass 1 showed violations can accumulate
+silently as warnings (the UI→BFF violation existed under `warn`). New deep imports now fail
+`pnpm lint`/`pnpm qg`; legitimate new public surfaces must be added to the allow-list explicitly.
 
 ---
 

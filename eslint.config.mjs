@@ -12,7 +12,7 @@ const eslintConfig = defineConfig([
     },
     rules: {
       "import/no-internal-modules": [
-        "warn",
+        "error",
         {
           allow: [
             "next/*",

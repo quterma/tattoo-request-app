@@ -44,7 +44,9 @@ tattoo-request-app/
 │   │   │       │           ├── error.tsx
 │   │   │       │           ├── loading.tsx
 │   │   │       │           ├── not-found.tsx
-│   │   │       │           └── page.tsx
+│   │   │       │           ├── page.tsx
+│   │   │       │           └── __tests__/
+│   │   │       │               └── actions.test.ts
 │   │   │       ├── forgot-password/
 │   │   │       │   ├── actions.ts
 │   │   │       │   ├── ForgotPasswordForm.tsx
@@ -189,7 +191,8 @@ tattoo-request-app/
 │   │       ├── authLog.test.ts
 │   │       ├── db.test.ts
 │   │       ├── requests.test.ts
-│   │       └── storage.test.ts
+│   │       ├── storage.test.ts
+│   │       └── supabaseAuth.test.ts
 │   ├── shared/
 │   │   ├── index.ts
 │   │   ├── api/

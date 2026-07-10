@@ -6,8 +6,12 @@ import {
   validateRequestPayload,
 } from "@/bff"
 import { API_ERROR_CODES } from "@/shared/api"
-import { BUCKET, createRequest, getRequestByClientSubmissionId, uploadRequestFiles } from "@/services"
-import { supabase } from "@/services"
+import {
+  cleanupRequestFiles,
+  createRequest,
+  getRequestByClientSubmissionId,
+  uploadRequestFiles,
+} from "@/services"
 import { config } from "@/config"
 
 function resolveStudioId(): string {
@@ -16,17 +20,6 @@ function resolveStudioId(): string {
 
 // Postgres unique violation error code
 const PG_UNIQUE_VIOLATION = "23505"
-
-async function cleanupStorageFiles(paths: string[]): Promise<void> {
-  if (paths.length === 0) return
-  console.log(`[route] cleanup: deleting ${paths.length} file(s) after DB failure`)
-  const { error } = await supabase.storage.from(BUCKET).remove(paths)
-  if (error) {
-    console.error("[route] cleanup failed:", error.message)
-  } else {
-    console.log("[route] cleanup succeeded")
-  }
-}
 
 export async function POST(req: Request) {
   try {
@@ -82,7 +75,7 @@ export async function POST(req: Request) {
 
       // Race condition: concurrent request already inserted with same clientSubmissionId
       if (message.includes(PG_UNIQUE_VIOLATION) || message.includes("unique constraint")) {
-        await cleanupStorageFiles(uploadedFiles.map((f) => f.storagePath))
+        await cleanupRequestFiles(uploadedFiles.map((f) => f.storagePath))
         try {
           const racedReferenceCode = await getRequestByClientSubmissionId(
             payload.clientSubmissionId,
@@ -97,7 +90,7 @@ export async function POST(req: Request) {
         }
       } else {
         console.error("[route] DB insert failed:", message)
-        await cleanupStorageFiles(uploadedFiles.map((f) => f.storagePath))
+        await cleanupRequestFiles(uploadedFiles.map((f) => f.storagePath))
       }
 
       return NextResponse.json(

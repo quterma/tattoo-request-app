@@ -9,7 +9,7 @@ const {
   mockUploadRequestFiles,
   mockCreateRequest,
   mockGetRequestByClientSubmissionId,
-  mockStorageRemove,
+  mockCleanupRequestFiles,
 } = vi.hoisted(() => ({
   mockParseRequestFormData: vi.fn(),
   mockValidateRequestPayload: vi.fn(),
@@ -17,7 +17,7 @@ const {
   mockUploadRequestFiles: vi.fn(),
   mockCreateRequest: vi.fn(),
   mockGetRequestByClientSubmissionId: vi.fn(),
-  mockStorageRemove: vi.fn(),
+  mockCleanupRequestFiles: vi.fn(),
 }))
 
 vi.mock("@/bff", () => ({
@@ -33,15 +33,10 @@ vi.mock("@/bff", () => ({
 }))
 
 vi.mock("@/services", () => ({
-  BUCKET: "request-images",
   uploadRequestFiles: mockUploadRequestFiles,
   createRequest: mockCreateRequest,
   getRequestByClientSubmissionId: mockGetRequestByClientSubmissionId,
-  supabase: {
-    storage: {
-      from: vi.fn(() => ({ remove: mockStorageRemove })),
-    },
-  },
+  cleanupRequestFiles: mockCleanupRequestFiles,
 }))
 
 vi.mock("@/config", () => ({
@@ -101,7 +96,7 @@ beforeEach(() => {
   mockGetRequestByClientSubmissionId.mockResolvedValue(null)
   mockUploadRequestFiles.mockResolvedValue(uploadedFiles)
   mockCreateRequest.mockResolvedValue({ id: "db-uuid", referenceCode: "REQ-2026-0001" })
-  mockStorageRemove.mockResolvedValue({ error: null })
+  mockCleanupRequestFiles.mockResolvedValue(undefined)
 })
 
 // ── normal flow ────────────────────────────────────────────────────────────
@@ -218,7 +213,8 @@ describe("POST /api/request — race-condition fallback", () => {
 
     expect(status).toBe(200)
     expect(body).toEqual({ ok: true, referenceCode: "REQ-2026-0007" })
-    expect(mockStorageRemove).toHaveBeenCalledTimes(1)
+    expect(mockCleanupRequestFiles).toHaveBeenCalledTimes(1)
+    expect(mockCleanupRequestFiles).toHaveBeenCalledWith([uploadedFiles[0].storagePath])
   })
 
   it("returns 500 when UNIQUE violation but subsequent lookup finds nothing", async () => {
@@ -245,6 +241,7 @@ describe("POST /api/request — race-condition fallback", () => {
     // cleanup is called for any DB failure, but getRequestByClientSubmissionId
     // should only be called once (initial idempotency check, not race recovery)
     expect(mockGetRequestByClientSubmissionId).toHaveBeenCalledTimes(1)
+    expect(mockCleanupRequestFiles).toHaveBeenCalledWith([uploadedFiles[0].storagePath])
   })
 })
 

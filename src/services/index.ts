@@ -1,5 +1,5 @@
 export { supabase } from "./supabase"
-export { BUCKET, uploadRequestFiles } from "./storage"
+export { BUCKET, cleanupRequestFiles, uploadRequestFiles } from "./storage"
 export type { UploadedFile, FileType } from "./storage"
 export {
   createRequest,

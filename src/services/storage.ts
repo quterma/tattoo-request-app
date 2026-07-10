@@ -111,7 +111,11 @@ async function uploadWithRetry(item: FileToUpload): Promise<void> {
   throw lastError ?? new Error("Upload failed after retries")
 }
 
-async function cleanupFiles(paths: string[]): Promise<void> {
+/**
+ * Best-effort removal of uploaded request files after a failed submit.
+ * Logs the outcome (file count only, no paths) and never throws.
+ */
+export async function cleanupRequestFiles(paths: string[]): Promise<void> {
   if (paths.length === 0) return
 
   console.log(`[storage] cleanup: deleting ${paths.length} file(s)`)
@@ -168,7 +172,7 @@ export async function uploadRequestFiles(
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
       console.error(`[storage] upload failed for ${item.storagePath}:`, message)
-      await cleanupFiles(uploaded)
+      await cleanupRequestFiles(uploaded)
       throw new Error(`File upload failed: ${message}`)
     }
   }

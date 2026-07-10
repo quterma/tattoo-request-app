@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache"
 import { getTranslations } from "next-intl/server"
 import { getAuthenticatedStudioMember } from "@/services/auth"
 import { REQUEST_STATUS_OPTIONS, updateRequestStatusForStudio } from "@/services"
+import { isUuid } from "@/shared/utils"
 import type { RequestStatus, UpdateRequestStatusResult } from "@/features/admin/types"
 
 function isRequestStatus(value: string): value is RequestStatus {
@@ -27,6 +28,12 @@ export async function updateRequestStatusAction(
 
   if (!result.ok) {
     return { ok: false, error: t("requestStatusUpdateFailed") }
+  }
+
+  // requestId is arbitrary route input, deliberately not logged
+  if (!isUuid(requestId)) {
+    console.warn("[admin] status update rejected", { operation: "update_request_status", reason: "invalid_request_id" })
+    return { ok: false, error: t("requestStatusUpdateNotFound") }
   }
 
   const status = formData.get("status")
