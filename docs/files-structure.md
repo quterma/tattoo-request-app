@@ -88,6 +88,8 @@ tattoo-request-app/
 │   │   ├── AI_FRAMEWORK_IDEAS.md
 │   │   ├── AI_PROJECT_BOOTSTRAP.md
 │   │   ├── AI_REVIEW_PIPELINE.md
+│   │   ├── AI_TASK_PROTOCOL.md
+│   │   ├── AI_WORKFLOW_MASTER.md
 │   │   ├── DOCUMENTATION_SYSTEM_RULES.md
 │   │   └── templates/
 │   │       ├── CLAUDE_TEMPLATE.md
@@ -109,7 +111,9 @@ tattoo-request-app/
 │       ├── PROJECT_STRUCTURE.md
 │       ├── PROJECT_TESTING_STRATEGY.md
 │       ├── STAGE_6_FUNCTIONAL_SPECIFICATION.md
-│       └── STAGE_6_PRODUCT_DEFINITION.md
+│       ├── STAGE_6_PRODUCT_DEFINITION.md
+│       └── tasks/
+│           └── STAGE_TASK_TEMPLATE.md
 ├── scripts/
 │   └── update-structure.mjs
 ├── src/

@@ -303,6 +303,35 @@ Completed in Stage 3:
 
 ## Log Entries (reverse chronological)
 
+### 2026-07-12 — AI task protocol and stage task template introduced
+
+Status: Completed. Documentation-only — no source code changed.
+
+To support the split into strategic (`STRAT:`) and implementation (`IMPL:`) AI sessions, two
+workflow documents were added, plus a CLAUDE.md rule:
+
+- `docs/framework/AI_TASK_PROTOCOL.md` — session types (strategic / implementation / meta),
+  task-file convention (`docs/project/tasks/`, one file per task,
+  `STAGE_<stage>_TASK_<NN>_<slug>.md`), lifecycle (`draft → ready → in progress → done`, completed
+  files move to `docs/project/tasks/done/`, never deleted), and session-settings guidance
+  (model tier, permission mode, when to start a new session).
+- `docs/project/tasks/STAGE_TASK_TEMPLATE.md` — the reusable skeleton copied for every stage /
+  sub-stage task: Status, How to run (session settings), Context (Pre-task Sync + stage Source of
+  Truth + task-specific docs), Goal, Scope, Out of Scope, enforced workflow (inspect → plan →
+  explicit approval → implement → Review Pipeline → report risks; stop and request a PRD/FS
+  update if product behavior must change), Acceptance Criteria, Reporting.
+- CLAUDE.md — new "Task Files & Session Types" section: a referenced task file is the scope
+  boundary; strategic sessions must persist outcomes into docs, not chat-only conclusions.
+- `docs/framework/AI_WORKFLOW_MASTER.md` — the standing "AI Workflow Master" role for `META:`
+  sessions (process ownership, mandate, working loop, kickoff prompt); observations journal
+  lives in AI_FRAMEWORK_IDEAS.md, which was normalized to its own declared idea format and
+  extended with a "Workflow Observations (META journal)" section.
+
+Approved by the owner in-session (framework docs change rule satisfied). `pnpm structure` run;
+no `pnpm qg` — docs-only.
+
+---
+
 ### 2026-07-12 — Stage 6 product documentation integrated (PRD + Functional Specification become Source of Truth)
 
 Status: Completed. Documentation-only pass — no source code, tests, dependencies, configuration,

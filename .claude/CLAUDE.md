@@ -29,6 +29,18 @@ Confirm understanding in 3–5 lines before proceeding.
 
 ---
 
+## Task Files & Session Types
+
+Sessions and task files follow docs/framework/AI_TASK_PROTOCOL.md.
+
+- If a prompt references a file in docs/project/tasks/:
+  → that task file is the scope boundary
+  → Pre-task Sync still applies
+- Strategic (STRAT:) sessions must end by persisting outcomes into docs
+  (task files, PROJECT_DECISIONS.md, PROJECT_STAGE_LOG.md) — never chat-only conclusions.
+
+---
+
 ## Task Granularity
 
 Break work into small, explicit TODO steps.
