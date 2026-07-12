@@ -36,6 +36,9 @@ Start every new strategic session with:
 > pickup point. If the brief does not exist and this is the stage's first STRAT session, stop
 > and ask the owner what the first strategic topic is — do not invent one.
 > Expected outcome: \<task files for a stage / a decision on a question / a plan\>.
+> Existing code is strategic context too: before presenting options or solutions on any
+> sub-topic, search the repository for prior art (existing components, utilities, decisions) —
+> never propose from general knowledge what the repo may already implement.
 > Confirm understanding in 3–5 lines before proceeding.
 > Before the session ends: persist every outcome into docs — task files per
 > STAGE_TASK_TEMPLATE.md (status `ready`), PROJECT_DECISIONS.md for decisions,
@@ -79,6 +82,16 @@ session's handoff and the next session's topic; the owner writes no ad-hoc summa
 - When the stage's strategic work is genuinely finished (project end or an explicit owner
   stop), move the brief to `docs/project/tasks/done/` (same never-delete convention as task
   files).
+
+## Mid-session persistence
+
+Persistence gates the session's END, not every internal step: a live STRAT session may
+discuss several sub-topics before writing anything down, and persisting (docs, brief,
+task files) does NOT close the session — after a persistence checkpoint the session may
+keep going. Recommended checkpoint triggers, besides the session end: a decision worth
+protecting, context grown long (summarization risk — "live memory" is not guaranteed),
+or scope a parallel session might touch. The only hard duty: nothing valuable remains
+chat-only when the session actually ends.
 
 ---
 

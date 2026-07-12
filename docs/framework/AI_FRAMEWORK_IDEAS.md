@@ -99,3 +99,41 @@ AI_WORKFLOW_MASTER.md. Format: date — observation — status (`open` / `resolv
   AI_WORKFLOW_MASTER.md, and its scope overlap with AI_DEVELOPMENT_WORKFLOW.md (in-session
   development cycle vs session organization) is not cross-referenced. Master copy lives in a
   separate repository — fix belongs there, local copy follows. — open.
+- 2026-07-13 — Owner question during a Stage 6 STRAT session: does breaking work into sub-topics
+  (e.g. an 8-item page-by-page breakdown for a UX blueprint) require writing that breakdown into
+  docs (brief/task files) as its own step before discussing the first sub-topic, even when the
+  session stays open and can keep going? Owner's view: persisting a plan mid-session is a hedge
+  against losing memory or against parallel sessions touching the same scope, not a mandatory
+  gate — while the session is live and continuous, discussion can proceed and persistence can
+  happen once, at natural checkpoints (e.g. end of session, per the STRAT Next-Session Brief),
+  rather than being forced before every sub-topic. Also: persisting/documenting progress should
+  not be conflated with closing a session — a session with live memory that isn't actually
+  finished should be able to keep going after a persistence step. Current AI_TASK_PROTOCOL.md
+  text ("Strategic... sessions must end by persisting outcomes into docs") is arguably already
+  consistent with this (persistence gates the *end*, not each internal step) but doesn't say so
+  explicitly, which caused the ambiguity in-session. — resolved: AI_TASK_PROTOCOL.md
+  (STRAT Next-Session Brief — Mid-session persistence subsection; owner's reading confirmed,
+  with an added checkpoint trigger for long-context/summarization risk).
+- 2026-07-13 — Same Stage 6 STRAT session: when proposing mobile-navigation options (top bar vs
+  hamburger vs bottom tab-bar) for the UX blueprint's navigation sub-topic, the agent proposed
+  generic patterns from general knowledge instead of first checking whether the project already
+  had an implementation — it did not exist. A working bottom-tab-bar (mobile) / top-sticky-bar
+  (`sm:` and up) component already existed at `src/shared/ui/app-nav.tsx`, unrelated to any doc
+  the Pre-task Sync or STRAT Kickoff Prompt names (PROJECT_STAGE_LOG.md, PROJECT_CONTEXT.md,
+  PROJECT_ARCHITECTURE.md, PROJECT_DECISIONS.md, PRD, FS — none of them mention or point at this
+  file). Owner's view: checking existing repo code/decisions before proposing a solution should
+  be a default agent behavior, not something that only happens when a kickoff prompt happens to
+  name the right doc. Agent's read on the cause: the STRAT Kickoff Prompt's Context list is
+  doc-only (Pre-task Sync + PRD/FS), with no step for searching the actual source tree for
+  prior art on the specific sub-topic being discussed — so a topic whose implementation exists
+  in code but isn't cross-referenced from those docs is invisible until someone thinks to grep
+  for it. CLAUDE.md's "Doing tasks" section already says to search for existing
+  functions/utilities/patterns before proposing new code, but that framing reads as
+  implementation-session guidance and wasn't naturally applied to a STRAT/UX-design discussion
+  proposing layout patterns rather than writing code. Possible angles for META to weigh: extend
+  the STRAT Context step (or CLAUDE.md's reuse-search rule) to explicitly cover STRAT/design
+  discussions, not just implementation; and/or require a quick source-tree check for prior art
+  before presenting options on any sub-topic with plausible existing coverage. — resolved:
+  AI_TASK_PROTOCOL.md (STRAT Kickoff Prompt: prior-art line — search the repository before
+  presenting options on any sub-topic; existing code is strategic context). The `app-nav.tsx`
+  existence was verified before fixing.

@@ -303,6 +303,30 @@ Completed in Stage 3:
 
 ## Log Entries (reverse chronological)
 
+### 2026-07-13 — META: two STRAT-session observations resolved (mid-session persistence; prior-art check)
+
+Status: Completed. Documentation-only — no source code changed. Owner-approved in-session
+(framework docs change rule satisfied). Both observations were recorded in
+AI_FRAMEWORK_IDEAS.md by a Stage 6 STRAT session and are now marked resolved there.
+
+Changes, both in AI_TASK_PROTOCOL.md:
+
+- **Mid-session persistence** (new subsection under STRAT Next-Session Brief): persistence
+  gates the session's END, not every internal step — a live session may discuss several
+  sub-topics before writing anything down, and a persistence checkpoint does not close the
+  session. Recommended (not mandatory) checkpoint triggers: a decision worth protecting,
+  context grown long (summarization risk), scope a parallel session might touch. Confirms the
+  owner's reading of the existing "must end by persisting" rule; CLAUDE.md unchanged.
+- **STRAT Kickoff Prompt — prior-art line**: existing code is strategic context too — before
+  presenting options on any sub-topic, search the repository for prior art; never propose from
+  general knowledge what the repo may already implement. Root cause: a STRAT session proposed
+  generic mobile-navigation patterns while `src/shared/ui/app-nav.tsx` already implemented one,
+  because the kickoff's context list was doc-only.
+
+`pnpm structure` run; no `pnpm qg` — docs-only.
+
+---
+
 ### 2026-07-13 — META: STRAT continuation note unified into STRAT Next-Session Brief
 
 Status: Completed. Documentation-only — no source code changed. Owner-approved in-session

@@ -18,7 +18,8 @@ tattoo-request-app/
 ├── tsconfig.json
 ├── vitest.config.ts
 ├── .claude/
-│   └── CLAUDE.md
+│   ├── CLAUDE.md
+│   └── settings.json
 ├── .husky/
 │   └── pre-commit
 ├── app/
