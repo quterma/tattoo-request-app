@@ -135,6 +135,9 @@ pointer to its replacement, if any) and also moves to `docs/project/tasks/done/`
   session at a time — do not run sessions in parallel if more than one will update the same
   shared doc. Task files are conflict-free by design (one file per task); STRAT briefs are
   stage-scoped and written only by the stage's single active STRAT session.
+- Out-of-scope findings discovered mid-task stay out of the diff: record product/code findings
+  in PROJECT_BACKLOG.md, process/workflow findings in the observations journal
+  (AI_FRAMEWORK_IDEAS.md), and mention them in the task report — never fix them in-scope.
 
 ---
 

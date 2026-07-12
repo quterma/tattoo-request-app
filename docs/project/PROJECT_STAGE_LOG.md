@@ -303,6 +303,30 @@ Completed in Stage 3:
 
 ## Log Entries (reverse chronological)
 
+### 2026-07-13 — META: remaining open journal items closed (out-of-scope findings rule; framework source of truth)
+
+Status: Completed. Documentation-only — no source code changed. Owner-approved in-session
+(framework docs change rule satisfied). Closes the last three open items in the
+AI_FRAMEWORK_IDEAS.md journal/ideas as of this date:
+
+- **Out-of-scope findings rule** — AI_TASK_PROTOCOL.md (Cross-Session Rules): findings
+  discovered mid-task stay out of the diff; product/code → PROJECT_BACKLOG.md, process →
+  observations journal, plus a mention in the task report.
+- **Framework source of truth (owner decision 2026-07-13)** — no separate framework master
+  repository exists yet; `docs/framework/` in this repository IS the master copy, changes are
+  committed here synchronously. DOCUMENTATION_SYSTEM_RULES.md updated accordingly: the stale
+  "separate master repository" note corrected; framework-doc examples extended with
+  AI_TASK_PROTOCOL.md / AI_WORKFLOW_MASTER.md / journal note; the deliberate scope split
+  between AI_DEVELOPMENT_WORKFLOW.md (in-session cycle) and AI_TASK_PROTOCOL.md (session
+  organization) cross-referenced.
+- **"Implementation plans as executable step sequences" idea** — marked effectively adopted
+  via the task-file convention (one file per task with Goal/Scope/Workflow/Acceptance
+  Criteria).
+
+`pnpm structure` run; no `pnpm qg` — docs-only.
+
+---
+
 ### 2026-07-13 — META: two STRAT-session observations resolved (mid-session persistence; prior-art check)
 
 Status: Completed. Documentation-only — no source code changed. Owner-approved in-session

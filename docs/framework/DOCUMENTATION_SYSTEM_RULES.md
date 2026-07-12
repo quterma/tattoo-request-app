@@ -137,10 +137,16 @@ Framework documents define global development rules.
 Examples:
 
 - AI_DEVELOPMENT_RULES.md
-- AI_DEVELOPMENT_WORKFLOW.md
+- AI_DEVELOPMENT_WORKFLOW.md — the in-session development cycle (analyze → implement → review → commit)
+- AI_TASK_PROTOCOL.md — session organization (STRAT / IMPL / META), task files, STRAT briefs
+- AI_WORKFLOW_MASTER.md — the AI Workflow Master role for META sessions
 - AI_REVIEW_PIPELINE.md
 - AI_PROJECT_BOOTSTRAP.md
-- AI_FRAMEWORK_IDEAS.md
+- AI_FRAMEWORK_IDEAS.md — ideas + the workflow observations journal
+
+AI_DEVELOPMENT_WORKFLOW.md and AI_TASK_PROTOCOL.md have deliberately different scopes:
+the former defines the development cycle inside a session; the latter defines how work is
+split into sessions and task files. Neither redefines the other.
 
 Project documents describe the specific application.
 
@@ -206,9 +212,10 @@ not implementation details or file structure.
 
 # Notes for Developers
 
-The framework documentation is maintained as a master copy in a separate repository.
-
-Each project contains a local copy in: docs/framework/
+There is currently no separate framework repository: `docs/framework/` in this repository IS
+the master copy and the source of truth (owner decision, 2026-07-13). Framework changes are
+committed here like any other change. Extracting the framework into a separate master
+repository (with per-project local copies) is a possible future step, not the current state.
 
 Project-specific documentation lives in: docs/project/
 

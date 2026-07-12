@@ -39,7 +39,9 @@ copy.
 Description: implementation plans must be executable step sequences, not descriptive documents.
 Motivation: descriptive plans drift from reality and cannot be verified step by step.
 Risks/trade-offs: more upfront planning effort per stage.
-Status: open.
+Status: effectively adopted in this project via the task-file convention (owner decision
+2026-07-13): AI_TASK_PROTOCOL.md — one file per task with Goal / Scope / Workflow /
+Acceptance Criteria, executed step by step by an IMPL session.
 
 ---
 
@@ -71,7 +73,8 @@ AI_WORKFLOW_MASTER.md. Format: date — observation — status (`open` / `resolv
   Guidance: Usage limits bullet).
 - 2026-07-12 — No rule says where an IMPL session records out-of-scope findings discovered
   mid-task (presumably PROJECT_BACKLOG.md for product/code, this journal for process); the task
-  template says "report risks" but the protocol is silent. — open.
+  template says "report risks" but the protocol is silent. — resolved: AI_TASK_PROTOCOL.md
+  (Cross-Session Rules: out-of-scope findings bullet).
 - 2026-07-13 — STRAT continuity gap: nothing told a STRAT session ending with an unfinished
   topic (long context) to leave a pickup point, or told the next STRAT session what to pick up;
   clean topic close was already covered by the kickoff. Related misconception clarified: forking
@@ -98,7 +101,11 @@ AI_WORKFLOW_MASTER.md. Format: date — observation — status (`open` / `resolv
   framework-doc examples and conflict-priority list predate AI_TASK_PROTOCOL.md /
   AI_WORKFLOW_MASTER.md, and its scope overlap with AI_DEVELOPMENT_WORKFLOW.md (in-session
   development cycle vs session organization) is not cross-referenced. Master copy lives in a
-  separate repository — fix belongs there, local copy follows. — open.
+  separate repository — fix belongs there, local copy follows. — resolved:
+  DOCUMENTATION_SYSTEM_RULES.md updated in place (framework-doc list extended with
+  AI_TASK_PROTOCOL.md / AI_WORKFLOW_MASTER.md; scope split with AI_DEVELOPMENT_WORKFLOW.md
+  cross-referenced; "separate master repository" note corrected — owner decision 2026-07-13:
+  no separate framework repo exists yet, docs/framework/ in this repo IS the source of truth).
 - 2026-07-13 — Owner question during a Stage 6 STRAT session: does breaking work into sub-topics
   (e.g. an 8-item page-by-page breakdown for a UX blueprint) require writing that breakdown into
   docs (brief/task files) as its own step before discussing the first sub-topic, even when the
