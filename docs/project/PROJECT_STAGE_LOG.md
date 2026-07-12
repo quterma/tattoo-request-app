@@ -303,6 +303,34 @@ Completed in Stage 3:
 
 ## Log Entries (reverse chronological)
 
+### 2026-07-13 — META: STRAT continuation note convention (unfinished strategic topics)
+
+Status: Completed. Documentation-only — no source code changed. Owner-approved in-session
+(framework docs change rule satisfied).
+
+Follow-up in the same META role: closed the STRAT-continuity gap — a strategic session that
+must end with its topic unfinished (long context, natural stopping point) had no handoff duty,
+and the next STRAT session had no defined pickup point (clean topic close was already covered
+by the STRAT Kickoff Prompt). Changes, all in AI_TASK_PROTOCOL.md:
+
+- new **STRAT Continuation (unfinished topic)** section: per-stage continuation note at
+  `docs/project/tasks/STAGE_<stage>_STRAT_CONTINUATION.md` (at most one per stage) holding
+  pointers only — Decided (pointers to PROJECT_DECISIONS.md/STAGE_LOG entries, never restated),
+  Open questions, task files `ready` vs `draft` (ideas concrete enough to file become `draft`
+  task files, not note text), optional next step; finished-stage notes move to `tasks/done/`
+- **STRAT Kickoff Prompt** extended: read the continuation note if it exists; Topic may be
+  "continue from the STRAT continuation note"; closing an unfinished topic requires
+  writing/updating the note; fallback rule — Topic says "continue" but no note exists →
+  fail-fast, stop and ask the owner (stale kickoff vs failed persistence duty)
+- **Session Settings Guidance**: forking clarified as not a continuation mechanism (inherits
+  the full parent transcript — same context weight); fresh session + docs is the continuation
+  path
+
+Observation recorded and resolved in AI_FRAMEWORK_IDEAS.md — Workflow Observations.
+`pnpm structure` run; no `pnpm qg` — docs-only.
+
+---
+
 ### 2026-07-12 — META: AI_TASK_PROTOCOL.md review + STRAT kickoff prompt
 
 Status: Completed. Documentation-only — no source code changed. Owner-approved in-session

@@ -72,6 +72,12 @@ AI_WORKFLOW_MASTER.md. Format: date — observation — status (`open` / `resolv
 - 2026-07-12 — No rule says where an IMPL session records out-of-scope findings discovered
   mid-task (presumably PROJECT_BACKLOG.md for product/code, this journal for process); the task
   template says "report risks" but the protocol is silent. — open.
+- 2026-07-13 — STRAT continuity gap: nothing told a STRAT session ending with an unfinished
+  topic (long context) to leave a pickup point, or told the next STRAT session what to pick up;
+  clean topic close was already covered by the kickoff. Related misconception clarified: forking
+  inherits the full parent transcript and does not relieve context pressure. — resolved:
+  AI_TASK_PROTOCOL.md (STRAT Continuation section; kickoff prompt continuation lines; Session
+  Settings Guidance forking bullet).
 - 2026-07-12 — DOCUMENTATION_SYSTEM_RULES.md is stale relative to the newer framework docs: its
   framework-doc examples and conflict-priority list predate AI_TASK_PROTOCOL.md /
   AI_WORKFLOW_MASTER.md, and its scope overlap with AI_DEVELOPMENT_WORKFLOW.md (in-session

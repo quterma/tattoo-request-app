@@ -30,15 +30,49 @@ Start every new strategic session with:
 > This is a STRAT session per docs/framework/AI_TASK_PROTOCOL.md.
 > Run the Pre-task Sync (CLAUDE.md) and read the current stage's Source of Truth
 > (for Stage 6: STAGE_6_PRODUCT_DEFINITION.md and STAGE_6_FUNCTIONAL_SPECIFICATION.md).
-> Topic: \<topic\>. Expected outcome: \<task files for a stage / a decision on a question / a plan\>.
+> If `docs/project/tasks/STAGE_<stage>_STRAT_CONTINUATION.md` exists, read it too.
+> Topic: \<topic — or simply: continue from the STRAT continuation note\>.
+> Expected outcome: \<task files for a stage / a decision on a question / a plan\>.
 > Confirm understanding in 3–5 lines before proceeding.
 > Before the session ends: persist every outcome into docs — task files per
 > STAGE_TASK_TEMPLATE.md (status `ready`), PROJECT_DECISIONS.md for decisions,
-> PROJECT_STAGE_LOG.md for progress. No chat-only conclusions. List created/updated files in
-> the final message.
+> PROJECT_STAGE_LOG.md for progress. If the topic is not finished when the session ends,
+> also write/update the stage's STRAT continuation note (see STRAT Continuation below).
+> No chat-only conclusions. List created/updated files in the final message.
 
 (The META kickoff prompt lives in AI_WORKFLOW_MASTER.md; IMPL sessions are started from a task
 file per STAGE_TASK_TEMPLATE.md — How to Use.)
+
+---
+
+# STRAT Continuation (unfinished topic)
+
+Two distinct ways a strategic session ends:
+
+- **Topic finished** — the standard kickoff persistence step is enough; the next STRAT session
+  picks a new Topic from PROJECT_STAGE_LOG.md / task files. No extra artifact.
+- **Topic NOT finished** (context grown long, natural stopping point) — the closing session
+  must leave a pickup point: the stage's **STRAT continuation note**.
+
+Continuation note convention:
+
+- Location: `docs/project/tasks/STAGE_<stage>_STRAT_CONTINUATION.md` — at most one per stage;
+  written and updated only by that stage's STRAT sessions (no conflict with Cross-Session
+  Rules: one active STRAT session per stage).
+- Contents — pointers, not prose (no duplication per DOCUMENTATION_SYSTEM_RULES.md):
+  1. **Decided** — pointers to the PROJECT_DECISIONS.md / PROJECT_STAGE_LOG.md entries this
+     session wrote; never restate decisions in the note
+  2. **Open** — the explicit list of questions still undecided or not yet discussed
+  3. **Task files** — which exist as `ready` vs `draft`; an idea concrete enough to file
+     becomes a `draft` task file, not note text
+  4. **Suggested next step** — optional, one line
+- The next STRAT session starts with the standard kickoff; its Topic is simply "continue from
+  the STRAT continuation note" — the owner writes no ad-hoc summary prompt.
+- If the Topic says to continue from the note but no note exists, do not guess (fail-fast per
+  CLAUDE.md): stop and ask the owner — a missing note means either a stale kickoff prompt or a
+  prior session that failed its persistence duty, and the owner must say which.
+- When the stage's strategic work is finished, the session that finishes it moves the note to
+  `docs/project/tasks/done/` (same never-delete convention as task files).
 
 ---
 
@@ -100,3 +134,7 @@ pointer to its replacement, if any) and also moves to `docs/project/tasks/done/`
 - **New session instead of continuing when:** starting a new task; the current session's context
   has grown long (summarization risk); or an independent review is needed — independent reviews
   must run in a fresh session without access to the prior session's conclusions.
+- **Forking is not a continuation mechanism:** a fork inherits the full parent transcript, so it
+  carries the same context weight and does not relieve context pressure. Fork to branch an idea
+  from shared context; to continue work that outgrew its session, start a fresh session with
+  context from docs (for unfinished strategic topics — see STRAT Continuation).
