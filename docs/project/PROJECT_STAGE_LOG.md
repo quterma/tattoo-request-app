@@ -303,6 +303,34 @@ Completed in Stage 3:
 
 ## Log Entries (reverse chronological)
 
+### 2026-07-12 — META: AI_TASK_PROTOCOL.md review + STRAT kickoff prompt
+
+Status: Completed. Documentation-only — no source code changed. Owner-approved in-session
+(framework docs change rule satisfied).
+
+First META session in the AI Workflow Master role (AI_WORKFLOW_MASTER.md). Reviewed
+AI_TASK_PROTOCOL.md and AI_WORKFLOW_MASTER.md for gaps; findings recorded in
+AI_FRAMEWORK_IDEAS.md — Workflow Observations (six resolved in this pass, two left open:
+out-of-scope-findings destination rule; DOCUMENTATION_SYSTEM_RULES.md staleness — master-copy
+fix). Changes applied to AI_TASK_PROTOCOL.md:
+
+- new **STRAT Kickoff Prompt** section (symmetric to the META kickoff): Pre-task Sync + stage
+  Source of Truth, topic/expected outcome, 3–5-line understanding confirmation, mandatory
+  persistence of outcomes into docs with a final created/updated-files list
+- **Lifecycle**: transition owners (`draft → ready` — developer; `ready → in progress` and
+  `in progress → done` — executing IMPL session) and a new `superseded` status for
+  cancelled/replaced tasks (reason + replacement pointer, moved to `tasks/done/`)
+- **Task Files naming**: `<stage>` includes the sub-stage (`STAGE_6A_TASK_01_<slug>.md`)
+- new **Cross-Session Rules** section: any session records workflow friction as a one-line
+  journal entry; shared docs (PROJECT_STAGE_LOG.md, PROJECT_DECISIONS.md) allow at most one
+  writing session at a time
+- **Session Settings Guidance**: usage-limits bullet added (fixes the dangling
+  AI_WORKFLOW_MASTER.md Mandate 4 reference)
+
+`pnpm structure` run; no `pnpm qg` — docs-only.
+
+---
+
 ### 2026-07-12 — AI task protocol and stage task template introduced
 
 Status: Completed. Documentation-only — no source code changed.

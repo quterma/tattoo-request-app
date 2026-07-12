@@ -55,3 +55,25 @@ AI_WORKFLOW_MASTER.md. Format: date — observation — status (`open` / `resolv
 - 2026-07-12 — Accumulative per-stage task files were considered and rejected (executor context
   bloat, parallel-session write conflicts); one file per task + `tasks/done/` chosen instead. —
   resolved: AI_TASK_PROTOCOL.md (Task Files, Lifecycle).
+- 2026-07-12 — STRAT sessions had no standard kickoff prompt (META and IMPL had one); risk of
+  chat-only conclusions and skipped Source-of-Truth reads. — resolved: AI_TASK_PROTOCOL.md
+  (STRAT Kickoff Prompt).
+- 2026-07-12 — Task lifecycle had no transition owners and no state for cancelled/replaced
+  tasks (only "never delete"). — resolved: AI_TASK_PROTOCOL.md (Lifecycle: transition owners,
+  `superseded`).
+- 2026-07-12 — Task-file naming was ambiguous for sub-stages (`STAGE_6_...` vs `STAGE_6A_...`).
+  — resolved: AI_TASK_PROTOCOL.md (Task Files: `<stage>` includes the sub-stage).
+- 2026-07-12 — Nothing obliged non-META sessions to record workflow observations, and parallel
+  sessions had no rule for shared docs (PROJECT_STAGE_LOG.md, PROJECT_DECISIONS.md) as a write
+  conflict point. — resolved: AI_TASK_PROTOCOL.md (Cross-Session Rules).
+- 2026-07-12 — AI_WORKFLOW_MASTER.md Mandate 4 referenced a "usage-limit strategy" in Session
+  Settings Guidance that did not exist there. — resolved: AI_TASK_PROTOCOL.md (Session Settings
+  Guidance: Usage limits bullet).
+- 2026-07-12 — No rule says where an IMPL session records out-of-scope findings discovered
+  mid-task (presumably PROJECT_BACKLOG.md for product/code, this journal for process); the task
+  template says "report risks" but the protocol is silent. — open.
+- 2026-07-12 — DOCUMENTATION_SYSTEM_RULES.md is stale relative to the newer framework docs: its
+  framework-doc examples and conflict-priority list predate AI_TASK_PROTOCOL.md /
+  AI_WORKFLOW_MASTER.md, and its scope overlap with AI_DEVELOPMENT_WORKFLOW.md (in-session
+  development cycle vs session organization) is not cross-referenced. Master copy lives in a
+  separate repository — fix belongs there, local copy follows. — open.
