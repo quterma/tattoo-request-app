@@ -60,7 +60,10 @@ The goal is clarity, maintainability, and fast iteration.
 
 ### Client (Frontend)
 
-- public pages (home, policies, location, request)
+- public pages (home, policies, location, request — as shipped through Stage 5; the Stage 6
+  target public page set and navigation are defined in STAGE_6_FUNCTIONAL_SPECIFICATION.md §2–§3:
+  Home, Process, Request, Location, Success, plus Preparation and Aftercare outside the primary
+  navigation)
 - admin interface (protected routes)
 
 Responsibilities:

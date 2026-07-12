@@ -14,29 +14,35 @@ not silently dropped. Stage 5D deferred findings are recorded in the entries bel
 
 ## UX / Product Improvements
 
-- FAQ as accordion on /policies page (after content stabilization)
-- Add "Not a Fit" block (small tattoos, rush jobs, no concept, low budget)
-- Sharpen positioning on Home:
-  - focus on 3–6 hour sessions
-  - large-scale work
-  - Masha's style
-- Price framing:
-  - "starting from …"
-  - filtering out low-budget clients
-- Client expectations section:
-  - trust the artist's style
-  - multiple sessions possible
-  - no micro-revisions
-- Curated gallery:
-  - 5–8 strong works instead of full feed
+**Absorbed into Stage 6 documentation (2026-07-12):** the items below are now covered by the
+Stage 6 Source of Truth documents — `STAGE_6_PRODUCT_DEFINITION.md` (PRD) and
+`STAGE_6_FUNCTIONAL_SPECIFICATION.md` (FS). They are kept here struck-through as the record of
+where the ideas originated; the PRD/FS versions govern. Do not implement from this list.
+
+- ~~FAQ as accordion on /policies page (after content stabilization)~~ — FAQ's canonical page is
+  Process (FS §5); presentation per FS §5 ("expandable details where appropriate")
+- ~~Add "Not a Fit" block (small tattoos, rush jobs, no concept, low budget)~~ — PRD D7 (Good Fit
+  content with respectful redirect); canonical Good Fit content on Process (FS §3.2)
+- ~~Sharpen positioning on Home (3–6 hour sessions, large-scale work, Masha's style)~~ — Home
+  spec: Hero one-line specialization + Good Fit teaser (FS §3.1, PRD D7)
+- ~~Price framing ("starting from …", filtering out low-budget clients)~~ — PRD D8 (Home price
+  teaser, canonical pricing on Process); FS §3.1/§3.2/§5
+- ~~Client expectations section (trust the artist's style, multiple sessions, no
+  micro-revisions)~~ — Process page content (FS §3.2: Design Process, Good Fit); owner-authored
+  copy per FS §3
+- ~~Curated gallery: 5–8 strong works instead of full feed~~ — FS §3.1 Featured Work (4–8
+  owner-curated images)
 
 ---
 
 ## Request Form Improvements
 
-- Required form fields are defined in PROJECT_CONTEXT.md (Request Form section).
-  The following fields are candidates for addition or refinement post-MVP:
-  - budget range
+- **Field model authority (2026-07-12):** the Stage 6 request-form field model is defined in
+  STAGE_6_FUNCTIONAL_SPECIFICATION.md §4.2 (which supersedes the PROJECT_CONTEXT.md Request Form
+  section for Stage 6). The FS's field-inclusion rule forbids adding any field outside its table
+  without escalation. The following remain post-MVP candidates, but each now requires a PRD/FS
+  change first (PRD §9 Change Control) before implementation:
+  - budget range (note: the FS §4.2 field model deliberately contains no budget field)
   - willingness to wait
 
 - File upload: prevent selecting the same file twice before submit. Nice-to-have, small,
@@ -45,6 +51,8 @@ not silently dropped. Stage 5D deferred findings are recorded in the entries bel
   `FileUploadInput`'s `handleChange`, since two `File` objects from separate picker selections are
   never reference-equal even when they represent the same underlying file. Not implemented — see
   PROJECT_IMPLEMENTATION_PLAN.md — Post-Launch Roadmap — File Upload UX for the fuller note.
+  (2026-07-12: still open; the Stage 6 upload UX itself is specified in FS §4.3–§4.5 —
+  thumbnails, per-file progress/failure/remove — and governs any rework of `FileUploadInput`.)
 
 ---
 
@@ -63,7 +71,10 @@ not silently dropped. Stage 5D deferred findings are recorded in the entries bel
   only under admin requests, so an unhandled public-page render error falls through to Next.js's
   default screen. Deferred as Stage 6 visual/product polish (localized 404 with navigation, minimal
   public error boundary / `global-error.tsx`), deliberately not implemented in the Stage 5D fix
-  passes. See PROJECT_STAGE_LOG.md, 2026-07-09 Stage 5D Fix Pass 2 entry.
+  passes. See PROJECT_STAGE_LOG.md, 2026-07-09 Stage 5D Fix Pass 2 entry. (2026-07-12: remains a
+  Stage 6 item — STAGE_6_FUNCTIONAL_SPECIFICATION.md does not define error/404 pages, so this is
+  tracked in PROJECT_IMPLEMENTATION_PLAN.md, Stage 6, "In Stage 6 but outside the FS's
+  public-website scope".)
 
 - Admin image viewer (`RequestImageViewer`, YARL Zoom) — physical mobile-device verification
   deferred from Stage 4B.5.1, carried into Stage 6 / pre-release manual QA (does not block Stage

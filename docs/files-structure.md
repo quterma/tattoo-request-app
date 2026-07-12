@@ -107,7 +107,9 @@ tattoo-request-app/
 │       ├── PROJECT_PRODUCTION_READINESS.md
 │       ├── PROJECT_STAGE_LOG.md
 │       ├── PROJECT_STRUCTURE.md
-│       └── PROJECT_TESTING_STRATEGY.md
+│       ├── PROJECT_TESTING_STRATEGY.md
+│       ├── STAGE_6_FUNCTIONAL_SPECIFICATION.md
+│       └── STAGE_6_PRODUCT_DEFINITION.md
 ├── scripts/
 │   └── update-structure.mjs
 ├── src/

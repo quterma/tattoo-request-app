@@ -226,6 +226,14 @@ Every submitted request is assigned a human-readable reference code.
 
 `referenceCode` is the identifier used in all human-facing contexts. DB UUID and `clientSubmissionId` are internal and never shown to users.
 
+**Stage 6 note (2026-07-12):** STAGE_6_FUNCTIONAL_SPECIFICATION.md §4.6 defines a different
+reference-code format for the Stage 6 public request flow (6 characters, uppercase alphanumeric
+excluding O/0/I/1, unique per request). The FS governs Stage 6 implementation; the
+`REQ-YYYY-NNNN` format above is the accurate record of what Stages 3–5 shipped. The migration
+path for existing codes (if any real data exists at that point) is a Stage 6 implementation
+decision to be recorded when that work is planned. The identifier-role split itself (UUID and
+`clientSubmissionId` internal-only, `referenceCode` human-facing) is unchanged.
+
 ---
 
 # Client Name Decision
@@ -978,6 +986,44 @@ These are separate domain concerns — see Future Domain Direction below.
 - The server validates only that a requested status value is one of the five allowed values.
 - No transition graph or transition validation is implemented in Stage 4B — any allowed value
   may be set from any other allowed value.
+
+---
+
+# Stage 6 Product Documentation Authority
+
+Decided 2026-07-12, at Stage 6 start. Two dedicated Stage 6 documents were added to
+`docs/project/` and are the official Source of Truth for Stage 6:
+
+- **`STAGE_6_PRODUCT_DEFINITION.md` (PRD)** — the authoritative **product** document: product
+  context, vision, goals, customer journey, product principles, Stage 6 Non-Goals, Future Scope,
+  and Owner Decisions D1–D10 (marketing, request-over-booking, reply channel, optional uploads,
+  48-hour response promise, eligibility, fit framing, pricing disclosure, navigation,
+  English-only localization).
+- **`STAGE_6_FUNCTIONAL_SPECIFICATION.md` (FS)** — the authoritative **implementation** document
+  for the public website: navigation/CTAs, page responsibilities, the Request flow at field
+  level, states and failure behavior, content canonical-ownership rules, normative copy
+  (Appendix A), and acceptance criteria (FS §6).
+
+## Rules
+
+- All future Stage 6 work on the public website must follow these two documents.
+- Product behavior changes require updating the PRD/FS **first** (PRD §9 Change Control), then
+  implementation. Engineers must not expand scope or resolve open product questions during
+  implementation (FS §1 Escalation rule) — such questions are escalated as owner decisions.
+- Precedence on conflict: PRD > FS > any older Stage 6 planning text in PROJECT_* documents.
+  A PRD/FS conflict is a documentation defect and is escalated (PRD §9).
+- The internal admin application remains governed by the existing PROJECT_* documentation — the
+  FS's responsibility ends when a valid request is durably persisted and assigned a reference
+  code (FS §1, Internal boundary).
+
+## Relationship to earlier decisions in this file
+
+Earlier decisions in this file describing the **public** surface as shipped in Stages 0–5
+(e.g. request-form field decisions, Reference Code format, contact-field model, consent wording)
+remain the accurate record of what was decided and built then. Where the Stage 6 PRD/FS define a
+different target (e.g. optional uploads, single contact method, eligibility confirmation,
+FS §4.6 reference-code format), the PRD/FS govern Stage 6 implementation; the earlier decision
+entries are historical and are annotated in place where the difference is material.
 - No terminal-state enforcement in Stage 4B — e.g., updating a `rejected` or `completed` request
   back to `new` is not blocked at this stage.
 - Same-status updates are valid (setting a request's status to the value it already has is not

@@ -580,8 +580,9 @@ PROJECT_DECISIONS.md, Stage 5A Security / Data-Boundary Decisions, for the decis
 Stage 5B's core hardening tasks are complete, but several of its listed items (custom SMTP / rate
 limits / leaked-password protection verification, production environment setup, CI/CD) remain open
 as pre-launch work — see the Stage 5B task list below and PROJECT_PRODUCTION_READINESS.md.
-**Stage 6 is the next development stage** — UI/content/polish work only; pre-launch requirements
-remain separately open and are not implied complete by Stage 5D closure.
+**Stage 6 is the next development stage** — governed by `STAGE_6_PRODUCT_DEFINITION.md` (PRD) and
+`STAGE_6_FUNCTIONAL_SPECIFICATION.md` (see Stage 6 below); pre-launch requirements remain
+separately open and are not implied complete by Stage 5D closure.
 
 ## Stage 5A — Security / Data-Boundary Planning ✓ completed (2026-07-05)
 
@@ -824,20 +825,39 @@ Result:
 
 # Stage 6 — Product Experience Polish
 
-Goal: elevate UI/UX quality after the initial release.
+Goal: elevate UI/UX and product quality of the public website and polish the admin experience.
 
-Stage 6 begins only after Stage 5D's audit/fix pass is closed (see Stage 5D above) — visual
-polish should build on a reviewed, documented baseline, not on unreviewed accumulated debt.
+Stage 6 begins only after Stage 5D's audit/fix pass is closed (see Stage 5D above) — it builds
+on a reviewed, documented baseline, not on unreviewed accumulated debt.
 
-This stage does not ship new features — it improves what exists.
+## Source of Truth (2026-07-12 — see PROJECT_DECISIONS.md, Stage 6 Product Documentation Authority)
 
-Tasks:
+Stage 6 is governed by two dedicated documents in `docs/project/`:
 
-- complete UI/UX pass across all public pages and the admin interface
-- landing page improvements (copy, layout, positioning, trust signals)
-- request flow optimization (reduce friction, improve guidance)
-- onboarding and conversion improvements
-- mobile polish (spacing, touch targets, scroll behavior)
+- **`STAGE_6_PRODUCT_DEFINITION.md` (PRD)** — the authoritative **product** document: product
+  context, vision, goals, customer journey, product principles, Non-Goals, and Owner Decisions
+  D1–D10.
+- **`STAGE_6_FUNCTIONAL_SPECIFICATION.md` (FS)** — the authoritative **implementation** document
+  for the public website: navigation and CTAs, page responsibilities, the Request flow at field
+  level, states/failure behavior, content rules, normative copy (Appendix A), and acceptance
+  criteria (FS §6).
+
+Rules:
+
+- All future Stage 6 work on the public website must follow these two documents. This plan does
+  not restate their scope — the earlier Stage 6 task list previously duplicated here is
+  superseded by them.
+- Product behavior changes require updating the PRD/FS **first** (PRD §9 Change Control), then
+  implementation. Engineers must not resolve open product questions during implementation
+  (FS §1 Escalation rule).
+- On conflict, the PRD wins over the FS; both win over any older Stage 6 planning text remaining
+  in PROJECT_* documents.
+
+## In Stage 6 but outside the FS's public-website scope
+
+Carried Stage 6 items not covered by the PRD/FS (tracked here and in PROJECT_BACKLOG.md):
+
+- admin interface polish, including mobile polish (spacing, touch targets, scroll behavior)
   - candidate (noted 2026-07-03, not decided): admin request list in mobile landscape /
     tablet-width view could move to a two-column card grid if it improves use of horizontal
     space; the Stage 4B.4 list stays single-column mobile-first until this visual review —
@@ -852,14 +872,17 @@ Tasks:
     `maxZoomPixelRatio: 2`, after a 2026-07-05 attempt was found insufficient; see
     PROJECT_STAGE_LOG.md 2026-07-06 entry) — only its manual real-browser verification remains,
     tracked alongside the physical-device checks above
-- design system refinement (typography, color, spacing consistency)
-- animations and micro-interactions
-- accessibility and readability improvements
-- trust-building content (portfolio, process, social proof)
-- basics: favicon, Open Graph / social preview image, meta description/SEO tags
+- public error & 404 UX (localized 404 with navigation, minimal public error boundary /
+  `global-error.tsx`) — Stage 5D deferred finding, see PROJECT_BACKLOG.md; the FS does not
+  define error/404 pages
+- basics: favicon, Open Graph / social preview image, meta description/SEO tags (public site,
+  not specified by the FS)
+- design system refinement (typography, color, spacing consistency), accessibility and
+  readability improvements — apply across both public and admin surfaces
 
 Exit Criteria:
 
+- every FS §6 acceptance criterion verifies true for the public website
 - visual and interaction quality is consistently high across all surfaces
 - mobile experience is polished
 - no regressions in core flows
@@ -939,8 +962,11 @@ Note: Telegram was originally planned for Stage 3E and Stage 5. Decision recorde
   immutable after submission per the existing Storage Decisions, and no in-place "swap this file
   for another" interaction exists pre-submit either; removing and re-picking is the only supported
   path today.
-- image previews (thumbnails)
-- drag-and-drop, progress indicator
+- ~~image previews (thumbnails)~~ / ~~progress indicator~~ — **absorbed into Stage 6
+  (2026-07-12):** STAGE_6_FUNCTIONAL_SPECIFICATION.md §4.3 requires per-file thumbnails with a
+  remove control, upload-on-selection with per-file progress, and per-file failure states for the
+  public request form — no longer post-launch for the public surface
+- drag-and-drop
 - prevent duplicate file selection before submit (nice-to-have; not blocking Stage 4B) — likely
   via a file-identity heuristic (`name + size + lastModified + type`, since `File` objects from
   separate picker selections are never `===`-equal even for the same underlying file) to silently
@@ -949,8 +975,13 @@ Note: Telegram was originally planned for Stage 3E and Stage 5. Decision recorde
 
 ## Other Planned Improvements
 
-- budget range and willingness-to-wait fields on the request form
-- FAQ accordion on the policies page
+- budget range and willingness-to-wait fields on the request form — **note (2026-07-12):** the
+  Stage 6 field model (STAGE_6_FUNCTIONAL_SPECIFICATION.md §4.2) contains no budget field and
+  forbids adding fields outside its table without escalation; implementing this item requires a
+  PRD/FS change first (PRD §9 Change Control)
+- FAQ accordion — **note (2026-07-12):** per STAGE_6_FUNCTIONAL_SPECIFICATION.md §5, the FAQ's
+  canonical page is Process (not Policies); presentation ("expandable details where appropriate")
+  is governed by the FS
 - magic-byte MIME type verification (if abuse observed)
 - API route constants consolidation (when multiple endpoints exist)
 - typography component extraction (SectionTitle, SectionText, BulletList)

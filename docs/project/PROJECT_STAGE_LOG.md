@@ -12,7 +12,8 @@ AI agents and developers working on the project.
 
 ## Current Stage
 
-Stage: Stage 5 — Production Hardening — closed. Next: Stage 6 — Visual/Product Polish.
+Stage: Stage 6 — Product Experience Polish — current (planning documentation integrated
+2026-07-12; implementation not started). Stage 5 — Production Hardening — closed.
 Status: Stage 4B — Admin Dashboard is closed (implementation-complete, 2026-07-04). Stage 5A —
 Security / Data-Boundary Planning is closed (completed 2026-07-05). **Stage 5B — Production
 Hardening Implementation is closed** — its core hardening scope (5B.1 `create_request` search_path
@@ -26,12 +27,23 @@ closure entry immediately below. **Stage 5D — Full Application Maturity Audit 
 (2026-07-10)** — primary audit (2026-07-08), findings reconciliation, Fix Pass 1 (commit
 `9bc8e6f`), Fix Pass 2 (commit `043bcb7`), and an independent read-only closure verification
 (`STAGE_5D_READY_TO_CLOSE`) are all complete — see the dated 2026-07-10 closure entry below.
-**Stage 6 (visual/product polish) is unblocked and is the next development stage.** Stage 5D
+**Stage 6 (visual/product polish) is unblocked and is the current development stage.** Stage 5D
 closure is not a public-launch or production-readiness claim — pre-launch items remain open in
-PROJECT_PRODUCTION_READINESS.md and PROJECT_BACKLOG.md.
+PROJECT_PRODUCTION_READINESS.md and PROJECT_BACKLOG.md. **Stage 6 Source of Truth (2026-07-12):**
+`STAGE_6_PRODUCT_DEFINITION.md` (PRD — the authoritative product document, incl. Owner Decisions
+D1–D10) and `STAGE_6_FUNCTIONAL_SPECIFICATION.md` (the authoritative implementation document for
+the public website). All future Stage 6 work follows these documents; product behavior changes
+require updating them first. See PROJECT_DECISIONS.md — Stage 6 Product Documentation Authority.
 
 Current focus:
 
+- **Stage 6 product documentation integrated — 2026-07-12.** The Stage 6 PRD and Functional
+  Specification were added to `docs/project/` and made the official Stage 6 Source of Truth.
+  PROJECT_IMPLEMENTATION_PLAN.md (Stage 6 section rewritten to reference them; superseded task
+  list removed), PROJECT_CONTEXT.md, PROJECT_DECISIONS.md (new Stage 6 Product Documentation
+  Authority section; Reference Code Decision annotated), PROJECT_BACKLOG.md (absorbed items
+  struck through with pointers), and PROJECT_ARCHITECTURE.md were aligned. Documentation only —
+  no source code changed. See the dated 2026-07-12 entry below.
 - **Stage 5D — formally closed 2026-07-10.** See the dated closure entry below for the full
   fixed/deferred/rejected record and explicit non-claims. Next: Stage 6 (visual/product polish) —
   see PROJECT_IMPLEMENTATION_PLAN.md, Stage 6; pre-launch DevOps/infrastructure work remains
@@ -290,6 +302,74 @@ Completed in Stage 3:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-07-12 — Stage 6 product documentation integrated (PRD + Functional Specification become Source of Truth)
+
+Status: Completed. Documentation-only pass — no source code, tests, dependencies, configuration,
+environment files, or deployment settings were changed.
+
+Two new Stage 6 documents (added to `docs/project/` by the owner) were integrated into the
+project documentation as the official Stage 6 Source of Truth:
+
+- **`STAGE_6_PRODUCT_DEFINITION.md` (PRD, v1.0, Approved)** — the authoritative **product**
+  document: product context/vision/goals, customer journey, product principles, Stage 6
+  Non-Goals, Future Scope, Owner Decisions D1–D10, and change control (PRD §9).
+- **`STAGE_6_FUNCTIONAL_SPECIFICATION.md` (FS, v1.0, Approved for implementation)** — the
+  authoritative **implementation** document for the public website: navigation/CTAs, page
+  responsibilities, field-level Request flow, states/failure behavior, content rules, normative
+  copy (Appendix A), acceptance criteria (FS §6).
+
+Rules now recorded across the documentation set: all future Stage 6 work follows these two
+documents; product behavior changes require updating the PRD/FS first; precedence on conflict is
+PRD > FS > older Stage 6 planning text in PROJECT_* docs; engineers escalate open product
+questions instead of resolving them in implementation (FS §1).
+
+**Documents updated in this pass:**
+
+- **PROJECT_IMPLEMENTATION_PLAN.md** — Stage 6 section rewritten: new Source of Truth block; the
+  previously duplicated Stage 6 task list replaced (superseded by the PRD/FS); items that remain
+  in Stage 6 but outside the FS's public-website scope kept explicitly (admin/mobile polish incl.
+  the image-viewer device QA and two-column-list candidate, public error & 404 UX, favicon/OG/SEO
+  basics, design-system/a11y refinement); exit criteria now include FS §6. Also: the Stage 5
+  "Stage 6 is next" note now points at the PRD/FS; Post-Launch Roadmap — File Upload UX:
+  thumbnails and per-file progress marked absorbed into Stage 6 (FS §4.3); Other Planned
+  Improvements: budget-range/willingness-to-wait and FAQ-accordion items annotated as requiring a
+  PRD/FS change first.
+- **PROJECT_CONTEXT.md** — Stage 6 note added at the top of MVP Features: the PRD/FS supersede
+  the Public Surface / Request Form sections for Stage 6 (those remain as the Stages 0–5
+  historical record); Success Criteria now reference FS §6 for public-website completeness.
+- **PROJECT_DECISIONS.md** — new "Stage 6 Product Documentation Authority" section (authority,
+  rules, precedence, admin-side boundary, relationship to earlier decisions); Reference Code
+  Decision annotated: FS §4.6 defines the Stage 6 reference-code format (6-char uppercase
+  alphanumeric excluding O/0/I/1), superseding `REQ-YYYY-NNNN` for Stage 6 implementation, with
+  the migration path for existing codes left as a to-be-recorded Stage 6 implementation decision.
+- **PROJECT_BACKLOG.md** — UX / Product Improvements items absorbed by the PRD/FS struck through
+  with pointers (FAQ accordion → FS §5; Not-a-Fit → PRD D7/FS §3.2; Home positioning → FS §3.1;
+  price framing → PRD D8; client expectations → FS §3.2; curated gallery → FS §3.1 Featured
+  Work); Request Form Improvements now defer to the FS §4.2 field model and its field-inclusion
+  rule; public error & 404 UX entry notes the FS does not cover it (remains a Stage 6 plan item);
+  the duplicate-file-selection item notes FS §4.3–§4.5 governs any `FileUploadInput` rework.
+- **PROJECT_ARCHITECTURE.md** — Client component description annotated: current public page set
+  is the Stages 0–5 shipped state; the Stage 6 target page set/navigation is defined in FS §2–§3.
+- **PROJECT_STAGE_LOG.md** — Current Stage header switched to Stage 6 (current, planning
+  documentation integrated; implementation not started); Current focus updated; this entry added.
+- **PROJECT_PRODUCTION_READINESS.md** — reviewed, no change needed: its Stage 6 references are
+  timing/manual-QA pointers, not duplicated Stage 6 planning text.
+
+**Known divergences deliberately recorded, not resolved here (implementation work, not
+documentation defects):** the shipped Stages 0–5 public site differs from the FS target — e.g.
+required vs optional uploads (2 required groups now vs 3 optional categories), contact model
+("at least one of email/phone/other" + budget field vs single contact-method select, no budget),
+consent-to-policies checkbox vs eligibility confirmation, idea length 10–2000 vs 20–1000, name
+2–30 vs 2–80, aftercare page combining preparation content vs separate Preparation/Aftercare
+pages, in-place success state vs dedicated Success page with redirect semantics, `REQ-YYYY-NNNN`
+vs FS §4.6 code format, and FS §4.5 abuse mitigation not yet existing. These are the Stage 6
+implementation gap by definition; the FS governs the target state.
+
+`pnpm structure` run (no change — docs-only). No `pnpm qg` — no source file touched, consistent
+with prior docs-only entries. Nothing committed.
+
+---
 
 ### 2026-07-10 — Stage 5D closed: Full Application Maturity Audit + Targeted Fix Passes complete
 

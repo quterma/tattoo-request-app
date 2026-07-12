@@ -51,6 +51,15 @@ Instead of chat-based communication, users provide all necessary information upf
 
 # MVP Features
 
+> **Stage 6 note (2026-07-12).** For Stage 6 and onward, the authoritative definition of the
+> public surface (pages, navigation, request-form fields, success behavior, content rules) is
+> `STAGE_6_PRODUCT_DEFINITION.md` (PRD — the authoritative product document) and
+> `STAGE_6_FUNCTIONAL_SPECIFICATION.md` (the authoritative implementation document for the
+> public website). The "Public Surface" and "Request Form" sections below describe the original
+> Stages 0–5 MVP as shipped and are kept as historical context; where they differ from the
+> Stage 6 documents (e.g. upload requiredness, contact model, consent wording, page set), the
+> Stage 6 documents win. Product behavior changes require updating the PRD/FS first.
+
 ### Public Surface
 
 - Home page (intro + navigation)
@@ -118,7 +127,9 @@ The production release is considered complete when:
 - requests are stored and accessible to the artist
 - requests can be reviewed and managed in the admin interface
 - the application works smoothly on mobile devices
-- UI/UX quality is production-ready across all surfaces (see Stage 6 in PROJECT_IMPLEMENTATION_PLAN.md)
+- UI/UX quality is production-ready across all surfaces (see Stage 6 in
+  PROJECT_IMPLEMENTATION_PLAN.md; the public website is complete when the acceptance criteria in
+  STAGE_6_FUNCTIONAL_SPECIFICATION.md §6 verify true)
 - the system is deployed and usable in real conditions
 
 ---
