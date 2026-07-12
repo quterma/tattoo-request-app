@@ -113,6 +113,7 @@ tattoo-request-app/
 │       ├── STAGE_6_FUNCTIONAL_SPECIFICATION.md
 │       ├── STAGE_6_PRODUCT_DEFINITION.md
 │       └── tasks/
+│           ├── STAGE_6_STRAT_BRIEF.md
 │           └── STAGE_TASK_TEMPLATE.md
 ├── scripts/
 │   └── update-structure.mjs

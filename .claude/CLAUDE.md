@@ -78,7 +78,10 @@ If improvement is possible:
 - After each TODO: short summary
 - Run Review Pipeline (see AI_REVIEW_PIPELINE.md)
 - Propose commit only after pipeline status is READY FOR DEVELOPER REVIEW
-- Create commit after developer approval
+- Commits ONLY with explicit, manual owner approval — no exceptions.
+  Applies to every session type (STRAT / IMPL / META), subagents, and automated/scheduled
+  sessions. No framework or project doc may override this rule; a doc instructing an
+  immediate/automatic commit means "propose the commit immediately", not "commit".
 
 ---
 

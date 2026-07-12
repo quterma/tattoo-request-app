@@ -28,16 +28,21 @@ so each type is findable by search.
 Start every new strategic session with:
 
 > This is a STRAT session per docs/framework/AI_TASK_PROTOCOL.md.
+> Session settings: highest-reasoning tier model recommended; Plan mode for non-trivial work;
+> session title `STRAT: Stage <stage> — <topic>`.
 > Run the Pre-task Sync (CLAUDE.md) and read the current stage's Source of Truth
 > (for Stage 6: STAGE_6_PRODUCT_DEFINITION.md and STAGE_6_FUNCTIONAL_SPECIFICATION.md).
-> If `docs/project/tasks/STAGE_<stage>_STRAT_CONTINUATION.md` exists, read it too.
-> Topic: \<topic — or simply: continue from the STRAT continuation note\>.
+> Read `docs/project/tasks/STAGE_<stage>_STRAT_BRIEF.md` — it is the topic and the session's
+> pickup point. If the brief does not exist and this is the stage's first STRAT session, stop
+> and ask the owner what the first strategic topic is — do not invent one.
 > Expected outcome: \<task files for a stage / a decision on a question / a plan\>.
 > Confirm understanding in 3–5 lines before proceeding.
 > Before the session ends: persist every outcome into docs — task files per
 > STAGE_TASK_TEMPLATE.md (status `ready`), PROJECT_DECISIONS.md for decisions,
-> PROJECT_STAGE_LOG.md for progress. If the topic is not finished when the session ends,
-> also write/update the stage's STRAT continuation note (see STRAT Continuation below).
+> PROJECT_STAGE_LOG.md for progress — and unconditionally write/update
+> `docs/project/tasks/STAGE_<stage>_STRAT_BRIEF.md` with what was done and what's next
+> (see STRAT Next-Session Brief below), proposing its commit immediately after writing
+> (commits require explicit owner approval — CLAUDE.md).
 > No chat-only conclusions. List created/updated files in the final message.
 
 (The META kickoff prompt lives in AI_WORKFLOW_MASTER.md; IMPL sessions are started from a task
@@ -45,34 +50,35 @@ file per STAGE_TASK_TEMPLATE.md — How to Use.)
 
 ---
 
-# STRAT Continuation (unfinished topic)
+# STRAT Next-Session Brief
 
-Two distinct ways a strategic session ends:
+Every strategic session ends by writing/updating the stage's brief — a single unified
+mechanism, with no "topic finished vs unfinished" branch. The brief is both the closing
+session's handoff and the next session's topic; the owner writes no ad-hoc summary prompt.
 
-- **Topic finished** — the standard kickoff persistence step is enough; the next STRAT session
-  picks a new Topic from PROJECT_STAGE_LOG.md / task files. No extra artifact.
-- **Topic NOT finished** (context grown long, natural stopping point) — the closing session
-  must leave a pickup point: the stage's **STRAT continuation note**.
-
-Continuation note convention:
-
-- Location: `docs/project/tasks/STAGE_<stage>_STRAT_CONTINUATION.md` — at most one per stage;
-  written and updated only by that stage's STRAT sessions (no conflict with Cross-Session
+- Location: `docs/project/tasks/STAGE_<stage>_STRAT_BRIEF.md` — one fixed name per stage,
+  **overwritten** by each closing session (not versioned or appended). History and
+  traceability come from `git log -- docs/project/tasks/STAGE_<stage>_STRAT_BRIEF.md`, which
+  only works if every brief version reaches a commit: the closing session must propose the
+  brief's commit immediately after writing it, and it must be committed (with owner approval —
+  commits are never made without it, CLAUDE.md) before the next STRAT session starts.
+- Written and updated only by that stage's STRAT sessions (no conflict with Cross-Session
   Rules: one active STRAT session per stage).
 - Contents — pointers, not prose (no duplication per DOCUMENTATION_SYSTEM_RULES.md):
-  1. **Decided** — pointers to the PROJECT_DECISIONS.md / PROJECT_STAGE_LOG.md entries this
-     session wrote; never restate decisions in the note
-  2. **Open** — the explicit list of questions still undecided or not yet discussed
-  3. **Task files** — which exist as `ready` vs `draft`; an idea concrete enough to file
-     becomes a `draft` task file, not note text
-  4. **Suggested next step** — optional, one line
-- The next STRAT session starts with the standard kickoff; its Topic is simply "continue from
-  the STRAT continuation note" — the owner writes no ad-hoc summary prompt.
-- If the Topic says to continue from the note but no note exists, do not guess (fail-fast per
-  CLAUDE.md): stop and ask the owner — a missing note means either a stale kickoff prompt or a
-  prior session that failed its persistence duty, and the owner must say which.
-- When the stage's strategic work is finished, the session that finishes it moves the note to
-  `docs/project/tasks/done/` (same never-delete convention as task files).
+  1. **Session summary** — one line
+  2. **Decided** — pointers to the PROJECT_DECISIONS.md / PROJECT_STAGE_LOG.md entries this
+     session wrote; never restate decisions in the brief
+  3. **Open** — undecided questions, if any
+  4. **Task files** — which exist as `ready` vs `draft`; an idea concrete enough to file
+     becomes a `draft` task file, not brief text
+  5. **Next topic** — continuation of the same topic, or a new one picked from
+     PROJECT_STAGE_LOG.md / PROJECT_BACKLOG.md, with a one-line reason if relevant
+- Fail-fast: if the kickoff expects a brief and none exists (and the stage is not new), do not
+  guess and never invent a topic — stop and ask the owner; a missing brief means either a
+  stale kickoff prompt or a prior session that failed its persistence duty.
+- When the stage's strategic work is genuinely finished (project end or an explicit owner
+  stop), move the brief to `docs/project/tasks/done/` (same never-delete convention as task
+  files).
 
 ---
 
@@ -114,7 +120,8 @@ pointer to its replacement, if any) and also moves to `docs/project/tasks/done/`
   discuss and resolve them per AI_WORKFLOW_MASTER.md.
 - Shared documents (PROJECT_STAGE_LOG.md, PROJECT_DECISIONS.md) must have at most one writing
   session at a time — do not run sessions in parallel if more than one will update the same
-  shared doc. Task files are conflict-free by design (one file per task).
+  shared doc. Task files are conflict-free by design (one file per task); STRAT briefs are
+  stage-scoped and written only by the stage's single active STRAT session.
 
 ---
 
@@ -137,4 +144,4 @@ pointer to its replacement, if any) and also moves to `docs/project/tasks/done/`
 - **Forking is not a continuation mechanism:** a fork inherits the full parent transcript, so it
   carries the same context weight and does not relieve context pressure. Fork to branch an idea
   from shared context; to continue work that outgrew its session, start a fresh session with
-  context from docs (for unfinished strategic topics — see STRAT Continuation).
+  context from docs (for strategic work — see STRAT Next-Session Brief).

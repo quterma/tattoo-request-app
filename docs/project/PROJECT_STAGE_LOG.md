@@ -303,6 +303,47 @@ Completed in Stage 3:
 
 ## Log Entries (reverse chronological)
 
+### 2026-07-13 — META: STRAT continuation note unified into STRAT Next-Session Brief
+
+Status: Completed. Documentation-only — no source code changed. Owner-approved in-session
+(framework docs change rule satisfied). Supersedes the "STRAT Continuation (unfinished topic)"
+design from the entry immediately below (same day). Note: an earlier report that this
+unification had been applied came from an agent without write access and never landed — the
+change was re-applied for real in this pass and verified by reading the file back (recorded as
+a workflow observation in AI_FRAMEWORK_IDEAS.md).
+
+Changes, all in AI_TASK_PROTOCOL.md:
+
+- **STRAT Continuation (unfinished topic)** section replaced by **STRAT Next-Session Brief**:
+  every STRAT session (no finished/unfinished branch) ends by overwriting the per-stage brief
+  `docs/project/tasks/STAGE_<stage>_STRAT_BRIEF.md` — one fixed name per stage, not
+  versioned/appended; history via `git log` on the file, so every brief version must reach a
+  commit: proposed immediately after writing, committed (with owner approval) before the next
+  STRAT session. Contents (pointers, not prose): one-line session summary; Decided
+  (pointers to PROJECT_DECISIONS.md/STAGE_LOG entries); Open questions; task files ready vs
+  draft; Next topic (same-topic continuation or a new one from PROJECT_STAGE_LOG.md/
+  PROJECT_BACKLOG.md). Fail-fast kept: expected brief missing (stage not new) → stop and ask.
+  Stage strategy genuinely finished → brief moves to `tasks/done/`.
+- **STRAT Kickoff Prompt** rewritten to match: the brief is the topic and pickup point (no
+  per-session Topic writing by the owner); first STRAT session on a new stage with no brief →
+  stop and ask for the first topic, never invent; session-settings line added (model tier,
+  Plan mode, title); closing duty now unconditionally includes writing the brief and
+  immediately proposing its commit.
+- Cross-Session Rules and the Session Settings Guidance fork bullet updated to reference the
+  brief.
+- **CLAUDE.md (Workflow)** — universal commit rule added, owner-requested: commits ONLY with
+  explicit, manual owner approval, no exceptions — every session type, subagents, and
+  automated/scheduled sessions; no doc may override; "commit immediately" in any doc means
+  "propose the commit immediately". This resolved the conflict with the brief's original
+  immediate-commit wording (rephrased in AI_TASK_PROTOCOL.md the same pass). Technical
+  enforcement added alongside the doc rule: new project `.claude/settings.json` with
+  permission `ask` rules for `git commit`/`git push` (Bash and PowerShell tools), so any
+  agent — including automated sessions — hits a manual permission prompt before committing.
+
+`pnpm structure` run; no `pnpm qg` — docs-only.
+
+---
+
 ### 2026-07-13 — META: STRAT continuation note convention (unfinished strategic topics)
 
 Status: Completed. Documentation-only — no source code changed. Owner-approved in-session

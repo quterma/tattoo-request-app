@@ -78,6 +78,22 @@ AI_WORKFLOW_MASTER.md. Format: date — observation — status (`open` / `resolv
   inherits the full parent transcript and does not relieve context pressure. — resolved:
   AI_TASK_PROTOCOL.md (STRAT Continuation section; kickoff prompt continuation lines; Session
   Settings Guidance forking bullet).
+- 2026-07-13 — The two-case STRAT ending design (continuation note only when a topic is
+  unfinished) was unified into a single unconditional per-stage brief
+  (`STAGE_<stage>_STRAT_BRIEF.md`, overwritten each session, committed immediately for git
+  traceability, carries the next topic) — removes the finished/unfinished branch and the
+  owner's per-session topic-writing duty. — resolved: AI_TASK_PROTOCOL.md (STRAT Next-Session
+  Brief; STRAT Kickoff Prompt).
+- 2026-07-13 — The brief's "commit immediately after writing" requirement conflicted with the
+  commits-only-with-approval principle, and no doc stated that principle universally (incl.
+  automated sessions and subagents). — resolved: CLAUDE.md (Workflow: universal manual-approval
+  commit rule, no doc may override); AI_TASK_PROTOCOL.md rephrased to "propose the commit
+  immediately".
+- 2026-07-13 — A tool-less agent's "changes applied" reports were relayed as done, but the
+  agent had no write access and the file was untouched; caught only by re-reading the file on
+  disk. Lesson: after any reported framework-doc change, verify on disk (read back) before
+  treating it as landed. — resolved: re-applied for real in the same pass, with read-back
+  confirmation.
 - 2026-07-12 — DOCUMENTATION_SYSTEM_RULES.md is stale relative to the newer framework docs: its
   framework-doc examples and conflict-priority list predate AI_TASK_PROTOCOL.md /
   AI_WORKFLOW_MASTER.md, and its scope overlap with AI_DEVELOPMENT_WORKFLOW.md (in-session
