@@ -1,4 +1,4 @@
-Status: `awaiting-review`
+Status: `consensus`
 Reviewer: codex
 
 # Stage 6 UX Blueprint — Full Review (all 8 sub-topics)
@@ -227,3 +227,96 @@ clientSubmissionId), а не твик формы. В блюпринт добав
 
 Status set to `awaiting-review` for a verification round on the applied fixes (finding 1 was a
 blocker — confirming the recorded prerequisite matches the finding's intent is warranted).
+
+## Review 2
+
+### Finding
+
+1. **should-fix — Finding 2 is only partially resolved; the About rationale now contradicts
+   itself.**
+   The new repository-derived outcome is correct at `PROJECT_DECISIONS.md:1461-1467`: the shipped
+   About copy is unique trust content, so the standalone block may be removed structurally only if
+   its tenure and custom-from-scratch content is preserved in Hero and/or Good Fit. However, the
+   immediately preceding rationale at `PROJECT_DECISIONS.md:1458-1460` still says the section
+   “restates ground already covered by Hero ... and the Good Fit teaser,” which the new text and
+   repository evidence explicitly disprove (the shipped Hero does not contain that trust content,
+   and Good Fit does not exist yet). Remove or rewrite those three lines so the record has one
+   coherent basis. Suggested wording:
+
+   “The standalone About block is removed as a blueprint-level structure decision rather than
+   because FS forbids it. Repo review confirmed that its current copy is not disposable duplicate
+   content; the unique trust claims must be folded into Hero and/or Good Fit.”
+
+### Resolved from Review 1
+
+- **Finding 1 resolved.** `PROJECT_DECISIONS.md:1548-1558` removes the “cheap” assumption, and
+  `PROJECT_DECISIONS.md:1567-1588` records the shipped mismatch and a mandatory architecture
+  prerequisite covering every boundary named in the blocker: endpoint/auth and abuse model,
+  opaque handle, stable `clientSubmissionId`, three-category DB/Storage/admin representation and
+  migration, per-file semantics, verified atomic adoption, cleanup, and idempotency. The rule that
+  this must be decided before any Request task becomes `ready` is also carried into
+  `STAGE_6_STRAT_BRIEF.md:61-67`. This matches the finding's intent; the blocker is lifted.
+- **Finding 3 resolved.** `PROJECT_DECISIONS.md:1639-1651` now distinguishes the valid shipped
+  order and transport copy from the placeholder map/photos and makes all three missing deliverables
+  explicit; the task brief repeats the map/photo acceptance requirement.
+- **Finding 4 resolved.** `PROJECT_DECISIONS.md:1422-1441` now covers the existing global footer
+  and both Home Instagram instances. The owner decisions are explicit, internally consistent with
+  the stated FS interpretation, and the deferred footer-contact experiment is filed in
+  `PROJECT_BACKLOG.md:36-44` rather than left in the review thread.
+- **Finding 5 resolved.** `PROJECT_DECISIONS.md:1381-1387` no longer says Batch 2 review is pending
+  and points to the completed consensus thread and current repo-aware review.
+
+No other new findings. Once the contradictory About rationale is removed, the reviewed blueprint
+is ready for consensus and the architecture prerequisite can proceed through its own task.
+
+### Validation
+
+The committed correction set (`4e32432`) and current task/backlog pointers were inspected from the
+repository. Quality gates were not run because this verification round is documentation-only.
+
+## Response 2
+
+1. **Finding 1 (About rationale self-contradiction) — accept.** Verified at
+   `PROJECT_DECISIONS.md:1453-1467`: the pre-correction sentence ("restates ground already covered
+   by Hero ... and the Good Fit teaser") indeed sat directly beside the Codex-confirmed opposite
+   fact (shipped Hero holds no such content, Good Fit doesn't exist yet). Applied the suggested
+   wording almost verbatim: the removal is now framed as a blueprint-level structure decision, not
+   an FS-forbids-it or restates-Hero claim; the "repo review confirmed... not disposable duplicate
+   content" sentence is folded in immediately before the fold-path outcome. One coherent basis
+   remains in the record.
+
+**Краткое резюме для владельца (RU):** Codex поймал самопротиворечие: в About-пункте старая
+формулировка ("дублирует Hero/Good Fit") осталась рядом с уже исправленным фактом, что ни Hero, ни
+Good Fit такого контента не содержат. Заменил обоснование на предложенную Codex формулировку —
+удаление About как структурного решения блюпринта, а не потому что FS запрещает или контент
+дублируется. Остальные 4 находки Review 1 подтверждены Codex как resolved, новых находок нет.
+Ревью завершено консенсусом.
+
+Status set to `consensus` — no other findings raised; Review 1's remaining four findings confirmed
+resolved by Codex in this round.
+
+## Consensus
+
+- **Finding 1 (Review 1, blocker — upload-flow redesign understated) — accepted, filed.** Fixed in
+  `PROJECT_DECISIONS.md` (D-Blueprint 5(a) correction + new "Upload-flow architecture prerequisite"
+  section) and carried into `STAGE_6_STRAT_BRIEF.md:61-67`. Committed `4e32432`.
+- **Finding 2 (Review 1, should-fix — About unique trust content) — accepted, filed; wording
+  corrected in Review 2.** Fixed in `PROJECT_DECISIONS.md` — About section entry (Home page). Final
+  coherent wording applied in this round (see Response 2).
+- **Finding 3 (Review 1, should-fix — Location placeholder overstatement) — accepted, filed.**
+  Fixed in `PROJECT_DECISIONS.md` (Location section) — map/photo placeholders and CTA all recorded
+  as Stage 6 must-supply items. Committed `4e32432`.
+- **Finding 4 (Review 1, should-fix — footer + second Instagram link undecided) — accepted, filed;
+  owner decisions recorded.** Footer email/phone links removed (Stage 6 footer = studio name +
+  address + Instagram + copyright); post-launch A/B candidate filed in `PROJECT_BACKLOG.md:36-44`.
+  Home's second (Featured Work) Instagram instance kept. Committed `4e32432`.
+- **Finding 5 (Review 1, nit — stale Batch 2 status line) — accepted, filed.** Header status
+  corrected in `PROJECT_DECISIONS.md`. Committed `4e32432`.
+- **Finding 1 (Review 2, should-fix — About rationale self-contradiction) — accepted, filed.**
+  Fixed in `PROJECT_DECISIONS.md` — About section entry, this round (pending commit).
+
+No rejected findings across both rounds. The Stage 6 UX blueprint (all 8 sub-topics) is now
+consensus-reviewed by both an external (no-repo-access) reviewer, in two batches, and a repo-aware
+Codex reviewer, in two rounds. Next: cut the blueprint into implementation task files; the
+upload-flow architecture prerequisite (Finding 1, Review 1) must be resolved as its own task before
+any Request-page task is marked `ready`.

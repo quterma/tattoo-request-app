@@ -1455,16 +1455,16 @@ rationale addition). Nothing required a PRD/FS escalation.
   required blocks. A UX-review pass (2026-07-13) caught that the original rationale for removing
   it ("FS §3.1's Must-not-contain: long-form duplicates") does not actually apply — a two-line
   block is not long-form by definition, and content outside both the "must contain" and "must not
-  contain" lists is not itself prohibited by FS. The correct basis is PRD §6's "one user problem
-  per content block": the section restates ground already covered by Hero (one-line specialization)
-  and the Good Fit teaser, answering a question the page already answered once. **Condition
-  resolved (Codex review checked the real copy):** the shipped About lines (`en.json` —
-  "20+ years of experience in painting, calligraphy, and tattoo art." / "Every piece is custom —
-  designed from scratch, just for you.") ARE unique trust content — the shipped Hero holds only
-  the studio name and "Custom tattoos in Tel Aviv", and no Good Fit block exists yet. So the
-  outcome is the fold path, not deletion: the standalone About block is removed as a structure,
-  and its trust content (tenure, custom-from-scratch promise) is folded into Hero and/or the Good
-  Fit teaser when Home is built. Final wording remains owner-authored.
+  contain" lists is not itself prohibited by FS. The standalone About block is removed as a
+  blueprint-level structure decision rather than because FS forbids it. **Condition resolved
+  (Codex review checked the real copy):** the shipped About lines (`en.json` — "20+ years of
+  experience in painting, calligraphy, and tattoo art." / "Every piece is custom — designed from
+  scratch, just for you.") ARE unique trust content — the shipped Hero holds only the studio name
+  and "Custom tattoos in Tel Aviv", and no Good Fit block exists yet. Repo review confirmed this
+  copy is not disposable duplicate content, so the outcome is the fold path, not deletion: the
+  standalone About block is removed as a structure, and its unique trust content (tenure,
+  custom-from-scratch promise) must be folded into Hero and/or the Good Fit teaser when Home is
+  built. Final wording remains owner-authored.
 - **Instagram link retained** as a secondary contextual link inside the Hero block (not a content
   block, not competing with the primary CTA) — consistent with PRD D1 (Instagram as the primary
   acquisition channel).

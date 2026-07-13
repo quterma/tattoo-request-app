@@ -118,12 +118,12 @@ tattoo-request-app/
 │       ├── STAGE_6_PRODUCT_DEFINITION.md
 │       ├── reviews/
 │       │   ├── .gitkeep
-│       │   ├── REVIEW_2026-07-13_stage6-ux-blueprint-full.md
 │       │   └── done/
 │       │       ├── .gitkeep
 │       │       ├── REVIEW_2026-07-13_codex-delegation-scope.md
 │       │       ├── REVIEW_2026-07-13_codex-sync-setup.md
-│       │       └── REVIEW_2026-07-13_stage6-ux-blueprint-batch2.md
+│       │       ├── REVIEW_2026-07-13_stage6-ux-blueprint-batch2.md
+│       │       └── REVIEW_2026-07-13_stage6-ux-blueprint-full.md
 │       └── tasks/
 │           └── STAGE_6_STRAT_BRIEF.md
 ├── scripts/

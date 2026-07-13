@@ -38,13 +38,20 @@ require updating them first. See PROJECT_DECISIONS.md — Stage 6 Product Docume
 Current focus:
 
 - **Stage 6 UX blueprint — complete and consensus-reviewed, 2026-07-13.** All 8 sub-topics
-  decided in the first product/UX STRAT session and externally reviewed to consensus in two
-  batches: batch 1 (navigation/CTA, Home, Process, Request — 4 corrections), batch 2 (Success,
-  Location, Preparation, Aftercare — 3 corrections + 1 acceptance note, via the formal
-  cross-review protocol). See PROJECT_DECISIONS.md — Stage 6 UX Blueprint Decisions;
-  `docs/project/reviews/done/REVIEW_2026-07-13_stage6-ux-blueprint-batch2.md`;
-  `docs/project/tasks/STAGE_6_STRAT_BRIEF.md`. Next: cut the blueprint into implementation task
-  files (status `draft`), then optionally a whole-blueprint Codex pass before implementation.
+  decided in the first product/UX STRAT session and externally reviewed to consensus in three
+  rounds: batch 1 (navigation/CTA, Home, Process, Request — 4 corrections, external reviewer),
+  batch 2 (Success, Location, Preparation, Aftercare — 3 corrections + 1 acceptance note, external
+  reviewer), and a whole-blueprint repo-aware Codex pass (2 rounds — Review 1: 5 findings incl. a
+  blocker on the shipped upload pipeline vs. FS target, all accepted; Review 2: 1 should-fix on a
+  self-contradictory About rationale, accepted). See PROJECT_DECISIONS.md — Stage 6 UX Blueprint
+  Decisions; `docs/project/reviews/done/REVIEW_2026-07-13_stage6-ux-blueprint-batch2.md`;
+  `docs/project/reviews/done/REVIEW_2026-07-13_stage6-ux-blueprint-full.md`;
+  `docs/project/tasks/STAGE_6_STRAT_BRIEF.md`. Codex's Review 1 blocker added a hard prerequisite:
+  a dedicated upload-flow architecture task (endpoint/auth, opaque client handle + stable
+  `clientSubmissionId`, three-category DB/Storage/admin representation, per-file retry/remove/
+  progress, atomic adopt-at-submit, cleanup/idempotency) must be decided before any Request-page
+  task is marked `ready`. Next: cut the blueprint into implementation task files (status `draft`),
+  starting with the upload-flow architecture prerequisite.
 - **Stage 6 product documentation integrated — 2026-07-12.** The Stage 6 PRD and Functional
   Specification were added to `docs/project/` and made the official Stage 6 Source of Truth.
   PROJECT_IMPLEMENTATION_PLAN.md (Stage 6 section rewritten to reference them; superseded task
