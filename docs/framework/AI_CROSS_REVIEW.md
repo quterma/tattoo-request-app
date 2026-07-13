@@ -35,9 +35,14 @@ reasoning — the Handoff section states scope and questions, not the author's c
 
 - Location: `docs/project/reviews/REVIEW_<YYYY-MM-DD>_<slug>.md` — one file per review
   thread (one reviewed block: an implementation task, a spec, a design/stage block).
-- Header fields: `Status:` (drives who acts) and `Reviewer: codex | external` (drives WHO
-  reviews — prevents Claude Code waiting on Codex when an external review was agreed, and
-  vice versa).
+- Header fields:
+  - `Status:` — drives who acts next (table below).
+  - `Reviewer: codex | external` — drives WHO reviews (prevents Claude Code waiting on Codex
+    when an external review was agreed, and vice versa).
+  - `Requested by:` — the session that opened the thread, by its title (e.g.
+    `META: framework audit`, `STRAT: Stage 6 UX blueprint`, `IMPL: Stage 6 item 2 shell`).
+    Findings usually belong to that session's work; without this, a later reader cannot tell
+    who should act on them or which session to return to.
 - The whole dialogue lives in this one file as appended sections; history is preserved in git.
 - **A thread is ACTIVE if it is not `queued` — i.e. its status is `awaiting-review`,
   `awaiting-response`, or `consensus` — and it still sits in `docs/project/reviews/` (not
@@ -48,13 +53,14 @@ reasoning — the Handoff section states scope and questions, not the author's c
   starts as `queued` (parked — nobody acts on it). Before creating a thread, scan all three
   active statuses, not just `awaiting-review`.
 - **Queue promotion, and recovery if it was missed.** Whoever moves the active thread to
-  `done/` must then promote the oldest `queued` thread to `awaiting-review` and tell the owner
-  it is ready for the next ping. Because a session can die between those two steps, promotion
-  is also a recovery check, not only a duty: **any Claude session that creates a thread,
-  processes a review, or cleans one up must first check for an orphaned queue — no active
-  thread but one or more `queued` — and promote the oldest one if so.** The check is idempotent
-  and costs one directory scan. Report the current queue size to the owner whenever it is
-  greater than zero.
+  `done/` must then promote a `queued` thread to `awaiting-review` and tell the owner it is
+  ready for the next ping. Default is oldest-first, but the owner may prioritize any queued
+  thread — work that blocks an active session outranks analysis that can wait. Because a
+  session can die between those two steps, promotion is also a recovery check, not only a duty:
+  **any Claude session that creates a thread, processes a review, or cleans one up must first
+  check for an orphaned queue — no active thread but one or more `queued` — and promote one if
+  so.** The check is idempotent and costs one directory scan. Report the current queue size to
+  the owner whenever it is greater than zero.
 - The reviewer handles exactly one thread per owner ping — the next review starts only after
   another explicit ping, never automatically.
 - A side asked to act that finds zero or multiple threads matching what it expects stops and
@@ -84,6 +90,27 @@ reasoning — the Handoff section states scope and questions, not the author's c
 4. Repeat 2–3 until consensus.
 5. `## Consensus` — final list: accepted findings and where each was filed (fix commit, task
    file, PROJECT_BACKLOG.md), rejected findings with rationale.
+
+## Deferred execution (review done, work postponed)
+
+A thread reaches `consensus` when the *review* is settled — the findings are understood and the
+owner has decided what to do with them. It does NOT require the work to be finished. Accepted
+findings whose execution is postponed (owner priority, usage budget, a conflicting active
+session) are **still consensus**: close the thread, move it to `done/`, free the slot.
+
+The deferred work itself goes where work already lives — never in a lingering review thread:
+
+- a `draft` task file (`docs/project/tasks/`) if it is concrete enough to execute, or
+- `PROJECT_BACKLOG.md` if it is not yet.
+
+Either way the entry names the thread it came from (`reviews/done/REVIEW_<...>.md`) and the
+session that requested it (the thread's `Requested by:`), so a later reader can reconstruct the
+reasoning without reopening the review. **Never park deferred work by leaving a thread open** —
+that blocks the review slot and hides the work from the places the owner actually looks.
+
+Anti-rot: any session that reports the review queue to the owner also reports open deferred
+items it filed or found (one line each: what, where it's filed, what it's waiting on). Same
+cost as the queue-size report, same purpose — nothing accepted quietly disappears.
 
 # External Reviewer Flow (`Reviewer: external`)
 

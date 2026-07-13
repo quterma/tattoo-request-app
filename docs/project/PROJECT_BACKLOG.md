@@ -223,3 +223,50 @@ failure). Deliberately not added in the Stage 5D fix passes: these route handler
 (`requests/[id]/__tests__/actions.test.ts`, mocking `next/headers`/`next/cache`/`next-intl/server`)
 — that pattern can be extended to the callback routes. Decide and implement the approach before
 public launch; the flows themselves are manually verified live (Stage 5C).
+
+---
+
+## Documentation: context-budget cleanup (Codex analysis 2026-07-13, deferred execution)
+
+Source: `docs/project/reviews/done/REVIEW_2026-07-13_docs-context-budget.md` (consensus reached;
+execution deferred by the owner — usage budget + a concurrent IMPL session writing to the same
+shared docs). Requested by `META: AI Workflow Master`.
+
+**Trigger:** a fresh IMPL session reported `PROJECT_STAGE_LOG.md` was too large to read whole and
+silently degraded its own mandatory Pre-task Sync. The four mandatory sync docs total ~5,600
+lines (STAGE_LOG alone: 3,639, of which 3,312 are the append-only journal).
+
+**Take first, as one pass (highest value, low risk):**
+
+- **A — hot-path split.** Create `docs/project/PROJECT_CURRENT_STATE.md` (~50–100 lines: current
+  stage + its Source of Truth, active tasks and their blockers, owner-supplied assets pending, one
+  pointer to the STRAT brief / implementation plan). Pre-task Sync reads it **first**;
+  `PROJECT_STAGE_LOG.md` stays at its current path (no rename — preserves every existing dated
+  pointer) and becomes an on-demand journal, not a session-start read. Replace the old Current
+  Stage block with a pointer so only one writable current-state source exists.
+- **B — targeted-read rule for `PROJECT_DECISIONS.md`** (1,726 lines): scan headings, read the
+  sections the task names plus those relevant to its domain; full read only for cross-domain
+  strategy/audits. **Do not** create a decisions index (duplication + sync cost) and **do not**
+  split by stage — Stages 3–5 decisions on Storage/identity/auth/service-layer are still binding
+  ("old decision ≠ inactive decision").
+- **Migration is not a two-line edit:** every mandatory-read enumeration must be updated —
+  `.claude/CLAUDE.md`, `docs/framework/templates/CLAUDE_TEMPLATE.md`, the stage-task template,
+  kickoff wording — **and `AGENTS.md`, which independently tells Codex to read the Stage Log
+  first** (otherwise Codex keeps the identical problem).
+- **Regrowth rule:** `PROJECT_CURRENT_STATE.md` is **replacement-only** — completed items are
+  removed once logged, never accumulated.
+
+**Later passes (accepted, lower priority):**
+
+- C — stale duplication: `PROJECT_CONTEXT.md`'s Stages 0–5 public-surface/form lists → pointer to
+  the Stage 6 PRD/FS; `PROJECT_ARCHITECTURE.md`'s batch-upload flow labelled "shipped baseline"
+  until the upload-architecture task decides the target.
+- `PROJECT_IMPLEMENTATION_PLAN.md` (1,070 lines) has become a second history *and* a second
+  backlog (~800 lines of completed Stages 0–5) while Stage 6 has its own plan — archive the
+  completed-stage detail behind a compact pointer.
+- `PROJECT_STRUCTURE.md` (535 lines) is half handwritten file catalogue, duplicating the generated
+  `docs/files-structure.md`. **Keep the rules** (dependency direction, layer boundaries, public-API
+  constraints — they are lint-enforced via `import/no-internal-modules`); cut the inventory.
+- Stage Log entry style: future entries should be milestone pointers (outcome + task/review link +
+  unresolved blocker), not file-by-file release notes with pasted gate transcripts — git, task
+  files, and review threads already hold that evidence.

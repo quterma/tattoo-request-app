@@ -150,6 +150,16 @@ AI_WORKFLOW_MASTER.md. Format: date — observation — status (`open` / `resolv
   AI_CROSS_REVIEW.md (`queued` status formalized; promotion duty on whoever closes the active
   thread; queue-size reporting to the owner; one thread per ping) + AGENTS.md (queued threads
   are parked; exactly one review per owner ping).
+- 2026-07-13 — A review whose findings were accepted but whose *execution* was postponed had no
+  home: leaving the thread open would block the single review slot and hide the work from the
+  places the owner actually looks, while closing it risked losing the accepted work. Also, threads
+  carried no record of which session opened them, so a later reader could not tell who to return
+  to. — resolved: AI_CROSS_REVIEW.md — `Requested by:` header field; "Deferred execution" section
+  (consensus settles the *review*, not the work — deferred work is filed as a `draft` task file or
+  a PROJECT_BACKLOG.md entry pointing back at the thread, and the thread closes so the slot frees);
+  queue promotion may be owner-prioritized rather than strictly oldest-first (work blocking an
+  active session outranks analysis that can wait); anti-rot — any session reporting the queue also
+  reports open deferred items.
 - 2026-07-13 — Full adversarial audit of the process framework by Codex (thread:
   `reviews/done/REVIEW_2026-07-13_framework-process-audit.md`) found 8 findings, incl. 2
   blockers, all accepted and fixed. Root cause across most of them: the framework grew
