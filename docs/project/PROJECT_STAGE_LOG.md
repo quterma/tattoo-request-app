@@ -318,6 +318,35 @@ Completed in Stage 3:
 
 ## Log Entries (reverse chronological)
 
+### 2026-07-13 — META: Codex gate-loop discipline for delegated IMPL tasks
+
+Status: Completed. Documentation-only — no source code changed. Owner-approved in-session
+(framework docs change rule satisfied).
+
+Follow-up to an idea raised in a Stage 6 STRAT session (AI_FRAMEWORK_IDEAS.md — Workflow
+Observations, 2026-07-13 entry on Claude usage-budget relief via Codex): the owner wanted a
+concrete way to have Codex absorb some of Claude Code's token/usage load on delegated
+implementation work, without any quality-control loss or duplicated gate runs. Resolution:
+
+- The "Codex runs `pnpm qg` and reports PASS/FAIL" idea, considered on its own, was superseded
+  by a stronger version folded into the already-approved delegation mechanism (2026-07-13,
+  "Delegating IMPL Tasks to Codex" — see the entry below on Codex's independent-reviewer
+  connection). "Codex writes tests" was recognized as not a new role-scope question at all —
+  it is an ordinary case of that same mechanism when the specific test task meets its
+  eligibility bar.
+- **The actual budget win:** Claude's expensive step is triaging raw lint/typecheck/test
+  failures, not running the gates. So AI_TASK_PROTOCOL.md (Delegating IMPL Tasks to Codex) and
+  AGENTS.md (Executing a delegated task) now require Codex to iterate its own
+  `pnpm lint` / `pnpm typecheck` / `pnpm test` loop — fix, re-run — until clean, or report
+  precisely which check it could not resolve, **before** setting `awaiting-claude-review`.
+  Claude's own full `pnpm qg` re-run stays mandatory and unconditional regardless of what
+  Codex reports — quality control is unchanged; only the debugging labor shifts to Codex, so
+  Claude's final gate run is normally a fast confirmation instead of a debugging session.
+
+`pnpm structure` run; no `pnpm qg` — docs-only.
+
+---
+
 ### 2026-07-13 — STRAT: Stage 6 UX blueprint — Codex repo-aware review round 1 processed, 5 findings accepted
 
 Status: Response written, thread at `awaiting-review` for Codex's verification round

@@ -157,17 +157,33 @@ Requirements:
   acceptance criterion admits materially different behaviors, a required decision/asset is
   missing, or the diff would need to expand beyond the declared boundary.
 - **Owner authorization for delegation itself is still required per task** (approving that
-  this specific `ready` task goes to Codex, not Claude) — this is not blanket automation.
+  this specific `ready` task goes to Codex, not Claude) — this is not blanket automation. In
+  practice this authorization IS the owner sending the standard kickoff
+  `Execute docs/project/tasks/<file>` in a fresh Codex session, provided the named file is
+  `ready` and states `Executor: codex` — no separate "delegate this to Codex" step is needed.
+  This does not skip the plan-approval turn below (same safeguard as an IMPL session): Codex
+  still syncs, validates eligibility/write surface, inspects the repo, presents a concise plan,
+  and waits for explicit approval before editing.
+- **Codex owns its own gate loop.** Before setting `awaiting-claude-review`, Codex must run
+  `pnpm lint` / `pnpm typecheck` / `pnpm test` (the same non-mutating gates AGENTS.md allows
+  it elsewhere) and iterate — fix, re-run — until all three pass, or stop and report exactly
+  which check it could not resolve and why. A report of "FAIL, unresolved" is acceptable; a
+  handoff with a *fixable* failure Codex didn't attempt to fix is not — the whole point of
+  delegating is that Claude should not spend its budget triaging errors Codex could have
+  cleared itself. This does NOT replace Claude's own gate run below; it exists so that run is
+  normally a fast confirmation instead of a debugging session.
 - Claude's review treats the diff as an unfamiliar contributor's patch, not a continuation of
   its own reasoning: re-derive what the patch must do from the task + docs before reading
   Codex's report; inspect the complete diff including untracked files, confirm every changed
   path was authorized; check behavior, failure paths, types, dependency direction, and
   security/data boundaries, not just whether tests pass; check tests against
   PROJECT_TESTING_STRATEGY.md for real contract coverage, not tests fitted to the
-  implementation; re-run the full quality gates itself rather than trusting Codex's reported
-  output; treat any fix made during review as a new diff needing its own pipeline pass. Only
-  after a clean pass does Claude update shared docs, move the task to `done`, and propose a
-  commit — commits remain Claude Code's job with owner approval, per CLAUDE.md.
+  implementation; **always re-run the full `pnpm qg` itself regardless of Codex's reported
+  result — this is the mandatory final gate and is never skipped or trusted secondhand, even
+  when Codex already reported a clean pass**; treat any fix made during review as a new diff
+  needing its own pipeline pass. Only after a clean pass does Claude update shared docs, move
+  the task to `done`, and propose a commit — commits remain Claude Code's job with owner
+  approval, per CLAUDE.md.
 - The execution report and Claude's review verdict live in the task file itself — no separate
   cross-review thread for routine delegated tasks (would duplicate the same facts). High-risk
   or disputed delegated work may still use the formal `docs/project/reviews/` protocol

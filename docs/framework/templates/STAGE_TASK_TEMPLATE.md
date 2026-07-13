@@ -18,7 +18,9 @@ AI agents and developers.
 2. Fill every section below; replace all `<angle-bracket>` placeholders; delete this "How to Use"
    section and the header above it.
 3. Start a new session named `IMPL: Stage <stage> — <slug>` with the settings from "How to run",
-   and prompt: `Execute docs/project/tasks/<file>`.
+   and prompt: `Execute docs/project/tasks/<file>`. This same kickoff line, sent in a fresh
+   Codex session instead, is how a task with `Executor: codex` is delegated — see
+   docs/framework/AI_TASK_PROTOCOL.md, Delegating IMPL Tasks to Codex.
 
 ---
 

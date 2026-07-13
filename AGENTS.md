@@ -53,14 +53,26 @@ Full eligibility, task-file requirements, and the review handoff are defined in
 `docs/framework/AI_TASK_PROTOCOL.md` — Delegating IMPL Tasks to Codex. Summary of your side:
 
 1. Only act on a task file the owner has pointed you to, that is `Status: ready` and states
-   `Executor: codex`. Never self-select a task to execute.
-2. Implement strictly within the task's declared write surface. If anything conflicts,
+   `Executor: codex`. Never self-select a task to execute. The owner's standard kickoff —
+   `Execute docs/project/tasks/<file>` — IS your delegation authorization when the named file
+   meets those two conditions; no separate confirmation is needed from the owner.
+2. This authorization does not skip inspection: sync on the Context docs, validate the task's
+   eligibility and write surface against the repo, then present a concise plan and wait for
+   the owner's explicit approval before editing — same safeguard an IMPL session gets.
+3. Implement strictly within the task's declared write surface. If anything conflicts,
    is missing, or would expand the diff beyond that surface — stop and ask the owner, do not
    improvise.
-3. Run the non-mutating quality gates (`pnpm lint`, `pnpm typecheck`, `pnpm test`) yourself
-   before handing back.
-4. Write an execution report in the task file itself (what changed, gate results, anything
-   flagged) and set the task's Status to `awaiting-claude-review`.
-5. Never set a delegated task to `done`, move it to `tasks/done/`, update
+4. Run `pnpm lint` / `pnpm typecheck` / `pnpm test` yourself and iterate — fix, re-run — until
+   all three pass, or until you hit a failure you cannot resolve within the task's declared
+   scope. Do not hand back a fixable failure unattempted: the point of delegation is to save
+   Claude Code's budget, which only works if you clear what you can before handoff. If a
+   check still fails, report exactly which one and why, precisely — do not guess or paper
+   over it.
+5. Write an execution report in the task file itself (what changed, final gate results,
+   anything flagged or unresolved) and set the task's Status to `awaiting-claude-review`.
+   Claude Code always re-runs the full `pnpm qg` itself regardless of your reported result —
+   this is expected, not a sign of distrust in your work; a clean run on your side just makes
+   that final pass fast instead of a debugging session.
+6. Never set a delegated task to `done`, move it to `tasks/done/`, update
    PROJECT_STAGE_LOG.md/PROJECT_DECISIONS.md, or propose a commit — that is Claude Code's
    independent review pass to do, per the protocol.

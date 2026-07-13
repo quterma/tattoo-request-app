@@ -150,3 +150,31 @@ AI_WORKFLOW_MASTER.md. Format: date — observation — status (`open` / `resolv
   AI_CROSS_REVIEW.md (`queued` status formalized; promotion duty on whoever closes the active
   thread; queue-size reporting to the owner; one thread per ping) + AGENTS.md (queued threads
   are parked; exactly one review per owner ping).
+- 2026-07-13 — Owner request for META to weigh, raised in a Stage 6 STRAT session (Claude Code
+  usage was burning through the session's token/usage budget fast, partly attributed to running
+  Fable for extended stretches): **should Codex take on some token-heavy, low-judgment work**,
+  beyond its current strictly-read-only reviewer role (AGENTS.md), to reduce Claude Code's load
+  — with Claude Code retaining control/review? Two candidates discussed in-session, not decided:
+  (a) **running `pnpm qg` (lint/typecheck/test/build) and reporting PASS/FAIL + output** —
+  argued as safe because it's deterministic/mechanical (no judgment call, nothing to get wrong
+  quality-wise) and already fits Codex's read-only constraint (running gates changes nothing on
+  disk); the expensive part today is Claude Code executing the run and parsing/carrying long
+  log output in its own context, which delegating would genuinely offload; (b) **writing missing
+  tests** — flagged as a real judgment call (what to cover), so it would need Claude Code/owner
+  review of the diff either way, AND it requires Codex to gain write access to `src/` (currently
+  AGENTS.md restricts Codex to `docs/project/reviews/` only) — a role-scope change, not just a
+  workflow choice. Owner's ask: think about whether/how to extend Codex's role for genuine
+  usage-budget relief without a quality regression — which tasks are safe to hand off
+  mechanically vs. which still need a judgment-capable reviewer in the loop, and whether (b)'s
+  write-access expansion is worth it or better left alone. — resolved: (a) rejected as a
+  separate mechanism — Codex running `pnpm qg` and reporting PASS/FAIL was already superseded
+  by the stronger rule adopted for (b); (b) is not actually a role-scope question — writing
+  tests is a normal case of the already-approved "Delegating IMPL Tasks to Codex" mechanism
+  when the specific test task meets its eligibility bar (deterministic/local/reversible/
+  decision-free), no separate write-access grant needed beyond what delegation already gives.
+  The real budget win identified: Claude's expensive step is triaging raw lint/typecheck/test
+  failures, not running the gates — so AI_TASK_PROTOCOL.md (Delegating IMPL Tasks to Codex)
+  and AGENTS.md (Executing a delegated task) now require Codex to iterate its own
+  lint/typecheck/test loop to a clean pass (or a precisely reported unresolved failure) before
+  handing back, while Claude's final full `pnpm qg` re-run stays mandatory and unconditional —
+  quality control is unchanged, only the debugging labor shifts.
