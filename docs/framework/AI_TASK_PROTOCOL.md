@@ -41,7 +41,7 @@ Start every new strategic session with:
 > never propose from general knowledge what the repo may already implement.
 > Confirm understanding in 3–5 lines before proceeding.
 > Before the session ends: persist every outcome into docs — task files per
-> STAGE_TASK_TEMPLATE.md (status `ready`), PROJECT_DECISIONS.md for decisions,
+> docs/framework/templates/STAGE_TASK_TEMPLATE.md (status `ready`), PROJECT_DECISIONS.md for decisions,
 > PROJECT_STAGE_LOG.md for progress — and unconditionally write/update
 > `docs/project/tasks/STAGE_<stage>_STRAT_BRIEF.md` with what was done and what's next
 > (see STRAT Next-Session Brief below), proposing its commit immediately after writing
@@ -49,7 +49,7 @@ Start every new strategic session with:
 > No chat-only conclusions. List created/updated files in the final message.
 
 (The META kickoff prompt lives in AI_WORKFLOW_MASTER.md; IMPL sessions are started from a task
-file per STAGE_TASK_TEMPLATE.md — How to Use.)
+file per docs/framework/templates/STAGE_TASK_TEMPLATE.md — How to Use.)
 
 ---
 
@@ -102,7 +102,7 @@ chat-only when the session actually ends.
   `<stage>` includes the sub-stage when one exists (e.g. `STAGE_6A_TASK_01_<slug>.md` for
   Stage 6A), so `<NN>` is unique within its `<stage>` prefix
 - Created by strategic sessions (or the developer); executed by implementation sessions.
-- Skeleton: `docs/project/tasks/STAGE_TASK_TEMPLATE.md`.
+- Skeleton: `docs/framework/templates/STAGE_TASK_TEMPLATE.md`.
 - **A task file is the scope boundary for the executing session.** No work outside it; the
   standard Pre-task Sync (CLAUDE.md) still applies.
 - Do not accumulate multiple tasks in one file — one file per task keeps the executor's context

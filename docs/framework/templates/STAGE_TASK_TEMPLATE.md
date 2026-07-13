@@ -1,6 +1,7 @@
 Purpose
-Reusable template for starting every implementation stage / sub-stage task in this repository
-(e.g. Stage 6A.1, Stage 6A.2, Stage 7B). This is NOT a project specification.
+Reusable template for starting every implementation stage / sub-stage task
+(e.g. Stage 6A.1, Stage 6A.2, Stage 7B). This is NOT a project specification — reusable across
+projects, like the rest of docs/framework/.
 
 Scope
 The standard task-file skeleton and the workflow it enforces. Session/task conventions live in
@@ -39,9 +40,10 @@ done: <date, commit hash, PROJECT_STAGE_LOG.md entry pointer>
 
 1. Mandatory Pre-task Sync per CLAUDE.md: PROJECT_STAGE_LOG.md, PROJECT_CONTEXT.md,
    PROJECT_ARCHITECTURE.md, PROJECT_DECISIONS.md (as needed).
-2. Stage Source of Truth: for Stage 6 — STAGE_6_PRODUCT_DEFINITION.md (PRD) and
-   STAGE_6_FUNCTIONAL_SPECIFICATION.md (FS). Product behavior must follow them.
-3. Task-specific docs/files: <list the exact FS/PRD sections, source files, prior log entries>
+2. Stage Source of Truth: <the project's authoritative product/spec doc(s) for this stage, if
+   any — e.g. this project's Stage 6 uses STAGE_6_PRODUCT_DEFINITION.md (PRD) and
+   STAGE_6_FUNCTIONAL_SPECIFICATION.md (FS)>. Product behavior must follow them.
+3. Task-specific docs/files: <list the exact spec sections, source files, prior log entries>
 
 ## Goal
 
@@ -68,12 +70,14 @@ done: <date, commit hash, PROJECT_STAGE_LOG.md entry pointer>
 6. After implementation: run the Review Pipeline per AI_REVIEW_PIPELINE.md (Test Agent →
    Quality Gates `pnpm qg` → Review Agent); self-review for architecture conformance,
    regressions, and documentation updates; report remaining risks explicitly.
-7. Never expand scope. If product behavior needs to change, STOP and request a PRD/FS update
-   first (PROJECT_DECISIONS.md — Stage 6 Product Documentation Authority).
+7. Never expand scope. If product behavior needs to change, STOP and request a spec update
+   first (see this project's PROJECT_DECISIONS.md for the applicable authority rule, e.g.
+   Stage 6 Product Documentation Authority).
 
 ## Acceptance Criteria
 
-<verifiable statements; for Stage 6 public-site work, reference the relevant FS §6 criteria>
+<verifiable statements; reference the relevant spec section's acceptance criteria if the
+project's Source of Truth defines one>
 
 ## Reporting
 
