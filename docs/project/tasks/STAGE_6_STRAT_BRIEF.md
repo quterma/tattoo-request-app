@@ -54,9 +54,14 @@ route remain — the shipped Home hero and Mini Process copy both link to it tod
 
 ## Next topic
 
-1. **Create the Stage 6 UX-blueprint implementation task files** (one per page/topic, per
-   AI_TASK_PROTOCOL.md's Task Files convention), status `draft`, referencing the
-   consensus-reviewed blueprint sections in PROJECT_DECISIONS.md and the relevant FS §§. Include
-   the policies inbound-link acceptance check above.
-2. Optionally, a final whole-blueprint Codex pass (per AGENTS.md's division of labor: Codex
-   reviews completed blocks) before implementation begins — owner's call, not yet decided.
+1. **Close the Codex whole-blueprint review thread**
+   (`docs/project/reviews/REVIEW_2026-07-13_stage6-ux-blueprint-full.md`, at `awaiting-review`
+   for the verification round on the applied round-1 fixes; 5/5 findings accepted, corrections
+   already folded into PROJECT_DECISIONS.md).
+2. **Create the Stage 6 UX-blueprint implementation task files** (one per page/topic, per
+   AI_TASK_PROTOCOL.md's Task Files convention), status `draft`, referencing the reviewed
+   blueprint sections in PROJECT_DECISIONS.md and the relevant FS §§. Constraints from the
+   reviews: the **upload-flow architecture task is a prerequisite** — no Request-page task may
+   be marked `ready` before it (PROJECT_DECISIONS.md — Upload-flow architecture prerequisite);
+   include the policies inbound-link acceptance check; Location tasks must cover the real map
+   embed and studio photos (shipped ones are placeholders), not just the CTA.

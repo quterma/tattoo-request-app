@@ -311,6 +311,42 @@ Completed in Stage 3:
 
 ## Log Entries (reverse chronological)
 
+### 2026-07-13 — STRAT: Stage 6 UX blueprint — Codex repo-aware review round 1 processed, 5 findings accepted
+
+Status: Response written, thread at `awaiting-review` for Codex's verification round
+(`docs/project/reviews/REVIEW_2026-07-13_stage6-ux-blueprint-full.md`). First Codex review of the
+whole blueprint — the angle no prior reviewer had: verification against the shipped repository.
+All five findings verified against the code in-session before acceptance; all accepted.
+
+1. **Blocker — upload-flow redesign was understated.** The blueprint claimed preserving uploaded
+   files was "cheap" (true only of the FS target): the shipped pipeline has no selection-time
+   upload (local `File` state → one `FormData` → batch upload after validation, all-or-nothing),
+   two file categories end-to-end vs FS's three, and a component-local `clientSubmissionId`.
+   Added an explicit **Upload-flow architecture prerequisite** to the Request section: a
+   dedicated architecture task must decide endpoint/auth, opaque client handle +
+   `clientSubmissionId` lifecycle, three-category representation (incl. DB-constraint
+   migration), per-file retry/remove/progress, atomic adoption at submit, and
+   cleanup/idempotency — before any Request-page task is marked `ready`.
+2. About-section check resolved from the repo: the shipped copy IS unique trust content
+   ("20+ years…", custom-from-scratch) — fold into Hero/Good Fit, not delete.
+3. Location precision: shipped map and all four studio photos are placeholder `<div>`s — real
+   map embed and photos recorded as Stage 6 must-supply items (the transport/parking sentence,
+   by contrast, already ships in `howToFindUsText`, satisfying the batch-2 resolution).
+4. **New site-wide decisions (owner, in-session):** global footer loses `mailto:`/`tel:`
+   (becomes studio + address + Instagram + copyright; rationale: PRD §2 thesis + FS §2
+   task-relevance; keep-and-A/B rejected for Stage 6 — analytics is a PRD §4 Non-Goal — idea
+   parked in PROJECT_BACKLOG.md); Home's second Instagram link (Featured Work) kept as
+   task-relevant.
+5. Blueprint header status line updated (was still saying batch-2 review pending).
+
+Also this session, per owner: the CLAUDE.md commit rule extended — approval is requested **after
+staging**, per commit (stage → show staged state → wait for explicit approval → commit); a
+blanket earlier "commit" does not carry over.
+
+`pnpm structure` run. No `pnpm qg` — docs-only.
+
+---
+
 ### 2026-07-13 — STRAT: Stage 6 UX blueprint — batch 2 external review closed at consensus, 3 corrections applied
 
 Status: Completed. First review thread run through the formal cross-review protocol

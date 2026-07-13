@@ -82,6 +82,11 @@ If improvement is possible:
   Applies to every session type (STRAT / IMPL / META), subagents, and automated/scheduled
   sessions. No framework or project doc may override this rule; a doc instructing an
   immediate/automatic commit means "propose the commit immediately", not "commit".
+- Approval is requested AFTER staging, per commit: stage the files, show the owner what is
+  staged (file list + one-line summary of what each commit will contain), then WAIT for
+  explicit approval before running `git commit`. A blanket "commit" given earlier in the
+  conversation does not carry over to a later commit — the working tree may have changed
+  since (parallel sessions, owner edits), so each commit gets its own staged-state approval.
 
 ---
 

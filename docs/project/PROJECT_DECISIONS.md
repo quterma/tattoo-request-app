@@ -1378,10 +1378,13 @@ navigation/CTA placement — no visual design (colors, typography, spacing, imag
 brief's stated boundary. These decisions sit strictly inside the PRD/FS corridor: none contradict
 or require a PRD/FS change; §4.5's permitted in-memory persistence is the only place a blueprint
 decision turns a FS "permitted" into a blueprint-level "required" (D-Blueprint 5 below), which the
-FS itself allows. Status: **all 8 sub-topics decided (2026-07-13)** — navigation/CTA, Home,
-Process, Request (batch 1: externally reviewed, 4 corrections folded in) and Success, Location,
-Preparation, Aftercare (batch 2: decided, external review pending — see
-`docs/project/reviews/`).
+FS itself allows. Status: **all 8 sub-topics decided and reviewed (2026-07-13)** — batch 1
+(navigation/CTA, Home, Process, Request): externally reviewed, 4 corrections folded in; batch 2
+(Success, Location, Preparation, Aftercare): externally reviewed to consensus
+(`docs/project/reviews/done/REVIEW_2026-07-13_stage6-ux-blueprint-batch2.md`), 3 corrections
+folded in; plus a repo-aware Codex review over the whole blueprint
+(`docs/project/reviews/REVIEW_2026-07-13_stage6-ux-blueprint-full.md`), whose corrections are
+marked "(Codex review)" below.
 
 Some conclusions below originated as an external hypothesis (an out-of-repository ChatGPT
 research thread predating this project's STRAT/IMPL workflow) and were independently verified
@@ -1416,6 +1419,26 @@ rationale addition). Nothing required a PRD/FS escalation.
   explicitly here, as a UX-review pass (2026-07-13, cross-checked against another AI reviewer)
   flagged it as the one point in this batch with a plausible literal-reading conflict, i.e. a
   "decision by silence" the blueprint should not leave implicit.
+- **Global footer (Codex review — the blueprint had ignored an existing site-wide action
+  surface).** Every public page renders `PublicFooter` (`app/[locale]/(public)/layout.tsx`),
+  which today exposes studio name, address, email (`mailto:`), phone (`tel:`), Instagram, and
+  copyright. Owner decision (2026-07-13): **email and phone links are removed**; the Stage 6
+  footer is studio name + address + Instagram + copyright. Rationale: the product's core thesis
+  (PRD §2) is replacing unstructured contact with the structured request — `mailto:`/`tel:` on
+  every page invite exactly the channel the product replaces, and they serve no page's current
+  task (FS §2's secondary-link rule); the legitimate needs they might serve are already covered
+  (address stays for trust, Instagram stays per D1, Location covers arrival). "Keep and A/B-test
+  later" was considered and rejected for Stage 6 — analytics is an explicit PRD §4 Non-Goal, so
+  the test could not run; the idea is recorded in PROJECT_BACKLOG.md as a post-launch candidate
+  instead. Cheap reversal noted: restoring the two links is a one-line change if real-world
+  demand appears.
+- **Home's second Instagram instance stays (Codex review flagged it as undecided).** Home has
+  Instagram links in Hero (decided in this blueprint) *and* under Featured Work ("see more on
+  Instagram") — the second was never explicitly decided. Owner decision (2026-07-13): keep both.
+  The Featured Work instance serves precisely that block's task (browsing more work = fit
+  confirmation), passing FS §2's task-relevance rule, and the same action-vs-instance
+  interpretation already adopted for the CTA applies: same action, two placements, no competing
+  action introduced.
 
 ## Home page (FS §3.1)
 
@@ -1434,11 +1457,14 @@ rationale addition). Nothing required a PRD/FS escalation.
   block is not long-form by definition, and content outside both the "must contain" and "must not
   contain" lists is not itself prohibited by FS. The correct basis is PRD §6's "one user problem
   per content block": the section restates ground already covered by Hero (one-line specialization)
-  and the Good Fit teaser, answering a question the page already answered once. Removal stands on
-  that basis, conditional on confirming the section is in fact restating Hero/Good Fit and does not
-  carry unique trust content (artist tenure, background, studio history) — if it does, the correct
-  action is to fold that content into Hero or Good Fit, not delete it outright. This check is left
-  for the implementation session that builds Home, against the real (not placeholder) copy.
+  and the Good Fit teaser, answering a question the page already answered once. **Condition
+  resolved (Codex review checked the real copy):** the shipped About lines (`en.json` —
+  "20+ years of experience in painting, calligraphy, and tattoo art." / "Every piece is custom —
+  designed from scratch, just for you.") ARE unique trust content — the shipped Hero holds only
+  the studio name and "Custom tattoos in Tel Aviv", and no Good Fit block exists yet. So the
+  outcome is the fold path, not deletion: the standalone About block is removed as a structure,
+  and its trust content (tenure, custom-from-scratch promise) is folded into Hero and/or the Good
+  Fit teaser when Home is built. Final wording remains owner-authored.
 - **Instagram link retained** as a secondary contextual link inside the Hero block (not a content
   block, not competing with the primary CTA) — consistent with PRD D1 (Instagram as the primary
   acquisition channel).
@@ -1519,13 +1545,17 @@ field set.
     form's state cannot live in `RequestForm.tsx`'s local component state (unmounted on navigation
     away) — it requires a module-level store/context that outlives the page. Left for the
     implementing session, not a blueprint-level architecture decision.
-    **Known follow-on concern:** per FS §4.3, uploads happen on file selection (before submit), so
-    "preserving uploaded files" means preserving references to already-uploaded files, which is
-    cheap — but this decision increases the number of **orphaned uploads** (files uploaded for a
-    request that is ultimately never submitted). Cleanup policy for orphaned Storage objects is an
-    internal/operational concern outside FS's boundary (FS §1) and already tracked in
-    PROJECT_BACKLOG.md as a post-launch/operational item — noted here only because this decision
-    increases their volume, not because it changes that policy.
+    **Known follow-on concern (corrected after the Codex repo review — the first version called
+    this "cheap", which was true only of the FS target, not the shipped architecture):** under
+    FS §4.3 uploads happen on file selection, so "preserving uploaded files" means preserving
+    references to already-uploaded objects — but see the **Upload-flow architecture
+    prerequisite** below: the shipped code has no selection-time upload at all, so this
+    reference-preserving model first has to be built. Once it exists, this decision increases
+    the number of **orphaned uploads** (files uploaded for a request that is ultimately never
+    submitted). Cleanup policy for orphaned Storage objects is an internal/operational concern
+    outside FS's boundary (FS §1) and already tracked in PROJECT_BACKLOG.md as a
+    post-launch/operational item — noted here only because this decision increases their
+    volume, not because it changes that policy.
   - **(b) Clean browser history.** A direct consequence of D-Blueprint 1: Request is a single
     history entry; the browser back button goes to the previous site page, predictably, with no
     interception — a wizard would either pollute history with one entry per step or require
@@ -1534,6 +1564,28 @@ field set.
     they scrolled past and keeps their spatial model of the form. No sticky progress indicator is
     added (a wizard artifact); the visible section structure of the scroll itself serves that
     function.
+- **Upload-flow architecture prerequisite (Codex review, blocker finding — recorded so task
+  decomposition does not silently inherit a redesign as if it were local UI state).** The
+  blueprint's upload decisions (D-Blueprint 4 stack, 5(a) persistence, FS §4.3 semantics) sit on
+  an upload model that the shipped architecture does not have. Shipped state:
+  `RequestForm.tsx` keeps selected `File` objects in local component state and sends everything
+  in one final `FormData`; the API route validates the complete request and only then uploads
+  the batch; `services/storage.ts` treats any file failure as batch failure (all-or-nothing with
+  cleanup); the type system, DB constraint, and admin viewer know exactly two file categories
+  (`reference` | `placement`) versus FS §4.2's three upload fields; and `clientSubmissionId` is
+  component-local state, regenerated on every Request mount — it cannot own selection-time
+  uploads across the navigation-persistence guarantee of D-Blueprint 5(a) unless it moves into
+  the persistent store too. FS §4.3's upload-on-selection with per-file progress, retry, remove,
+  and per-file failure isolation is therefore a **redesign of the upload pipeline**, not a form
+  tweak. Before any Request-page implementation task is marked `ready`, a dedicated
+  architecture task must decide at least: the selection-time upload endpoint and its
+  authorization/abuse model; the opaque client-side file handle and the stable
+  `clientSubmissionId` lifecycle; the three-category representation across DB, Storage, and the
+  admin viewer (including migration of the existing two-category constraint); per-file
+  retry/remove/progress semantics; how final submit verifies and atomically adopts exactly this
+  submission's uploads; and cleanup/idempotency behavior for unadopted uploads. This is
+  security- and data-model-sensitive (public unauthenticated upload surface) and follows
+  PROJECT_ARCHITECTURE.md's service-layer rules.
 
 ## Success page (FS §3.4) — decided 2026-07-13, batch 2
 
@@ -1584,12 +1636,19 @@ successful submission in the current session, redirect to Home"):
 FS §3.5 fixes the content set (address, map, studio photos, transport/parking, entrance
 instructions if non-obvious; no marketing content) but not the order.
 
-- **Block order: keep the shipped page's order**, which already satisfies the content set:
-  Address (with map-provider links: Google Maps / Apple Maps / Waze) → map embed → How to find us
-  → Studio Photos, **plus the primary CTA appended at the end** per the site-wide CTA decision
-  (Location is in FS §2's CTA table — "Start Your Request" — but the shipped page has no CTA;
-  that is the only structural gap). Prior art respected: the page exists and works
-  (`app/[locale]/(public)/location/page.tsx`); no reordering without cause.
+- **Block order: keep the shipped page's order**: Address (with map-provider links: Google Maps /
+  Apple Maps / Waze) → map embed → How to find us → Studio Photos, **plus the primary CTA
+  appended at the end** per the site-wide CTA decision (Location is in FS §2's CTA table —
+  "Start Your Request"). Prior art respected: the page exists
+  (`app/[locale]/(public)/location/page.tsx`); no reordering without cause. **Content-state
+  precision (Codex review corrected an overstatement here):** the shipped page supplies the
+  chosen block order, the address/provider links, and — already — the transport/parking sentence
+  ("easily accessible by public transport and there is street parking available nearby",
+  satisfying the batch-2 resolution as shipped); but the "map" is an empty placeholder `<div>`
+  and all four "studio photos" are empty placeholder `<div>`s. Stage 6 implementation must
+  supply a real map embed and real studio photos (both FS §3.5 must-contain items) in addition
+  to appending the CTA — the earlier claim that the CTA was "the only structural gap" understated
+  this and risked the two placeholder items dropping out of task acceptance.
 - **Transport/parking and entrance instructions live inside "How to find us"**, not as separate
   blocks — with different requiredness, corrected after the batch-2 external review caught a real
   FS conflict in this decision's first version. FS §3.5 reads "Must contain: address, map, studio

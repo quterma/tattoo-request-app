@@ -33,6 +33,16 @@ where the ideas originated; the PRD/FS versions govern. Do not implement from th
 - ~~Curated gallery: 5–8 strong works instead of full feed~~ — FS §3.1 Featured Work (4–8
   owner-curated images)
 
+### Footer contact links — post-launch A/B candidate (Stage 6 UX blueprint decision, 2026-07-13)
+
+The Stage 6 blueprint removes the `mailto:`/`tel:` links from the global public footer (footer
+becomes studio name + address + Instagram + copyright) — see PROJECT_DECISIONS.md, Stage 6 UX
+Blueprint Decisions, "Global footer". The owner considered keeping them behind a styled contact
+block and A/B-testing which converts better; that test is impossible in Stage 6 (analytics is a
+PRD §4 Non-Goal), so the idea is parked here. **When:** post-launch, only if analytics tooling
+is ever adopted (PRD Future Scope) or if real-world demand for direct contact appears — in the
+latter case restoring the two links is a one-line change and needs no test.
+
 ---
 
 ## Request Form Improvements
