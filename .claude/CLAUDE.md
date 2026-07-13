@@ -82,21 +82,22 @@ If improvement is possible:
   Applies to every session type (STRAT / IMPL / META), subagents, and automated/scheduled
   sessions. No framework or project doc may override this rule; a doc instructing an
   immediate/automatic commit means "propose the commit immediately", not "commit".
-- Approval is requested AFTER staging, per commit: stage the files, show the owner what is
-  staged (file list + one-line summary of what each commit will contain), then WAIT for
-  explicit approval before running `git commit`. A blanket "commit" given earlier in the
-  conversation does not carry over to a later commit — the working tree may have changed
-  since (parallel sessions, owner edits), so each commit gets its own staged-state approval.
-- **Approval binds to the exact staged set, not to the intent.** The git index is shared
-  across all sessions, so another session can stage files while you wait for approval.
-  Therefore: immediately BEFORE running `git commit`, re-check the staged set
-  (`git status --short` / `git diff --cached --stat`). If it differs in any way from what the
-  owner approved — extra files, changed content, anything — the approval is VOID: do not
-  commit. Re-stage only your intended files, show the corrected staged state, and ask again.
-  Never commit a staged set the owner has not seen in its final form.
-- Stage only files you own in this session. If files from another session are already staged
-  when you begin, do not sweep them into your commit — unstage them (or ask the owner) rather
-  than committing work you did not do and they did not approve here.
+- **Do NOT stage before approval.** The git index is shared by every session in the repository,
+  so a dirty index left sitting across an owner round-trip is a live hazard: a parallel session's
+  `git commit` will sweep up whatever you staged, under a message that does not describe it.
+  (This happened — commit `df70cae`.) Therefore:
+  1. Propose the commit from the WORKING TREE: list the exact files you intend to commit
+     (`git status --short`, and the diff if useful) plus a one-line summary of the change.
+  2. WAIT for explicit owner approval.
+  3. Only then stage and commit **in one uninterrupted step**, naming your files explicitly:
+     `git add <your files> && git commit -m "..."` — never `git add -A`, never `git add .`.
+  A blanket "commit" given earlier does not carry over to a later commit; each commit gets its
+  own approval against a freshly listed file set.
+- **Commit only your own paths.** If another session's files are already staged when you begin
+  (it may be mid-approval), leave them alone — never `git commit` while a foreign file sits in
+  the index: unstage it first (`git restore --staged <path>`) or ask the owner. Beware that
+  `git add` auto-detects renames, so adding your own file can silently pull in another session's
+  rename pair — check `git diff --cached --stat` after staging and before committing, every time.
 
 ---
 

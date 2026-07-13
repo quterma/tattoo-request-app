@@ -85,7 +85,7 @@ contain the hash of the commit that first records it; git history is the commit 
    distinct **"Deviations from the task file"** section — one line per deviation ("task file
    says A, I propose B, because C"), or an explicit "no deviations". Never substitute silently:
    the Review Pipeline compares the *diff* to the task file, so a deviation baked into the plan
-   is invisible to every later check (AI_TASK_PROTOCOL.md — IMPL Session Duties).
+   is invisible to every later check (AI_TASK_PROTOCOL.md — Session Duties).
 5. Implement only after approval, within Scope only.
 6. After implementation: run the Review Pipeline per AI_REVIEW_PIPELINE.md (Test Agent →
    Quality Gates `pnpm qg` → Review Agent); self-review for architecture conformance,

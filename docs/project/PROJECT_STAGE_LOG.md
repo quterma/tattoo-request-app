@@ -37,6 +37,26 @@ require updating them first. See PROJECT_DECISIONS.md — Stage 6 Product Docume
 
 Current focus:
 
+- **Stage 6 Item 8 — blocked on the owner, not cuttable — STRAT 2026-07-13.** A STRAT session set
+  out to cut Item 8's task file (Preparation/Aftercare split) on the strength of the then-current
+  `STAGE_6_STRAT_BRIEF.md`, which called it "fully unblocked — copy already exists in `en.json`".
+  **That claim was wrong**, and repo verification (not prose) exposed it — the same class of error
+  the previous brief had itself warned about. Three questions surfaced that only the owner can
+  answer, and the owner deferred all three; no task file was cut and no code was written.
+  Recorded in full in `STAGE_6_IMPLEMENTATION_PLAN.md` — "Item 8 open questions":
+  **(Q1)** how Preparation/Aftercare are reached — the owner's position is that they should be
+  reachable from inside the app, which **contradicts PRD §5 ("no in-product fallback discovery")
+  and FS §2 ("reachable only by direct URL")** and is therefore a **PRD/FS escalation under PRD §9,
+  not a blueprint decision** a STRAT or IMPL session may make on its own; Q1 also owns the fate of
+  the Process page's `process.aftercareLink`, which Item 2 explicitly deferred to Item 8.
+  **(Q2)** the boundary bullet in `aftercare.tattooDayItems` that straddles the split.
+  **(Q3)** the per-page intro copy the blueprint requires, which does not exist in `en.json` (FS §3
+  — missing content blocks implementation). Everything *else* about Item 8 is verified ready: the
+  route is a single self-contained page, absent from the nav, with no outbound links and no test
+  coverage, splitting cleanly along existing i18n keys. Item 8's status in the implementation plan
+  is now `blocked`, not `not started`. **Item 1 remains `ready` and is the next session to run**
+  (its own IMPL session, which owns its review loop through to consensus and commit —
+  AI_TASK_PROTOCOL.md, Post-Review Fix Loop; STRAT does not follow it).
 - **Stage 6 Item 2 — site-wide shell — completed 2026-07-13.** `STAGE_6_TASK_02_site_wide_shell.md`
   implemented in full and moved to `docs/project/tasks/done/`. Nav item set is now exactly
   Home/Process/Request/Location (`src/shared/ui/app-nav.tsx`); the `policies` → `process` route
@@ -70,8 +90,9 @@ Current focus:
   footer HTML contains no `mailto:`/`tel:`, and Process/Location both render their CTA. Reviewed
   independently by Codex (thread at `reviews/done/REVIEW_2026-07-13_stage6-item2-shell.md`,
   consensus — one finding, the CTA-copy correction recorded above); committed as `e833398`.
-  Items 5/6/7/8 are now unblocked on the shell (Items 6/7 remain content/asset-blocked on
-  owner-supplied material).
+  Items 5/6/7/8 are now unblocked **on the shell** — code-unblocked only: Items 6/7 remain
+  content/asset-blocked on owner-supplied material, and Item 8 was subsequently found blocked on
+  three owner questions (see the Item 8 entry above).
 - **Stage 6 implementation started — 2026-07-13.** The UX blueprint is closed (see the entry
   below) and the durable, item-by-item plan lives in `docs/project/STAGE_6_IMPLEMENTATION_PLAN.md`
   (13 items). **Item 2 is done** (see the entry above, commit `e833398`). **Item 1 —
@@ -81,8 +102,10 @@ Current focus:
   items are independent — not because Item 1 was in progress. (An earlier version of this entry
   and of `STAGE_6_STRAT_BRIEF.md` said Item 1's IMPL session "runs in parallel"; that was a STRAT
   session's unverified assumption, never true — corrected 2026-07-13.) Items 6 (Process copy) and
-  7 (Location studio photos) remain content/asset-blocked on owner-supplied material, not on code;
-  Items 5 and 8 are unblocked by Item 2 and have no task files yet.
+  7 (Location studio photos) remain content/asset-blocked on owner-supplied material, not on code.
+  Item 5 is code-unblocked by Item 2 and has no task file yet; **Item 8 is blocked on three owner
+  questions** (see the Item 8 entry above — the claim that it was unblocked did not survive repo
+  verification).
 - **Stage 6 UX blueprint — complete and consensus-reviewed, 2026-07-13.** All 8 sub-topics
   decided in the first product/UX STRAT session and externally reviewed to consensus in three
   rounds: batch 1 (navigation/CTA, Home, Process, Request — 4 corrections, external reviewer),
@@ -363,6 +386,56 @@ Completed in Stage 3:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-07-13 — META: shared-git-index hazard removed; state-claim verification rule
+
+Status: Completed. Documentation-only — no source code changed. Owner-approved in-session
+(framework docs change rule satisfied). Resolves two more observations from the Stage 6 STRAT
+session; a third (plan approval as the single enforcement point) is deliberately left `open` in
+AI_FRAMEWORK_IDEAS.md for the next META session.
+
+**1. Shared git index — the exposure window is removed, not guarded (CLAUDE.md — Workflow;
+AI_TASK_PROTOCOL.md — Cross-Session Rules).** Every session shares one git index. The previous
+rule — "stage, show the owner, wait for approval" — left the index dirty across an owner
+round-trip, so a parallel session's commit could sweep up whatever was staged. This is not
+theoretical: this META session's own commit `df70cae` carried away the STRAT session's staged
+Item 2 files under a message that did not describe them. The guard rule ("re-check the staged set
+before committing") already existed and had fired correctly twice that same day — and still failed
+the third time, because the failure is silent by construction: neither session can see the other's
+staging. So the window itself is closed rather than watched: **do not stage before approval** —
+propose the commit from the working tree (`git status --short` + one-line summary), wait for the
+owner, then `git add <explicit paths> && git commit` in one uninterrupted step. Never
+`git add -A`/`git add .`; never commit while a foreign file sits staged. The pre-commit
+`git diff --cached --stat` check is kept anyway, because `git add` silently pulls in rename pairs
+(that is how this session swept up a `policies → process` rename earlier the same day).
+Per-session git worktrees were considered and rejected for now — real protection, but
+infrastructure cost the owner does not want yet.
+
+**2. State claims must be verified against the repository at write time (AI_TASK_PROTOCOL.md —
+Session Duties, new subsection).** Distinct from the already-fixed ban on *unverifiable* claims
+about a conversation: this covers claims that **are** verifiable and were simply not checked —
+which is worse, since the check is nearly free. Triggering case: a STRAT session was told an IMPL
+kickoff "exists", inferred the session was *running*, and wrote "Item 1 runs in parallel" into
+STAGE_6_STRAT_BRIEF.md, PROJECT_STAGE_LOG.md and a Codex review handoff. Item 1 had never started.
+Nothing caught it — not the gates, not the Codex review (it reviews the diff, not the log's claims
+about the world), not the plan approvals; only a direct owner question did (corrected in `818f914`).
+New rule: any claim about world state — what is running, done, in progress, committed, exists —
+is checked against the repo when written, never recalled (lookup table: `Status` field and
+`tasks/` vs `tasks/done/` for task state; `git log` for commits; a session's *diff*, not its
+report, for what it did; read the file for what the code contains). Two corollaries: the task
+file's `Status` field is the **source of truth** for task state and narrative docs must point at
+it rather than restate it as drift-prone prose (in the triggering case the task file was correct —
+only the narrative docs lied); and a **relayed report** ("the pipeline passed", "the review found
+nothing") is that session's claim, not an observed fact — verify it or attribute it plainly, never
+launder a report into a fact.
+
+The enclosing section was renamed "IMPL Session Duties" → **"Session Duties"**: these two writing
+rules bind STRAT and META as well (the triggering case was a STRAT session), and under the old
+heading they would have been invisible to exactly the sessions that needed them.
+
+`pnpm structure` run; no `pnpm qg` — docs-only.
+
+---
 
 ### 2026-07-13 — META: plan-deviation barrier + post-review fix-loop ownership
 

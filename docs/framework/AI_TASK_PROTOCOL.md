@@ -108,9 +108,12 @@ chat-only when the session actually ends.
 - Do not accumulate multiple tasks in one file — one file per task keeps the executor's context
   minimal and avoids write conflicts between parallel sessions.
 
-## IMPL Session Duties
+## Session Duties (writing rules)
 
-### Deviations must be flagged at plan time
+The first rule below binds IMPL sessions specifically; the two that follow bind **every** session
+type — STRAT, IMPL and META alike — because durable docs are written by all of them.
+
+### Deviations must be flagged at plan time (IMPL)
 
 The plan an IMPL session presents for approval must carry a distinct, unmissable
 **"Deviations from the task file"** section — one line per deviation: *task file says A, I
@@ -140,6 +143,35 @@ Write what is checkable instead: the decision itself and its rationale, a pointe
 section that authorizes it, or — if it genuinely rests on an owner call — record the call as a
 decision in PROJECT_DECISIONS.md, where it becomes reviewable, rather than as a claim about a
 conversation.
+
+### Verify state claims against the repository before writing them
+
+Every claim about **world state** — what is running, what is done, what is in progress, what was
+committed, what exists — must be checked against the repository **at the moment of writing**,
+never recalled from memory or inferred from what someone said. These claims are cheap to verify,
+which is exactly why writing them unchecked is worse than writing an unverifiable one:
+
+| Claim about… | Check |
+| --- | --- |
+| a task's state | the task file's `Status` field; `tasks/` vs `tasks/done/` |
+| what was committed | `git log` / `git show` |
+| what a session did | the diff and the docs it wrote — not its own report |
+| what exists in the code | read the file |
+
+(Real case, 2026-07-13: a STRAT session was told an IMPL kickoff "exists", inferred that the
+session was *running*, and wrote "Item 1 runs in parallel" into STAGE_6_STRAT_BRIEF.md,
+PROJECT_STAGE_LOG.md and a Codex review handoff. Item 1 had never started. Nothing caught it —
+not the gates, not the Codex review (it reviews the diff, not the log's claims about the world),
+not the plan approvals — only a direct owner question did. Corrected in `818f914`.)
+
+This applies to **relayed reports too**: another session's "the pipeline passed" or "the review
+found nothing" is that session's claim, not an observed fact. If you are going to write it into a
+durable doc or a review handoff, either verify it yourself or attribute it plainly ("the IMPL
+session reported X") — never launder a report into a fact.
+
+Corollary: the task file's `Status` field is the source of truth for task state. Narrative docs
+may point at it; they must not restate it as prose that can silently drift (in the case above,
+the task file was correct — the narrative docs were the ones that lied).
 
 ## Lifecycle
 
@@ -276,10 +308,14 @@ Requirements:
   session at a time — do not run sessions in parallel if more than one will update the same
   shared doc. Task files are conflict-free by design (one file per task); STRAT briefs are
   stage-scoped and written only by the stage's single active STRAT session.
-- **The git index is shared across all sessions and is not a private workspace.** Staging is a
-  critical section: stage only files this session owns, and re-verify the staged set
-  immediately before `git commit` — if it changed since the owner approved it, the approval is
-  void (CLAUDE.md — Workflow). Never sweep another session's staged files into your commit.
+- **The git index is shared across all sessions and is not a private workspace.** Do not leave it
+  dirty across an owner round-trip: propose the commit from the working tree, wait for approval,
+  then stage and commit in one step with explicit paths (CLAUDE.md — Workflow). Never
+  `git add -A`/`git add .`; never commit while another session's file sits staged; re-check
+  `git diff --cached --stat` before every commit, because `git add` silently pulls in rename
+  pairs. A parallel session's commit will otherwise carry away whatever you left staged — this
+  has already happened (`df70cae`), and it is silent by construction: neither session can see the
+  other's staging.
 - Out-of-scope findings discovered mid-task stay out of the diff. Routing depends on who found
   them: a **Claude session** records product/code findings in PROJECT_BACKLOG.md and
   process/workflow findings in the observations journal (AI_FRAMEWORK_IDEAS.md), and mentions

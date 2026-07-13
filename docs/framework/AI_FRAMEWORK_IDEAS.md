@@ -51,6 +51,94 @@ Raw observations about the AI-assisted workflow (sessions, task files, models, a
 pipeline). Recorded by any session; discussed and resolved in META sessions per
 AI_WORKFLOW_MASTER.md. Format: date — observation — status (`open` / `resolved: <where fixed>`).
 
+- 2026-07-13 — **Parallel sessions share one git index, and one session's commit silently swept up
+  another's staged files.** Concrete case (Stage 6.2): the STRAT session had staged its Item 2
+  changes (incl. edits to PROJECT_STAGE_LOG.md and AI_FRAMEWORK_IDEAS.md) and was waiting for the
+  owner's commit approval; a META session running in parallel committed its own framework changes
+  and, because `git add` had already put the STRAT session's edits in the shared index, they went
+  into the META commit (`df70cae`) instead — under a commit message that does not describe them.
+  No work was lost and the owner was not misled (he was told), but the log/code for one item ended
+  up split across two unrelated commits, and the failure is silent by construction: neither
+  session can see the other's staging. The existing rule that approval is requested *after*
+  staging (CLAUDE.md) is what creates the exposure window — the index sits dirty across an owner
+  round-trip. **For META:** is the fix a convention (never `git add` until the owner has said
+  commit; show the diff from the working tree instead), a mechanism (per-session worktrees), or an
+  accepted risk with a "check `git status` before committing, and commit only your own paths"
+  rule? Note that the current guidance actively pushes toward the risky pattern. — resolved:
+  CLAUDE.md (Workflow) + AI_TASK_PROTOCOL.md (Cross-Session Rules). The exposure window is
+  **removed**, not guarded: **do not stage before approval** — propose the commit from the working
+  tree (`git status --short` + summary), wait for the owner, then `git add <explicit paths> &&
+  git commit` in one uninterrupted step. Never `git add -A`/`git add .`; never commit while a
+  foreign file sits staged; still re-check `git diff --cached --stat` before committing, because
+  `git add` silently pulls in rename pairs (that is how the META session's own `git add` swept up
+  a `policies → process` rename earlier the same day). Per-session worktrees were considered and
+  rejected for now: real protection, but infrastructure cost the owner explicitly does not want
+  yet. The "check before committing" rule alone was rejected as insufficient — it existed, fired
+  correctly twice, and still failed the third time, because the failure is silent by construction.
+- 2026-07-13 — **A STRAT session wrote an unverified assumption about session state into the
+  durable docs, and it survived three commits.** Concrete case (Stage 6.2): the owner's kickoff
+  said Item 1's IMPL session "кикофф уже есть отдельно от этого чата" (a kickoff *exists*); the
+  STRAT session read that as "the session is running", and wrote **"Item 1 runs in parallel"**
+  into STAGE_6_STRAT_BRIEF.md, PROJECT_STAGE_LOG.md, and the Codex review handoff. Item 1 had
+  never started. Nothing caught it — not `pnpm qg`, not the Codex review (it reviews the diff,
+  not the log's claims about the world), not the owner's plan approvals. It was caught only when
+  the owner asked a direct question ("где он идёт? я не запускал сессий"). Corrected in commit
+  `818f914`. **Why this is not the same as the already-resolved rule:** the fix committed in
+  `df70cae` ("durable docs may not assert unverifiable claims about a conversation") targets
+  claims about *what was said/agreed*. This one is a claim about **observable world state** —
+  whether a session is running, whether a task is in progress, whether a file was committed — and
+  it *is* verifiable (`git log`, `docs/project/tasks/` vs `tasks/done/`, the task file's Status
+  field), which is precisely why writing it from memory instead of checking is worse, not better.
+  **Questions for META:** (a) Should there be an explicit rule that any claim about progress/state
+  written into a durable doc must be checked against the repo at write time, not recalled? (b)
+  Session state is currently tracked *only* in prose — a task file's `Status` field is the closest
+  thing to a machine-checkable source, and nothing keeps it in sync with reality (Item 1's file
+  says `ready`, which was correct; the *narrative docs* were the ones that lied). Is a status
+  field the source of truth, and should the docs be forbidden from restating it in prose at all?
+  (c) The class is broader than STRAT: the same session also relayed an IMPL session's completion
+  report ("Review Agent found no issues") into a Codex handoff without re-verifying it — the
+  handoff's "the in-session Review Pipeline reported a clean pass" was true only in the sense that
+  the report said so. — resolved: AI_TASK_PROTOCOL.md — Session Duties, new subsection "Verify
+  state claims against the repository before writing them" (and the enclosing section renamed from
+  "IMPL Session Duties" to "Session Duties", since these writing rules bind STRAT and META too —
+  the triggering case was a STRAT session). Answers to (a)/(b)/(c): (a) **yes** — every claim about
+  world state (what is running / done / in progress / committed / exists) must be checked against
+  the repo at write time, never recalled; a lookup table names the check for each claim type
+  (`Status` field, `tasks/` vs `tasks/done/`, `git log`, read the file). (b) **the task file's
+  `Status` field is the source of truth** for task state; narrative docs may point at it but must
+  not restate it as prose that can silently drift — in the triggering case the task file was
+  correct and only the narrative docs lied. (c) covered explicitly: a relayed report ("the pipeline
+  passed", "the review found nothing") is that session's *claim*, not an observed fact — either
+  verify it yourself or attribute it plainly; never launder a report into a fact.
+- 2026-07-13 — **The owner is the only real check on plan approval, and the process is designed
+  around him being able to skip it.** Owner's own words this session: "ИМПЛ предоставил план и я
+  его апрувнул не читая — мой косяк". The plan-deviation barrier (`df70cae`) makes deviations
+  *visible*, which is necessary but not sufficient — a highlighted deviation in a plan that is
+  approved unread is still unread. The framework currently has exactly one enforcement point
+  (owner approval) and no fallback if the owner's attention is the scarce resource, which it
+  explicitly is ("the owner's binding constraint is their own time" — recorded in the
+  docs-context-budget thread). **For META to weigh:** is there a cheap second check on *plan*
+  conformance that does not cost owner attention — e.g. the deviation section, when non-empty,
+  becomes a mandatory Codex pre-implementation check (cheap: Codex is free on the owner's budget,
+  reads the plan + task file + spec, answers one question: "is this deviation justified against
+  the Source of Truth?"), rather than the current model where Codex only ever sees the block
+  *after* it is built and the deviation is already baked into the diff. Note the tension: this
+  adds a round-trip to every deviating plan, and most deviations are legitimate. — **open — next
+  META session's first topic.** Prior META's non-binding read (2026-07-13, for the next session to
+  accept or reject, not a decision): the proposal is attractive because it puts a check exactly
+  where the barrier currently has no teeth (a highlighted deviation in an unread plan), and it
+  spends the free resource (Codex) instead of the scarce one (owner attention) — Codex today only
+  ever sees a block *after* the deviation is already built. Open questions it must answer: (a) is
+  the trigger the deviation section being non-empty, or does it need a severity/kind filter (most
+  deviations are legitimate and mechanical — a round-trip on every one of them is a real cost to
+  the owner's clock, not just Codex's); (b) does this fit the existing review-thread machinery
+  (one-active-thread queue, `Requested by:`, ping-per-turn) or does a pre-implementation check need
+  a lighter path than a full thread; (c) what happens when Codex says the deviation is *not*
+  justified — does the IMPL session re-plan, or does it escalate to the owner/STRAT anyway, in
+  which case the check only saved owner attention when Codex agreed. Related and worth deciding
+  together: the same pattern (Codex as a cheap pre-check on a plan, not a post-check on a diff)
+  could apply to any plan, not just deviating ones — but that is a bigger change and was not
+  proposed.
 - 2026-07-13 — **Nobody owns the post-review fix loop, so it defaulted to the wrong session.**
   The protocol defines who *implements* (IMPL, from a task file) and who *reviews*
   (AI_REVIEW_PIPELINE.md in-session; AI_CROSS_REVIEW.md for Codex/external), but it is silent on
