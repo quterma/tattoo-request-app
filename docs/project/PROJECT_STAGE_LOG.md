@@ -67,18 +67,22 @@ Current focus:
   rebuilding resolved it (no source change). Manually verified in the browser (dev server): all
   public routes return the correct status (`/process` 200, `/policies` 404, others unchanged), nav
   renders all 4 items in order with correct `aria-current` active-state on both Home and Process,
-  footer HTML contains no `mailto:`/`tel:`, and Process/Location both render their CTA. Not
-  committed — the owner will review the staged set before any commit. Items 5/6/7/8 are now
-  unblocked on the shell (Items 6/7 remain content/asset-blocked on owner-supplied material).
+  footer HTML contains no `mailto:`/`tel:`, and Process/Location both render their CTA. Reviewed
+  independently by Codex (thread at `reviews/done/REVIEW_2026-07-13_stage6-item2-shell.md`,
+  consensus — one finding, the CTA-copy correction recorded above); committed as `e833398`.
+  Items 5/6/7/8 are now unblocked on the shell (Items 6/7 remain content/asset-blocked on
+  owner-supplied material).
 - **Stage 6 implementation started — 2026-07-13.** The UX blueprint is closed (see the entry
   below) and the durable, item-by-item plan lives in `docs/project/STAGE_6_IMPLEMENTATION_PLAN.md`
-  (13 items). Two task files are `ready` and their IMPL sessions run in parallel (disjoint files):
-  **Item 1** — `STAGE_6_TASK_01_upload_flow_architecture.md` (blocks Items 3/4 — the critical
-  path; public unauthenticated upload surface, Opus) and **Item 2** —
-  `STAGE_6_TASK_02_site_wide_shell.md` (blocks Items 5/6/7/8; nav/footer/CTA shell plus the
-  `policies` → `process` route rename with the shipped copy carried over unchanged — see the
-  dated 2026-07-13 entry on the Item 2/6 boundary decision). Items 6 (Process copy) and 7
-  (Location studio photos) remain content/asset-blocked on owner-supplied material, not on code.
+  (13 items). **Item 2 is done** (see the entry above, commit `e833398`). **Item 1 —
+  `STAGE_6_TASK_01_upload_flow_architecture.md` — is `ready` but NOT started**; it is the
+  critical path (blocks Items 3 and 4; public unauthenticated upload surface, Opus + Plan mode)
+  and is the next session to run. Item 2 was taken first, by owner instruction, because the two
+  items are independent — not because Item 1 was in progress. (An earlier version of this entry
+  and of `STAGE_6_STRAT_BRIEF.md` said Item 1's IMPL session "runs in parallel"; that was a STRAT
+  session's unverified assumption, never true — corrected 2026-07-13.) Items 6 (Process copy) and
+  7 (Location studio photos) remain content/asset-blocked on owner-supplied material, not on code;
+  Items 5 and 8 are unblocked by Item 2 and have no task files yet.
 - **Stage 6 UX blueprint — complete and consensus-reviewed, 2026-07-13.** All 8 sub-topics
   decided in the first product/UX STRAT session and externally reviewed to consensus in three
   rounds: batch 1 (navigation/CTA, Home, Process, Request — 4 corrections, external reviewer),

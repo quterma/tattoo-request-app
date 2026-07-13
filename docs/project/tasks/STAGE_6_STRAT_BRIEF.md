@@ -14,50 +14,74 @@ AI agents and the developer, at the start of the next STRAT: Stage 6 session.
 
 ## Session summary
 
-Short session. Cut the task file for **Item 2 — site-wide shell**
-(`STAGE_6_TASK_02_site_wide_shell.md`, status `ready`), in parallel with Item 1, which is running
-as its own IMPL session (the two items touch disjoint files). One product-level boundary call was
-made and recorded (the Item 2/6 route-rename boundary — see Decided).
+Cut the task file for **Item 2 — site-wide shell**, then (against the protocol as it stood at the
+time) also carried Item 2's whole post-review fix loop: Codex handoff, review processing, code
+fixes, `pnpm qg`, commit. **Item 2 is done and committed (`e833398`).** That boundary violation is
+now fixed at the framework level — see "Protocol changes you inherit" below; do not repeat it.
 
-## Decided
+## State of the board — verify before trusting this
 
-- **Item 2/6 boundary (owner, this session).** Item 2 renames `policies` → `process` **and carries
-  the shipped copy over unchanged**; Item 6 later replaces that copy with the FS §3.2 canonical
-  content. Rejected: leaving the rename in Item 6 (the new nav would point at a 404 for as long as
-  Item 6 stays content-blocked) and shipping a stub `/process` (would take the site's only
-  pricing/FAQ content offline meanwhile). Also decided: **no redirect** from the old `/policies`
-  URL — the site is not publicly launched, so there is nothing to preserve. Full rationale:
-  `docs/project/STAGE_6_IMPLEMENTATION_PLAN.md` — "Item 2/6 boundary" note.
-- Item 2 additionally pulls forward Location's missing primary CTA (FS §2's table requires one;
-  Item 7 is asset-blocked, and the site-wide CTA pattern should not ship half-applied).
-- Everything else from the prior session stands: the full UX blueprint (PROJECT_DECISIONS.md —
-  Stage 6 UX Blueprint Decisions) and the 13-item plan (`STAGE_6_IMPLEMENTATION_PLAN.md` — the
-  durable plan; read it, not just this brief).
+**Item 1 has NOT started.** Its task file (`STAGE_6_TASK_01_upload_flow_architecture.md`) is
+`ready` and sitting in `docs/project/tasks/`. Earlier versions of this brief and of
+PROJECT_STAGE_LOG.md claimed its IMPL session "runs in parallel" — that was never true; a STRAT
+session took an owner's remark about a prepared kickoff to mean the session was live, and
+propagated the assumption into the durable docs. Corrected 2026-07-13. **Confirm state from
+`docs/project/tasks/` and `git log`, not from prose.**
 
-## Open
+| Item | State |
+| --- | --- |
+| 1 — Upload-flow architecture | `ready`, **not started** — the critical path (blocks 3 and 4) |
+| 2 — Site-wide shell | **done**, `e833398` |
+| 3 — Request form rebuild | blocked on Item 1 |
+| 4 — Success page | blocked on Item 3 |
+| 5 — Home rebuild | unblocked (Item 2 landed), no task file |
+| 6 — Process content | unblocked in code, **content-blocked** on owner copy |
+| 7 — Location polish | unblocked in code, **asset-blocked** on studio photos |
+| 8 — Preparation/Aftercare split | unblocked (Item 2 landed), no task file |
+| 9–13 | see `STAGE_6_IMPLEMENTATION_PLAN.md` |
 
-None blocking. Still parked for META (not this stage's blocker): whether/how to extend Codex
-beyond its read-only reviewer role — see AI_FRAMEWORK_IDEAS.md, 2026-07-13 entry on Codex
-delegation scope. Do not resolve it in a Stage 6 STRAT session.
+## Decided (this session)
 
-## Task files
+- **Item 2/6 boundary:** Item 2 renamed `policies` → `process` and carried the shipped copy over
+  unchanged; Item 6 replaces that copy with FS §3.2 content. No redirect from the old URL (site
+  not publicly launched). Rationale: `STAGE_6_IMPLEMENTATION_PLAN.md` — "Item 2/6 boundary".
+- **CTA copy follows FS §2 ("Start Your Request").** The IMPL session had shipped "Request a
+  Tattoo" and logged a non-existent approval for it; the Codex review caught both. The
+  `CtaRequestButton` now owns its label via a single `cta.requestButton` key — the per-page
+  `label` prop was the mechanism that let three call sites diverge. Thread:
+  `reviews/done/REVIEW_2026-07-13_stage6-item2-shell.md`.
 
-- `STAGE_6_TASK_01_upload_flow_architecture.md` — **ready**; its IMPL session was kicked off
-  separately and is running in parallel. Blocks Items 3 and 4.
-- `STAGE_6_TASK_02_site_wide_shell.md` — **ready** (written this session). Blocks Items 5/6/7/8.
-  Independent of Item 1.
-- No other task files yet — per owner instruction, write them close to when work starts, not all
-  13 upfront (see the plan's "How to use this document").
+## Protocol changes you inherit (committed `df70cae` — read before running any IMPL)
+
+1. **Plan-deviation barrier** (AI_TASK_PROTOCOL.md — IMPL Session Duties): every IMPL plan must
+   carry a distinct "Deviations from the task file" section, or state "no deviations". A deviation
+   baked into the plan is invisible downstream — the Review Agent compares the *diff* to the task
+   file, so it faithfully validates the wrong thing.
+2. **Durable docs may not assert unverifiable claims about a conversation** ("flagged and approved
+   in-plan"). A future session has no transcript.
+3. **Post-Review Fix Loop** (AI_TASK_PROTOCOL.md): **the IMPL session that built a block owns the
+   whole loop** — Codex handoff, `## Response`, fixes, gates, commit, consensus — and stays open
+   until its review thread reaches consensus, rather than ending at "READY FOR DEVELOPER REVIEW".
+   **STRAT does not participate.** No final STRAT sign-off exists, deliberately.
 
 ## Next topic
 
-1. When Item 1 or Item 2 lands, cut the next unblocked task file(s): after **Item 1** → Item 3
-   (Request form rebuild — consider folding Items 9 and 10 into it; same submit endpoint, the plan
-   already leaves this to the STRAT session's discretion). After **Item 2** → Items 5 (Home
-   rebuild) and 8 (Preparation/Aftercare split) are both unblocked and independent of each other.
-2. Re-verify each item's assumptions against the repo before writing its task file — Items 1 and 2
-   are changing shipped code right now, so the plan's item descriptions may already be stale.
-3. Owner note, unchanged: Items 6 (Process copy — pricing, FAQ, Good Fit) and 7 (Location studio
-   photos) are content/asset-blocked, not code-blocked — produce that material in parallel so it
-   isn't the long pole when their turn comes. Item 2 buys time here (the Process route ships with
-   the old copy rather than a 404 or a stub) but does not remove the blocker.
+1. **Run Item 1.** It is the critical path and everything downstream waits on it. Task file is
+   `ready`; nothing needs cutting first.
+   - Session: `IMPL: Stage 6 — upload flow architecture`
+   - Model: Opus · Plan mode (mandatory — this is architecture design on a public,
+     unauthenticated write surface)
+   - Prompt: `Execute docs/project/tasks/STAGE_6_TASK_01_upload_flow_architecture.md`
+   - That session owns its own review loop through to consensus and commit. This STRAT session
+     does not follow it.
+2. **While Item 1 runs**, the cuttable work is **Item 8** (Preparation/Aftercare split — fully
+   unblocked, copy already exists in `en.json`) and **Item 5** (Home rebuild — unblocked, but its
+   Good Fit / About-fold copy is the same owner-authored material that blocks Item 6). Cutting
+   either is optional; waiting for Item 1 and then cutting **Item 3** (with Items 9 and 10 folded
+   in — same submit endpoint, the plan leaves this to STRAT's discretion) is the cheaper path if
+   token budget is the binding constraint.
+3. **Owner's own critical path, unchanged:** Items 6 and 7 are blocked on *you*, not on code —
+   Process copy (pricing, FAQ, Good Fit) and Location studio photos. They are the likeliest long
+   pole at the end of the stage.
+4. Re-verify every assumption in this brief against the repo before acting on it. This session
+   demonstrated exactly how a plausible-sounding brief can carry a fabrication forward.
