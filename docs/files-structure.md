@@ -102,7 +102,8 @@ tattoo-request-app/
 │   │       ├── PROJECT_DECISIONS_TEMPLATE.md
 │   │       ├── PROJECT_IMPLEMENTATION_PLAN_TEMPLATE.md
 │   │       ├── PROJECT_STAGE_LOG_TEMPLATE.md
-│   │       └── PROJECT_STRUCTURE_TEMPLATE.md
+│   │       ├── PROJECT_STRUCTURE_TEMPLATE.md
+│   │       └── STAGE_TASK_TEMPLATE.md
 │   └── project/
 │       ├── PROJECT_ARCHITECTURE.md
 │       ├── PROJECT_BACKLOG.md
@@ -119,10 +120,10 @@ tattoo-request-app/
 │       │   ├── .gitkeep
 │       │   └── done/
 │       │       ├── .gitkeep
-│       │       └── REVIEW_2026-07-13_codex-sync-setup.md
+│       │       ├── REVIEW_2026-07-13_codex-sync-setup.md
+│       │       └── REVIEW_2026-07-13_stage6-ux-blueprint-batch2.md
 │       └── tasks/
-│           ├── STAGE_6_STRAT_BRIEF.md
-│           └── STAGE_TASK_TEMPLATE.md
+│           └── STAGE_6_STRAT_BRIEF.md
 ├── scripts/
 │   └── update-structure.mjs
 ├── src/

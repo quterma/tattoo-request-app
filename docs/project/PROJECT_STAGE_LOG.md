@@ -37,6 +37,14 @@ require updating them first. See PROJECT_DECISIONS.md — Stage 6 Product Docume
 
 Current focus:
 
+- **Stage 6 UX blueprint — complete and consensus-reviewed, 2026-07-13.** All 8 sub-topics
+  decided in the first product/UX STRAT session and externally reviewed to consensus in two
+  batches: batch 1 (navigation/CTA, Home, Process, Request — 4 corrections), batch 2 (Success,
+  Location, Preparation, Aftercare — 3 corrections + 1 acceptance note, via the formal
+  cross-review protocol). See PROJECT_DECISIONS.md — Stage 6 UX Blueprint Decisions;
+  `docs/project/reviews/done/REVIEW_2026-07-13_stage6-ux-blueprint-batch2.md`;
+  `docs/project/tasks/STAGE_6_STRAT_BRIEF.md`. Next: cut the blueprint into implementation task
+  files (status `draft`), then optionally a whole-blueprint Codex pass before implementation.
 - **Stage 6 product documentation integrated — 2026-07-12.** The Stage 6 PRD and Functional
   Specification were added to `docs/project/` and made the official Stage 6 Source of Truth.
   PROJECT_IMPLEMENTATION_PLAN.md (Stage 6 section rewritten to reference them; superseded task
@@ -302,6 +310,259 @@ Completed in Stage 3:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-07-13 — STRAT: Stage 6 UX blueprint — batch 2 external review closed at consensus, 3 corrections applied
+
+Status: Completed. First review thread run through the formal cross-review protocol
+(AI_CROSS_REVIEW.md, `Reviewer: external`); thread with full findings, responses, and consensus
+table: `docs/project/reviews/done/REVIEW_2026-07-13_stage6-ux-blueprint-batch2.md`. All findings
+accepted; corrections applied to PROJECT_DECISIONS.md — Stage 6 UX Blueprint Decisions:
+
+1. **Success:** added a bfcache guard (`pageshow` + `event.persisted` → re-run the gate check —
+   browser-back restore after a full document navigation bypasses mount-based checks, so the
+   reference code could reappear); reworded one-time read to idempotent semantics (dev strict
+   mode double-invokes effects); added the missing form-state-clearing rule (successful persist
+   clears both the success payload after display and the D-Blueprint 5(a) persisted form state —
+   without it, revisiting Request in the same session would show an already-submitted form).
+2. **Location:** the review caught a real FS conflict — FS §3.5's "if non-obvious" qualifier
+   binds only to entrance instructions, so transport/parking is unconditional must-contain
+   content that the blueprint had waived as an "owner content decision" (silent FS override at
+   the wrong level). Owner chose the review's recommended resolution over an FS amendment:
+   "How to find us" carries at least one sentence of transport/parking content.
+3. **Preparation/Aftercare cross-link:** decision unchanged (no cross-link), recorded basis
+   corrected from PRD §5 (overclaim — that clause governs public discoverability, not links
+   between already-distributed contextual pages) to FS §2 task-relevance; future cross-link
+   explicitly marked a cheap blueprint-level change, not a PRD escalation.
+
+Plus one acceptance item carried to future task files (STAGE_6_STRAT_BRIEF.md): site-wide check
+that no inbound links to the superseded `policies` route remain (Home hero and Mini Process copy
+link to it today). **The Stage 6 UX blueprint is now fully decided and consensus-reviewed across
+both batches; next step is cutting it into implementation task files.**
+
+`pnpm structure` not run — no source/structure change. No `pnpm qg` — docs-only.
+
+---
+
+### 2026-07-13 — META: task template moved to docs/framework/templates/
+
+Status: Completed. Documentation-only — no source code changed. Owner-approved in-session
+(framework docs change rule satisfied).
+
+`docs/project/tasks/STAGE_TASK_TEMPLATE.md` was a framework artifact living under
+`docs/project/` — it is a reusable, project-agnostic skeleton (per DOCUMENTATION_SYSTEM_RULES.md,
+templates belong to framework docs, reusable across projects), so it was moved via `git mv`
+(history preserved) to `docs/framework/templates/STAGE_TASK_TEMPLATE.md`. Generalized the two
+project-specific mentions in place: "Stage Source of Truth" and "Acceptance Criteria" sections
+now describe the Stage-6-PRD/FS reference as an example rather than a hard-coded assumption,
+so the template copies cleanly into a project with no PRD/FS-style doc. Updated the three path
+references in AI_TASK_PROTOCOL.md (STRAT Kickoff Prompt persistence line, the parenthetical
+IMPL note, and Task Files — Skeleton). Historical PROJECT_STAGE_LOG.md entries mentioning the
+old path are left as-is (history is not rewritten).
+
+`pnpm structure` run; no `pnpm qg` — docs-only.
+
+---
+
+### 2026-07-13 — STRAT: Stage 6 UX blueprint — Success, Location, Preparation, Aftercare decided (batch 2, all 8 sub-topics now complete)
+
+Status: Batch 2 decisions completed (session still open, model switched Sonnet → Fable for this
+batch per owner request, then back to Sonnet). Follow-up to the entry below (same day). Closes the
+last four of the eight UX-blueprint sub-topics from STAGE_6_STRAT_BRIEF.md. Full text:
+PROJECT_DECISIONS.md — Stage 6 UX Blueprint Decisions (Success/Location/Preparation/Aftercare
+sections).
+
+**Success (FS §3.4).** Content and order are fully fixed by FS itself ("Must contain, in order");
+this page does not exist in the shipped site (Stages 0–5 used an in-place success state — a
+recorded divergence). Decided: data transport via the same module-level client store
+D-Blueprint 5(a) already introduced (success payload set on submit, client-side navigation to a
+clean `/success` URL with no query data); gate check on mount (empty store → redirect to Home,
+covering direct-open/refresh/no-submission cases in one check); one-time read (store cleared
+immediately after render, so any revisit — including browser back — also redirects), a known,
+accepted trade-off against re-viewing the code on-site (matches FS §4.6's "no public lookup").
+
+**Location (FS §3.5).** Content set fixed by FS, order not specified. Decided: keep the shipped
+page's existing order (Address+map-links → map embed → How to find us → Studio Photos) — no
+reordering without cause — plus append the primary CTA the shipped page is currently missing
+(Location is in FS §2's CTA table). Transport/parking and entrance instructions live inside "How
+to find us" as optional owner-added items (FS itself gates entrance instructions on "if
+non-obvious"; the owner confirmed neither applies to the current Tel Aviv location and forcing
+them in would be friction, not help, per PRD §6).
+
+**Preparation / Aftercare (FS §3.6/§3.7).** The shipped site has no separate pages for these — a
+single combined `aftercare` route exists today (before-appointment, tattoo-day,
+aftercare-instructions, healing-touch-ups sections), a recorded Stages 0–5 divergence. Splitting
+into two routes is direct FS compliance, not a new invention. Decided for both: chronological
+block order (short intro → the two FS-mandated content sections each); nav bar renders on the
+page but the page stays out of the nav item set, reachable only by direct URL the artist sends at
+the right journey moment (PRD §5 — the owner explicitly reconfirmed this distribution model
+in-session, including its "no in-product discovery" accepted risk, after the trade-off was
+restated); no primary CTA (FS §2 table); the shipped page's "back to policies" links removed
+(policies is superseded by Process in Stage 6, and FS §2 only allows secondary links that help
+the current task); no cross-link between Preparation and Aftercare (would quietly reintroduce
+in-product discovery against the PRD §5 model). Aftercare additionally records an explicit content
+boundary: "Healing & touch-ups" covers healing/appropriateness only — touch-up booking terms and
+pricing stay exclusively on Process, per FS §3.7's pricing/booking prohibition and FS §5's
+canonical-ownership table.
+
+**Status after this entry:** all 8 UX-blueprint sub-topics are decided. Batch 1
+(navigation/CTA, Home, Process, Request) has completed one external-review round (4 corrections
+applied — see the entry below). Batch 2 (this entry) has not yet been through external review;
+next step is preparing that review round, now via the newly-formalized cross-review protocol
+(`docs/framework/AI_CROSS_REVIEW.md`) rather than the ad-hoc file exchange batch 1 used.
+
+`pnpm structure` not run — no source/structure change. No `pnpm qg` — docs-only.
+
+---
+
+### 2026-07-13 — STRAT: Stage 6 UX blueprint — first external review round, 4 corrections applied
+
+Status: Completed for this round (session still open — see STAGE_6_STRAT_BRIEF.md). Follow-up to
+the "navigation/CTA, Home, Process, Request format decided" entry below (same day). The four
+decided sub-topics were handed to an external AI reviewer for independent verification against
+the full PRD/FS text (owner-run, ad-hoc file exchange via `docs/project/temp/` — predates the
+Codex cross-review protocol formalized in the entry above; future rounds should use
+`docs/framework/AI_CROSS_REVIEW.md` / `docs/project/reviews/` instead). Per the owner: source of
+truth for these decisions is the **consensus** across AI + docs + owner, not any single party.
+
+Review found zero PRD/FS contradictions and confirmed the Home/Process block-order reasoning
+against the owner's own prior competitor research (unprompted — the reviewer had that context
+independently). Four corrections applied to PROJECT_DECISIONS.md — Stage 6 UX Blueprint
+Decisions:
+
+1. **Home's double CTA instance** (Hero + end of page) — added an explicit interpretation note:
+   FS §2 / acceptance criterion 10's "exactly one primary CTA" governs the primary *action*, not
+   the literal instance count; two instances of the same action are not a violation.
+2. **About-section removal rationale corrected** — the original citation (FS §3.1 "long-form
+   duplicates") does not actually apply to a two-line block; the real basis is PRD §6 ("one user
+   problem per content block"). Removal itself still stands, now conditional on confirming the
+   real copy has no unique trust content worth folding into Hero/Good Fit instead of deleting.
+3. **D-Blueprint 5(a) (required in-session form persistence)** — added an explicit guarantee
+   boundary: covers client-side navigation only, not page reload / tab close / mobile OS tab
+   eviction (a real scenario); noted the implementation cost (state must outlive the page
+   component, so it needs a module-level store) and that this decision increases orphaned Storage
+   uploads (already tracked in PROJECT_BACKLOG.md as post-launch/operational, unchanged policy).
+4. **D-Blueprint 4 (vertical upload-card stack) rationale strengthened** — added the direct tie to
+   PRD D4's review trigger: the stack is what keeps "missing placement photos causing
+   clarification rounds" an interpretable signal at all (a carousel/tabs would make low upload
+   rates ambiguous — decline vs. never-seen).
+
+One reviewer claim was flagged as unverifiable and intentionally excluded from the fix ("most
+valuable upload category" traced to competitor research, not PRD/FS — confirmed as already
+correctly excluded from D-Blueprint 4's recorded rationale in the prior session).
+
+`pnpm structure` not run — no source/structure change. No `pnpm qg` — docs-only.
+
+---
+
+### 2026-07-13 — META: Codex connected as independent reviewer (AGENTS.md + cross-review protocol)
+
+Status: Completed. Documentation-only — no source code changed. Owner-approved in-session
+(framework docs change rule satisfied).
+
+The owner connected OpenAI Codex to the project. Division of labor decided: **Claude Code
+remains the primary agent for everything** (design, analysis, implementation); **Codex is the
+independent reviewer only** — reviews completed blocks (implementation / spec / design) after
+the fact, read-only, no implementation delegation for now (revisit later; rationale: a second
+writer would break the single-writer principle and increase — not reduce — the owner's review
+load, which is the actual bottleneck).
+
+Artifacts added:
+
+- **`AGENTS.md`** (repo root — Codex's rules file, its CLAUDE.md equivalent): independent-
+  reviewer role; read-only everywhere except `docs/project/reviews/`; never commits (commits
+  remain Claude Code's job with explicit manual owner approval per CLAUDE.md — note: the
+  `.claude/settings.json` permission prompt does not apply to Codex, so the rule + Codex-side
+  sandbox settings are the barrier); context list (CLAUDE.md, PROJECT_* docs, stage Source of
+  Truth, cross-review protocol); fail-fast.
+- **`docs/framework/AI_CROSS_REVIEW.md`** (new framework doc): status-driven review threads —
+  one file per reviewed block at `docs/project/reviews/REVIEW_<date>_<slug>.md`, appended
+  sections Handoff (Claude) → Review N (Codex) → Response N (Claude, incl. Russian owner
+  summary) → … → Consensus; statuses `awaiting-review` / `awaiting-response` / `consensus`
+  determine who acts, so the owner's orchestration is two one-line pings per round; accepted
+  findings are filed to fixes/task files/PROJECT_BACKLOG.md (review file = discussion record,
+  not a work tracker); after consensus the thread moves to `reviews/done/` (never-delete);
+  does NOT replace AI_REVIEW_PIPELINE.md.
+- **`docs/project/reviews/`** + `done/` created (with .gitkeep).
+- **AI_TASK_PROTOCOL.md** (Cross-Session Rules): pointer bullet to AI_CROSS_REVIEW.md.
+
+**Protocol validated end-to-end the same day (dogfood review):** the first review thread
+(`reviews/done/REVIEW_2026-07-13_codex-sync-setup.md`) had Codex review the setup itself.
+Codex found the thread from the standard one-line ping and followed file/format/status rules
+correctly on both rounds. 4 findings (3 should-fix, 1 nit), all accepted and fixed:
+reviewer's quality gates narrowed to the non-mutating `lint`/`typecheck`/`test` (Codex itself
+caught that `pnpm qg` writes `docs/files-structure.md` via `structure` — and correctly
+refused to run it); review-debt definition corrected (`.gitkeep`/`done/` don't count);
+uniqueness invariant for `awaiting-review` threads added (zero/multiple → ask the owner);
+git `safe.directory` read-only inspection note added. Consensus reached in 2 rounds; thread
+moved to `reviews/done/`.
+
+**External reviewer flow added the same day** (owner request; need already proven by the
+Stage 6 STRAT session's ad-hoc external review via `docs/project/temp/`): threads now carry a
+`Reviewer: codex | external` header field (Codex acts only on `codex` threads — prevents
+waiting on the wrong reviewer). For `external` threads the external AI has no repo access, so
+Claude Code generates transient self-contained `*.request.md` / `*.answer.md` copy buffers
+next to the thread; the owner carries them by copy-paste; answers are normalized into the
+thread (single source of history) and the buffers are deleted at Consensus. Owner commands:
+`Подготовь внешнее ревью: <тема>` / `Process the external review`. AGENTS.md and
+AI_CROSS_REVIEW.md updated accordingly.
+
+`pnpm structure` run; no `pnpm qg` — docs-only.
+
+---
+
+### 2026-07-13 — STRAT: Stage 6 UX blueprint — navigation/CTA, Home, Process, Request format decided
+
+Status: In progress (session ongoing, checkpointed mid-session per owner request — not a session
+close). First Stage 6 product/UX STRAT session on the approved PRD/FS (prior Stage 6 STRAT session
+was workflow-only, see the entry below). Documentation-only — no source/UI code changed; this is
+blueprint decision-making, not implementation. Full decision text and rationale: PROJECT_DECISIONS.md
+— Stage 6 UX Blueprint Decisions.
+
+**Navigation and CTA (site-wide).** Existing `src/shared/ui/app-nav.tsx` pattern (bottom fixed
+tab-bar on mobile, top sticky bar from `sm:`) retained; only the item set changes to Home/Process/
+Request/Location (FS §2/PRD D9 — `policies` item becomes `process`). Primary CTA appears at the
+end of each content page, plus an additional CTA at the end of the Hero block on Home only.
+
+**Home (FS §3.1).** Block order (not fixed by FS, a blueprint decision): Hero → Featured Work →
+Good Fit teaser → Mini Process → Price teaser → CTA. The two-line About section in the
+currently-shipped page (`app/[locale]/(public)/page.tsx`) is removed as a FS-prohibited
+long-form duplicate; the Instagram link is retained as a secondary link inside Hero.
+
+**Process (FS §3.2).** Block order: Process Overview → Good Fit → Design Process → Pricing →
+Booking Policy → FAQ → CTA.
+
+**Request — form format (FS §4).** Field-level order/fields/states were already fixed by FS; the
+open question was on-screen format. Decided: single continuous scroll with visually separated
+sections (not a wizard, not an accordion) — retains the current `RequestForm.tsx` architecture.
+No Review step (submit leads directly to Success/failure, matching FS §4.5's existing states).
+Upload categories (fields 5–7) shown as a vertical stack of motivation cards inside one section,
+not a carousel/tabs/step, in FS's own field order. In-session form persistence (values + uploaded
+files survive navigating away and back) is elevated from FS's "permitted, not required" wording
+to a required blueprint behavior — explicitly inside the FS-permitted range. Clean single-entry
+browser history and local smooth-scroll-to-invalid-field (no sticky progress indicator) follow
+directly from the single-scroll decision. Full argument chain (why scroll beats wizard/accordion,
+why cross-step validation doesn't apply, why no Review step) is in PROJECT_DECISIONS.md.
+
+One conclusion (the Request format decision) originated as an external hypothesis from an
+out-of-repository ChatGPT research thread predating this project's STRAT/IMPL workflow; it was
+independently re-verified against PRD/FS text in-session (checked for conflicts with FS §4.4/§4.5)
+before acceptance, and an unverifiable claim in the external material ("most valuable upload
+category" — not supported by any PRD/FS/PROJECT_* text) was identified and dropped from the
+recorded rationale.
+
+**Not yet discussed this session:** Success, Location, Preparation, Aftercare page blueprints.
+
+**Process notes:** two workflow-friction observations from this session (mid-session persistence
+expectations; checking existing repo code before proposing UX patterns) were logged to
+AI_FRAMEWORK_IDEAS.md and have already been resolved by a separate META session during this same
+session — see the two "2026-07-13" META entries below for the actual protocol changes
+(AI_TASK_PROTOCOL.md: STRAT Next-Session Brief mid-session-persistence subsection; STRAT Kickoff
+Prompt prior-art line).
+
+`pnpm structure` not run — no source/structure change. No `pnpm qg` — docs-only, per established
+precedent for documentation-only passes.
+
+---
 
 ### 2026-07-13 — META: remaining open journal items closed (out-of-scope findings rule; framework source of truth)
 

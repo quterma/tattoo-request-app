@@ -1370,6 +1370,292 @@ silently as warnings (the UI→BFF violation existed under `warn`). New deep imp
 
 ---
 
+# Stage 6 UX Blueprint Decisions
+
+Decided 2026-07-13, Stage 6 STRAT session (UX blueprint topic — see
+`docs/project/tasks/STAGE_6_STRAT_BRIEF.md`). Scope: page structure, block order, flows, states,
+navigation/CTA placement — no visual design (colors, typography, spacing, imagery), per the
+brief's stated boundary. These decisions sit strictly inside the PRD/FS corridor: none contradict
+or require a PRD/FS change; §4.5's permitted in-memory persistence is the only place a blueprint
+decision turns a FS "permitted" into a blueprint-level "required" (D-Blueprint 5 below), which the
+FS itself allows. Status: **all 8 sub-topics decided (2026-07-13)** — navigation/CTA, Home,
+Process, Request (batch 1: externally reviewed, 4 corrections folded in) and Success, Location,
+Preparation, Aftercare (batch 2: decided, external review pending — see
+`docs/project/reviews/`).
+
+Some conclusions below originated as an external hypothesis (an out-of-repository ChatGPT
+research thread predating this project's STRAT/IMPL workflow) and were independently verified
+against PRD/FS text in this session before being accepted; only the verified conclusions are
+recorded here, not the external material itself.
+
+**Consensus note.** Per the owner: the source of truth for these decisions is neither this
+document, nor any single AI, nor the owner alone, but the consensus reached across them. The
+Navigation/CTA, Home, Process, and Request sections below were independently reviewed by a second
+AI (2026-07-13, cross-session, given only the batch of decisions plus the relevant FS/PRD
+excerpts) before being finalized; four corrections from that review are folded in below (CTA
+interpretation note, About-removal rationale, D-Blueprint 5(a) guarantee boundary, D-Blueprint 4
+rationale addition). Nothing required a PRD/FS escalation.
+
+## Navigation and CTA placement (site-wide)
+
+- **Navigation pattern unchanged.** The existing `src/shared/ui/app-nav.tsx` component (bottom
+  fixed tab-bar on mobile, top sticky bar from the `sm:` breakpoint up) is retained as the Stage 6
+  pattern. Only its item set changes, to match FS §2/PRD D9 exactly: Home, Process, Request,
+  Location (was Home, Request, Policies, Location — `policies` is replaced by `process`, item
+  order follows D9).
+- **Primary CTA placement on content pages** (Home, Process, Location): the primary CTA block
+  appears once at the end of the page, after all content. On Home only, an additional CTA appears
+  at the end of the Hero block, for visitors who are ready to act immediately. The CTA never
+  competes with the nav bar — nav is site navigation, CTA is an in-content action.
+- **Interpretation of "one primary CTA per page" (FS §2, acceptance criterion 10) for the Home
+  double instance.** "Exactly one primary CTA" governs the primary *action* a page offers, not the
+  literal count of button instances on screen. Two instances of the identical "Start Your Request"
+  action (Hero + end of page) are the same action repeated for scroll convenience on a long
+  mobile page, not two competing CTAs — a *different* action (e.g. a second, distinct CTA) would
+  violate the rule; a repeated instance of the *same* one does not. This interpretation is recorded
+  explicitly here, as a UX-review pass (2026-07-13, cross-checked against another AI reviewer)
+  flagged it as the one point in this batch with a plausible literal-reading conflict, i.e. a
+  "decision by silence" the blueprint should not leave implicit.
+
+## Home page (FS §3.1)
+
+- **Block order** (FS §3.1 lists required blocks without an explicit order, unlike Success §3.4
+  which says "in order" — the order is this blueprint's decision to make):
+  Hero → Featured Work → Good Fit teaser → Mini Process → Price teaser → primary CTA.
+  Rationale: cheapest visual/positioning filters ("do I like the work / am I a fit") come before
+  the more detailed content (process mechanics, price), so visitors who are not a fit disengage
+  before investing attention in details that no longer matter to them. This is a funnel-logic
+  hypothesis, not validated against real traffic data — flagged as a candidate for future
+  analytics/A-B review, not a Stage 6 blocker.
+- **About section removed — corrected rationale.** The currently-shipped Home
+  (`app/[locale]/(public)/page.tsx`) has a two-line About section not listed among FS §3.1's
+  required blocks. A UX-review pass (2026-07-13) caught that the original rationale for removing
+  it ("FS §3.1's Must-not-contain: long-form duplicates") does not actually apply — a two-line
+  block is not long-form by definition, and content outside both the "must contain" and "must not
+  contain" lists is not itself prohibited by FS. The correct basis is PRD §6's "one user problem
+  per content block": the section restates ground already covered by Hero (one-line specialization)
+  and the Good Fit teaser, answering a question the page already answered once. Removal stands on
+  that basis, conditional on confirming the section is in fact restating Hero/Good Fit and does not
+  carry unique trust content (artist tenure, background, studio history) — if it does, the correct
+  action is to fold that content into Hero or Good Fit, not delete it outright. This check is left
+  for the implementation session that builds Home, against the real (not placeholder) copy.
+- **Instagram link retained** as a secondary contextual link inside the Hero block (not a content
+  block, not competing with the primary CTA) — consistent with PRD D1 (Instagram as the primary
+  acquisition channel).
+
+## Process page (FS §3.2)
+
+- **Block order** (same "order not specified by FS" situation as Home):
+  Process Overview → Good Fit → Design Process → Pricing → Booking Policy → FAQ → primary CTA.
+  Rationale: orientation first, then the same fit-filter as Home but in full, then how the design
+  process actually works, then price (once the visitor understands what they're paying for), then
+  booking rules, then residual questions (FAQ), then CTA.
+
+## Request page — form format (FS §4)
+
+FS §4.1 fixes the field-level block order (Introduction → Idea → Project Details → Reference
+Uploads → Contact → Eligibility & Privacy → Submit) and §4.2–§4.7 fix every field and state in
+detail; the open blueprint question was strictly the on-screen format, not the block order or
+field set.
+
+- **D-Blueprint 1 — Format: single continuous scroll with visually separated sections.** Not a
+  multi-step wizard, not an accordion. Retains the current `RequestForm.tsx` architecture (one
+  RHF form, one submit). Three independent arguments converge: (a) product — "a structured first
+  Direct message, not a booking system" (PRD principles, §6) is a single-message metaphor; a
+  wizard with steps/progress bar reads as booking-system language, which PRD deliberately
+  distances itself from; (b) cognitive load — with ~7 fields actually filled in, a scroll makes
+  the full scope of effort visible immediately (lower perceived load), while a wizard hides scope
+  and creates step-count anxiety, and an empty step containing only three optional upload cards
+  plus a "next" button silently implies something must be uploaded, undermining D4's
+  optionality; (c) specification cost — FS §4.5 is written in scroll terms ("first invalid field
+  scrolled into view and focused"); a wizard would require rewriting the validation/state model,
+  i.e. a FS escalation, for no product benefit.
+- **D-Blueprint 2 — Cross-step validation: not applicable**, a direct consequence of D-Blueprint 1
+  (no steps exist to validate across). Recorded because both wizard-side alternatives were
+  independently shown to conflict with existing decisions (a blocking per-step validation would
+  make optional upload steps read as required, undermining D4; deferred end-of-flow validation
+  would contradict FS §4.5's scroll-to-first-invalid wording) — an independent confirmation that
+  the scroll format is not a stylistic preference.
+- **D-Blueprint 3 — No Review step.** Submit leads directly to Success or a failure state, as FS
+  §4.5 already describes (no Review state exists in FS). In a single scroll, the review function
+  already exists physically — the visitor scans their own answers while scrolling toward Submit;
+  a separate review screen would duplicate that and add friction against the flow's low-friction
+  goal, and would require a FS escalation (a new §4.5 state, a new §6 acceptance criterion). The
+  residual risk a review step would catch — a typo in the contact value — is already mitigated by
+  format validation (E.164/email/handle charset), the Success-page contact echo (FS §3.4 item 4,
+  makes an error visible immediately), and the Instagram fallback as a last-resort channel.
+  Accepted as a recorded risk, not a gap.
+- **D-Blueprint 4 — Uploads: vertical stack inside the Reference Uploads section**, not a separate
+  step, not a carousel/tabs. The three motivation cards (fields 5, 6, 7 — FS Appendix A.1 supplies
+  the normative copy for each) are stacked in field order (5 → 6 → 7) within one section. A
+  carousel or tabs would hide categories a visitor doesn't swipe/tap to, defeating FS §4.4's
+  "communicated benefit" mechanism (a motivation sentence only works if it's seen); a vertical
+  stack shows all three at once during normal scrolling. The field order (5→6→7) is FS's own field
+  order, not re-derived here. **Additional rationale (added after a 2026-07-13 UX-review pass):**
+  the stack also serves PRD D4's review trigger directly — "if missing placement photos recurrently
+  cause clarification rounds, the placement photo's optionality is re-decided." That trigger is
+  only interpretable if every visitor actually sees the placement-photo card; a carousel or tabs
+  would make low upload rates ambiguous (did visitors decline, or never scroll/tap to the card?),
+  turning the review signal into a UI artifact instead of a genuine visitor decision. The vertical
+  stack is what keeps D4's review trigger measurable.
+- **D-Blueprint 5 — "Quick way back", made concrete as three blueprint-level behaviors:**
+  - **(a) In-session form persistence is required at the blueprint level — with an explicit
+    guarantee boundary.** FS §4.5 permits but does not require in-memory persistence within the
+    session ("permitted, not required"); this blueprint makes it required: a visitor who leaves
+    Request to check Process for price/fit and returns finds all entered values and uploaded files
+    intact. This is the one point where the blueprint adds an obligation beyond FS's floor —
+    explicitly allowed by FS's own wording, not a FS conflict. Session-memory only, no server-side
+    draft (PRD §4 boundary unchanged).
+    **Guarantee boundary (added after a 2026-07-13 UX-review pass, which correctly noted the
+    original wording overclaimed):** the guarantee covers client-side navigation within a live
+    session only (e.g. Request → Process → Request without a full page reload). It does **not**
+    cover a page reload, closing the tab, or the mobile OS evicting a backgrounded tab to reclaim
+    memory — a real mobile scenario (visitor leaves the tab to check the artist's Instagram,
+    returns minutes later to a reloaded, empty tab). Reload/eviction data loss is an accepted risk,
+    not covered by this decision; a stronger guarantee (e.g. `sessionStorage`/`localStorage`)
+    is explicitly out of scope here — it raises its own risk (persisting body-placement photos on
+    the visitor's device) and was not what was decided.
+    **Implementation cost (noted, not decided here):** surviving client-side navigation means the
+    form's state cannot live in `RequestForm.tsx`'s local component state (unmounted on navigation
+    away) — it requires a module-level store/context that outlives the page. Left for the
+    implementing session, not a blueprint-level architecture decision.
+    **Known follow-on concern:** per FS §4.3, uploads happen on file selection (before submit), so
+    "preserving uploaded files" means preserving references to already-uploaded files, which is
+    cheap — but this decision increases the number of **orphaned uploads** (files uploaded for a
+    request that is ultimately never submitted). Cleanup policy for orphaned Storage objects is an
+    internal/operational concern outside FS's boundary (FS §1) and already tracked in
+    PROJECT_BACKLOG.md as a post-launch/operational item — noted here only because this decision
+    increases their volume, not because it changes that policy.
+  - **(b) Clean browser history.** A direct consequence of D-Blueprint 1: Request is a single
+    history entry; the browser back button goes to the previous site page, predictably, with no
+    interception — a wizard would either pollute history with one entry per step or require
+    intercepting the back button, both against mobile user expectations.
+  - **(c) Validation jumps use local smooth-scroll**, not a state change — the visitor sees what
+    they scrolled past and keeps their spatial model of the form. No sticky progress indicator is
+    added (a wizard artifact); the visible section structure of the scroll itself serves that
+    function.
+
+## Success page (FS §3.4) — decided 2026-07-13, batch 2
+
+Content and its order are fully fixed by FS §3.4 ("Must contain, **in order**": confirmation →
+reference code → 48-hour expectation → contact echo → channel notes → Back to Home CTA) — not
+reopened here. The page does not exist in the shipped Stages 0–5 site (an in-place success state
+was shipped instead — a recorded divergence); Stage 6 introduces it as a real route. The open
+blueprint questions were the access/data mechanics behind FS's gating rule ("Reachable only
+immediately after a successful submission. If opened directly, refreshed, or reached without a
+successful submission in the current session, redirect to Home"):
+
+- **Data transport: the module-level client store, clean URL.** On successful submit, the same
+  module-level store that D-Blueprint 5(a) already requires for form persistence receives the
+  success payload (reference code + the contact method/value as entered), and the client
+  navigates to `/success` via client-side routing. The URL carries no data (no query params, no
+  path segment): a reload drops module state by nature, which yields FS's "refreshed → redirect
+  to Home" behavior for free instead of requiring an invalidation mechanism. The rejected
+  alternative (data in URL, e.g. `/success?ref=…`) would keep a shareable/refreshable success URL
+  alive — directly contradicting the FS gating sentence.
+- **Gate check:** on mount, Success reads the store; an empty store means no successful
+  submission in this session → immediate client-side redirect to Home. This single check covers
+  all three FS cases (direct open, refresh, no-submission navigation).
+- **One-time read (idempotent):** the success payload follows read-once semantics — after Success
+  has rendered it, the payload is cleared, and the read-once mechanism must be robust to repeated
+  invocation (React dev-mode strict effects double-invoke; a naive read-then-clear effect would
+  redirect itself — mechanics left to implementation, the semantics are the blueprint
+  requirement). Any revisit (browser back from Home, history navigation, manual URL entry) finds
+  the store empty and redirects. Trade-off accepted knowingly: a visitor who navigates away and
+  comes back cannot re-view the reference code on-site; the code is delivered once. This matches
+  FS's intent (no public lookup functionality, §4.6) and the reply itself arrives via the contact
+  channel regardless.
+- **bfcache guard (added after the batch-2 external review, which found the gap):** the
+  "any revisit redirects" guarantee relies on a fresh mount re-running the gate check — which
+  holds for client-side route transitions and new tabs, but not for a browser-back restore from
+  the back-forward cache after a full document navigation away from Success (bfcache restores the
+  whole DOM without a mount, common on mobile Safari/Chrome). Blueprint requirement: Success
+  listens for `pageshow` and re-runs the gate check when `event.persisted === true` — restored
+  page + empty store → redirect. With this, the gating matches FS §3.4 in every case, not just
+  the mounted ones.
+- **Form-state clearing on successful submit (gap found by the same review — neither batch had
+  stated it):** a successful persist clears *both* stores' contents: the success payload (after
+  its one-time display) *and* the persisted Request form state from D-Blueprint 5(a). Without
+  this line, a visitor returning to Request in the same session would find the form pre-filled
+  with an already-submitted request.
+
+## Location page (FS §3.5) — decided 2026-07-13, batch 2
+
+FS §3.5 fixes the content set (address, map, studio photos, transport/parking, entrance
+instructions if non-obvious; no marketing content) but not the order.
+
+- **Block order: keep the shipped page's order**, which already satisfies the content set:
+  Address (with map-provider links: Google Maps / Apple Maps / Waze) → map embed → How to find us
+  → Studio Photos, **plus the primary CTA appended at the end** per the site-wide CTA decision
+  (Location is in FS §2's CTA table — "Start Your Request" — but the shipped page has no CTA;
+  that is the only structural gap). Prior art respected: the page exists and works
+  (`app/[locale]/(public)/location/page.tsx`); no reordering without cause.
+- **Transport/parking and entrance instructions live inside "How to find us"**, not as separate
+  blocks — with different requiredness, corrected after the batch-2 external review caught a real
+  FS conflict in this decision's first version. FS §3.5 reads "Must contain: address, map, studio
+  photos, transport/parking, entrance instructions **if non-obvious**" — the conditional
+  qualifier binds to entrance instructions only; **transport/parking is unconditional
+  must-contain content and cannot be waived by a blueprint- or content-level decision** (the
+  first version of this entry did exactly that, framing its omission as an "owner content
+  decision" — an FS violation resolved silently at the wrong level). Owner-decided resolution
+  (2026-07-13, choosing the review's recommended option over an FS amendment): "How to find us"
+  carries **at least one sentence of transport/parking content** (e.g. whether nearby parking
+  exists, nearest transit stop) — minimal, literal satisfaction of the FS item, and genuinely
+  arrival-friction information for an Israeli city (the page's FS purpose). Entrance instructions
+  remain conditional per FS's own "if non-obvious" and are omitted for the current location.
+
+## Preparation page (FS §3.6) — decided 2026-07-13, batch 2
+
+The shipped site has no Preparation page — its content lives inside the combined `aftercare`
+route (sections: before-appointment, tattoo-day, aftercare-instructions, healing-touch-ups), a
+recorded Stages 0–5 divergence. **Stage 6 splits it into two routes per FS §3.6/§3.7**; this is
+FS compliance, not a new blueprint invention.
+
+- **Blocks, chronological:** short intro (1–2 lines: who this page is for — booked clients — and
+  what it covers) → Before appointment → Tattoo day.
+- **Navigation presence:** the nav bar is rendered on this page (FS §2 — primary navigation is
+  "identical and persistent on all public pages") while the page itself is absent from the nav's
+  item set (PRD D9). Reaching the page is by direct URL only, sent by the artist at the right
+  journey moment (PRD §5 operational assumption; no in-product discovery is an explicitly
+  accepted, recorded risk — changing that requires a PRD escalation, and the owner reconfirmed
+  the model in-session after the trade-off was restated).
+- **No primary CTA** (FS §2 table: none for content pages Preparation/Aftercare).
+- **The shipped page's "back to policies" links (top and bottom) are removed:** the policies page
+  is superseded in Stage 6 (nav item becomes Process), and FS §2 allows secondary links only when
+  they help complete the current task — a preparing client's task is not served by Process.
+- **No cross-link to Aftercare — on task-relevance grounds (rationale corrected after the
+  batch-2 external review):** FS §2 allows secondary links only when they help complete the
+  page's current task, and the Preparation reader's task (their session is still ahead) is not
+  aftercare — so the link earns no place. Explicitly noted: PRD §5's "no in-product fallback
+  discovery (no footer links)" does **not** forbid such a link — that clause is about public-page
+  discoverability, and seeing a Preparation→Aftercare link already requires having received the
+  Preparation URL from the artist. The first version of this entry cited PRD §5 as the basis —
+  an overclaim (same class as batch 1's "long-form duplicate"). Recording the honest, narrower
+  basis keeps the future cost of change accurate: if the owner later wants a "what comes after"
+  link here (a plausible pre-session-anxiety case), that is a cheap blueprint-level change, not a
+  PRD escalation.
+
+## Aftercare page (FS §3.7) — decided 2026-07-13, batch 2
+
+Mirror of Preparation (same split, same rules).
+
+- **Blocks, chronological:** short intro → Aftercare instructions (immediate care) → Healing &
+  touch-ups (longer-term expectations).
+- Nav bar present / absent from nav item set; no primary CTA; "back to policies" links removed;
+  no cross-link to Preparation — same rationale as the Preparation section above, applied
+  symmetrically.
+- **Content boundary for "Healing & touch-ups" recorded explicitly:** this section covers healing
+  expectations and when a touch-up is appropriate — nothing else. Any touch-up booking terms or
+  pricing belong exclusively to Process (Booking Policy): FS §3.7 forbids pricing/booking content
+  here, and FS §5's canonical-ownership table places booking rules on Process alone. This line is
+  drawn now because touch-ups are the one aftercare topic that naturally drifts toward booking
+  language.
+- **Tone requirement carried from FS §3.7:** the copy is "written as the artist's own
+  instructions" — owner-authored content; per FS §3, missing content blocks implementation, it is
+  not improvised by engineering.
+
+---
+
 # Rule for Future Changes
 
 All architectural, product, or behavioral decisions MUST be recorded in this document.
