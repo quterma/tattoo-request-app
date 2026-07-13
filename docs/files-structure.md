@@ -115,17 +115,20 @@ tattoo-request-app/
 │       ├── PROJECT_STRUCTURE.md
 │       ├── PROJECT_TESTING_STRATEGY.md
 │       ├── STAGE_6_FUNCTIONAL_SPECIFICATION.md
+│       ├── STAGE_6_IMPLEMENTATION_PLAN.md
 │       ├── STAGE_6_PRODUCT_DEFINITION.md
 │       ├── reviews/
 │       │   ├── .gitkeep
 │       │   └── done/
 │       │       ├── .gitkeep
+│       │       ├── REVIEW_2026-07-13_codex-delegation-invocation.md
 │       │       ├── REVIEW_2026-07-13_codex-delegation-scope.md
 │       │       ├── REVIEW_2026-07-13_codex-sync-setup.md
 │       │       ├── REVIEW_2026-07-13_stage6-ux-blueprint-batch2.md
 │       │       └── REVIEW_2026-07-13_stage6-ux-blueprint-full.md
 │       └── tasks/
-│           └── STAGE_6_STRAT_BRIEF.md
+│           ├── STAGE_6_STRAT_BRIEF.md
+│           └── STAGE_6_TASK_01_upload_flow_architecture.md
 ├── scripts/
 │   └── update-structure.mjs
 ├── src/

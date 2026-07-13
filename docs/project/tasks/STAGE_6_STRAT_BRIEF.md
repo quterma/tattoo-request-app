@@ -14,54 +14,48 @@ AI agents and the developer, at the start of the next STRAT: Stage 6 session.
 
 ## Session summary
 
-Mid-session checkpoint (session not closed — persisted per owner request while continuing).
-First Stage 6 product/UX STRAT session: worked the full UX blueprint page-by-page. All 8
-sub-topics decided and externally reviewed to consensus: batch 1 (nav/CTA, Home, Process,
-Request) — 4 corrections applied via ad-hoc exchange; batch 2 (Success, Location, Preparation,
-Aftercare) — 3 findings + 1 acceptance note, all accepted, applied via the formal cross-review
-protocol (thread: `docs/project/reviews/done/REVIEW_2026-07-13_stage6-ux-blueprint-batch2.md`).
+Long session, closing here (context grown large across model switches). Completed the full UX
+blueprint (all 8 sub-topics, 2 external-AI review batches + 2 Codex repo-aware review rounds, all
+consensus), then moved to implementation planning: wrote `docs/project/
+STAGE_6_IMPLEMENTATION_PLAN.md` (the durable, item-by-item stage plan — read this first, not just
+this brief) and the first task file, `STAGE_6_TASK_01_upload_flow_architecture.md` (status
+`ready`, owner-approved).
 
 ## Decided
 
-- All 8 UX-blueprint sub-topics: PROJECT_DECISIONS.md — Stage 6 UX Blueprint Decisions (one
-  subsection per topic). PROJECT_STAGE_LOG.md, 2026-07-13 entries: "navigation/CTA, Home,
-  Process, Request format decided"; "first external review round, 4 corrections applied";
-  "Success, Location, Preparation, Aftercare decided (batch 2, all 8 sub-topics now complete)".
-- Owner's consensus principle (source of truth = consensus across AI + docs + owner, not any
-  single party) recorded in PROJECT_DECISIONS.md's blueprint section header — applies to all
-  sub-topics, including batch 2.
-- Confirmed in-session: the PRD §5 Preparation/Aftercare distribution model (direct URL sent by
-  the artist, no in-product discovery) stands as an accepted, recorded risk — reconfirmed by the
-  owner when the trade-off was restated during the Preparation/Aftercare discussion, not
-  reopened.
+- Full UX blueprint (all 8 sub-topics) + all review rounds: PROJECT_DECISIONS.md — Stage 6 UX
+  Blueprint Decisions (header lists every review-thread pointer).
+- Implementation sequencing (13 items, dependencies, content/asset blockers, model guidance):
+  `docs/project/STAGE_6_IMPLEMENTATION_PLAN.md` — this is now the durable plan; this brief will
+  stop repeating its contents from here on.
+- CLAUDE.md commit rule extended: approval requested after staging, per commit (see PROJECT_STAGE_LOG.md,
+  the "Codex repo-aware review round 1" entry, 2026-07-13).
 
 ## Open
 
-None blocking — no unresolved product question; all 8 sub-topics have a decision. Two earlier
-process observations from this session (mid-session persistence expectations; prior-art check
-before proposing UX patterns) were already resolved by a parallel META session — see
-AI_TASK_PROTOCOL.md (STRAT Next-Session Brief mid-session-persistence subsection; STRAT Kickoff
-Prompt prior-art line).
+None blocking. One process question parked for META (not this stage's blocker): whether/how to
+extend Codex beyond its current read-only reviewer role for token-heavy, low-judgment work (e.g.
+running `pnpm qg` and reporting) — see AI_FRAMEWORK_IDEAS.md, 2026-07-13 entry on Codex
+delegation scope. Do not resolve this in a Stage 6 STRAT session; it's a framework/process
+decision.
 
 ## Task files
 
-None created yet. All blueprint decisions are recorded directly in PROJECT_DECISIONS.md and both
-batches are consensus-reviewed — the blueprint is ready to be cut into implementation task files
-(per the template at `docs/framework/templates/STAGE_TASK_TEMPLATE.md`), status `draft`, for
-developer approval. **Acceptance-check note for the task files (from the batch-2 review):** the
-implementation batch must verify site-wide that no inbound links to the superseded `policies`
-route remain — the shipped Home hero and Mini Process copy both link to it today.
+- `STAGE_6_TASK_01_upload_flow_architecture.md` — **ready**. Blocks Item 3 (Request form rebuild)
+  and Item 4 (Success page) per the implementation plan. Start here.
+- No other task files exist yet — per owner instruction, write one (or a small parallelizable
+  few) at a time, close to when work on them starts, not all 13 items upfront. See the
+  implementation plan's "How to use this document" section for the exact convention.
 
 ## Next topic
 
-1. **Close the Codex whole-blueprint review thread**
-   (`docs/project/reviews/REVIEW_2026-07-13_stage6-ux-blueprint-full.md`, at `awaiting-review`
-   for the verification round on the applied round-1 fixes; 5/5 findings accepted, corrections
-   already folded into PROJECT_DECISIONS.md).
-2. **Create the Stage 6 UX-blueprint implementation task files** (one per page/topic, per
-   AI_TASK_PROTOCOL.md's Task Files convention), status `draft`, referencing the reviewed
-   blueprint sections in PROJECT_DECISIONS.md and the relevant FS §§. Constraints from the
-   reviews: the **upload-flow architecture task is a prerequisite** — no Request-page task may
-   be marked `ready` before it (PROJECT_DECISIONS.md — Upload-flow architecture prerequisite);
-   include the policies inbound-link acceptance check; Location tasks must cover the real map
-   embed and studio photos (shipped ones are placeholders), not just the CTA.
+1. **Run Item 1** (`STAGE_6_TASK_01_upload_flow_architecture.md`) as an IMPL session — Opus,
+   Plan mode, per the task file's "How to run".
+2. Once Item 1 is `done`, the next STRAT session picks the next unblocked item(s) from
+   `STAGE_6_IMPLEMENTATION_PLAN.md` (Item 2 — site-wide shell — is small and unblocks four other
+   items; a reasonable next pick, but re-verify against the plan's current state rather than
+   assuming this brief is still accurate) and writes its task file(s).
+3. Owner note from this session, for the content/asset-blocked items (6 — Process, 7 —
+   Location): start producing Process copy (pricing, FAQ, Good Fit text) and Location studio
+   photos in parallel — they aren't code-blocked, only content-blocked, so they shouldn't become
+   the long pole once their implementation turn comes.
