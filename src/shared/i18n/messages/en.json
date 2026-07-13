@@ -6,8 +6,11 @@
   "nav": {
     "home": "Home",
     "request": "Request",
-    "policies": "Policies",
+    "process": "Process",
     "location": "Location"
+  },
+  "cta": {
+    "requestButton": "Start Your Request"
   },
   "location": {
     "title": "Location",
@@ -19,7 +22,7 @@
     "howToFindUsText": "We are located on Herzl Street in the heart of Tel Aviv. The studio is easily accessible by public transport and there is street parking available nearby.",
     "studioPhotos": "Studio photos"
   },
-  "policies": {
+  "process": {
     "title": "Pricing & Policies",
     "fees": "Hourly Rate",
     "feesText": "₪1,000 per hour (Minimum ₪2,000)\nCover-ups are ₪1,100 per hour (Minimum ₪2,200)\nThe final price depends on size and placement. Some areas such as ribs, neck or knee may require an additional fee depending on complexity.",
@@ -35,12 +38,10 @@
     "agePolicyText": "Clients must be 18 or older. For clients aged 16 and 17 parental consent may be required.",
     "faq": "FAQ",
     "faqText": "Is the sketch free?\nYes. The sketch is free. A ₪1,000 deposit is required to secure your date and begin working on your design. This amount goes toward the final tattoo cost. It is not an additional payment.\n\nWhat does the deposit cover?\nThe deposit secures your appointment and allows me to begin preparing your custom design. It is subtracted from the final amount on the day of your tattoo.\n\nWhat happens if I change my idea?\nSmall adjustments are fine. If the concept changes entirely after booking, I may cancel the appointment and keep the deposit. A new project requires a new deposit.\n\nHow is the final price calculated?\nPricing is based on actual working time and complexity. The final amount is calculated after the session is completed.\n\nDo you do cover-ups?\nYes. Cover-ups are ₪1,100 per hour with a minimum of ₪2,200.",
-    "ctaButton": "Request a Tattoo",
     "aftercareLink": "Read about Tattoo Day & Aftercare"
   },
   "aftercare": {
     "title": "Tattoo Day & Aftercare",
-    "backToPolicies": "Back to Policies",
     "beforeAppointment": "Before Your Appointment",
     "beforeAppointmentItems": "Get a good night of sleep\nEat a proper meal before you arrive\nAvoid alcohol the day before\nWear comfortable clothes that make the tattoo area easy to access\nIf needed, shave the area in advance (or I can help at the studio)",
     "tattooDay": "What Happens on Tattoo Day",
@@ -53,8 +54,8 @@
   "home": {
     "title": "Studio Name",
     "tagline": "Custom tattoos in Tel Aviv",
-    "requestButton": "Request a Tattoo",
-    "policiesLink": "Pricing & Policies",
+    "requestButton": "Start Your Request",
+    "processLink": "Pricing & Policies",
     "instagramLabel": "Follow me on Instagram",
     "instagramHandle": "@mashakarda_tattoo",
     "seeMoreOnInstagram": "See more on Instagram",
@@ -62,7 +63,7 @@
     "step1Title": "Submit a Request",
     "step1Text": "Fill out a short form with your idea, references, and placement. It takes just a few minutes.",
     "step2Title": "Review & Booking",
-    "step2Text": "I review your request, confirm details, and schedule your appointment. Check <policies>Pricing & Policies</policies> for rates and deposit info.",
+    "step2Text": "I review your request, confirm details, and schedule your appointment. Check <process>Pricing & Policies</process> for rates and deposit info.",
     "step3Title": "Get Your Tattoo",
     "step3Text": "We meet at the studio, finalize the design together, and bring your idea to life.",
     "aboutLine1": "20+ years of experience in painting, calligraphy, and tattoo art.",
@@ -280,9 +281,6 @@
   "footer": {
     "studio": "Studio Name",
     "address": "Herzl 100, Tel Aviv, Israel",
-    "email": "masha.karda@gmail.com",
-    "phone": "054-918-3435",
-    "phoneHref": "+972549183435",
     "instagramUrl": "https://www.instagram.com/mashakarda_tattoo/",
     "copyright": "\u00a9 {year} All rights reserved"
   }

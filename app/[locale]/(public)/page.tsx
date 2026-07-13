@@ -1,6 +1,12 @@
 import { useTranslations } from "next-intl"
 import { Link } from "@/shared/i18n"
-import { Container, InstagramIcon, Section, Stack } from "@/shared/ui"
+import {
+  Container,
+  CtaRequestButton,
+  InstagramIcon,
+  Section,
+  Stack,
+} from "@/shared/ui"
 
 export default function Home() {
   const t = useTranslations("home")
@@ -28,10 +34,10 @@ export default function Home() {
               {t("requestButton")}
             </Link>
             <Link
-              href="/policies"
+              href="/process"
               className="text-sm text-white/70 underline underline-offset-4 transition-colors hover:text-white"
             >
-              {t("policiesLink")}
+              {t("processLink")}
             </Link>
           </div>
 
@@ -80,9 +86,9 @@ export default function Home() {
                 <p className="mb-1 font-semibold">2. {t("step2Title")}</p>
                 <p className="mb-0 text-sm text-muted-foreground">
                   {t.rich("step2Text", {
-                    policies: (chunks) => (
+                    process: (chunks) => (
                       <Link
-                        href="/policies"
+                        href="/process"
                         className="underline underline-offset-2 transition-colors hover:text-foreground"
                       >
                         {chunks}
@@ -99,12 +105,7 @@ export default function Home() {
               </div>
             </div>
             <div className="text-center">
-              <Link
-                href="/request"
-                className="inline-block rounded-md bg-foreground px-6 py-3 text-sm font-semibold text-background transition-colors hover:bg-foreground/90"
-              >
-                {t("requestButton")}
-              </Link>
+              <CtaRequestButton />
             </div>
           </Stack>
         </Section>

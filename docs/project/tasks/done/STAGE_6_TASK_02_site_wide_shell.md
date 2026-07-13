@@ -2,7 +2,7 @@
 
 ## Status
 
-`ready` · created 2026-07-13 · done: <date · PROJECT_STAGE_LOG.md entry pointer>
+`done` · created 2026-07-13 · done: 2026-07-13 · see PROJECT_STAGE_LOG.md entry "Stage 6 Item 2 — site-wide shell — completed 2026-07-13"
 
 ## Execution
 

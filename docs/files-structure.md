@@ -68,7 +68,7 @@ tattoo-request-app/
 │   │       │   └── page.tsx
 │   │       ├── location/
 │   │       │   └── page.tsx
-│   │       ├── policies/
+│   │       ├── process/
 │   │       │   └── page.tsx
 │   │       └── request/
 │   │           └── page.tsx
@@ -124,13 +124,16 @@ tattoo-request-app/
 │       │       ├── REVIEW_2026-07-13_codex-delegation-invocation.md
 │       │       ├── REVIEW_2026-07-13_codex-delegation-scope.md
 │       │       ├── REVIEW_2026-07-13_codex-sync-setup.md
+│       │       ├── REVIEW_2026-07-13_docs-context-budget.md
 │       │       ├── REVIEW_2026-07-13_framework-process-audit.md
+│       │       ├── REVIEW_2026-07-13_stage6-item2-shell.md
 │       │       ├── REVIEW_2026-07-13_stage6-ux-blueprint-batch2.md
 │       │       └── REVIEW_2026-07-13_stage6-ux-blueprint-full.md
 │       └── tasks/
 │           ├── STAGE_6_STRAT_BRIEF.md
 │           ├── STAGE_6_TASK_01_upload_flow_architecture.md
-│           └── STAGE_6_TASK_02_site_wide_shell.md
+│           └── done/
+│               └── STAGE_6_TASK_02_site_wide_shell.md
 ├── scripts/
 │   └── update-structure.mjs
 ├── src/
@@ -242,6 +245,7 @@ tattoo-request-app/
 │   │   ├── ui/
 │   │   │   ├── app-nav.tsx
 │   │   │   ├── container.tsx
+│   │   │   ├── cta-request-button.tsx
 │   │   │   ├── icons.tsx
 │   │   │   ├── index.ts
 │   │   │   ├── page.tsx

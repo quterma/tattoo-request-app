@@ -14,12 +14,6 @@ export function PublicFooter() {
           <p className="mb-0 font-semibold text-foreground">{t("studio")}</p>
           <p className="mb-0">{t("address")}</p>
           <div className="flex items-center gap-3">
-            <a href={`mailto:${t("email")}`} className="text-sm">
-              {t("email")}
-            </a>
-            <a href={`tel:${t("phoneHref")}`} className="text-sm">
-              {t("phone")}
-            </a>
             <a
               href={t("instagramUrl")}
               target="_blank"

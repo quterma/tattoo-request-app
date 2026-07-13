@@ -1,9 +1,9 @@
 import { useTranslations } from "next-intl"
 import { Link } from "@/shared/i18n"
-import { Page, Section, Stack } from "@/shared/ui"
+import { CtaRequestButton, Page, Section, Stack } from "@/shared/ui"
 
-export default function PoliciesPage() {
-  const t = useTranslations("policies")
+export default function ProcessPage() {
+  const t = useTranslations("process")
 
   return (
     <Page className="py-4 sm:py-8">
@@ -78,12 +78,7 @@ export default function PoliciesPage() {
 
       <Section className="py-3 sm:py-3 text-center">
         <Stack gap="gap-5" className="items-center">
-          <Link
-            href="/request"
-            className="inline-block rounded-md bg-foreground px-6 py-3 text-sm font-semibold text-background transition-colors hover:bg-foreground/90"
-          >
-            {t("ctaButton")}
-          </Link>
+          <CtaRequestButton />
           <Link
             href="/aftercare"
             className="text-sm text-muted-foreground underline transition-colors hover:text-foreground"

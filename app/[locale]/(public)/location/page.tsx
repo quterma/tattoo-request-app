@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl"
-import { Page, Section, Stack } from "@/shared/ui"
+import { CtaRequestButton, Page, Section, Stack } from "@/shared/ui"
 
 const addressQuery = encodeURIComponent("Herzl 100, Tel Aviv, Israel")
 
@@ -55,6 +55,10 @@ export default function LocationPage() {
             <div key={i} className="aspect-video rounded-md bg-muted" />
           ))}
         </div>
+      </Section>
+
+      <Section className="py-3 sm:py-3 text-center">
+        <CtaRequestButton />
       </Section>
     </Page>
   )
