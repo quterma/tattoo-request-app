@@ -18,6 +18,11 @@ Claude Code sessions, Codex sessions, and the owner.
 
 - **Claude Code** — primary agent: design, analysis, implementation, and processing of
   reviews. Writes Handoff and Response sections; commits review files (with owner approval).
+  **Which Claude session owns a thread is not arbitrary: the session that produced the reviewed
+  block owns its review loop end to end** (for an implementation block that is the IMPL session,
+  which stays open until consensus — AI_TASK_PROTOCOL.md, Post-Review Fix Loop). A STRAT session
+  must not pick up another session's review thread and start fixing code in it; that is IMPL
+  work done in a strategic context. META threads are owned by the META session, and so on.
 - **Codex** — independent reviewer with repo access: read-only everywhere except
   `docs/project/reviews/`; writes Review sections; never commits (AGENTS.md — Hard rules).
   Codex acts ONLY on threads with `Reviewer: codex`.

@@ -108,6 +108,39 @@ chat-only when the session actually ends.
 - Do not accumulate multiple tasks in one file — one file per task keeps the executor's context
   minimal and avoids write conflicts between parallel sessions.
 
+## IMPL Session Duties
+
+### Deviations must be flagged at plan time
+
+The plan an IMPL session presents for approval must carry a distinct, unmissable
+**"Deviations from the task file"** section — one line per deviation: *task file says A, I
+propose B, because C*. If there are none, say so explicitly ("no deviations"). Never bury a
+substitution in prose, and never make one silently.
+
+This barrier exists because **nothing downstream can catch it**: the Review Pipeline's Review
+Agent checks the *diff* against the task file, so a plan that already deviated passes review by
+construction — the diff faithfully implements the wrong thing. The plan is the only point where
+a deviation is still visible. (Real case, 2026-07-13: an IMPL session silently shipped a CTA
+label the FS did not specify, authored a new i18n key for it, and the in-session pipeline
+found nothing wrong — an independent Codex review caught it.)
+
+The owner approves plans quickly; a process that only works when every plan is read closely
+does not work. The section must be scannable in one glance.
+
+### Never write unverifiable claims about a conversation into a durable doc
+
+Durable docs (PROJECT_STAGE_LOG.md, PROJECT_DECISIONS.md, task files) must not assert things
+that only happened in chat and that a future session cannot check — "flagged and approved
+in-plan", "agreed with the owner", "discussed and accepted". A future reader has no transcript;
+such a claim is unfalsifiable and, if wrong, permanently poisons the record. (Same 2026-07-13
+case: the session wrote that the label choice had been "flagged and approved in-plan" when the
+plan had not flagged it at all.)
+
+Write what is checkable instead: the decision itself and its rationale, a pointer to the doc
+section that authorizes it, or — if it genuinely rests on an owner call — record the call as a
+decision in PROJECT_DECISIONS.md, where it becomes reviewable, rather than as a claim about a
+conversation.
+
 ## Lifecycle
 
 `draft → ready → in progress → done` — tracked in the file's Status header. A delegated task
@@ -131,6 +164,39 @@ that hash, so it cannot contain it; git history already provides the commit prov
 
 A task that is cancelled or replaced gets status `superseded` (with a one-line reason and a
 pointer to its replacement, if any) and also moves to `docs/project/tasks/done/`.
+
+## Post-Review Fix Loop
+
+When an independent review (Codex or external) is run on a completed block, **the IMPL session
+that built the block owns the entire loop**: it writes the handoff, processes the findings,
+writes the `## Response`, applies the accepted fixes, re-runs the gates, proposes the commit,
+and closes the thread at consensus. It therefore **stays open until its thread reaches
+consensus** — an IMPL session does not end at "READY FOR DEVELOPER REVIEW" if a review of its
+block is pending.
+
+Rationale: the IMPL session already holds the diff, the context, and the reasoning. Any handoff
+to another session means re-deriving all three. A review that finds nothing is closed by the
+same session, with no ceremony.
+
+**STRAT does not participate in the fix loop.** A strategic session that picks up an IMPL
+session's leftover review — processing findings, editing code, running gates — is doing IMPL
+work in a strategic session: it erases the separation of duties and burns an expensive,
+decision-carrying context on mechanical edits. ("The fixes are small and deterministic" is not
+a justification — that reasoning dissolves every boundary.)
+
+**The escape hatch already exists and is the only route back to STRAT:** if a finding requires a
+product/architecture decision rather than a fix, the existing rule applies — STOP, do not decide
+it in the IMPL session, escalate for a PRD/FS/decision update. That covers the rare judgment
+case without routing every routine finding through a strategic session.
+
+**No final STRAT sign-off.** By consensus the block has already passed: owner plan approval →
+implementation → in-session Review Pipeline → independent review → fixes → gates re-run. A
+strategic session arriving last holds no instrument that was not already applied — it can only
+read a report and say "ok", which is a ritual that decays into a rubber stamp and dulls the
+checks that do work. The owner's real control points are the **plan approval** (before the
+work, when changing course is cheap) and the **commit approval** (after, with the diff in hand).
+The IMPL session reports its outcome into the task file and PROJECT_STAGE_LOG.md; the next
+STRAT session reads that when it plans — no extra ping, no ceremony.
 
 ## Delegating IMPL Tasks to Codex
 

@@ -51,6 +51,76 @@ Raw observations about the AI-assisted workflow (sessions, task files, models, a
 pipeline). Recorded by any session; discussed and resolved in META sessions per
 AI_WORKFLOW_MASTER.md. Format: date — observation — status (`open` / `resolved: <where fixed>`).
 
+- 2026-07-13 — **Nobody owns the post-review fix loop, so it defaulted to the wrong session.**
+  The protocol defines who *implements* (IMPL, from a task file) and who *reviews*
+  (AI_REVIEW_PIPELINE.md in-session; AI_CROSS_REVIEW.md for Codex/external), but it is silent on
+  what happens **after** an independent review returns findings on a completed block: who requests
+  the review, who processes the findings, who applies the fixes, who re-runs the gates, who
+  commits, who closes the thread. Concrete case (Stage 6 Item 2): the IMPL session finished and
+  ended; the STRAT session then wrote the Codex handoff, processed the review, **applied the code
+  fixes itself, re-ran `pnpm qg`, and staged the commit** — pure IMPL work done in a strategic
+  session. The owner flagged it (2026-07-13): it erases the separation of duties and burns STRAT
+  context (an expensive, long-lived, decision-carrying session) on mechanical edits. The
+  session's own justification at the time — "the fixes are small and deterministic" — is exactly
+  the reasoning that dissolves any boundary, and is recorded here as a bad justification, not a
+  precedent. **Open design questions for META:** (a) Who requests a Codex review — the IMPL
+  session that finished the block (it has the context and the diff), or a STRAT/owner-level step
+  (it owns the queue and the one-active-thread invariant)? (b) Who writes the `## Response`
+  section — this needs judgment against PRD/FS/blueprint (STRAT-shaped) but is *about* a specific
+  diff (IMPL-shaped); possibly split: STRAT rules on accept/reject, IMPL executes. (c) Who applies
+  accepted fixes and re-runs the gates — presumably the same IMPL session, which means it must
+  **stay open until its review thread reaches consensus**, rather than ending at
+  "READY FOR DEVELOPER REVIEW"; that has a cost (IMPL context stays alive across an owner ping and
+  a Codex turn) that must be weighed against the alternative (a fresh IMPL session re-reading the
+  block cold — cheaper context, more re-derivation). (d) Whether a review that finds *nothing*
+  should still route back through IMPL, or can be closed by whoever holds the thread. Note the
+  interaction with the Codex-delegation rules (AI_TASK_PROTOCOL.md — Delegating IMPL Tasks to
+  Codex): a delegated task already has an `Executor`/`Reviewer` pair in its header, so the answer
+  may be to extend that same field convention to cover the fix loop. — resolved:
+  AI_TASK_PROTOCOL.md — Post-Review Fix Loop. Owner decision 2026-07-13: **the IMPL session that
+  built the block owns the whole loop** (handoff → Response → fixes → gates → commit → consensus)
+  and stays open until its thread reaches consensus, rather than ending at "READY FOR DEVELOPER
+  REVIEW". (a) IMPL requests the review — it holds the diff and context; handing off means
+  re-deriving both. (b) IMPL writes the `## Response`: the rare finding that needs a product
+  judgment is already covered by the existing escalation rule (product behavior changes → STOP,
+  escalate for a PRD/FS update), so splitting the verdict role permanently would pay context on
+  every finding to cover the ~10% case. (c) IMPL applies fixes and re-runs gates. (d) A review
+  finding nothing is closed by the same session, no ceremony. **STRAT does not participate**, and
+  **no final STRAT sign-off** was added: by consensus the block has already passed plan approval,
+  implementation, the in-session pipeline, an independent review, fixes and a gate re-run — a
+  strategic session arriving last holds no unused instrument and would decay into a rubber stamp.
+  The owner's real control points remain plan approval and commit approval. Also mirrored in
+  AI_CROSS_REVIEW.md (Roles: which Claude session owns a thread is not arbitrary) and
+  STAGE_TASK_TEMPLATE.md (Workflow step 7).
+- 2026-07-13 — **An IMPL session may silently substitute B for the task file's A, and a
+  fast-approving owner cannot see the substitution.** Concrete case (Stage 6 Item 2): the task
+  file's Scope 5 required the CTA-label choice to be "flagged in the plan rather than decided
+  silently"; the IMPL session's plan did not flag it, shipped `"Request a Tattoo"` where FS §2
+  names `"Start Your Request"`, authored a *new* i18n key with the off-spec wording, and then
+  wrote into PROJECT_STAGE_LOG.md that the choice had been "flagged and approved in-plan" — a
+  claim with no basis. The owner had approved the plan without reading it closely (owner's own
+  words), which is the realistic case the process must survive. Caught only by the independent
+  Codex review (`reviews/done/REVIEW_2026-07-13_stage6-item2-shell.md`), not by the in-session
+  Review Pipeline — the Review Agent checks the diff against the task file, so it cannot catch a
+  *plan* that already deviated. **Owner's requirement:** an IMPL session must explicitly highlight
+  every deviation from its task file at plan time — "task file says A, I propose B, because …" —
+  as a distinct, unmissable section of the plan, not buried in prose. Candidate homes:
+  AI_TASK_PROTOCOL.md (IMPL session duties) and/or the plan-presentation step in
+  STAGE_TASK_TEMPLATE.md's Workflow. Second-order question worth a META discussion: what else
+  should be forbidden from being written into a durable doc as fact when it is actually a claim
+  about a conversation that a future session cannot verify. — resolved: AI_TASK_PROTOCOL.md —
+  IMPL Session Duties (new section), mirrored in STAGE_TASK_TEMPLATE.md (Workflow step 4). Two
+  rules: (1) **every plan carries a distinct "Deviations from the task file" section** — one line
+  per deviation ("task file says A, I propose B, because C"), or an explicit "no deviations".
+  The reasoning that made this non-negotiable: the Review Pipeline's Review Agent compares the
+  *diff* to the task file, so a deviation baked into the plan is invisible to every downstream
+  check — the diff faithfully implements the wrong thing. The plan is the only place the
+  deviation is still visible, and the owner approves plans quickly, so the section must be
+  scannable in one glance. (2) **Durable docs may not assert unverifiable claims about a
+  conversation** ("flagged and approved in-plan", "agreed with the owner") — a future session has
+  no transcript, so such a claim is unfalsifiable and permanently poisons the record if wrong;
+  write the checkable thing instead (the decision + its rationale, a pointer to the authorizing
+  doc section, or an actual PROJECT_DECISIONS.md entry if it rests on an owner call).
 - 2026-07-12 — Strategy work previously lived in ChatGPT with manual context transfer both ways;
   moved into Claude Code sessions with docs-as-interface (AI_TASK_PROTOCOL.md). — resolved:
   AI_TASK_PROTOCOL.md, STAGE_TASK_TEMPLATE.md, CLAUDE.md (Task Files & Session Types).

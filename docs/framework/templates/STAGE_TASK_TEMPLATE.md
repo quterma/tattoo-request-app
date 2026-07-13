@@ -81,12 +81,20 @@ contain the hash of the commit that first records it; git history is the commit 
 3. Before any implementation: inspect the repository and existing architecture; challenge
    assumptions where appropriate; surface ambiguities; ask questions when anything is unclear
    (fail-fast per CLAUDE.md). Never modify code immediately.
-4. Present a concise implementation plan and wait for explicit approval.
+4. Present a concise implementation plan and wait for explicit approval. The plan MUST contain a
+   distinct **"Deviations from the task file"** section — one line per deviation ("task file
+   says A, I propose B, because C"), or an explicit "no deviations". Never substitute silently:
+   the Review Pipeline compares the *diff* to the task file, so a deviation baked into the plan
+   is invisible to every later check (AI_TASK_PROTOCOL.md — IMPL Session Duties).
 5. Implement only after approval, within Scope only.
 6. After implementation: run the Review Pipeline per AI_REVIEW_PIPELINE.md (Test Agent →
    Quality Gates `pnpm qg` → Review Agent); self-review for architecture conformance,
    regressions, and documentation updates; report remaining risks explicitly.
-7. Never expand scope. If product behavior needs to change, STOP and request a spec update
+7. If an independent review (Codex / external) is run on this block, the IMPL session owns that
+   loop end to end — it writes the handoff, processes the findings, applies accepted fixes,
+   re-runs the gates, and closes the thread; it stays open until consensus rather than ending at
+   "READY FOR DEVELOPER REVIEW" (AI_TASK_PROTOCOL.md — Post-Review Fix Loop).
+8. Never expand scope. If product behavior needs to change, STOP and request a spec update
    first (see this project's PROJECT_DECISIONS.md for the applicable authority rule, e.g.
    Stage 6 Product Documentation Authority).
 

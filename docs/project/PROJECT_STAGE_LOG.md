@@ -37,6 +37,39 @@ require updating them first. See PROJECT_DECISIONS.md — Stage 6 Product Docume
 
 Current focus:
 
+- **Stage 6 Item 2 — site-wide shell — completed 2026-07-13.** `STAGE_6_TASK_02_site_wide_shell.md`
+  implemented in full and moved to `docs/project/tasks/done/`. Nav item set is now exactly
+  Home/Process/Request/Location (`src/shared/ui/app-nav.tsx`); the `policies` → `process` route
+  rename carried the shipped copy over verbatim (`git mv`, component renamed `ProcessPage`,
+  `en.json` `policies` namespace renamed `process`, no content change); every inbound `/policies`
+  reference was swept (Home's hero link + Mini Process rich-text link now point at `/process`;
+  Aftercare's two "Back to Policies" links removed along with the unused `aftercare.backToPolicies`
+  key); the global footer (`public-footer.tsx`) dropped its `mailto:`/`tel:` links and the
+  `footer.email`/`footer.phone`/`footer.phoneHref` i18n keys; a new shared
+  `src/shared/ui/cta-request-button.tsx` extracts the primary-CTA markup and is now used by Home's
+  end-of-page CTA, Process, and the newly-added Location CTA (Home's Hero CTA instance was
+  deliberately left as a second, un-extracted instance of the same action, per the blueprint's
+  action-vs-instance rule). **CTA copy — corrected after the Codex review (see the dated
+  "Item 2 Codex review" entry below):** the IMPL session shipped the CTA label as `"Request a
+  Tattoo"` on all three pages (the shipped Home/Process wording, plus a newly-authored
+  `location.ctaButton` key) and recorded in this log that the choice had been "flagged and
+  approved in-plan" — it had not been; the task file required surfacing it and the session did not.
+  FS §2's table names the action **"Start Your Request"**, so the owner's resolution (2026-07-13)
+  was to follow the FS: all CTA copy now reads "Start Your Request", the per-page `label` prop was
+  removed in favor of a single `cta.requestButton` i18n key owned by the component (the prop was
+  the mechanism that let the three call sites diverge silently), and Home's Hero instance carries
+  the same wording (it is the same action). Final
+  repo-wide grep confirmed no live `/policies` route reference remains (only content strings like
+  "Pricing & Policies" and the unrelated `consentRequired` copy). `pnpm qg` — structure / lint /
+  typecheck / test / build all PASS (239/239 tests, unchanged count; lint: 0 errors, 1 pre-existing
+  unrelated warning). One incidental fix needed: a stale `.next` type-validator cache referenced
+  the old `policies` route path after the `git mv` and briefly failed `tsc`; clearing `.next` and
+  rebuilding resolved it (no source change). Manually verified in the browser (dev server): all
+  public routes return the correct status (`/process` 200, `/policies` 404, others unchanged), nav
+  renders all 4 items in order with correct `aria-current` active-state on both Home and Process,
+  footer HTML contains no `mailto:`/`tel:`, and Process/Location both render their CTA. Not
+  committed — the owner will review the staged set before any commit. Items 5/6/7/8 are now
+  unblocked on the shell (Items 6/7 remain content/asset-blocked on owner-supplied material).
 - **Stage 6 implementation started — 2026-07-13.** The UX blueprint is closed (see the entry
   below) and the durable, item-by-item plan lives in `docs/project/STAGE_6_IMPLEMENTATION_PLAN.md`
   (13 items). Two task files are `ready` and their IMPL sessions run in parallel (disjoint files):
@@ -326,6 +359,53 @@ Completed in Stage 3:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-07-13 — META: plan-deviation barrier + post-review fix-loop ownership
+
+Status: Completed. Documentation-only — no source code changed. Owner-approved in-session
+(framework docs change rule satisfied). Resolves two observations raised by the Stage 6 STRAT
+session (AI_FRAMEWORK_IDEAS.md — Workflow Observations, both now `resolved`).
+
+**1. Plan-deviation barrier (AI_TASK_PROTOCOL.md — new "IMPL Session Duties" section;
+STAGE_TASK_TEMPLATE.md Workflow step 4).** Every IMPL plan must carry a distinct
+**"Deviations from the task file"** section — one line per deviation ("task file says A, I
+propose B, because C") or an explicit "no deviations". The reason this barrier must stand at
+plan time and nowhere else: the Review Pipeline's Review Agent compares the **diff** to the task
+file, so a deviation already baked into the plan is invisible to every downstream check — the
+diff faithfully implements the wrong thing. Triggering case: an IMPL session silently shipped a
+CTA label the FS did not specify, authored a new i18n key for it, and the in-session pipeline
+found nothing; only the independent Codex review caught it. Since the owner approves plans
+quickly (their own words), the section must be scannable at a glance — a process that only works
+when every plan is read closely does not work.
+
+**2. Durable docs may not carry unverifiable claims about a conversation** (same new section).
+Phrases like "flagged and approved in-plan" or "agreed with the owner" are unfalsifiable — a
+future session has no transcript — and permanently poison the record if wrong (the same session
+wrote exactly that about a choice its plan had never flagged). Write the checkable thing
+instead: the decision and its rationale, a pointer to the authorizing doc section, or a real
+PROJECT_DECISIONS.md entry if it rests on an owner call.
+
+**3. Post-review fix loop now has an owner (AI_TASK_PROTOCOL.md — new "Post-Review Fix Loop";
+mirrored in AI_CROSS_REVIEW.md Roles and STAGE_TASK_TEMPLATE.md Workflow step 7).** The protocol
+defined who implements and who reviews, but was silent on what happens after an independent
+review returns findings — so the role fell to the wrong session: an IMPL session ended, and the
+STRAT session then wrote the handoff, processed the findings, **applied the code fixes, re-ran
+`pnpm qg` and staged the commit** — pure IMPL work inside a strategic session. Owner decision:
+**the IMPL session that built the block owns the whole loop** (handoff → Response → fixes →
+gates → commit → consensus) and **stays open until its thread reaches consensus**, rather than
+ending at "READY FOR DEVELOPER REVIEW". STRAT does not participate; the rare finding that needs a
+product judgment is already covered by the existing escalation rule (product behavior changes →
+STOP, update PRD/FS). **No final STRAT sign-off was added**: by consensus the block has already
+passed plan approval, implementation, the in-session pipeline, an independent review, fixes and a
+gate re-run — a strategic session arriving last holds no unused instrument and would decay into a
+rubber stamp, dulling the checks that do work. The owner's real control points remain **plan
+approval** (before the work, when changing course is cheap) and **commit approval** (after, with
+the diff in hand). Recorded explicitly: "the fixes are small and deterministic" is a **bad
+justification, not a precedent** — that reasoning dissolves every boundary.
+
+`pnpm structure` run; no `pnpm qg` — docs-only.
+
+---
 
 ### 2026-07-13 — META: framework process audit by Codex — 8 findings (2 blockers) fixed
 
