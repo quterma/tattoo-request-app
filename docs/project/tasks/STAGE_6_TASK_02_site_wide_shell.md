@@ -2,8 +2,14 @@
 
 ## Status
 
-`ready` · created 2026-07-13 · executor: <IMPL session name> ·
-done: <date, commit hash, PROJECT_STAGE_LOG.md entry pointer>
+`ready` · created 2026-07-13 · done: <date · PROJECT_STAGE_LOG.md entry pointer>
+
+## Execution
+
+- Executor: `claude` (owner may re-assign to `codex` if the task is judged to meet the
+  delegation eligibility bar — it would then also need an explicit Allowed Write Surface and a
+  baseline commit recorded here, per AI_TASK_PROTOCOL.md)
+- Reviewer: `claude`
 
 ## How to run (session settings)
 
@@ -182,7 +188,8 @@ Verifiable, and mapped to FS §6 where applicable:
 - Update `docs/project/STAGE_6_IMPLEMENTATION_PLAN.md`'s Item 2 status row (and Item 6's note, if
   the carried-over content changes what Item 6 must do).
 - Run `pnpm structure` (updates `docs/files-structure.md` — the route rename changes it).
-- Set Status to `done` with commit hash; move this file to `docs/project/tasks/done/`.
+- Set Status to `done` (date + PROJECT_STAGE_LOG.md entry pointer — no commit hash, see
+  AI_TASK_PROTOCOL.md — Lifecycle); move this file to `docs/project/tasks/done/`.
 
 ## Open questions (resolved at STRAT time — recorded so the IMPL session does not re-litigate)
 

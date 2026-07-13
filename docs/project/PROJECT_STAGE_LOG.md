@@ -327,6 +327,55 @@ Completed in Stage 3:
 
 ## Log Entries (reverse chronological)
 
+### 2026-07-13 — META: framework process audit by Codex — 8 findings (2 blockers) fixed
+
+Status: Completed. Documentation-only — no source code changed. Owner-approved in-session
+(framework docs change rule satisfied). Thread:
+`docs/project/reviews/done/REVIEW_2026-07-13_framework-process-audit.md` (closed to consensus).
+
+The process framework had grown reactively over two days (STRAT continuity, review-queue
+collision, usage-limit pressure, Codex connected first as reviewer then as executor) and had
+never been read end to end. Codex ran a full adversarial audit of it — 9 framework docs +
+AGENTS.md + CLAUDE.md — and found 8 findings, all accepted and fixed:
+
+**Blockers (both would have failed on first real use, not in theory):**
+
+1. **Codex's executor role had no source-code write authority.** AGENTS.md's hard rule allowed
+   writing only the assigned task file itself, directly contradicting the delegation protocol
+   that has Codex implement and fix a patch. The first delegated task would have been unable to
+   touch any code. Fixed: the hard rule now grants the task file **plus exactly the paths in a
+   required per-task `Allowed Write Surface`** — nothing else, ever.
+2. **Commit approval was not bound to the staged set.** The git index is shared across sessions,
+   so a parallel session could stage files between the owner's approval and the actual
+   `git commit` — shipping unapproved work under an approval. Not hypothetical: during the audit
+   the index really did contain another session's staged files. Fixed in CLAUDE.md: approval
+   binds to the exact staged set, a pre-commit re-check is mandatory, and the approval is **void**
+   if anything changed; never sweep another session's staged files into your commit. Mirrored in
+   AI_TASK_PROTOCOL.md (the index is a shared critical section).
+
+**Should-fix (3–7) and nit (8):** the task template couldn't encode the real lifecycle
+(`awaiting-claude-review`, `superseded`, Executor/Reviewer, Allowed Write Surface) and demanded a
+self-referential commit hash — rewritten, hash replaced by date + stage-log pointer; delegation's
+accepted baseline/ownership precondition was never filed into the protocol — restored as an
+enforceable startup check; the review queue defined "active" as `awaiting-review` only (two live
+dialogues possible) and had no recovery actor for an orphaned queue — both closed, promotion is now
+an idempotent recovery check; "config-only changes skip the pipeline" let gate-defining config
+(eslint/tsconfig/deps/CI) through unvalidated and post-pipeline fixes required no re-run — both
+closed, with AI_REVIEW_PIPELINE.md made the single source of truth for the rule (it was duplicated
+across three docs); universal observation/backlog write duties conflicted with a delegated task's
+bounded write surface — routing now differs by executor; "external reviewer" was used for Codex,
+colliding with the distinct `Reviewer: external` role — terminology separated.
+
+**Root-cause pattern, recorded in AI_FRAMEWORK_IDEAS.md:** findings 1, 4 and 7 share one cause —
+decisions accepted in earlier review threads were never actually filed into a doc where they would
+be enforced. Docs touched: AGENTS.md, .claude/CLAUDE.md, AI_TASK_PROTOCOL.md, AI_CROSS_REVIEW.md,
+AI_REVIEW_PIPELINE.md, AI_DEVELOPMENT_WORKFLOW.md, AI_DEVELOPMENT_RULES.md,
+templates/STAGE_TASK_TEMPLATE.md, AI_FRAMEWORK_IDEAS.md.
+
+`pnpm structure` run; no `pnpm qg` — docs-only.
+
+---
+
 ### 2026-07-13 — STRAT: Stage 6 — Item 2 (site-wide shell) task file cut; Item 2/6 route boundary decided
 
 Status: Completed. Documentation-only — no source code changed. Item 1's IMPL session runs in

@@ -2,8 +2,13 @@
 
 ## Status
 
-`ready` · created 2026-07-13 · executor: <IMPL session name> ·
-done: <date, commit hash, PROJECT_STAGE_LOG.md entry pointer>
+`ready` · created 2026-07-13 · done: <date · PROJECT_STAGE_LOG.md entry pointer>
+
+## Execution
+
+- Executor: `claude` (architecture/design task — not delegable per AI_TASK_PROTOCOL.md,
+  Delegating IMPL Tasks to Codex: unresolved architecture decisions, security-sensitive surface)
+- Reviewer: `claude`
 
 ## How to run (session settings)
 
@@ -148,4 +153,5 @@ below) covering all six points, then its implementation.
 - Update PROJECT_STAGE_LOG.md (progress) and PROJECT_DECISIONS.md (the architecture decision
   itself, per Workflow step 5).
 - Update `docs/project/STAGE_6_IMPLEMENTATION_PLAN.md`'s Item 1 status row.
-- Set Status to `done` with commit hash; move this file to `docs/project/tasks/done/`.
+- Set Status to `done` (date + PROJECT_STAGE_LOG.md entry pointer — no commit hash, see
+  AI_TASK_PROTOCOL.md — Lifecycle); move this file to `docs/project/tasks/done/`.

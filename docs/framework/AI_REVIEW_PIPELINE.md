@@ -33,11 +33,21 @@ Run the Review Pipeline when:
 
 - production or source code was modified or created
 - a new feature, fix, or refactor was implemented
+- **configuration that the gates themselves depend on changed** — `eslint.config.mjs`,
+  `tsconfig*`, `next.config*`, `vitest`/test config, `package.json` scripts or dependencies,
+  CI config, security headers. These can silently break or weaken the very checks the pipeline
+  relies on, so they get the gates, not a self-check. (Run the applicable gates at minimum;
+  run the full pipeline if behavior could change.)
 
 Skip when:
 
-- only documentation or configuration files changed
+- only documentation changed
 - task is exploratory or analysis-only
+
+**After the first gate run, any further file change re-arms the gates**: re-run the affected
+gates (full pipeline if production/source behavior changed) before declaring
+READY FOR DEVELOPER REVIEW. A "small fix" to a test or config after a green run is exactly how
+a red build reaches a commit.
 
 ---
 

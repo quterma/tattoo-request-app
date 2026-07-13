@@ -28,8 +28,22 @@ AI agents and developers.
 
 ## Status
 
-`draft | ready | in progress | done` · created <date> · executor: <session name> ·
-done: <date, commit hash, PROJECT_STAGE_LOG.md entry pointer>
+`draft | ready | in progress | awaiting-claude-review | done | superseded` · created <date> ·
+done: <date · PROJECT_STAGE_LOG.md entry pointer>
+
+(`awaiting-claude-review` applies only to a task delegated to Codex. `superseded` needs a
+one-line reason + pointer to the replacement. Do not record a commit hash here — a file cannot
+contain the hash of the commit that first records it; git history is the commit provenance.)
+
+## Execution
+
+- Executor: `claude | codex` — who implements this task
+- Reviewer: `claude` — Claude Code always reviews; for a Codex-executed task this is the
+  mandatory independent review pass (AI_TASK_PROTOCOL.md — Delegating IMPL Tasks to Codex)
+- Baseline commit: <hash the work starts from — the executor stops if HEAD differs>
+- Allowed Write Surface: <explicit list of paths the executor may write; nothing outside it.
+  Required for `Executor: codex`; recommended for any task>
+- May touch dependencies / migrations / generated files / shared docs: <no by default>
 
 ## How to run (session settings)
 
@@ -83,5 +97,23 @@ project's Source of Truth defines one>
 
 ## Reporting
 
+**If `Executor: claude`:**
+
 - Update PROJECT_STAGE_LOG.md (progress) and PROJECT_DECISIONS.md (if a decision was made).
-- Set Status to `done` with commit hash; move this file to `docs/project/tasks/done/`.
+- Set Status to `done` (date + stage-log pointer, no commit hash); move this file to
+  `docs/project/tasks/done/`; propose the commit for owner approval.
+
+**If `Executor: codex`:** Codex does NOT do any of the above. It appends an Execution Report to
+this file (what changed, final `pnpm lint`/`typecheck`/`test` results, anything unresolved, any
+out-of-scope findings noticed) and sets Status to `awaiting-claude-review`. Claude Code then
+runs its independent review pass — including a mandatory full `pnpm qg` — and only after a
+clean pass does the Claude-side reporting above, filing any accepted out-of-scope findings into
+PROJECT_BACKLOG.md / AI_FRAMEWORK_IDEAS.md itself.
+
+## Execution Report (filled by the executor)
+
+<what changed; gate results; unresolved items; out-of-scope findings — see Reporting above>
+
+## Claude Review Verdict (delegated tasks only)
+
+<Claude's independent verdict after reviewing the diff and re-running `pnpm qg`>

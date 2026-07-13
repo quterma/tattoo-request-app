@@ -39,15 +39,26 @@ reasoning — the Handoff section states scope and questions, not the author's c
   reviews — prevents Claude Code waiting on Codex when an external review was agreed, and
   vice versa).
 - The whole dialogue lives in this one file as appended sections; history is preserved in git.
-- **At most one thread may have status `awaiting-review` at a time.** A side asked to act
-  that finds zero or multiple matching threads stops and asks the owner — never guesses.
-- Parallel review requests are allowed via the queue: a thread created while another is
-  active starts as `queued` (parked — nobody acts on it). Whoever moves the active thread to
-  `done/` must then promote the oldest `queued` thread to `awaiting-review` and tell the
-  owner it is ready for the next ping. Any session creating or processing threads reports the
-  current queue size to the owner when it is more than zero.
+- **A thread is ACTIVE if it is not `queued` — i.e. its status is `awaiting-review`,
+  `awaiting-response`, or `consensus` — and it still sits in `docs/project/reviews/` (not
+  `done/`). At most one thread may be active at a time.** A dialogue mid-flight is still
+  occupying the slot: do not create a new active thread just because nothing is currently in
+  `awaiting-review`.
+- Parallel review requests are allowed via the queue: a thread created while another is active
+  starts as `queued` (parked — nobody acts on it). Before creating a thread, scan all three
+  active statuses, not just `awaiting-review`.
+- **Queue promotion, and recovery if it was missed.** Whoever moves the active thread to
+  `done/` must then promote the oldest `queued` thread to `awaiting-review` and tell the owner
+  it is ready for the next ping. Because a session can die between those two steps, promotion
+  is also a recovery check, not only a duty: **any Claude session that creates a thread,
+  processes a review, or cleans one up must first check for an orphaned queue — no active
+  thread but one or more `queued` — and promote the oldest one if so.** The check is idempotent
+  and costs one directory scan. Report the current queue size to the owner whenever it is
+  greater than zero.
 - The reviewer handles exactly one thread per owner ping — the next review starts only after
   another explicit ping, never automatically.
+- A side asked to act that finds zero or multiple threads matching what it expects stops and
+  asks the owner — never guesses.
 - Status header at the top drives who acts next:
 
 | Status | Meaning | Who acts |

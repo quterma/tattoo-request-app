@@ -117,9 +117,12 @@ When production or source code was changed:
 - re-run pipeline if fixes touched production or source code
 - pipeline status must be READY FOR DEVELOPER REVIEW before proposing a commit
 
-When only documentation or configuration files changed:
+When only documentation changed:
 
 - self-check is sufficient (architecture compliance, scope, consistency)
+- configuration changes do NOT qualify — config the gates depend on (eslint/tsconfig/next/test
+  config, package scripts/deps, CI, security headers) runs the gates. See
+  AI_REVIEW_PIPELINE.md — When to Run, which is the source of truth for this rule.
 
 If pipeline detects issues requiring architectural changes or developer decisions,
 AI must stop and request clarification.

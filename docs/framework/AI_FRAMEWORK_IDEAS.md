@@ -150,6 +150,29 @@ AI_WORKFLOW_MASTER.md. Format: date — observation — status (`open` / `resolv
   AI_CROSS_REVIEW.md (`queued` status formalized; promotion duty on whoever closes the active
   thread; queue-size reporting to the owner; one thread per ping) + AGENTS.md (queued threads
   are parked; exactly one review per owner ping).
+- 2026-07-13 — Full adversarial audit of the process framework by Codex (thread:
+  `reviews/done/REVIEW_2026-07-13_framework-process-audit.md`) found 8 findings, incl. 2
+  blockers, all accepted and fixed. Root cause across most of them: the framework grew
+  reactively over two days — each change locally correct, but hard rules, the task template,
+  and cross-doc references did not keep up, so several accepted decisions were never actually
+  filed anywhere enforceable. Fixed: (1) Codex's executor role had no source-code write
+  authority at all — the AGENTS.md hard rule allowed only the task file itself, contradicting
+  the delegation protocol; now an explicit per-task Allowed Write Surface. (2) Commit approval
+  was not bound to the staged set — the git index is shared, so a parallel session could stage
+  into an approved-but-not-yet-run commit; now approval is void if the staged set changed, with
+  a mandatory pre-commit re-check. (3) The task template could not represent the real lifecycle
+  (no `awaiting-claude-review`/`superseded`/Executor/Write Surface) and demanded a
+  self-referential commit hash; rewritten with execution metadata and Claude/Codex reporting
+  branches. (4) Delegation lost its accepted baseline/ownership precondition; restored as a
+  startup check. (5) The review queue's "active" invariant counted only `awaiting-review`
+  (allowing two live dialogues) and had no recovery actor for an orphaned queue; both fixed.
+  (6) "Config-only changes skip the pipeline" let gate-defining config (eslint/tsconfig/deps)
+  through unvalidated, and post-pipeline fixes required no re-run; both closed. (7) Universal
+  observation/backlog write duties conflicted with a delegated Codex task's bounded write
+  surface; routing now differs by executor. (8) "External reviewer" was used for Codex,
+  colliding with the distinct `Reviewer: external` role. — resolved: AGENTS.md, CLAUDE.md,
+  AI_TASK_PROTOCOL.md, AI_CROSS_REVIEW.md, AI_REVIEW_PIPELINE.md, AI_DEVELOPMENT_WORKFLOW.md,
+  AI_DEVELOPMENT_RULES.md, templates/STAGE_TASK_TEMPLATE.md.
 - 2026-07-13 — Owner request for META to weigh, raised in a Stage 6 STRAT session (Claude Code
   usage was burning through the session's token/usage budget fast, partly attributed to running
   Fable for extended stretches): **should Codex take on some token-heavy, low-judgment work**,

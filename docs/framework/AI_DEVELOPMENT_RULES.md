@@ -162,9 +162,11 @@ Before a commit is finalized, when production or source code was changed:
 - AI must summarize the change and present pipeline results to the developer
 - the developer must review and approve before the commit is created
 
-When only documentation or configuration files changed:
+When only documentation changed:
 
 - self-check is sufficient before proposing a commit
+- configuration changes do NOT qualify — see AI_REVIEW_PIPELINE.md — When to Run (source of
+  truth): config the gates depend on runs the gates.
 
 Commits should remain small, focused and logically grouped.
 

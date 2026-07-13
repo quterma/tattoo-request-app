@@ -87,6 +87,16 @@ If improvement is possible:
   explicit approval before running `git commit`. A blanket "commit" given earlier in the
   conversation does not carry over to a later commit — the working tree may have changed
   since (parallel sessions, owner edits), so each commit gets its own staged-state approval.
+- **Approval binds to the exact staged set, not to the intent.** The git index is shared
+  across all sessions, so another session can stage files while you wait for approval.
+  Therefore: immediately BEFORE running `git commit`, re-check the staged set
+  (`git status --short` / `git diff --cached --stat`). If it differs in any way from what the
+  owner approved — extra files, changed content, anything — the approval is VOID: do not
+  commit. Re-stage only your intended files, show the corrected staged state, and ask again.
+  Never commit a staged set the owner has not seen in its final form.
+- Stage only files you own in this session. If files from another session are already staged
+  when you begin, do not sweep them into your commit — unstage them (or ask the owner) rather
+  than committing work you did not do and they did not approve here.
 
 ---
 
@@ -107,16 +117,17 @@ These steps are not optional and do not require user confirmation.
 
 Before every commit, verify:
 
-### Review Pipeline (when source code changed)
+### Review Pipeline (when source code OR gate-affecting config changed)
 
-Run all three stages in order — see AI_REVIEW_PIPELINE.md:
+Run all three stages in order — see AI_REVIEW_PIPELINE.md (source of truth for when to run):
 
 1. Test Agent — determine coverage per PROJECT_TESTING_STRATEGY.md, write missing tests, run pnpm test
 2. Quality Gates — run `pnpm qg` (runs structure + lint + typecheck + test + build in one command).
    Report PASS / FAIL / NOT CONFIGURED for each gate. Do not skip.
 3. Review Agent — subagent_type: "Explore", read-only inspection of changed files
 
-Re-run pipeline if any fix touches source code.
+Re-run after ANY file change made post-pipeline — source, test, or config alike. A green run is
+only valid for the exact tree it ran on.
 Do NOT propose commit unless pipeline status is READY FOR DEVELOPER REVIEW.
 
 ### Architecture
