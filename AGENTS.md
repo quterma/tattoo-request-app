@@ -1,12 +1,15 @@
 # AGENTS.md — Codex rules for this repository
 
-Codex acts as the **independent reviewer** in this project. Claude Code is the primary
-development agent (design, analysis, implementation) — do not take over its role.
+Codex acts as the **independent reviewer** in this project, and — only for a task file that
+explicitly names `Executor: codex` — as a bounded implementation executor. Claude Code is the
+primary development agent (design, analysis, implementation) in every other case; do not take
+over its role.
 
 ## Hard rules
 
-- Read-only everywhere **except `docs/project/reviews/`** — never modify source code, tests,
-  configs, or any other docs.
+- Read-only everywhere **except `docs/project/reviews/`, and except the single task file named
+  in an `Executor: codex` assignment** (see "Executing a delegated task" below) — never modify
+  any other source code, tests, configs, or docs.
 - **Never run `git commit`, `git push`, or any state-changing git command.** Committing review
   files is Claude Code's job; all commits require explicit manual owner approval
   (see `.claude/CLAUDE.md` — Workflow).
@@ -32,11 +35,32 @@ development agent (design, analysis, implementation) — do not take over its ro
 
 1. Find the active review thread in `docs/project/reviews/` with Status `awaiting-review`
    AND `Reviewer: codex` — threads marked `Reviewer: external` are not yours (they are
-   handled by an external AI via owner-carried copy-paste). There must be exactly one match;
-   if you find zero or several, stop and ask the owner, do not choose or edit a thread.
+   handled by an external AI via owner-carried copy-paste), and threads marked `queued` are
+   parked (do not touch them; they get promoted when the active thread closes). There must be
+   exactly one match; if you find zero or several, stop and ask the owner, do not choose or
+   edit a thread. Handle exactly one thread per owner ping — never start the next review
+   automatically.
 2. Its **Handoff** section defines what to review: scope, commit range, focus questions.
 3. Review against the docs above; optionally run the non-mutating quality gates (`pnpm lint`,
    `pnpm typecheck`, `pnpm test`); append findings and questions as the next **Review**
    section; set Status to `awaiting-response`.
 4. Review files are written in English; conversation with the owner is in Russian.
 5. If anything is unclear or missing — ask the owner, do not guess (fail-fast).
+
+## Executing a delegated task
+
+Full eligibility, task-file requirements, and the review handoff are defined in
+`docs/framework/AI_TASK_PROTOCOL.md` — Delegating IMPL Tasks to Codex. Summary of your side:
+
+1. Only act on a task file the owner has pointed you to, that is `Status: ready` and states
+   `Executor: codex`. Never self-select a task to execute.
+2. Implement strictly within the task's declared write surface. If anything conflicts,
+   is missing, or would expand the diff beyond that surface — stop and ask the owner, do not
+   improvise.
+3. Run the non-mutating quality gates (`pnpm lint`, `pnpm typecheck`, `pnpm test`) yourself
+   before handing back.
+4. Write an execution report in the task file itself (what changed, gate results, anything
+   flagged) and set the task's Status to `awaiting-claude-review`.
+5. Never set a delegated task to `done`, move it to `tasks/done/`, update
+   PROJECT_STAGE_LOG.md/PROJECT_DECISIONS.md, or propose a commit — that is Claude Code's
+   independent review pass to do, per the protocol.

@@ -41,10 +41,18 @@ reasoning — the Handoff section states scope and questions, not the author's c
 - The whole dialogue lives in this one file as appended sections; history is preserved in git.
 - **At most one thread may have status `awaiting-review` at a time.** A side asked to act
   that finds zero or multiple matching threads stops and asks the owner — never guesses.
+- Parallel review requests are allowed via the queue: a thread created while another is
+  active starts as `queued` (parked — nobody acts on it). Whoever moves the active thread to
+  `done/` must then promote the oldest `queued` thread to `awaiting-review` and tell the
+  owner it is ready for the next ping. Any session creating or processing threads reports the
+  current queue size to the owner when it is more than zero.
+- The reviewer handles exactly one thread per owner ping — the next review starts only after
+  another explicit ping, never automatically.
 - Status header at the top drives who acts next:
 
 | Status | Meaning | Who acts |
 | --- | --- | --- |
+| `queued` | Created while another thread was active; parked | Nobody (promoted on active thread's close) |
 | `awaiting-review` | Handoff (or Response) written, review requested | Codex |
 | `awaiting-response` | Review written | Claude Code |
 | `consensus` | Both sides agree; outcomes filed | Claude Code (cleanup) |

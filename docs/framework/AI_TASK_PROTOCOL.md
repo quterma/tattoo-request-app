@@ -110,19 +110,68 @@ chat-only when the session actually ends.
 
 ## Lifecycle
 
-`draft → ready → in progress → done` — tracked in the file's Status header.
+`draft → ready → in progress → done` — tracked in the file's Status header. A delegated task
+(see Delegating IMPL Tasks to Codex below) inserts `awaiting-claude-review` between
+`in progress` and `done`.
 
 Transition owners:
 
 - `draft → ready` — the developer (approval that the task may be executed as written)
 - `ready → in progress` — the executing implementation session, at start
 - `in progress → done` — the executing implementation session, after Review Pipeline + reporting
+- for a delegated task: `in progress → awaiting-claude-review` — Codex, after implementing,
+  self-reviewing, running its allowed gates, and writing an execution report in the task file;
+  `awaiting-claude-review → done` — a Claude Code session only, after its own independent
+  review pass (never the executor's self-report alone)
 
 When done: record the outcome in the file (commit hash, stage-log pointer), set status `done`,
 and move the file to `docs/project/tasks/done/`. Never delete task files.
 
 A task that is cancelled or replaced gets status `superseded` (with a one-line reason and a
 pointer to its replacement, if any) and also moves to `docs/project/tasks/done/`.
+
+## Delegating IMPL Tasks to Codex
+
+Codex may execute a task file directly (not just review one) when the task is
+**deterministic, local, reversible, and decision-free**: the desired behavior is already
+settled in the authoritative docs, the affected surface is small and named, acceptance is
+objectively checkable, and no product/architecture/visual-taste decision is required.
+Examples: a localized bug fix with a clear repro and contract; a component/route whose
+behavior is already fully specified; tests for an already-clear contract; pure utilities;
+mechanical renames/migrations within an established pattern with an explicit file set;
+objective accessibility fixes; doc sync from an already-decided source. Not delegable:
+unresolved product/UX/visual decisions, architecture changes or new abstractions, dependency
+additions, migrations/RLS/secrets/deployment/CI/CD, concurrency/idempotency/recovery-sensitive
+work, subjective UI iteration, or anything touching files another session may be editing.
+
+Requirements:
+
+- The task file must be `ready` (never `draft`) and self-sufficient — Codex has no
+  conversational history, only what's written: exact outcome and authoritative spec sections;
+  numbered in-scope deliverables and named out-of-scope neighbors; objective acceptance
+  criteria including failure behavior; expected tests/manual verification (or an explicit
+  reason neither applies); an allowed write surface; whether deps/migrations/generated
+  files/shared docs may be touched (default: no); and `Executor: codex` / `Reviewer: claude`
+  stated in the task file.
+- Codex stops and asks rather than improvising when repo evidence conflicts with the task, an
+  acceptance criterion admits materially different behaviors, a required decision/asset is
+  missing, or the diff would need to expand beyond the declared boundary.
+- **Owner authorization for delegation itself is still required per task** (approving that
+  this specific `ready` task goes to Codex, not Claude) — this is not blanket automation.
+- Claude's review treats the diff as an unfamiliar contributor's patch, not a continuation of
+  its own reasoning: re-derive what the patch must do from the task + docs before reading
+  Codex's report; inspect the complete diff including untracked files, confirm every changed
+  path was authorized; check behavior, failure paths, types, dependency direction, and
+  security/data boundaries, not just whether tests pass; check tests against
+  PROJECT_TESTING_STRATEGY.md for real contract coverage, not tests fitted to the
+  implementation; re-run the full quality gates itself rather than trusting Codex's reported
+  output; treat any fix made during review as a new diff needing its own pipeline pass. Only
+  after a clean pass does Claude update shared docs, move the task to `done`, and propose a
+  commit — commits remain Claude Code's job with owner approval, per CLAUDE.md.
+- The execution report and Claude's review verdict live in the task file itself — no separate
+  cross-review thread for routine delegated tasks (would duplicate the same facts). High-risk
+  or disputed delegated work may still use the formal `docs/project/reviews/` protocol
+  deliberately.
 
 ---
 

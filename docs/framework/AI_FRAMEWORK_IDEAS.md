@@ -144,3 +144,9 @@ AI_WORKFLOW_MASTER.md. Format: date — observation — status (`open` / `resolv
   AI_TASK_PROTOCOL.md (STRAT Kickoff Prompt: prior-art line — search the repository before
   presenting options on any sub-topic; existing code is strategic context). The `app-nav.tsx`
   existence was verified before fixing.
+- 2026-07-13 — A second review request created while another thread was `awaiting-review` had
+  no protocol-defined state: the creating STRAT session improvised a `queued` status with an
+  in-file workaround note, and Codex (correctly) could not see the thread. — resolved:
+  AI_CROSS_REVIEW.md (`queued` status formalized; promotion duty on whoever closes the active
+  thread; queue-size reporting to the owner; one thread per ping) + AGENTS.md (queued threads
+  are parked; exactly one review per owner ping).
