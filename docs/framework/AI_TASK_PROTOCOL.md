@@ -138,6 +138,9 @@ pointer to its replacement, if any) and also moves to `docs/project/tasks/done/`
 - Out-of-scope findings discovered mid-task stay out of the diff: record product/code findings
   in PROJECT_BACKLOG.md, process/workflow findings in the observations journal
   (AI_FRAMEWORK_IDEAS.md), and mention them in the task report — never fix them in-scope.
+- Independent cross-review with the external reviewer (Codex) follows
+  docs/framework/AI_CROSS_REVIEW.md: Claude Code authors and responds, Codex reviews
+  read-only via status-driven review threads in `docs/project/reviews/`.
 
 ---
 

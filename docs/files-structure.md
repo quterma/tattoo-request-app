@@ -7,6 +7,7 @@ tattoo-request-app/
 ├── .gitignore
 ├── .prettierignore
 ├── .prettierrc
+├── AGENTS.md
 ├── components.json
 ├── eslint.config.mjs
 ├── next.config.ts
@@ -84,6 +85,7 @@ tattoo-request-app/
 ├── docs/
 │   ├── files-structure.md
 │   ├── framework/
+│   │   ├── AI_CROSS_REVIEW.md
 │   │   ├── AI_DEVELOPMENT_RULES.md
 │   │   ├── AI_DEVELOPMENT_WORKFLOW.md
 │   │   ├── AI_FRAMEWORK_IDEAS.md
@@ -113,6 +115,11 @@ tattoo-request-app/
 │       ├── PROJECT_TESTING_STRATEGY.md
 │       ├── STAGE_6_FUNCTIONAL_SPECIFICATION.md
 │       ├── STAGE_6_PRODUCT_DEFINITION.md
+│       ├── reviews/
+│       │   ├── .gitkeep
+│       │   └── done/
+│       │       ├── .gitkeep
+│       │       └── REVIEW_2026-07-13_codex-sync-setup.md
 │       └── tasks/
 │           ├── STAGE_6_STRAT_BRIEF.md
 │           └── STAGE_TASK_TEMPLATE.md
