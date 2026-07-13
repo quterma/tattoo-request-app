@@ -46,12 +46,12 @@ file may contradict these without first escalating a PRD/FS/blueprint change.
 | # | Item | Depends on | Status | Blueprint ref |
 | --- | --- | --- | --- | --- |
 | 1 | Upload-flow architecture (endpoint/auth model, opaque client handle + `clientSubmissionId` lifecycle, 3-category DB/Storage/admin representation, per-file retry/remove/progress, atomic adopt-at-submit, cleanup/idempotency) | — | **task ready** (`STAGE_6_TASK_01_upload_flow_architecture.md`) | PROJECT_DECISIONS.md — Request page, "Upload-flow architecture prerequisite" (Codex blocker finding) |
-| 2 | Site-wide shell (nav item set → Home/Process/Request/Location; footer strips `mailto:`/`tel:`; CTA-at-end-of-page pattern) | — | not started | PROJECT_DECISIONS.md — Navigation and CTA placement |
+| 2 | Site-wide shell (nav item set → Home/Process/Request/Location; footer strips `mailto:`/`tel:`; shared CTA-at-end-of-page component; `policies` → `process` route rename **with content carried over as-is**; inbound-link sweep; Location's missing CTA pulled forward) | — | **task ready** (`STAGE_6_TASK_02_site_wide_shell.md`) | PROJECT_DECISIONS.md — Navigation and CTA placement |
 | 3 | Request form rebuild (field model, states, single-scroll format, upload card stack, required in-session persistence incl. clearing on submit) | Item 1 | not started | PROJECT_DECISIONS.md — Request page — form format |
 | 4 | Success page (new route; client store gate incl. bfcache guard; contact echo; one-time read) | Item 3 (shares the persistence store) | not started | PROJECT_DECISIONS.md — Success page |
 | 5 | Home rebuild (block order; About folded into Hero/Good Fit, not deleted; footer/Instagram decisions already covered by Item 2) | Item 2 | not started | PROJECT_DECISIONS.md — Home page |
-| 6 | Process page (new route; full canonical content: Overview, Good Fit, Design Process, Pricing, Booking Policy, FAQ) | Item 2 | not started, **content-blocked** — needs owner-authored copy (pricing, FAQ, Good Fit text) | PROJECT_DECISIONS.md — Process page |
-| 7 | Location polish (real map embed + real studio photos replacing placeholders; append CTA) | Item 2 | not started, **asset-blocked** — needs real studio photos | PROJECT_DECISIONS.md — Location page |
+| 6 | Process page **content rewrite** (the route itself is delivered by Item 2 with the old `policies` copy carried over; Item 6 replaces that copy with the FS §3.2 canonical content: Overview, Good Fit, Design Process, Pricing, Booking Policy, FAQ, in blueprint block order) | Item 2 | not started, **content-blocked** — needs owner-authored copy (pricing, FAQ, Good Fit text) | PROJECT_DECISIONS.md — Process page |
+| 7 | Location polish (real map embed + real studio photos replacing placeholders) — the missing CTA is pulled forward into Item 2 | Item 2 | not started, **asset-blocked** — needs real studio photos | PROJECT_DECISIONS.md — Location page |
 | 8 | Preparation / Aftercare split (two routes from the current combined `aftercare` page; drop policies links; no cross-link) | Item 2 | not started | PROJECT_DECISIONS.md — Preparation page / Aftercare page |
 | 9 | Reference-code format (6-char uppercase alphanumeric, excludes O/0/I/1) | Item 3 (generated at submit) | not started | FS §4.6; PROJECT_DECISIONS.md — Stage 6 note under Reference Code Decision |
 | 10 | Abuse mitigation on the submit endpoint (honeypot and/or rate limiting, invisible to legitimate visitors, no CAPTCHA) | Item 1 (shares the endpoint) | not started | FS §4.5 |
@@ -59,10 +59,25 @@ file may contradict these without first escalating a PRD/FS/blueprint change.
 | 12 | Favicon / OG / basic SEO | — | not started | PROJECT_IMPLEMENTATION_PLAN.md — Stage 6 |
 | 13 | Final FS §6 acceptance sweep (all 13 criteria) + manual mobile QA | Items 1–10 | not started | FS §6 |
 
-**Not itemized separately, folded into the items above:** the "policies inbound-link check" (fold
-into Item 2 — removing/redirecting the old route and checking no page still links to it) and the
-`policies` → `process` route rename itself (Item 2/6 boundary — Item 2 handles nav+footer, Item 6
-delivers the actual Process page content at that route).
+**Not itemized separately, folded into the items above:** the "policies inbound-link check" and
+the `policies` → `process` route rename (both in Item 2 — see the Item 2/6 boundary decision
+below).
+
+**Item 2/6 boundary — owner decision, STRAT 2026-07-13.** Item 2 performs the `policies` →
+`process` route rename **and carries the shipped policies copy over unchanged**; Item 6 later
+replaces that copy with the FS §3.2 canonical content. The alternatives were rejected: leaving
+the rename in Item 6 would point the new nav at a 404 for as long as Item 6 stays content-blocked
+on owner-authored copy, and shipping a stub `/process` would take the site's only pricing/FAQ
+content offline in the meantime. Carrying the content over keeps the site coherent at every
+commit and costs Item 6 nothing — it rewrites a page at a route that already exists. Item 2 also
+pulls forward the one Location line that belongs to the site-wide CTA pattern (Location has no
+primary CTA today, FS §2's table says it must), so the pattern is not left half-applied behind
+the asset-blocked Item 7.
+
+**No redirect from the old `/policies` URL** (same decision): the site is not publicly launched
+(PROJECT_PRODUCTION_READINESS.md — production environment setup still open), so there are no
+external inbound links or index entries to preserve; a permanent redirect for a URL nobody has is
+debt. Revisit only if the owner has already shared `/policies` links publicly.
 
 ---
 

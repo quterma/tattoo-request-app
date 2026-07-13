@@ -119,6 +119,7 @@ tattoo-request-app/
 │       ├── STAGE_6_PRODUCT_DEFINITION.md
 │       ├── reviews/
 │       │   ├── .gitkeep
+│       │   ├── REVIEW_2026-07-13_framework-process-audit.md
 │       │   └── done/
 │       │       ├── .gitkeep
 │       │       ├── REVIEW_2026-07-13_codex-delegation-invocation.md
@@ -128,7 +129,8 @@ tattoo-request-app/
 │       │       └── REVIEW_2026-07-13_stage6-ux-blueprint-full.md
 │       └── tasks/
 │           ├── STAGE_6_STRAT_BRIEF.md
-│           └── STAGE_6_TASK_01_upload_flow_architecture.md
+│           ├── STAGE_6_TASK_01_upload_flow_architecture.md
+│           └── STAGE_6_TASK_02_site_wide_shell.md
 ├── scripts/
 │   └── update-structure.mjs
 ├── src/

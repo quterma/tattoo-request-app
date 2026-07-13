@@ -37,6 +37,15 @@ require updating them first. See PROJECT_DECISIONS.md — Stage 6 Product Docume
 
 Current focus:
 
+- **Stage 6 implementation started — 2026-07-13.** The UX blueprint is closed (see the entry
+  below) and the durable, item-by-item plan lives in `docs/project/STAGE_6_IMPLEMENTATION_PLAN.md`
+  (13 items). Two task files are `ready` and their IMPL sessions run in parallel (disjoint files):
+  **Item 1** — `STAGE_6_TASK_01_upload_flow_architecture.md` (blocks Items 3/4 — the critical
+  path; public unauthenticated upload surface, Opus) and **Item 2** —
+  `STAGE_6_TASK_02_site_wide_shell.md` (blocks Items 5/6/7/8; nav/footer/CTA shell plus the
+  `policies` → `process` route rename with the shipped copy carried over unchanged — see the
+  dated 2026-07-13 entry on the Item 2/6 boundary decision). Items 6 (Process copy) and 7
+  (Location studio photos) remain content/asset-blocked on owner-supplied material, not on code.
 - **Stage 6 UX blueprint — complete and consensus-reviewed, 2026-07-13.** All 8 sub-topics
   decided in the first product/UX STRAT session and externally reviewed to consensus in three
   rounds: batch 1 (navigation/CTA, Home, Process, Request — 4 corrections, external reviewer),
@@ -317,6 +326,40 @@ Completed in Stage 3:
 ---
 
 ## Log Entries (reverse chronological)
+
+### 2026-07-13 — STRAT: Stage 6 — Item 2 (site-wide shell) task file cut; Item 2/6 route boundary decided
+
+Status: Completed. Documentation-only — no source code changed. Item 1's IMPL session runs in
+parallel (separate kickoff); Items 1 and 2 touch disjoint files, so no coordination is needed.
+
+Wrote `docs/project/tasks/STAGE_6_TASK_02_site_wide_shell.md` (status `ready`, Sonnet + Plan
+mode): nav item set → Home/Process/Request/Location (PRD D9), footer stripped of `mailto:`/`tel:`,
+the primary CTA extracted into one shared `shared/ui` component, the `policies` → `process` route
+rename, the inbound-link sweep, and Location's missing CTA.
+
+**Owner decision this session — the Item 2/6 boundary.** Item 2 performs the route rename **and
+carries the shipped policies copy over unchanged**; Item 6 later replaces that copy with the FS
+§3.2 canonical content (Overview, Good Fit, Design Process, Pricing, Booking Policy, FAQ). Two
+alternatives were considered and rejected: (a) leaving the rename in Item 6 — the new nav would
+point at a 404 for as long as Item 6 stays blocked on owner-authored copy; (b) shipping a stub
+`/process` and deleting `/policies` — that would take the site's only pricing/FAQ content offline
+in the meantime. Carrying the content over keeps the site coherent at every commit and costs Item
+6 nothing (it rewrites a page at a route that already exists). Also decided: **no redirect** from
+the old `/policies` URL (site not publicly launched — nothing to preserve; revisit only if the
+owner has already shared that URL publicly). Recorded in `STAGE_6_IMPLEMENTATION_PLAN.md` (new
+"Item 2/6 boundary" note; Items 2/6/7 rows updated).
+
+Item 2 also pulls forward the one Location line belonging to the site-wide CTA pattern — Location
+has no primary CTA today and FS §2's table requires one; Item 7 is asset-blocked on studio photos,
+and the CTA pattern should not ship half-applied behind it. The two `aftercare` "Back to Policies"
+links are removed as part of the inbound-link sweep (already a blueprint decision — Aftercare
+page); the Preparation/Aftercare split itself stays in Item 8.
+
+`STAGE_6_STRAT_BRIEF.md` rewritten (pickup point: cut Item 3's task file after Item 1 lands; Items
+5 and 8 after Item 2). `pnpm structure` not run — no source/structure change. No `pnpm qg` —
+docs-only.
+
+---
 
 ### 2026-07-13 — META: Codex gate-loop discipline for delegated IMPL tasks
 
