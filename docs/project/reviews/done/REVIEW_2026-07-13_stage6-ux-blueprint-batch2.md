@@ -1,4 +1,4 @@
-Status: consensus
+Status: `consensus`
 Reviewer: external
 
 # Stage 6 UX Blueprint — Batch 2 (Success, Location, Preparation, Aftercare)

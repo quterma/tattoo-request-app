@@ -41,7 +41,7 @@ reasoning — the Handoff section states scope and questions, not the author's c
 
 - Location: `docs/project/reviews/REVIEW_<YYYY-MM-DD>_<slug>.md` — one file per review
   thread (one reviewed block: an implementation task, a spec, a design/stage block).
-- Header fields:
+- Header fields — see **Header format** below; it is a contract, not a style preference:
   - `Status:` — drives who acts next (table below).
   - `Reviewer: codex | external` — drives WHO reviews (prevents Claude Code waiting on Codex
     when an external review was agreed, and vice versa).
@@ -49,6 +49,30 @@ reasoning — the Handoff section states scope and questions, not the author's c
     `META: framework audit`, `STRAT: Stage 6 UX blueprint`, `IMPL: Stage 6 item 2 shell`).
     Findings usually belong to that session's work; without this, a later reader cannot tell
     who should act on them or which session to return to.
+
+## Header format (both thread types)
+
+The header is **read by machines** — an agent locating the one thread it must act on, and
+`pnpm project:status` — so its shape is fixed:
+
+- Each field is its own line at the top of the file, `Field: value`, nothing before the colon.
+- **The status value is wrapped in backticks**: `` Status: `awaiting-review` `` — the dominant
+  form in the existing threads, and the one to write from now on.
+- **A reader must accept the value with or without backticks.** This is not permission to write it
+  loosely; it is a reader obligation, because the existing threads are already inconsistent (one
+  `consensus` sits bare among eight backticked ones) and a reader that only matches one form
+  silently finds nothing.
+- Anything after the status value (a date, a pointer) is free text and must be ignored by readers:
+  `` Status: `closed` · outcomes filed 2026-07-14 `` is valid.
+- `Researcher:`/`Reviewer:` values are written **bare**: `Researcher: codex`.
+
+Never invent a status value. If a thread needs a state the table below does not have, that is a
+protocol gap — raise it (AI_FRAMEWORK_IDEAS.md), do not improvise a new word into the header.
+
+(2026-07-14: this is written down because a Codex research turn searched for
+`^Status:\s*awaiting-research\s*$`, found zero matches against a backticked header, and — per the
+"stop if you find zero or several" rule — should have halted. It recovered by reading the headers
+by eye, which is exactly the fragility this section removes.)
 - The whole dialogue lives in this one file as appended sections; history is preserved in git.
 - **A thread is ACTIVE if it is not `queued` — i.e. its status is `awaiting-review`,
   `awaiting-response`, or `consensus` — and it still sits in `docs/project/reviews/` (not

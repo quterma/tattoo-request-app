@@ -106,6 +106,33 @@ contain the hash of the commit that first records it; git history is the commit 
    first (see this project's PROJECT_DECISIONS.md for the applicable authority rule, e.g.
    Stage 6 Product Documentation Authority).
 
+## Completion obligations
+
+<Actions this task requires but may not itself perform — a DB migration to apply, a new required
+env var/secret to set, a live end-to-end verification a Source-of-Truth doc demands, an accepted
+review finding deferred. Pre-populate what is known at task-cutting time; the executor reconciles
+before closing (AI_TASK_PROTOCOL.md — Completion Obligations). Write `None` if there are none —
+silence must not be ambiguous.
+
+A task MAY NOT be set `done` while an obligation exists only as prose: each needs either checkable
+completion evidence, or a pointer to a canonical work item created before this task closes. A
+sentence in PROJECT_STAGE_LOG.md is not a work item.>
+
+```text
+- CO-1 — <action>
+  - Required by: <acceptance criterion / PRD-FS-decision requirement / review finding / a contract
+    the diff introduces>
+  - Disposition: completed — <checkable evidence>
+    OR tracked in: <task or backlog path + anchor>
+```
+
+## Review Granularity
+
+<Required only when the task crosses the size trigger — 16 execution-affecting files or 500 lines
+of churn (AI_TASK_PROTOCOL.md — A Large Task Is Reviewed in Checkpoints). Name the proposed blocks,
+which one is the risk nucleus, and whether the task stays whole or returns to STRAT to be split.
+Otherwise: `single` (one block, one review at the end).>
+
 ## Acceptance Criteria
 
 <verifiable statements; reference the relevant spec section's acceptance criteria if the
@@ -118,6 +145,11 @@ project's Source of Truth defines one>
 - Update PROJECT_STAGE_LOG.md (progress) and PROJECT_DECISIONS.md (if a decision was made).
   These are durable docs — writing them after a green gate run does not re-arm the gates
   (AI_REVIEW_PIPELINE.md — When to Run).
+- **Reconcile `## Completion obligations` before closing** — check the four objective sources
+  (migration/schema files changed; a new required env var or external config; an acceptance
+  criterion needing manual/real-boundary verification; a deferred review finding). Every entry gets
+  completion evidence or a pointer to a work item created *now*. The task may not go `done`
+  otherwise (AI_TASK_PROTOCOL.md — Completion Obligations).
 - Set Status to `done` (date + stage-log pointer, no commit hash); move this file to
   `docs/project/tasks/done/`; propose the commit for owner approval — for a code block, only
   after the cross-review thread reached consensus (Workflow step 7).

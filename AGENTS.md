@@ -46,7 +46,11 @@ Which one you are doing is decided by the owner's ping and the thread you find, 
 ## Your workflow (summary — full rules in AI_CROSS_REVIEW.md)
 
 1. Find the review thread in `docs/project/reviews/` with Status `awaiting-review` AND
-   `Reviewer: codex` — that is the one waiting on you. Threads marked `Reviewer: external` are
+   `Reviewer: codex` — that is the one waiting on you. **Match the status value with or without
+   backticks** (`` Status: `awaiting-review` `` and `Status: awaiting-review` are the same thing —
+   AI_CROSS_REVIEW.md, Header format), and ignore any trailing text after the value. A regex that
+   only matches one form will silently find nothing and send you to the owner for no reason.
+   Threads marked `Reviewer: external` are
    not yours (an external AI handles them via owner-carried copy-paste); threads marked
    `queued` are parked (never touch them — Claude Code promotes them when the active thread
    closes); threads in `awaiting-response` or `consensus` are Claude Code's turn, not yours.
@@ -67,8 +71,9 @@ there is no diff and no finished block. Full protocol: `docs/framework/AI_CROSS_
 Research Threads. Your side:
 
 1. Find the thread in `docs/project/research/` with Status `awaiting-research` and
-   `Researcher: codex`. Same discipline as reviews: exactly one match, one thread per owner ping,
-   never self-select or start the next one automatically.
+   `Researcher: codex` — matching the status **with or without backticks**, same as for reviews
+   (AI_CROSS_REVIEW.md, Header format). Same discipline otherwise: exactly one match, one thread
+   per owner ping, never self-select or start the next one automatically.
 2. Its `## Question` section defines what to investigate and the constraints the answer must
    respect. Append your investigation as the next `## Findings <N>` section; set Status to
    `awaiting-response`.

@@ -245,6 +245,91 @@ that hash, so it cannot contain it; git history already provides the commit prov
 A task that is cancelled or replaced gets status `superseded` (with a one-line reason and a
 pointer to its replacement, if any) and also moves to `docs/project/tasks/done/`.
 
+## Completion Obligations (a task may not close over an unfinished duty)
+
+A green `pnpm qg` certifies the **tree**, not the **deployed system**. A task can therefore pass
+every gate, pass an independent review, and still leave the running system broken — which is
+exactly what happened (Stage 6 Item 1, 2026-07-14: the code wrote three new DB category values
+while the live database still carried the old two-value constraint, so any request with an image
+would have failed on insert; a new required secret was introduced without which the production
+build does not start; and a live end-to-end verification that PROJECT_DECISIONS.md's own Database
+Stage Completion Criteria demand had not been run). **All three were written into the durable
+docs — and all three would still have been missed**, because a sentence in a journal obliges
+nobody. They surfaced only because the owner happened to ask.
+
+### What qualifies
+
+A **completion obligation** is an action for which all three hold:
+
+1. **Its necessity has a named basis** — a task acceptance criterion or workflow step, a PRD/FS or
+   PROJECT_DECISIONS requirement, an accepted review finding, or a contract the diff itself
+   introduces (a new required secret, a migration the committed code depends on).
+2. **Until it is performed, some named claim cannot honestly be made** — that the changed behavior
+   works in its target environment, that a dependent task can be verified, that the stage meets its
+   completion criteria, or that a launch/deploy gate is clear.
+3. **The session has no checkable evidence that it was performed.**
+
+All three must hold. This is deliberately narrower than "everything worth doing": optional
+improvements, polish, and speculative risks do not invalidate a named readiness claim and remain
+ordinary PROJECT_BACKLOG.md candidates. Applied to the case above, all three Item 1 actions qualify
+on objective grounds — no judgment about how the session "felt" is involved.
+
+### The rule
+
+**A task may not transition to `done` while a completion obligation exists only as prose.** Each
+one must carry either:
+
+- **completion evidence** — something checkable (a command that was run, a migration listed as
+  applied, a verification with an observable result); or
+- **a pointer to a canonical work item** — a task file (usually) or a flagged PROJECT_BACKLOG.md
+  entry (only when the work is genuinely not executable yet) — **created before the source task
+  closes**.
+
+A sentence in PROJECT_STAGE_LOG.md, a line in a STRAT brief, or a chat-plan item **is not a work
+item**. This generalizes the rule AI_CROSS_REVIEW.md already applies to deferred review findings
+(Deferred execution) — the same routing, now applied to every unfinished duty, not just to review
+findings.
+
+Record them in the task file's `## Completion obligations` section (STAGE_TASK_TEMPLATE.md), and
+write an explicit `None` when there are none — silence must not be ambiguous.
+
+Before closing, reconcile the section against four objective sources rather than trying to recall
+what was left undone (the failure mode here is a session that *did* record its leftovers and still
+left them inert — so the check must not depend on the session noticing anything):
+
+- migration / schema / policy files changed;
+- a required environment variable or external configuration was introduced;
+- a task or Source-of-Truth acceptance criterion requires manual or real-boundary verification;
+- an accepted review finding was postponed.
+
+The mandatory independent review checks this manifest against the diff and the acceptance criteria
+— at no extra review turn, since that review now always happens.
+
+### Blocking work is named on the follow-up task, not in a journal
+
+A follow-up task created this way may carry two optional fields:
+
+```text
+Blocks: <task path | stage verification | deploy | public launch>
+Source: <the completed task's completion-obligation entry>
+```
+
+`Status` already says whether that work is open; `Blocks` says only what it holds up — this is a
+dependency, not duplicated state. **A hand-maintained `OPEN_ACTIONS.md`, or a `⛔ BLOCKER` marker
+parsed out of Stage Log prose, are both rejected**: the first is the stale-dashboard design this
+project already refused (see `research/done/RESEARCH_2026-07-14_open-question-trigger-and-thread-visibility.md`),
+and the second makes a journal emphasis into a source of truth. `pnpm project:status`
+(`tasks/TOOLING_TASK_01_project_status_command.md`) surfaces `Blocks` and warns when a closed
+task's obligation has no resolvable target.
+
+### STRAT's duty is to check canonical work, not to re-read journals
+
+Before creating or promoting a task to `ready`, a STRAT session inspects **open canonical work that
+names that task or stage as blocked** and keeps the dependent task `draft`, or names the
+prerequisite in its Context, until the blocker closes. It does **not** re-read the previous item's
+prose looking for leftovers — that is another memory ritual, the very failure being fixed here. The
+dependent task points at the prerequisite's path; it never restates its live status.
+
 ## Independent Review Is Mandatory (when to open a thread)
 
 **Every IMPL block that changed source code gets an independent cross-review thread
@@ -274,6 +359,84 @@ or parallel IMPL sessions make the single review slot a bottleneck, replace the 
 a risk-class trigger (public/security surface, new architecture or abstraction,
 migrations/RLS/secrets, concurrency/idempotency — the same list that makes a task non-delegable)
 rather than dropping the gate.
+
+## A Large Task Is Reviewed in Checkpoints, Not All at Once
+
+One review at the end of a big task reaches the reviewer too late to matter. (Stage 6 Item 1,
+2026-07-14: one commit, 60 files, +3,496 / −938 — 28 of them production files. The independent
+review found two **blockers**, and both were *design* defects in the architectural core: an
+undeliverable size limit, and a broken idempotent-replay path. By then the client store, the UI and
+18 test files had already been built on top of them.)
+
+**Splitting the commits would not have fixed this** — the reviewer would still have received 28
+production files in one go, because the *review* was still one review, at the end. Commit
+granularity and review granularity are different decisions, and only the second one addresses late
+feedback. Note also what several commits actually cost here: **every commit needs its own owner
+approval** (CLAUDE.md — a blanket "commit" never carries over) and **every source block needs its
+own review to consensus**. Four seams therefore mean up to four approvals and four threads — "just
+commit more often" is not free, and is not the fix.
+
+### The rule (owner decision 2026-07-14)
+
+**A task over the size trigger below is built and reviewed as a small number of checkpointed
+blocks**: implement a bounded block → gates green → independent review to consensus → owner
+approves that commit → build the next block on a now-known contract. Prefer **two substantial
+blocks** over mechanically turning every possible seam into its own thread; each checkpoint costs
+the owner a ping and an approval, and that is the budget being spent.
+
+The first block should be the **risk nucleus** — the part later work depends on, drawn from the risk
+classes the protocol already names (public/security boundary, new architecture or abstraction,
+migration/RLS/secrets, concurrency/idempotency/recovery). Its Handoff must state plainly **what the
+reviewer can assert now and what remains unasserted until integration** — a half-built pipeline
+cannot be reviewed for end-to-end behavior, and pretending otherwise wastes the turn.
+
+### What makes a legitimate seam
+
+A green tree is necessary but not sufficient. A block is a legitimate seam only if all hold:
+
+1. **One contract** — a short, independently assertable purpose ("handle mint/read + adoption
+   invariants"), not "the next N files".
+2. **Complete evidence travels together** — production code, its tests, and any migration/config
+   implications are in the same block. "Code now, tests later" is never a seam.
+3. **Stable boundary** — later blocks consume a named interface; they do not have to repair a
+   knowingly temporary API or a red intermediate state.
+4. **Green and externally honest** — the gates pass, and the block is either deployable against the
+   current external world or explicitly held by a recorded completion obligation (see above).
+5. **Reviewable in isolation** — see the Handoff requirement above.
+
+A split by directory, by "code then tests", or at an arbitrary file count fails this test.
+
+### The size trigger
+
+Measured on this repository (2026-07-14): across the 20 most recent runtime-touching commits, Item 1
+was **28 execution-affecting files / 1,763 lines of churn**, while every other commit topped out at
+**14 files / 366 churn**. The trigger is set between them:
+
+> **16 execution-affecting files, or 500 lines of execution-affecting churn** (additions +
+> deletions). Count runtime source, migrations, and gate-affecting config. Exclude tests, docs,
+> generated files, and lockfiles from the *trigger* — they are still reviewed, they just do not
+> decide whether the task is oversized.
+
+- **At plan time** — if the expected surface crosses the trigger, or the plan already contains four
+  independently testable seams, the plan carries a **Review Granularity** section: the proposed
+  blocks, the risk nucleus, and whether the task stays one task or goes back to STRAT to be split.
+  This is inside the existing plan-approval turn — no new owner round-trip.
+- **Before the final review** — measure the actual surface. If it crossed the trigger and the work
+  was never split, the task must record why no legitimate seam existed. A session may not silently
+  declare its own oversized block exempt at the end.
+
+**This number is a trial rule, not a constant.** It is fitted to a 20-commit sample containing
+exactly one positive case; it must be recalibrated after a few firings or near-misses, and a META
+session that sees it misfiring should say so rather than defend it.
+
+### Who decides
+
+- **STRAT, at task-cutting time** — owns the task's boundary, dependency order, and whether an
+  obvious large-and-risky nucleus needs a checkpoint. If no legitimate green seam exists, STRAT
+  splits the task rather than ordering arbitrary commits.
+- **IMPL, at plan time** — owns the actual file-aware seams after inspecting the repo, and names
+  each block's contract. Collapsing a checkpoint the task file asked for is a **deviation** and must
+  be surfaced under the existing deviation rule, never done silently.
 
 ## Post-Review Fix Loop
 

@@ -70,11 +70,28 @@ nothing** — stdout is the whole product.
    - **a task carrying a literal `Baseline commit: <hash>`** — the convention forbids it (a file
      cannot name the commit that carries it; see AI_TASK_PROTOCOL.md). This exact defect was live
      in `STAGE_6_TASK_08` and is what motivated the command.
-5. **Git overlay only** — mark artifacts that are modified/untracked relative to HEAD, so a
+   - **a `done` task whose `## Completion obligations` entry has no resolvable disposition** —
+     neither completion evidence nor a `tracked in:` target that exists (AI_TASK_PROTOCOL.md —
+     Completion Obligations). Warn, do not error, for tasks created before the section existed:
+     enforce on files that contain it, and do not fail the whole repo retroactively.
+   - a `tracked in:` target that points at a **journal or brief** (PROJECT_STAGE_LOG.md, a STRAT
+     brief) rather than a task file or backlog entry — a sentence in a journal is not a work item.
+5. **Blocking work is surfaced, not buried.** Print every non-`done` task's `Blocks:` target
+   prominently (the command may render it as `⛔ BLOCKS <target>`), derived from the task's own
+   metadata. `Status` remains the source of truth for whether the work is open; `Blocks` only says
+   what it holds up. Do NOT introduce a separate open-actions file — that design is rejected
+   (AI_TASK_PROTOCOL.md — Completion Obligations).
+6. **Header parsing must tolerate the formats that actually exist.** Status values appear both
+   backticked (`` Status: `consensus` ``, the canonical form) and bare (`Status: consensus` — one
+   legacy thread), and may carry trailing free text (`` Status: `closed` · outcomes filed … ``).
+   Strip backticks, take the first token, ignore the rest — see AI_CROSS_REVIEW.md, Header format.
+   A parser that matches only one form finds nothing and reports a false "no threads". (This is
+   not hypothetical: a Codex research turn hit exactly this on 2026-07-14.)
+7. **Git overlay only** — mark artifacts that are modified/untracked relative to HEAD, so a
    held working-tree change is not mistaken for committed state. The filesystem is the source; git
    is an annotation on it. (Do not build the view from `git log`: this repo routinely holds
    uncommitted work across sessions.)
-6. **Honest gaps** — for categories that are not structured data today (blocked work and
+8. **Honest gaps** — for categories that are not structured data today (blocked work and
    deferred-accepted findings live in prose), print `not represented by structured data` rather
    than scraping prose and presenting the result as complete.
 

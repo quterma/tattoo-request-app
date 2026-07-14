@@ -154,6 +154,17 @@ block — its cross-review thread reached consensus.
 - Files in correct layers
 - Public API imports only (index.ts) where module exposes one
 
+### Completion obligations (before setting a task `done`)
+
+- Reconcile the task's `## Completion obligations` section against what the work actually
+  introduced: migration/schema files changed? a new required env var or external config? an
+  acceptance criterion needing manual/real-boundary verification? a deferred review finding?
+- Each entry needs **checkable completion evidence** or **a pointer to a work item created now**
+  (a task file, or a flagged backlog entry). A sentence in PROJECT_STAGE_LOG.md is NOT a work item.
+- A task may not go `done` while an obligation exists only as prose
+  (AI_TASK_PROTOCOL.md — Completion Obligations). A green `pnpm qg` certifies the tree, not the
+  deployed system.
+
 ### Docs
 
 - Structure changed → update PROJECT_STRUCTURE.md

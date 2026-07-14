@@ -125,6 +125,7 @@ tattoo-request-app/
 │       │   ├── .gitkeep
 │       │   └── done/
 │       │       ├── .gitkeep
+│       │       ├── RESEARCH_2026-07-14_deferred-actions-and-review-granularity.md
 │       │       └── RESEARCH_2026-07-14_open-question-trigger-and-thread-visibility.md
 │       ├── reviews/
 │       │   ├── .gitkeep

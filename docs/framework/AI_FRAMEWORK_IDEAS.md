@@ -586,7 +586,36 @@ AI_WORKFLOW_MASTER.md. Format: date — observation — status (`open` / `resolv
   the middle of a long prose entry? (4) more generally: the project has repeatedly hit the pattern
   "the durable doc says the right thing, but nothing *acts* on it" — is the fix per-case, or does the
   framework need one explicit rule that **anything a session did not do, but which must be done,
-  becomes a tracked work item, not a sentence in a journal**? Raised by the owner directly. — open
+  becomes a tracked work item, not a sentence in a journal**? Raised by the owner directly. —
+  resolved: AI_TASK_PROTOCOL.md — new **Completion Obligations** section; STAGE_TASK_TEMPLATE.md
+  (`## Completion obligations` + a Reporting reconciliation step); TOOLING_TASK_01 (Scope 4/5).
+  Researched in `research/done/RESEARCH_2026-07-14_deferred-actions-and-review-granularity.md`;
+  owner decision 2026-07-14. **(4) — yes, one general rule, and it needed the objective filter the
+  question asked for:** a *completion obligation* qualifies only if all three hold — (a) its
+  necessity has a **named basis** (an acceptance criterion, a PRD/FS/decision requirement, an
+  accepted review finding, or a contract the diff itself introduces: a new required secret, a
+  migration the code depends on); (b) until it is done, **some named claim cannot honestly be
+  made** (the behavior works in its target environment; the stage meets its completion criteria; a
+  launch gate is clear); (c) there is **no checkable evidence** it was done. That excludes
+  "everything worth doing" — the reason a broader rule would have been ignored — and admits all
+  three Item 1 actions on objective grounds. **(1) — yes:** the task file carries
+  `## Completion obligations`, and **a task may not go `done` while an obligation exists only as
+  prose** — each needs completion evidence or a pointer to a canonical work item created *before*
+  the task closes. A Stage Log sentence is not a work item. This generalizes AI_CROSS_REVIEW.md's
+  existing Deferred-execution routing from review findings to every unfinished duty. Crucially the
+  close-out is a **fixed reconciliation against four objective sources** (migration/schema files
+  changed; a new required env var; an acceptance criterion needing real-boundary verification; a
+  deferred review finding) — not "remember what you left undone", because the failure mode here was
+  a session that *did* record all three and still left them inert. **(2) — yes, but the question
+  aimed it at the wrong source.** "Re-read the previous item's deferred-action prose" is another
+  memory ritual; the duty adopted instead is: before creating or promoting a task to `ready`,
+  inspect **open canonical work that names it as blocked**, and keep it `draft` or name the
+  prerequisite in its Context. **(3) — no.** Both `OPEN_ACTIONS.md` and a `⛔ BLOCKER` marker parsed
+  out of Stage Log prose are rejected: the first is the stale-dashboard design already refused in
+  the prior research thread, the second makes a journal emphasis into a source of truth. Blocking is
+  expressed as a `Blocks:` field on the follow-up task (where `Status` already carries liveness),
+  and `pnpm project:status` surfaces it and warns when a closed task's obligation has no resolvable
+  target.
 - 2026-07-14 — **One IMPL session produced one commit of 60 files / +3,496 −938, and neither the
   task protocol nor the review protocol had anything to say about it. Nobody can review that
   volume well — the owner said so plainly, and he is right.** Concrete case (Stage 6 Item 1,
@@ -628,4 +657,52 @@ AI_WORKFLOW_MASTER.md. Format: date — observation — status (`open` / `resolv
   defects that a mid-flight review of the core would have caught before the UI, the store, and 18
   test files were written against them. (4) Who decides granularity — STRAT at task-cutting time
   (it knows the shape), or the IMPL session at plan time (it knows the seams)? Raised by the owner.
-  — open
+  — resolved: AI_TASK_PROTOCOL.md — new **A Large Task Is Reviewed in Checkpoints, Not All at
+  Once** section; STAGE_TASK_TEMPLATE.md (`## Review Granularity`). Same research thread; owner
+  decision 2026-07-14: **checkpointed review**. **The finding that changed the answer:** the
+  question (written by the META session) asserted that committing at seams "costs the session almost
+  nothing" — **false, and Codex caught it**. CLAUDE.md requires a fresh owner approval for *every*
+  commit (a blanket "commit" never carries over) and the new gate requires consensus per
+  source-changing block, so four seams can mean **four owner approvals and four review threads**.
+  The cheap version of Defect A's fix does not exist. That reframes everything: **commit
+  granularity and review granularity are separate decisions, and only the second one fixes the real
+  defect** — even four commits would have handed the reviewer 28 production files at once, at the
+  end, and both blockers it found were *design* defects in the core, already built upon by then.
+  Adopted: over the size trigger, a task is built and reviewed as **a small number of checkpointed
+  blocks (prefer two, not four)** — implement a bounded block → gates → independent review to
+  consensus → owner approves the commit → build the next on a known contract; the first block is the
+  **risk nucleus**, drawn from the risk classes the protocol already names, and its Handoff must say
+  what the reviewer *cannot* yet assert. **Seam definition** (adopted verbatim): one contract;
+  production + tests + migration/config travel together ("code now, tests later" is never a seam); a
+  stable boundary later blocks consume; green *and externally honest*; reviewable in isolation.
+  **Size trigger:** 16 execution-affecting files or 500 lines of churn (runtime source + migrations
+  + gate-affecting config; tests/docs/generated files are still reviewed but do not count toward the
+  trigger) — calibrated on this repo (Item 1: 28 files / 1,763 churn; the other 19 recent
+  runtime-touching commits topped out at 14 / 366). **Recorded as a trial rule, not a constant** —
+  it is fitted to a sample with exactly one positive case and must be recalibrated after a few
+  firings; a future META session seeing it misfire should say so, not defend it. Fires at *plan
+  time* (inside the existing approval turn — no new round-trip) and is re-checked against the actual
+  diff before the final review, so a session cannot silently exempt its own oversized block.
+  **(4) Both altitudes:** STRAT owns the task boundary and whether a large+risky nucleus needs a
+  checkpoint; IMPL owns the real file-aware seams at plan time, and collapsing a checkpoint the task
+  asked for is a **deviation** under the existing rule, never silent.
+- 2026-07-14 — **The thread header had no defined format, and the first machine that read it found
+  nothing.** A Codex research turn opened by searching for `^Status:\s*awaiting-research\s*$`,
+  matched zero threads (the header reads `` Status: `awaiting-research` `` — backticked), and by
+  the protocol's own "if you find zero or several, stop and ask the owner" rule should have halted
+  before doing any work. It recovered only by falling back to reading the headers by eye. Checking
+  the existing threads showed the real defect is worse than one bad header: **the format was never
+  specified anywhere**, so it had already drifted — eight review threads write `` Status:
+  `consensus` `` and one writes `Status: consensus` bare. It worked until now purely because the
+  reader was a human-like agent rather than a parser; `pnpm project:status`
+  (`tasks/TOOLING_TASK_01_project_status_command.md`), commissioned the same day, would have hit it
+  immediately. — resolved: AI_CROSS_REVIEW.md — new **Header format** section (the fields are a
+  machine-read contract: one `Field: value` line each; the status value is written **backticked**
+  — the dominant existing form; **readers must accept it with or without backticks**, because the
+  legacy threads are already inconsistent; trailing free text after the value is legal and must be
+  ignored; never invent a status value — a missing state is a protocol gap to raise, not a word to
+  improvise). Mirrored in AGENTS.md (both the reviewer and the researcher lookup steps) and in
+  TOOLING_TASK_01's Scope as an explicit parser requirement. The one divergent legacy header
+  (`REVIEW_2026-07-13_stage6-ux-blueprint-batch2.md`) was normalized. Note the shape of the fix:
+  the tolerant-reader rule is a **reader** obligation, not licence to write headers loosely — the
+  canonical form remains exactly one.
