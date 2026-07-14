@@ -132,6 +132,7 @@ tattoo-request-app/
 │       └── tasks/
 │           ├── STAGE_6_STRAT_BRIEF.md
 │           ├── STAGE_6_TASK_01_upload_flow_architecture.md
+│           ├── STAGE_6_TASK_08_preparation_aftercare_split.md
 │           └── done/
 │               └── STAGE_6_TASK_02_site_wide_shell.md
 ├── scripts/

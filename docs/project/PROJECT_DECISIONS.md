@@ -1674,10 +1674,10 @@ FS compliance, not a new blueprint invention.
   what it covers) → Before appointment → Tattoo day.
 - **Navigation presence:** the nav bar is rendered on this page (FS §2 — primary navigation is
   "identical and persistent on all public pages") while the page itself is absent from the nav's
-  item set (PRD D9). Reaching the page is by direct URL only, sent by the artist at the right
-  journey moment (PRD §5 operational assumption; no in-product discovery is an explicitly
-  accepted, recorded risk — changing that requires a PRD escalation, and the owner reconfirmed
-  the model in-session after the trade-off was restated).
+  item set (PRD D9). Reaching the page is by the artist-sent direct URL (primary path) plus a
+  global-footer link (in-product fallback discovery). **(Superseded 2026-07-14 — this entry
+  originally read "by direct URL only … no in-product discovery is an accepted risk"; see
+  "Preparation/Aftercare in-product discovery" above, which reversed that and amended PRD §5/FS §2.)**
 - **No primary CTA** (FS §2 table: none for content pages Preparation/Aftercare).
 - **The shipped page's "back to policies" links (top and bottom) are removed:** the policies page
   is superseded in Stage 6 (nav item becomes Process), and FS §2 allows secondary links only when
@@ -1702,7 +1702,8 @@ Mirror of Preparation (same split, same rules).
   touch-ups (longer-term expectations).
 - Nav bar present / absent from nav item set; no primary CTA; "back to policies" links removed;
   no cross-link to Preparation — same rationale as the Preparation section above, applied
-  symmetrically.
+  symmetrically. Discovery: artist-sent direct URL plus a global-footer link, same as Preparation
+  (superseded 2026-07-14 — see "Preparation/Aftercare in-product discovery" above).
 - **Content boundary for "Healing & touch-ups" recorded explicitly:** this section covers healing
   expectations and when a touch-up is appropriate — nothing else. Any touch-up booking terms or
   pricing belong exclusively to Process (Booking Policy): FS §3.7 forbids pricing/booking content
@@ -1712,6 +1713,50 @@ Mirror of Preparation (same split, same rules).
 - **Tone requirement carried from FS §3.7:** the copy is "written as the artist's own
   instructions" — owner-authored content; per FS §3, missing content blocks implementation, it is
   not improvised by engineering.
+
+## Preparation/Aftercare in-product discovery — decided 2026-07-14 (supersedes the batch-2 "direct URL only" stance)
+
+Owner decision, resolving Item 8's open question Q1 (see STAGE_6_IMPLEMENTATION_PLAN.md). It
+**changes the Source of Truth** — PRD §5 and FS §2 were amended in the same change (PRD §9 change
+control: the PRD/FS are edited first, then implementation follows). This is recorded as a
+first-class product decision, not a blueprint tweak, precisely because it moved PRD/FS text.
+
+- **Decision (Q1):** the global public footer (`src/shared/ui/public-footer.tsx`, rendered on
+  every public page by `(public)/layout.tsx`) gains **two links: Preparation and Aftercare**. The
+  artist-sent direct URL stays the *primary* path (timed to the client's journey); the footer
+  links are **in-product fallback discovery** for a client who has lost the artist's message.
+- **Why this reverses the batch-2 stance.** The Preparation/Aftercare batch-2 entries recorded
+  "reaching the page is by direct URL only … no in-product discovery is an explicitly accepted,
+  recorded risk." The owner re-weighed that risk on 2026-07-14 and decided the lost-link failure
+  mode is worth two unobtrusive footer links. The earlier stance is not deleted — it is superseded
+  here and annotated in place below.
+- **Why the footer, not the nav or a page CTA.** PRD D9 fixes primary navigation at exactly
+  Home/Process/Request/Location — the footer is not primary navigation, so this does not add a
+  fifth/sixth nav item and does not surface these pages to a first-time Instagram visitor deciding
+  fit (the audience the pages are explicitly *not* for). It also does not touch any page's single
+  primary CTA (FS §2). Alternatives considered and not taken: links from Process (its task is
+  fit-decision, not session prep — weaker task-relevance under FS §2) and a link from Success (FS
+  §3.4 fixes Success's content "in order" with a single Back-to-Home CTA — adding a link there is a
+  larger spec change for no extra reach the footer doesn't already give).
+- **`process.aftercareLink` fate (was deferred here from Item 2):** the Process page's single
+  secondary link to `/aftercare` is **removed**; discovery is now the footer's job site-wide, and
+  a fit-deciding Process reader's task is not served by an aftercare link (FS §2 secondary-link
+  rule). The `process.aftercareLink` i18n key is removed with it.
+- **New footer i18n keys:** `footer.preparation`, `footer.aftercare` (labels owner-adjustable
+  without changing meaning, per FS Appendix A convention). Routes: `/preparation`, `/aftercare`.
+
+**Q2 (boundary bullet) — decided 2026-07-14:** the last bullet of the shipped `tattooDayItems`
+("After the tattoo, we'll take photos, then I'll apply aftercare protection and explain next
+steps") **stays in Preparation's Tattoo-day section, copy unchanged.** It describes what happens in
+the studio on the day (part of "what to expect on the day", FS §3.6 appointment-preparation scope),
+not at-home aftercare — so it does not belong in Aftercare and needs no rewrite.
+
+**Q3 (intro copy) — decided 2026-07-14:** the short intro each page requires (blueprint;
+FS §3.6/§3.7) is owner-supplied as:
+- `preparation.intro`: "For clients with an upcoming appointment — here's how to prepare and what
+  to expect on the day."
+- `aftercare.intro`: "Your tattoo is done — here's how to care for it while it heals."
+Wording is owner-adjustable without changing meaning (FS Appendix A convention); meaning is fixed.
 
 ---
 

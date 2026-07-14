@@ -51,7 +51,7 @@ Instagram → Home / Process (confidence) → Request → Success → artist rev
 
 **Exits.** A visitor concluding the artist is not the right fit is a valid outcome; Good Fit content provides a respectful redirect (D7). A declined request is likewise valid; the decline happens off-product.
 
-**Operational assumption — Preparation/Aftercare distribution.** These pages are reached via stable, shareable URLs manually sent by the artist at the right journey moment. The product provides stable URLs and content; distribution is the artist's responsibility. No in-product fallback discovery (no footer links) in Stage 6 — accepted, recorded risk.
+**Operational assumption — Preparation/Aftercare distribution.** These pages are reached primarily via stable, shareable URLs manually sent by the artist at the right journey moment (the artist-sent link remains the primary path — it is timed to the client's journey). The product provides stable URLs and content; timing the artist-sent link is the artist's responsibility. **In-product fallback discovery is provided by two links in the global footer (Preparation, Aftercare)** so a client who has lost the artist's message can still reach the page; these footer links are not primary navigation (PRD D9 keeps navigation to Home/Process/Request/Location) and do not surface the pages to a first-time Instagram visitor deciding fit. (Owner decision 2026-07-14, superseding the Stage 6 blueprint's original "no footer links / accepted risk" stance — see PROJECT_DECISIONS.md, Preparation/Aftercare in-product discovery.)
 
 ---
 

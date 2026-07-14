@@ -52,7 +52,7 @@ file may contradict these without first escalating a PRD/FS/blueprint change.
 | 5 | Home rebuild (block order; About folded into Hero/Good Fit, not deleted; footer/Instagram decisions already covered by Item 2) | Item 2 | not started | PROJECT_DECISIONS.md — Home page |
 | 6 | Process page **content rewrite** (the route itself is delivered by Item 2 with the old `policies` copy carried over; Item 6 replaces that copy with the FS §3.2 canonical content: Overview, Good Fit, Design Process, Pricing, Booking Policy, FAQ, in blueprint block order) | Item 2 | not started, **content-blocked** — needs owner-authored copy (pricing, FAQ, Good Fit text) | PROJECT_DECISIONS.md — Process page |
 | 7 | Location polish (real map embed + real studio photos replacing placeholders) — the missing CTA is pulled forward into Item 2 | Item 2 | not started, **asset-blocked** — needs real studio photos | PROJECT_DECISIONS.md — Location page |
-| 8 | Preparation / Aftercare split (two routes from the current combined `aftercare` page; drop policies links; no cross-link) | Item 2 | not started | PROJECT_DECISIONS.md — Preparation page / Aftercare page |
+| 8 | Preparation / Aftercare split (two routes from the current combined `aftercare` page; drop policies links; **footer discovery links added**; no cross-link) | Item 2 | **task ready** (`STAGE_6_TASK_08_preparation_aftercare_split.md`, `Executor: codex`) — Q1/Q2/Q3 resolved 2026-07-14 | PROJECT_DECISIONS.md — Preparation/Aftercare in-product discovery |
 | 9 | Reference-code format (6-char uppercase alphanumeric, excludes O/0/I/1) | Item 3 (generated at submit) | not started | FS §4.6; PROJECT_DECISIONS.md — Stage 6 note under Reference Code Decision |
 | 10 | Abuse mitigation on the submit endpoint (honeypot and/or rate limiting, invisible to legitimate visitors, no CAPTCHA) | Item 1 (shares the endpoint) | not started | FS §4.5 |
 | 11 | Public error/404 UX polish (localized 404, public error boundary) | — | not started, pre-existing backlog item | PROJECT_BACKLOG.md; PROJECT_STAGE_LOG.md 2026-07-09 Fix Pass 2 entry |
@@ -79,17 +79,42 @@ the asset-blocked Item 7.
 external inbound links or index entries to preserve; a permanent redirect for a URL nobody has is
 debt. Revisit only if the owner has already shared `/policies` links publicly.
 
+**Item 8 open questions — RESOLVED (owner, 2026-07-14).** Item 8 was briefly `blocked` on three
+questions a STRAT session surfaced when the previous brief's "fully unblocked" claim did not
+survive repo verification. All three are now decided (full record: PROJECT_DECISIONS.md —
+"Preparation/Aftercare in-product discovery, 2026-07-14"), and the task file
+`STAGE_6_TASK_08_preparation_aftercare_split.md` is `ready`.
+
+- **Q1 — how are Preparation/Aftercare reached? → two global-footer links** (Preparation,
+  Aftercare) as fallback discovery; artist-sent direct URL stays the primary path. This **reversed
+  the batch-2 "direct URL only / accepted risk" stance and amended PRD §5 and FS §2** (PRD §9
+  change control — the spec was edited first, then the task cut against it). It also resolved the
+  deferred-from-Item-2 fate of `process.aftercareLink`: **removed** (discovery is the footer's job
+  now; a fit-deciding Process reader's task is not served by an aftercare link, FS §2).
+- **Q2 — the boundary bullet** ("After the tattoo…") **stays in Preparation, copy unchanged** — it
+  describes the in-studio day, within FS §3.6's appointment-preparation scope.
+- **Q3 — intro copy** owner-supplied: `preparation.intro` / `aftercare.intro` (exact strings in
+  PROJECT_DECISIONS.md and the task file).
+
+Everything else about Item 8 was already verified ready: `/aftercare` is a single self-contained
+page with no outbound links and no test coverage, absent from the nav, splitting cleanly along
+existing i18n keys (`beforeAppointment*` + `tattooDay*` → Preparation; `aftercareInstructions*` +
+`healingTouchUps*` → Aftercare). The task is delegated to Codex (`Executor: codex`).
+
 ---
 
 ## Sequencing notes (not a rigid schedule)
 
 - **Item 1 blocks Item 3 blocks Item 4.** This is the critical path — the upload redesign is
   also the single most architecturally risky piece (public unauthenticated upload surface).
-- **Item 2 is small and unblocks 5/6/7/8** (all four content pages depend on the nav/footer
-  shell existing first, even though their own content work can be drafted in parallel).
-- **Items 6 and 7 are content/asset-blocked, not code-blocked** — the owner should be
-  producing/collecting Process copy (pricing, FAQ, Good Fit text) and Location studio photos in
-  parallel with Items 1/3/4, so they aren't the long pole when their turn comes.
+- **Item 2 (done) unblocked 5/6/7/8 in code** — all four content pages needed the nav/footer shell
+  to exist first. Code-unblocked is not the same as ready to cut: 6 and 7 are content/asset-blocked
+  and 8 is blocked on the three owner questions above.
+- **Items 6, 7 and 8 are blocked on the owner, not on code** — Process copy (pricing, FAQ, Good
+  Fit text), Location studio photos, and Item 8's Q1–Q3. The owner should be producing these in
+  parallel with Items 1/3/4, so they aren't the long pole when their turn comes. **Item 8's Q1 is
+  the cheapest of them to clear and the one that unlocks a whole parallel work stream** — it is a
+  decision, not an asset to produce.
 - **Item 9 and 10 are small** and can be folded into Item 3's task file instead of standing
   alone, at the next STRAT session's discretion, since they touch the same submit endpoint.
 - Items 11/12 are low-risk, can slot in anywhere there's idle capacity; they don't block or get

@@ -138,7 +138,22 @@ AI_WORKFLOW_MASTER.md. Format: date — observation — status (`open` / `resolv
   which case the check only saved owner attention when Codex agreed. Related and worth deciding
   together: the same pattern (Codex as a cheap pre-check on a plan, not a post-check on a diff)
   could apply to any plan, not just deviating ones — but that is a bigger change and was not
-  proposed.
+  proposed. — resolved: AI_TASK_PROTOCOL.md (Session Duties — plan-deviation section: source
+  classification) + STAGE_TASK_TEMPLATE.md (Workflow step 4). Owner decision 2026-07-14: the
+  mandatory Codex pre-check is **rejected**; instead, every deviation line must name where A is
+  specified. Task-file-only deviations stay approvable in-plan; a deviation from a PRD/FS-named A
+  is not a plan-approval matter at all — it is a product behavior change and routes through the
+  existing STOP/escalate-for-a-spec-update rule, which an unread (or even attentive) plan approval
+  cannot override. Two facts drove the rejection: (1) Codex cannot read a chat plan — a mandatory
+  pre-check would require persisting plans into the repo plus write-surface/protocol changes; (2)
+  the round-trip (ping → verdict → approve) costs the owner more clock than reading the one-line
+  section it would replace, and most deviations are legitimate. The triggering CTA case was a
+  deviation from FS-named copy, i.e. already forbidden without an FS update — what was missing was
+  anything forcing the session to look at the FS, which the mandatory source citation now does.
+  Answers to (a)/(b)/(c): all three dissolve — (a) no trigger needed, the objective filter is
+  where A is specified; (b) no machinery needed; (c) a PRD/FS-contradicting deviation escalates to
+  the owner via the spec-update route, never to a Codex verdict. An ad-hoc Codex pre-check on any
+  plan remains available on owner request, just not institutionalized.
 - 2026-07-13 — **Nobody owns the post-review fix loop, so it defaulted to the wrong session.**
   The protocol defines who *implements* (IMPL, from a task file) and who *reviews*
   (AI_REVIEW_PIPELINE.md in-session; AI_CROSS_REVIEW.md for Codex/external), but it is silent on

@@ -130,6 +130,20 @@ found nothing wrong — an independent Codex review caught it.)
 The owner approves plans quickly; a process that only works when every plan is read closely
 does not work. The section must be scannable in one glance.
 
+**Each deviation line must also name where A is specified** — the task file only, or a
+Source-of-Truth document (PRD/FS, with the section). The classification decides the route:
+
+- A comes from the task file only → the deviation may be approved in-plan (the normal case);
+- A is named in the PRD/FS → the deviation may **not** be approved in-plan at all — it is a
+  product behavior change, and the existing rule applies: STOP and escalate for a PRD/FS update
+  first. Plan approval, even an attentive one, is not a substitute for a spec change.
+
+Citing the source forces the Source-of-Truth lookup that the triggering case skipped, at zero
+owner cost. A mandatory Codex pre-check on deviating plans was considered and rejected
+(owner decision 2026-07-14): Codex cannot read a chat plan without new persistence machinery,
+and a blocking round-trip per deviating plan spends more owner time than reading a one-line
+section; the owner may still request an ad-hoc Codex check on any plan.
+
 ### Never write unverifiable claims about a conversation into a durable doc
 
 Durable docs (PROJECT_STAGE_LOG.md, PROJECT_DECISIONS.md, task files) must not assert things

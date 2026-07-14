@@ -83,7 +83,9 @@ contain the hash of the commit that first records it; git history is the commit 
    (fail-fast per CLAUDE.md). Never modify code immediately.
 4. Present a concise implementation plan and wait for explicit approval. The plan MUST contain a
    distinct **"Deviations from the task file"** section — one line per deviation ("task file
-   says A, I propose B, because C"), or an explicit "no deviations". Never substitute silently:
+   says A, I propose B, because C"), or an explicit "no deviations". Each line also names where
+   A is specified: task file only → approvable in-plan; named in the PRD/FS → NOT approvable
+   in-plan — STOP and request the spec update instead (step 8). Never substitute silently:
    the Review Pipeline compares the *diff* to the task file, so a deviation baked into the plan
    is invisible to every later check (AI_TASK_PROTOCOL.md — Session Duties).
 5. Implement only after approval, within Scope only.

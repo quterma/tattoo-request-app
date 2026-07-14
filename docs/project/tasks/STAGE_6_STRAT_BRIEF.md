@@ -14,74 +14,61 @@ AI agents and the developer, at the start of the next STRAT: Stage 6 session.
 
 ## Session summary
 
-Cut the task file for **Item 2 — site-wide shell**, then (against the protocol as it stood at the
-time) also carried Item 2's whole post-review fix loop: Codex handoff, review processing, code
-fixes, `pnpm qg`, commit. **Item 2 is done and committed (`e833398`).** That boundary violation is
-now fixed at the framework level — see "Protocol changes you inherit" below; do not repeat it.
+Resolved Item 8's three open questions with the owner, **amended PRD §5 and FS §2** (footer
+discovery for Preparation/Aftercare — PRD §9 change control), recorded the decisions, and **cut
+Item 8's task file** (`STAGE_6_TASK_08_preparation_aftercare_split.md`, `ready`, `Executor: codex`).
+Item 1 was confirmed `ready`; the owner runs it as its own IMPL session in parallel. Owner
+instructed this session to commit the whole working tree (this session's docs + a parallel META
+session's framework edits) as one commit, then work continues in separate threads.
 
 ## State of the board — verify before trusting this
 
-**Item 1 has NOT started.** Its task file (`STAGE_6_TASK_01_upload_flow_architecture.md`) is
-`ready` and sitting in `docs/project/tasks/`. Earlier versions of this brief and of
-PROJECT_STAGE_LOG.md claimed its IMPL session "runs in parallel" — that was never true; a STRAT
-session took an owner's remark about a prepared kickoff to mean the session was live, and
-propagated the assumption into the durable docs. Corrected 2026-07-13. **Confirm state from
-`docs/project/tasks/` and `git log`, not from prose.**
-
 | Item | State |
 | --- | --- |
-| 1 — Upload-flow architecture | `ready`, **not started** — the critical path (blocks 3 and 4) |
+| 1 — Upload-flow architecture | `ready`, **running as its own IMPL session** (Opus, Plan mode; critical path, blocks 3 and 4; owns its review loop to commit) |
 | 2 — Site-wide shell | **done**, `e833398` |
 | 3 — Request form rebuild | blocked on Item 1 |
 | 4 — Success page | blocked on Item 3 |
-| 5 — Home rebuild | unblocked (Item 2 landed), no task file |
-| 6 — Process content | unblocked in code, **content-blocked** on owner copy |
-| 7 — Location polish | unblocked in code, **asset-blocked** on studio photos |
-| 8 — Preparation/Aftercare split | unblocked (Item 2 landed), no task file |
+| 5 — Home rebuild | code-unblocked, no task file. Good Fit + Price-teaser blocks don't exist yet — that copy is the same owner-authored material blocking Item 6. |
+| 6 — Process content | code-unblocked, **content-blocked** on owner copy (pricing, FAQ, Good Fit) |
+| 7 — Location polish | code-unblocked, **asset-blocked** on studio photos |
+| 8 — Preparation/Aftercare split | **task ready** (`STAGE_6_TASK_08_preparation_aftercare_split.md`, `Executor: codex`) |
 | 9–13 | see `STAGE_6_IMPLEMENTATION_PLAN.md` |
 
-## Decided (this session)
+## Decided (this session — 2026-07-14)
 
-- **Item 2/6 boundary:** Item 2 renamed `policies` → `process` and carried the shipped copy over
-  unchanged; Item 6 replaces that copy with FS §3.2 content. No redirect from the old URL (site
-  not publicly launched). Rationale: `STAGE_6_IMPLEMENTATION_PLAN.md` — "Item 2/6 boundary".
-- **CTA copy follows FS §2 ("Start Your Request").** The IMPL session had shipped "Request a
-  Tattoo" and logged a non-existent approval for it; the Codex review caught both. The
-  `CtaRequestButton` now owns its label via a single `cta.requestButton` key — the per-page
-  `label` prop was the mechanism that let three call sites diverge. Thread:
-  `reviews/done/REVIEW_2026-07-13_stage6-item2-shell.md`.
+Pointers only (full text in the named docs):
 
-## Protocol changes you inherit (committed `df70cae` — read before running any IMPL)
+- **Preparation/Aftercare in-product discovery** — PROJECT_DECISIONS.md, new section
+  "Preparation/Aftercare in-product discovery (2026-07-14)". Two global-footer links; artist-sent
+  URL stays primary; `process.aftercareLink` removed; Q2 boundary bullet stays in Preparation
+  unchanged; Q3 intro copy fixed. **This amended PRD §5 and FS §2** — those files were edited, not
+  just annotated.
+- Item 8 status → `task ready`; STAGE_6_IMPLEMENTATION_PLAN.md "Item 8 open questions" rewritten
+  as RESOLVED.
 
-1. **Plan-deviation barrier** (AI_TASK_PROTOCOL.md — IMPL Session Duties): every IMPL plan must
-   carry a distinct "Deviations from the task file" section, or state "no deviations". A deviation
-   baked into the plan is invisible downstream — the Review Agent compares the *diff* to the task
-   file, so it faithfully validates the wrong thing.
-2. **Durable docs may not assert unverifiable claims about a conversation** ("flagged and approved
-   in-plan"). A future session has no transcript.
-3. **Post-Review Fix Loop** (AI_TASK_PROTOCOL.md): **the IMPL session that built a block owns the
-   whole loop** — Codex handoff, `## Response`, fixes, gates, commit, consensus — and stays open
-   until its review thread reaches consensus, rather than ending at "READY FOR DEVELOPER REVIEW".
-   **STRAT does not participate.** No final STRAT sign-off exists, deliberately.
+## Open
+
+None on Item 8. Standing owner-side blockers remain (Items 5/6/7 — see below).
+
+## Task files
+
+- `STAGE_6_TASK_01_upload_flow_architecture.md` — `ready`, running as its own IMPL session.
+- `STAGE_6_TASK_08_preparation_aftercare_split.md` — `ready`, `Executor: codex`, not yet started.
+- No others. Nothing in `draft`.
 
 ## Next topic
 
-1. **Run Item 1.** It is the critical path and everything downstream waits on it. Task file is
-   `ready`; nothing needs cutting first.
-   - Session: `IMPL: Stage 6 — upload flow architecture`
-   - Model: Opus · Plan mode (mandatory — this is architecture design on a public,
-     unauthenticated write surface)
-   - Prompt: `Execute docs/project/tasks/STAGE_6_TASK_01_upload_flow_architecture.md`
-   - That session owns its own review loop through to consensus and commit. This STRAT session
-     does not follow it.
-2. **While Item 1 runs**, the cuttable work is **Item 8** (Preparation/Aftercare split — fully
-   unblocked, copy already exists in `en.json`) and **Item 5** (Home rebuild — unblocked, but its
-   Good Fit / About-fold copy is the same owner-authored material that blocks Item 6). Cutting
-   either is optional; waiting for Item 1 and then cutting **Item 3** (with Items 9 and 10 folded
-   in — same submit endpoint, the plan leaves this to STRAT's discretion) is the cheaper path if
-   token budget is the binding constraint.
-3. **Owner's own critical path, unchanged:** Items 6 and 7 are blocked on *you*, not on code —
-   Process copy (pricing, FAQ, Good Fit) and Location studio photos. They are the likeliest long
-   pole at the end of the stage.
-4. Re-verify every assumption in this brief against the repo before acting on it. This session
-   demonstrated exactly how a plausible-sounding brief can carry a fabrication forward.
+1. **After Item 1 lands, cut Item 3** — with Items 9 (reference-code format) and 10 (abuse
+   mitigation) folded in unless there's a reason not to (owner deferred that call to the cutting
+   session). Item 3's task file cannot be written honestly before Item 1's architecture decision
+   exists — the form consumes the upload plumbing Item 1 designs.
+2. **Owner-side long pole, unchanged:** Items 6 (Process copy: pricing/FAQ/Good Fit) and 7
+   (Location studio photos) are blocked on the owner, not on code — and Item 6's copy is the same
+   material that unblocks Item 5's Good Fit / Price teaser. This is now the stage's dominant long
+   pole; producing it is the highest-leverage owner action.
+3. **Cross-session hazard, live:** the git index and PROJECT_* docs are shared. This session had
+   its `PROJECT_STAGE_LOG.md` edit swept into a parallel META commit (`da6861f`) — content intact,
+   wrong commit. Do not run two sessions writing PROJECT_* docs at once; sequence their doc-writing
+   (Cross-Session Rules).
+4. Re-verify every assumption in this brief against the repo before acting on it.

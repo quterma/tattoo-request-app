@@ -37,26 +37,24 @@ require updating them first. See PROJECT_DECISIONS.md — Stage 6 Product Docume
 
 Current focus:
 
-- **Stage 6 Item 8 — blocked on the owner, not cuttable — STRAT 2026-07-13.** A STRAT session set
-  out to cut Item 8's task file (Preparation/Aftercare split) on the strength of the then-current
-  `STAGE_6_STRAT_BRIEF.md`, which called it "fully unblocked — copy already exists in `en.json`".
-  **That claim was wrong**, and repo verification (not prose) exposed it — the same class of error
-  the previous brief had itself warned about. Three questions surfaced that only the owner can
-  answer, and the owner deferred all three; no task file was cut and no code was written.
-  Recorded in full in `STAGE_6_IMPLEMENTATION_PLAN.md` — "Item 8 open questions":
-  **(Q1)** how Preparation/Aftercare are reached — the owner's position is that they should be
-  reachable from inside the app, which **contradicts PRD §5 ("no in-product fallback discovery")
-  and FS §2 ("reachable only by direct URL")** and is therefore a **PRD/FS escalation under PRD §9,
-  not a blueprint decision** a STRAT or IMPL session may make on its own; Q1 also owns the fate of
-  the Process page's `process.aftercareLink`, which Item 2 explicitly deferred to Item 8.
-  **(Q2)** the boundary bullet in `aftercare.tattooDayItems` that straddles the split.
-  **(Q3)** the per-page intro copy the blueprint requires, which does not exist in `en.json` (FS §3
-  — missing content blocks implementation). Everything *else* about Item 8 is verified ready: the
-  route is a single self-contained page, absent from the nav, with no outbound links and no test
-  coverage, splitting cleanly along existing i18n keys. Item 8's status in the implementation plan
-  is now `blocked`, not `not started`. **Item 1 remains `ready` and is the next session to run**
-  (its own IMPL session, which owns its review loop through to consensus and commit —
-  AI_TASK_PROTOCOL.md, Post-Review Fix Loop; STRAT does not follow it).
+- **Stage 6 Item 8 — three open questions resolved; task file cut; PRD/FS amended — STRAT
+  2026-07-14.** Item 8 (Preparation/Aftercare split) was briefly `blocked` after repo verification
+  (2026-07-13) exposed that the brief's "fully unblocked" claim was false and surfaced three
+  owner-only questions. All three are now decided (full record: PROJECT_DECISIONS.md —
+  "Preparation/Aftercare in-product discovery, 2026-07-14"):
+  **(Q1)** how the pages are reached → **two global-footer links** (Preparation, Aftercare) as
+  fallback discovery, artist-sent direct URL still primary. This **reversed the blueprint's
+  batch-2 "direct URL only / accepted risk" stance and amended PRD §5 and FS §2** (PRD §9 change
+  control — spec edited first, then the task cut against it); it also **removes**
+  `process.aftercareLink` (the Item-2-deferred question), discovery being the footer's job now.
+  **(Q2)** the boundary bullet stays in Preparation, copy unchanged (in-studio day = FS §3.6
+  prep scope). **(Q3)** intro copy owner-supplied (`preparation.intro` / `aftercare.intro`).
+  Task file `STAGE_6_TASK_08_preparation_aftercare_split.md` is `ready`, `Executor: codex`
+  (mechanical split + two footer links; delegable). **Item 1 remains `ready` and runs as its own
+  IMPL session** (Opus, Plan mode; owns its review loop through to consensus and commit —
+  AI_TASK_PROTOCOL.md, Post-Review Fix Loop; STRAT does not follow it). Item 1 and the Item 8
+  Codex session both touch shared docs on completion — sequence their doc-writing, do not let two
+  sessions write PROJECT_* at once (Cross-Session Rules).
 - **Stage 6 Item 2 — site-wide shell — completed 2026-07-13.** `STAGE_6_TASK_02_site_wide_shell.md`
   implemented in full and moved to `docs/project/tasks/done/`. Nav item set is now exactly
   Home/Process/Request/Location (`src/shared/ui/app-nav.tsx`); the `policies` → `process` route
