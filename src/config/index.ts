@@ -14,4 +14,10 @@ export const config = {
   app: {
     deploymentStudioId: requireEnv("DEPLOYMENT_STUDIO_ID"),
   },
+  upload: {
+    // 32 random bytes, base64 — encrypts the opaque upload handles returned to
+    // the public client. Rotating it invalidates in-flight handles (blast radius
+    // is the handle TTL). See services/uploadToken.ts.
+    tokenSecret: requireEnv("UPLOAD_TOKEN_SECRET"),
+  },
 }

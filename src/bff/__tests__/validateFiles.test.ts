@@ -1,113 +1,109 @@
 import { describe, it, expect } from "vitest"
-import { API_ERROR_CODES, REQUEST_FIELDS } from "@/shared/api"
-import { validateFiles } from "../validateFiles"
+import { API_ERROR_CODES, UPLOAD_FIELDS } from "@/shared/api"
+import { MAX_FILE_SIZE_BYTES, validateSingleFile } from "../validateFiles"
 
 const MB = 1024 * 1024
 
-function makeFile(name: string, type: string, sizeBytes: number): File {
-  const content = new Uint8Array(sizeBytes)
-  return new File([content], name, { type })
+const MAGIC: Record<string, number[]> = {
+  "image/jpeg": [0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01],
+  "image/png": [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d],
+  "image/webp": [
+    0x52, 0x49, 0x46, 0x46, 0x00, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50,
+  ], // RIFF....WEBP
+  "image/heic": [
+    0x00, 0x00, 0x00, 0x18, 0x66, 0x74, 0x79, 0x70, 0x68, 0x65, 0x69, 0x63,
+  ], // ....ftypheic
 }
 
-const validJpeg = () => makeFile("photo.jpg", "image/jpeg", 1 * MB)
-const validPng = () => makeFile("photo.png", "image/png", 1 * MB)
-const validWebp = () => makeFile("photo.webp", "image/webp", 1 * MB)
-const validHeic = () => makeFile("photo.heic", "image/heic", 1 * MB)
-const validHeif = () => makeFile("photo.heif", "image/heif", 1 * MB)
+/** Builds a file whose leading bytes match `magicType` and total size is `sizeBytes`. */
+function makeFile(
+  name: string,
+  declaredType: string,
+  sizeBytes: number,
+  magicType: string = declaredType,
+): File {
+  const bytes = new Uint8Array(sizeBytes)
+  const head = MAGIC[magicType]
+  if (head) bytes.set(head, 0)
+  return new File([bytes], name, { type: declaredType })
+}
 
-describe("validateFiles", () => {
-  it("passes with all allowed mime types", () => {
-    for (const file of [validJpeg(), validPng(), validWebp(), validHeic(), validHeif()]) {
-      const result = validateFiles({
-        referenceImages: [file],
-        placementImages: [validJpeg()],
-      })
+const CAT = "artist_work"
+
+describe("validateSingleFile", () => {
+  it("passes with each allowed mime type and matching magic bytes", async () => {
+    for (const type of ["image/jpeg", "image/png", "image/webp", "image/heic"]) {
+      const result = await validateSingleFile(makeFile(`photo`, type, 1 * MB), CAT)
       expect(result.ok).toBe(true)
     }
   })
 
-  it("returns file_type_invalid for disallowed mime type on referenceImages", () => {
-    const result = validateFiles({
-      referenceImages: [makeFile("doc.pdf", "application/pdf", 1 * MB)],
-      placementImages: [validJpeg()],
-    })
+  it("rejects an unknown category", async () => {
+    const result = await validateSingleFile(makeFile("photo.jpg", "image/jpeg", 1 * MB), "nope")
     expect(result.ok).toBe(false)
     if (!result.ok) {
-      expect(result.error.fieldErrors[REQUEST_FIELDS.referenceImages]).toEqual(["file_type_invalid"])
-      expect(result.error.fieldErrors[REQUEST_FIELDS.placementImages]).toBeUndefined()
+      expect(result.error.fieldErrors[UPLOAD_FIELDS.category]).toEqual(["upload_type_invalid"])
     }
   })
 
-  it("returns file_type_invalid for disallowed mime type on placementImages", () => {
-    const result = validateFiles({
-      referenceImages: [validJpeg()],
-      placementImages: [makeFile("virus.exe", "application/octet-stream", 1 * MB)],
-    })
+  it("rejects a disallowed mime type", async () => {
+    const result = await validateSingleFile(
+      makeFile("doc.pdf", "application/pdf", 1 * MB),
+      CAT,
+    )
     expect(result.ok).toBe(false)
     if (!result.ok) {
-      expect(result.error.fieldErrors[REQUEST_FIELDS.placementImages]).toEqual(["file_type_invalid"])
-      expect(result.error.fieldErrors[REQUEST_FIELDS.referenceImages]).toBeUndefined()
+      expect(result.error.fieldErrors[UPLOAD_FIELDS.file]).toEqual(["upload_type_invalid"])
     }
   })
 
-  it("returns file_too_large when a file exceeds 10 MB", () => {
-    const result = validateFiles({
-      referenceImages: [makeFile("huge.jpg", "image/jpeg", 11 * MB)],
-      placementImages: [validJpeg()],
-    })
+  // Asserted against the constant, not a hardcoded number: the ceiling is bounded by the
+  // hosting platform (Vercel rejects bodies over 4.5 MB at the edge) and may move again.
+  it("rejects a file over the size ceiling", async () => {
+    const result = await validateSingleFile(
+      makeFile("huge.jpg", "image/jpeg", MAX_FILE_SIZE_BYTES + 1),
+      CAT,
+    )
     expect(result.ok).toBe(false)
     if (!result.ok) {
-      expect(result.error.fieldErrors[REQUEST_FIELDS.referenceImages]).toEqual(["file_too_large"])
+      expect(result.error.fieldErrors[UPLOAD_FIELDS.file]).toEqual(["upload_too_large"])
     }
   })
 
-  it("reports error on the first invalid file in a field, stops checking further files", () => {
-    const result = validateFiles({
-      referenceImages: [
-        makeFile("bad.gif", "image/gif", 1 * MB),
-        makeFile("also-bad.pdf", "application/pdf", 1 * MB),
-      ],
-      placementImages: [validJpeg()],
-    })
-    expect(result.ok).toBe(false)
-    if (!result.ok) {
-      expect(result.error.fieldErrors[REQUEST_FIELDS.referenceImages]).toEqual(["file_type_invalid"])
-    }
-  })
-
-  it("reports errors on both fields when both have invalid files", () => {
-    const result = validateFiles({
-      referenceImages: [makeFile("bad.pdf", "application/pdf", 1 * MB)],
-      placementImages: [makeFile("huge.jpg", "image/jpeg", 15 * MB)],
-    })
-    expect(result.ok).toBe(false)
-    if (!result.ok) {
-      expect(result.error.fieldErrors[REQUEST_FIELDS.referenceImages]).toEqual(["file_type_invalid"])
-      expect(result.error.fieldErrors[REQUEST_FIELDS.placementImages]).toEqual(["file_too_large"])
-    }
-  })
-
-  it("passes when file size is exactly 10 MB", () => {
-    const result = validateFiles({
-      referenceImages: [makeFile("exact.jpg", "image/jpeg", 10 * MB)],
-      placementImages: [validJpeg()],
-    })
+  it("passes at exactly the size ceiling", async () => {
+    const result = await validateSingleFile(
+      makeFile("exact.jpg", "image/jpeg", MAX_FILE_SIZE_BYTES),
+      CAT,
+    )
     expect(result.ok).toBe(true)
   })
 
-  it("passes with empty file arrays", () => {
-    const result = validateFiles({
-      referenceImages: [],
-      placementImages: [],
-    })
-    expect(result.ok).toBe(true)
+  it("keeps the ceiling under Vercel's 4.5 MB request-body limit", () => {
+    expect(MAX_FILE_SIZE_BYTES).toBeLessThan(4.5 * MB)
   })
 
-  it("uses VALIDATION_ERROR code and empty formErrors on failure", () => {
-    const result = validateFiles({
-      referenceImages: [makeFile("bad.pdf", "application/pdf", 1 * MB)],
-      placementImages: [],
-    })
+  it("rejects a file that lies about its type (allowed mime, wrong magic bytes)", async () => {
+    // Declares image/jpeg but the bytes are a PNG header — the magic sniff catches it.
+    const result = await validateSingleFile(
+      makeFile("fake.jpg", "image/jpeg", 1 * MB, "image/png"),
+      CAT,
+    )
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error.fieldErrors[UPLOAD_FIELDS.file]).toEqual(["upload_type_invalid"])
+    }
+  })
+
+  it("rejects an empty file", async () => {
+    const result = await validateSingleFile(new File([], "empty.jpg", { type: "image/jpeg" }), CAT)
+    expect(result.ok).toBe(false)
+  })
+
+  it("uses VALIDATION_ERROR code and empty formErrors on failure", async () => {
+    const result = await validateSingleFile(
+      makeFile("bad.pdf", "application/pdf", 1 * MB),
+      CAT,
+    )
     expect(result.ok).toBe(false)
     if (!result.ok) {
       expect(result.error.code).toBe(API_ERROR_CODES.VALIDATION_ERROR)

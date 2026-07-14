@@ -56,14 +56,14 @@ const baseRequest: AdminRequestDetail = {
       status: "available",
       id: "file-1",
       originalName: "reference-01.jpg",
-      type: "reference",
+      type: "artist_work",
       signedUrl: "https://storage.example.com/signed/reference-01.jpg?token=abc",
     },
     {
       status: "unavailable",
       id: "file-2",
       originalName: "placement-01.jpg",
-      type: "placement",
+      type: "placement_photo",
     },
   ],
 }

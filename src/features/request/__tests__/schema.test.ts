@@ -1,16 +1,10 @@
 import { describe, it, expect } from "vitest"
 import { requestFormSchema } from "../validation"
 
-function makeFile(name = "photo.png"): File {
-  return new File(["x"], name, { type: "image/png" })
-}
-
 const validBase = {
   clientName: "Alex",
   ideaDescription: "A detailed dragon tattoo on the arm",
-  referenceImages: [makeFile()],
   placement: "arm",
-  placementImages: [makeFile()],
   size: "medium",
   color: "black",
   budget: "",
@@ -116,13 +110,9 @@ describe("requestFormSchema – required fields", () => {
     expect(result.success).toBe(true)
   })
 
-  it("rejects when referenceImages is empty", () => {
-    const result = requestFormSchema.safeParse({ ...validBase, referenceImages: [] })
-    expect(result.success).toBe(false)
-    if (!result.success) {
-      const messages = result.error.issues.map((i) => i.message)
-      expect(messages).toContain("reference_images_required")
-    }
+  it("accepts a valid input with zero uploads (uploads are optional)", () => {
+    const result = requestFormSchema.safeParse({ ...validBase, uploadHandles: [] })
+    expect(result.success).toBe(true)
   })
 
   it("rejects when placement is empty string", () => {
@@ -131,15 +121,6 @@ describe("requestFormSchema – required fields", () => {
     if (!result.success) {
       const messages = result.error.issues.map((i) => i.message)
       expect(messages).toContain("placement_required")
-    }
-  })
-
-  it("rejects when placementImages is empty", () => {
-    const result = requestFormSchema.safeParse({ ...validBase, placementImages: [] })
-    expect(result.success).toBe(false)
-    if (!result.success) {
-      const messages = result.error.issues.map((i) => i.message)
-      expect(messages).toContain("placement_images_required")
     }
   })
 
@@ -202,9 +183,7 @@ describe("requestFormSchema – contact group validation", () => {
     const emptyForm = {
       clientName: "",
       ideaDescription: "",
-      referenceImages: [],
       placement: "",
-      placementImages: [],
       size: "",
       color: "",
       budget: "",
@@ -246,25 +225,21 @@ describe("requestFormSchema – contact group validation", () => {
   })
 })
 
-describe("requestFormSchema – file upload constraints", () => {
-  it("rejects referenceImages exceeding max files", () => {
-    const files = [makeFile(), makeFile(), makeFile(), makeFile()]
-    const result = requestFormSchema.safeParse({ ...validBase, referenceImages: files })
+describe("requestFormSchema – upload handle constraints", () => {
+  it("rejects more than 9 upload handles", () => {
+    const handles = Array.from({ length: 10 }, (_, i) => `h${i}`)
+    const result = requestFormSchema.safeParse({ ...validBase, uploadHandles: handles })
     expect(result.success).toBe(false)
     if (!result.success) {
       const messages = result.error.issues.map((i) => i.message)
-      expect(messages).toContain("reference_images_too_many")
+      expect(messages).toContain("upload_too_many")
     }
   })
 
-  it("rejects placementImages exceeding max files", () => {
-    const files = [makeFile(), makeFile(), makeFile(), makeFile()]
-    const result = requestFormSchema.safeParse({ ...validBase, placementImages: files })
-    expect(result.success).toBe(false)
-    if (!result.success) {
-      const messages = result.error.issues.map((i) => i.message)
-      expect(messages).toContain("placement_images_too_many")
-    }
+  it("accepts up to 9 upload handles", () => {
+    const handles = Array.from({ length: 9 }, (_, i) => `h${i}`)
+    const result = requestFormSchema.safeParse({ ...validBase, uploadHandles: handles })
+    expect(result.success).toBe(true)
   })
 })
 

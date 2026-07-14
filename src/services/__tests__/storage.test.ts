@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 const mockRemove = vi.fn()
 const mockUpload = vi.fn()
 const mockCreateSignedUrl = vi.fn()
+const mockList = vi.fn()
 
 vi.mock("../supabase", () => ({
   supabase: {
@@ -11,12 +12,18 @@ vi.mock("../supabase", () => ({
         upload: mockUpload,
         remove: mockRemove,
         createSignedUrl: mockCreateSignedUrl,
+        list: mockList,
       })),
     },
   },
 }))
 
-import { BUCKET, createSignedRequestFileUrl, uploadRequestFiles } from "../storage"
+import {
+  BUCKET,
+  countObjectsForSubmission,
+  createSignedRequestFileUrl,
+  uploadRequestFile,
+} from "../storage"
 
 const STUDIO_ID = "a1b2c3d4-0000-4000-8000-000000000001"
 const CLIENT_ID = "f47ac10b-58cc-4372-a567-0e02b2c3d479"
@@ -26,115 +33,76 @@ function makeFile(name: string, type = "image/jpeg", size = 1 * MB): File {
   return new File([new Uint8Array(size)], name, { type })
 }
 
+const UUID_NAME = /[0-9a-f-]{36}\.\w+$/i
+
 beforeEach(() => {
   vi.clearAllMocks()
   vi.useRealTimers()
 })
 
-describe("uploadRequestFiles", () => {
-  it("uploads all files and returns typed records", async () => {
+describe("uploadRequestFile", () => {
+  it("uploads one file and returns a typed record under the category prefix", async () => {
     mockUpload.mockResolvedValue({ error: null })
 
-    const ref1 = makeFile("ref1.jpg")
-    const ref2 = makeFile("ref2.png", "image/png")
-    const place1 = makeFile("place1.jpg")
-
-    const results = await uploadRequestFiles(
-      { referenceImages: [ref1, ref2], placementImages: [place1] },
+    const result = await uploadRequestFile(
+      makeFile("ref.jpg"),
+      "artist_work",
       STUDIO_ID,
       CLIENT_ID,
     )
 
-    expect(results).toHaveLength(3)
-
-    expect(results[0]).toMatchObject({
-      storagePath: `${STUDIO_ID}/${CLIENT_ID}/reference/reference-01.jpg`,
-      originalName: "ref1.jpg",
+    expect(result).toMatchObject({
+      originalName: "ref.jpg",
       mimeType: "image/jpeg",
-      type: "reference",
+      type: "artist_work",
     })
-    expect(results[1]).toMatchObject({
-      storagePath: `${STUDIO_ID}/${CLIENT_ID}/reference/reference-02.png`,
-      originalName: "ref2.png",
-      mimeType: "image/png",
-      type: "reference",
-    })
-    expect(results[2]).toMatchObject({
-      storagePath: `${STUDIO_ID}/${CLIENT_ID}/placement/placement-01.jpg`,
-      originalName: "place1.jpg",
-      type: "placement",
-    })
+    expect(result.storagePath.startsWith(`${STUDIO_ID}/${CLIENT_ID}/artist_work/`)).toBe(true)
+    expect(result.storagePath).toMatch(UUID_NAME)
   })
 
-  it("derives storage extension from MIME type, not original filename", async () => {
+  it("derives the storage extension from MIME type, not the original filename", async () => {
     mockUpload.mockResolvedValue({ error: null })
 
-    // filename has wrong/misleading extension — storage path must use MIME-derived ext
-    const results = await uploadRequestFiles(
-      {
-        referenceImages: [
-          makeFile("photo.jpg", "image/webp"),
-          makeFile("img.jpg", "image/heic"),
-          makeFile("pic.jpg", "image/heif"),
-        ],
-        placementImages: [makeFile("body.png", "image/jpeg")],
-      },
+    const result = await uploadRequestFile(
+      makeFile("photo.jpg", "image/webp"),
+      "inspiration",
       STUDIO_ID,
       CLIENT_ID,
     )
 
-    expect(results[0].storagePath).toBe(`${STUDIO_ID}/${CLIENT_ID}/reference/reference-01.webp`)
-    expect(results[0].originalName).toBe("photo.jpg")
-    expect(results[1].storagePath).toBe(`${STUDIO_ID}/${CLIENT_ID}/reference/reference-02.heic`)
-    expect(results[2].storagePath).toBe(`${STUDIO_ID}/${CLIENT_ID}/reference/reference-03.heif`)
-    expect(results[3].storagePath).toBe(`${STUDIO_ID}/${CLIENT_ID}/placement/placement-01.jpg`)
-    expect(results[3].originalName).toBe("body.png")
+    expect(result.storagePath.endsWith(".webp")).toBe(true)
+    expect(result.originalName).toBe("photo.jpg")
   })
 
-  it("returns empty array when no files provided", async () => {
-    const results = await uploadRequestFiles(
-      { referenceImages: [], placementImages: [] },
-      STUDIO_ID,
-      CLIENT_ID,
-    )
+  it("uses a non-deterministic filename (no positional index) so concurrent uploads never collide", async () => {
+    mockUpload.mockResolvedValue({ error: null })
 
-    expect(results).toEqual([])
-    expect(mockUpload).not.toHaveBeenCalled()
+    const a = await uploadRequestFile(makeFile("x.jpg"), "artist_work", STUDIO_ID, CLIENT_ID)
+    const b = await uploadRequestFile(makeFile("x.jpg"), "artist_work", STUDIO_ID, CLIENT_ID)
+
+    expect(a.storagePath).not.toBe(b.storagePath)
   })
 
-  it("retries on transient error and succeeds", async () => {
+  it("retries on a transient error and succeeds", async () => {
     vi.useFakeTimers()
-
     mockUpload
       .mockResolvedValueOnce({ error: { message: "network error" } })
       .mockResolvedValueOnce({ error: null })
 
-    const promise = uploadRequestFiles(
-      { referenceImages: [makeFile("ref.jpg")], placementImages: [] },
-      STUDIO_ID,
-      CLIENT_ID,
-    )
+    const promise = uploadRequestFile(makeFile("ref.jpg"), "artist_work", STUDIO_ID, CLIENT_ID)
     await vi.runAllTimersAsync()
-    const results = await promise
+    await promise
 
     expect(mockUpload).toHaveBeenCalledTimes(2)
-    expect(results).toHaveLength(1)
   })
 
-  it("retries up to MAX_RETRIES times on transient errors, then throws", async () => {
+  it("retries up to MAX_RETRIES on transient errors, then throws", async () => {
     vi.useFakeTimers()
-
     mockUpload.mockResolvedValue({ error: { message: "timeout error" } })
-    mockRemove.mockResolvedValue({ error: null })
 
     const rejectPromise = expect(
-      uploadRequestFiles(
-        { referenceImages: [makeFile("ref.jpg")], placementImages: [] },
-        STUDIO_ID,
-        CLIENT_ID,
-      ),
+      uploadRequestFile(makeFile("ref.jpg"), "artist_work", STUDIO_ID, CLIENT_ID),
     ).rejects.toThrow()
-
     await vi.runAllTimersAsync()
     await rejectPromise
 
@@ -143,132 +111,64 @@ describe("uploadRequestFiles", () => {
 
   it("does not retry non-transient errors", async () => {
     mockUpload.mockResolvedValue({ error: { message: "The object already exists" } })
-    mockRemove.mockResolvedValue({ error: null })
 
     await expect(
-      uploadRequestFiles(
-        { referenceImages: [makeFile("ref.jpg")], placementImages: [] },
-        STUDIO_ID,
-        CLIENT_ID,
-      ),
+      uploadRequestFile(makeFile("ref.jpg"), "artist_work", STUDIO_ID, CLIENT_ID),
     ).rejects.toThrow()
 
     expect(mockUpload).toHaveBeenCalledTimes(1)
   })
+})
 
-  it("cleans up already-uploaded files when a later file fails", async () => {
-    mockUpload
-      .mockResolvedValueOnce({ error: null })
-      .mockResolvedValueOnce({ error: { message: "The object already exists" } })
-    mockRemove.mockResolvedValue({ error: null })
+describe("countObjectsForSubmission", () => {
+  it("sums object counts across all category prefixes", async () => {
+    mockList
+      .mockResolvedValueOnce({ data: [{}, {}], error: null }) // artist_work
+      .mockResolvedValueOnce({ data: [{}], error: null }) // inspiration
+      .mockResolvedValueOnce({ data: [], error: null }) // placement_photo
 
-    await expect(
-      uploadRequestFiles(
-        { referenceImages: [makeFile("ref1.jpg"), makeFile("ref2.jpg")], placementImages: [] },
-        STUDIO_ID,
-        CLIENT_ID,
-      ),
-    ).rejects.toThrow()
-
-    expect(mockRemove).toHaveBeenCalledTimes(1)
-    const removedPaths: string[] = mockRemove.mock.calls[0][0]
-    expect(removedPaths).toHaveLength(1)
-    expect(removedPaths[0]).toContain("reference-01.jpg")
+    const total = await countObjectsForSubmission(STUDIO_ID, CLIENT_ID)
+    expect(total).toBe(3)
   })
 
-  it("logs cleanup failure without rethrowing", async () => {
-    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {})
-
-    mockUpload
-      .mockResolvedValueOnce({ error: null })
-      .mockResolvedValueOnce({ error: { message: "The object already exists" } })
-    mockRemove.mockResolvedValue({ error: { message: "storage unavailable" } })
-
-    await expect(
-      uploadRequestFiles(
-        { referenceImages: [makeFile("ref1.jpg"), makeFile("ref2.jpg")], placementImages: [] },
-        STUDIO_ID,
-        CLIENT_ID,
-      ),
-    ).rejects.toThrow()
-
-    expect(consoleError).toHaveBeenCalledWith(
-      expect.stringContaining("[storage] cleanup failed:"),
-      "storage unavailable",
-    )
-
-    consoleError.mockRestore()
-  })
-
-  it("does not call cleanup when no files were uploaded before failure", async () => {
-    mockUpload.mockResolvedValue({ error: { message: "The object already exists" } })
-
-    await expect(
-      uploadRequestFiles(
-        { referenceImages: [makeFile("ref.jpg")], placementImages: [] },
-        STUDIO_ID,
-        CLIENT_ID,
-      ),
-    ).rejects.toThrow()
-
-    expect(mockRemove).not.toHaveBeenCalled()
+  it("throws when a Storage list call errors", async () => {
+    mockList.mockResolvedValue({ data: null, error: { message: "boom" } })
+    await expect(countObjectsForSubmission(STUDIO_ID, CLIENT_ID)).rejects.toThrow("Storage list failed")
   })
 })
 
 describe("createSignedRequestFileUrl", () => {
-  const STORAGE_PATH = `${STUDIO_ID}/${CLIENT_ID}/reference/reference-01.jpg`
+  const STORAGE_PATH = `${STUDIO_ID}/${CLIENT_ID}/artist_work/abc.jpg`
 
-  it("calls Supabase Storage createSignedUrl with the bucket, path, and 3600s expiry", async () => {
+  it("calls createSignedUrl with the path and 3600s expiry", async () => {
     mockCreateSignedUrl.mockResolvedValue({
-      data: { signedUrl: "https://signed.example/reference-01.jpg" },
+      data: { signedUrl: "https://signed.example/abc.jpg" },
       error: null,
     })
-
     await createSignedRequestFileUrl(STORAGE_PATH)
-
     expect(mockCreateSignedUrl).toHaveBeenCalledWith(STORAGE_PATH, 3600)
   })
 
   it("uses the request-images bucket", async () => {
     const { supabase } = await import("../supabase")
     mockCreateSignedUrl.mockResolvedValue({
-      data: { signedUrl: "https://signed.example/reference-01.jpg" },
+      data: { signedUrl: "https://signed.example/abc.jpg" },
       error: null,
     })
-
     await createSignedRequestFileUrl(STORAGE_PATH)
-
     expect(supabase.storage.from).toHaveBeenCalledWith(BUCKET)
   })
 
   it("returns the signed URL", async () => {
     mockCreateSignedUrl.mockResolvedValue({
-      data: { signedUrl: "https://signed.example/reference-01.jpg" },
+      data: { signedUrl: "https://signed.example/abc.jpg" },
       error: null,
     })
-
-    const result = await createSignedRequestFileUrl(STORAGE_PATH)
-
-    expect(result).toBe("https://signed.example/reference-01.jpg")
+    expect(await createSignedRequestFileUrl(STORAGE_PATH)).toBe("https://signed.example/abc.jpg")
   })
 
-  it("throws when Supabase returns a signing error", async () => {
-    mockCreateSignedUrl.mockResolvedValue({
-      data: null,
-      error: { message: "Object not found" },
-    })
-
-    await expect(createSignedRequestFileUrl(STORAGE_PATH)).rejects.toThrow(
-      "Signed URL creation failed",
-    )
-  })
-
-  it("throws with the supabase error message", async () => {
-    mockCreateSignedUrl.mockResolvedValue({
-      data: null,
-      error: { message: "Object not found" },
-    })
-
+  it("throws with the supabase error message when signing fails", async () => {
+    mockCreateSignedUrl.mockResolvedValue({ data: null, error: { message: "Object not found" } })
     await expect(createSignedRequestFileUrl(STORAGE_PATH)).rejects.toThrow("Object not found")
   })
 })

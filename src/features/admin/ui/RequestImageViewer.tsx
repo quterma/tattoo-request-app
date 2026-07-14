@@ -7,11 +7,13 @@ import "yet-another-react-lightbox/styles.css"
 import type { AdminRequestFile } from "../types"
 import { RequestImageGroup } from "./RequestImageGroup"
 
+type RequestImageGroupData = {
+  title: string
+  files: AdminRequestFile[]
+}
+
 type RequestImageViewerProps = {
-  referenceFiles: AdminRequestFile[]
-  placementFiles: AdminRequestFile[]
-  referenceImagesTitle: string
-  placementImagesTitle: string
+  groups: RequestImageGroupData[]
   unavailableLabel: string
   closeLabel: string
 }
@@ -43,19 +45,16 @@ const viewerImageProps = {
 }
 
 export function RequestImageViewer({
-  referenceFiles,
-  placementFiles,
-  referenceImagesTitle,
-  placementImagesTitle,
+  groups,
   unavailableLabel,
   closeLabel,
 }: RequestImageViewerProps) {
   const [open, setOpen] = useState(false)
   const [initialIndex, setInitialIndex] = useState(0)
 
-  const availableFiles = [...referenceFiles, ...placementFiles].filter(
-    (file) => file.status === "available",
-  )
+  const availableFiles = groups
+    .flatMap((group) => group.files)
+    .filter((file) => file.status === "available")
   const slides = availableFiles.map((file) => ({
     src: file.signedUrl,
     alt: file.originalName,
@@ -73,18 +72,15 @@ export function RequestImageViewer({
   return (
     <>
       <div className="flex flex-col gap-6">
-        <RequestImageGroup
-          title={referenceImagesTitle}
-          files={referenceFiles}
-          unavailableLabel={unavailableLabel}
-          onImageClick={openViewerAt}
-        />
-        <RequestImageGroup
-          title={placementImagesTitle}
-          files={placementFiles}
-          unavailableLabel={unavailableLabel}
-          onImageClick={openViewerAt}
-        />
+        {groups.map((group) => (
+          <RequestImageGroup
+            key={group.title}
+            title={group.title}
+            files={group.files}
+            unavailableLabel={unavailableLabel}
+            onImageClick={openViewerAt}
+          />
+        ))}
       </div>
 
       {open ? (

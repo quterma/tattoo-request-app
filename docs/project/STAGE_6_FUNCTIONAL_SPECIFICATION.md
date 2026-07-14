@@ -120,7 +120,9 @@ Field-inclusion rule (normative): every field must help the artist's initial acc
 
 ### 4.3 Upload constraints (fields 5–7, identically)
 
-Up to 3 images per category, 9 total. Formats: JPEG, PNG, WebP, HEIC. Max 10 MB per file pre-processing; client-side downscaling/compression permitted if quality remains adequate for evaluation. Each image shows a thumbnail with a remove control. Upload occurs on file selection with per-file progress and per-file failure state (§4.5).
+Up to 3 images per category, 9 total. Formats: JPEG, PNG, WebP, HEIC. **Max 4 MB per file** (amended 2026-07-14 from 10 MB — see below); client-side downscaling/compression permitted if quality remains adequate for evaluation. Each image shows a thumbnail with a remove control. Upload occurs on file selection with per-file progress and per-file failure state (§4.5).
+
+**Size-limit amendment (owner decision 2026-07-14).** The original 10 MB limit is not deliverable on the current hosting: Vercel Node Functions reject any request body over 4.5 MB at the platform edge, before application code runs. Since each file is uploaded in its own request (selection-time upload, one file per `POST /api/upload`), the constraint is **per file, not per submission** — 9 files of 4 MB each are 9 independent requests and never sum against the limit. The limit is therefore set to **4 MB per file**, leaving headroom under the platform's 4.5 MB ceiling for multipart overhead. Files over the limit are rejected with a clear, actionable message; **client-side compression is not implemented in Stage 6** (it remains permitted by this section, and is under research — see PROJECT_BACKLOG.md). Rationale for why 4 MB is sufficient for the expected inputs (Instagram screenshots, reference images, phone photos of the placement area) and the residual risk (a high-resolution phone photo may exceed it and require the visitor to reduce it) are recorded in PROJECT_DECISIONS.md — "Stage 6 Upload-Flow Architecture".
 
 ### 4.4 Upload motivation (implements PRD D4)
 

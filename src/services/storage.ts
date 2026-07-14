@@ -1,10 +1,19 @@
+import { randomUUID } from "node:crypto"
 import { supabase } from "./supabase"
 
 export const BUCKET = "request-images"
 const MAX_RETRIES = 3
 const RETRY_BASE_MS = 200
 
-export type FileType = "reference" | "placement"
+/**
+ * The three FS §4.2 upload categories (fields 5–7). Replaces the Stage 3
+ * two-category set ("reference" | "placement") — see PROJECT_DECISIONS.md,
+ * Stage 6 Upload-Flow Architecture. The DB CHECK constraint on
+ * request_files.type mirrors these values exactly.
+ */
+export const UPLOAD_CATEGORIES = ["artist_work", "inspiration", "placement_photo"] as const
+
+export type FileType = (typeof UPLOAD_CATEGORIES)[number]
 
 export interface UploadedFile {
   storagePath: string
@@ -12,12 +21,6 @@ export interface UploadedFile {
   mimeType: string
   size: number
   type: FileType
-}
-
-interface FileToUpload {
-  file: File
-  type: FileType
-  storagePath: string
 }
 
 function isTransientError(message: string): boolean {
@@ -49,49 +52,40 @@ function extFromMime(mimeType: string): string {
   return MIME_TO_EXT[mimeType] ?? "jpg"
 }
 
-function buildFileList(
-  referenceImages: File[],
-  placementImages: File[],
+/**
+ * Storage path for one selection-time upload.
+ *
+ * The filename is a server-generated UUID, not a positional index. Selection-time
+ * upload has no batch: files arrive one at a time and can be removed or retried out
+ * of order, so a positional `${type}-01` name (the Stage 3 scheme) is racy — two
+ * concurrent uploads both compute `-01` and, with upsert:false, one fails. A UUID is
+ * collision-free by construction and retry-safe. The {studioId}/{clientSubmissionId}/
+ * prefix convention is preserved (PROJECT_DECISIONS.md — Stage 5A Storage Model).
+ */
+function buildStoragePath(
   studioId: string,
   clientSubmissionId: string,
-): FileToUpload[] {
-  const files: FileToUpload[] = []
-
-  for (let i = 0; i < referenceImages.length; i++) {
-    const file = referenceImages[i]
-    const ext = extFromMime(file.type)
-    const index = String(i + 1).padStart(2, "0")
-    files.push({
-      file,
-      type: "reference",
-      storagePath: `${studioId}/${clientSubmissionId}/reference/reference-${index}.${ext}`,
-    })
-  }
-
-  for (let i = 0; i < placementImages.length; i++) {
-    const file = placementImages[i]
-    const ext = extFromMime(file.type)
-    const index = String(i + 1).padStart(2, "0")
-    files.push({
-      file,
-      type: "placement",
-      storagePath: `${studioId}/${clientSubmissionId}/placement/placement-${index}.${ext}`,
-    })
-  }
-
-  return files
+  category: FileType,
+  mimeType: string,
+): string {
+  return `${studioId}/${clientSubmissionId}/${category}/${randomUUID()}.${extFromMime(mimeType)}`
 }
 
-async function uploadWithRetry(item: FileToUpload): Promise<void> {
+export function storagePrefixForSubmission(
+  studioId: string,
+  clientSubmissionId: string,
+): string {
+  return `${studioId}/${clientSubmissionId}`
+}
+
+async function uploadWithRetry(file: File, storagePath: string): Promise<void> {
   let lastError: Error | null = null
 
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-    const { error } = await supabase.storage
-      .from(BUCKET)
-      .upload(item.storagePath, item.file, {
-        contentType: item.file.type,
-        upsert: false,
-      })
+    const { error } = await supabase.storage.from(BUCKET).upload(storagePath, file, {
+      contentType: file.type,
+      upsert: false,
+    })
 
     if (!error) return
 
@@ -112,8 +106,70 @@ async function uploadWithRetry(item: FileToUpload): Promise<void> {
 }
 
 /**
- * Best-effort removal of uploaded request files after a failed submit.
- * Logs the outcome (file count only, no paths) and never throws.
+ * Uploads a single file at selection time, before the request row exists.
+ *
+ * One file per call, independent of every other file — a failure here affects only
+ * this file (FS §4.5). The batch-with-cleanup model of Stages 3–5 is gone: nothing
+ * is deleted on failure, because there is no batch to unwind and the visitor may
+ * retry this file alone.
+ */
+export async function uploadRequestFile(
+  file: File,
+  category: FileType,
+  studioId: string,
+  clientSubmissionId: string,
+): Promise<UploadedFile> {
+  const storagePath = buildStoragePath(studioId, clientSubmissionId, category, file.type)
+
+  await uploadWithRetry(file, storagePath)
+
+  return {
+    storagePath,
+    originalName: file.name,
+    mimeType: file.type,
+    size: file.size,
+    type: category,
+  }
+}
+
+/**
+ * Counts objects already stored under one clientSubmissionId, across all categories.
+ *
+ * This is the hard cap behind the public upload endpoint: without it, a single
+ * session id can be replayed indefinitely to fill the bucket. Storage `list` is not
+ * recursive, so each category prefix is listed separately.
+ */
+export async function countObjectsForSubmission(
+  studioId: string,
+  clientSubmissionId: string,
+): Promise<number> {
+  const prefix = storagePrefixForSubmission(studioId, clientSubmissionId)
+
+  const counts = await Promise.all(
+    UPLOAD_CATEGORIES.map(async (category) => {
+      const { data, error } = await supabase.storage
+        .from(BUCKET)
+        .list(`${prefix}/${category}`, { limit: 100 })
+
+      if (error) throw new Error(`Storage list failed: ${error.message}`)
+
+      return data?.length ?? 0
+    }),
+  )
+
+  return counts.reduce((total, count) => total + count, 0)
+}
+
+/**
+ * Best-effort removal of storage objects. Logs the outcome (file count only, no
+ * paths) and never throws.
+ *
+ * NOTE: this is no longer called on the submit path. Under selection-time upload the
+ * files exist before the request does, and on a submit failure the visitor retries
+ * with the same handles pointing at the same paths — deleting them would destroy the
+ * very files the retry needs (and, on the idempotency-race path, the winning
+ * request's live files). It survives as the primitive for the future orphaned-object
+ * cleanup job (PROJECT_BACKLOG.md).
  */
 export async function cleanupRequestFiles(paths: string[]): Promise<void> {
   if (paths.length === 0) return
@@ -146,36 +202,4 @@ export async function createSignedRequestFileUrl(storagePath: string): Promise<s
   }
 
   return data.signedUrl
-}
-
-export async function uploadRequestFiles(
-  files: { referenceImages: File[]; placementImages: File[] },
-  studioId: string,
-  clientSubmissionId: string,
-): Promise<UploadedFile[]> {
-  const fileList = buildFileList(files.referenceImages, files.placementImages, studioId, clientSubmissionId)
-
-  const uploaded: string[] = []
-  const results: UploadedFile[] = []
-
-  for (const item of fileList) {
-    try {
-      await uploadWithRetry(item)
-      uploaded.push(item.storagePath)
-      results.push({
-        storagePath: item.storagePath,
-        originalName: item.file.name,
-        mimeType: item.file.type,
-        size: item.file.size,
-        type: item.type,
-      })
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err)
-      console.error(`[storage] upload failed for ${item.storagePath}:`, message)
-      await cleanupRequestFiles(uploaded)
-      throw new Error(`File upload failed: ${message}`)
-    }
-  }
-
-  return results
 }

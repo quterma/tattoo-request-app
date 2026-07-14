@@ -384,3 +384,132 @@ AI_WORKFLOW_MASTER.md. Format: date — observation — status (`open` / `resolv
   lint/typecheck/test loop to a clean pass (or a precisely reported unresolved failure) before
   handing back, while Claude's final full `pnpm qg` re-run stays mandatory and unconditional —
   quality control is unchanged, only the debugging labor shifts.
+- 2026-07-14 — **An IMPL session (Stage 6 Item 1, upload-flow architecture) ran the in-session
+  Review Pipeline (AI_REVIEW_PIPELINE.md: Test Agent, `pnpm qg`, read-only Review Agent — all
+  green, no blockers) and was about to propose a commit, without ever opening an independent
+  Codex/external review thread (AI_CROSS_REVIEW.md).** Caught only because the owner asked the
+  session to re-check the end-of-IMPL protocol before proceeding — the session itself did not
+  self-catch it. Two things line up that should have triggered the cross-review step on their
+  own: (1) PROJECT_STAGE_LOG.md already carried a Current Focus line, written *before*
+  implementation started, saying this Item "runs as its own IMPL session ... owns its review
+  loop through to consensus and commit — AI_TASK_PROTOCOL.md, Post-Review Fix Loop" — i.e. an
+  independent review was explicitly anticipated for this block; (2) the task file itself
+  frames the surface as security-sensitive (public unauthenticated write endpoint,
+  encrypted-handle ownership model) — exactly the kind of block AI_CROSS_REVIEW.md exists for.
+  Despite both signals being present in the session's own context, "run the Review Pipeline"
+  in the task file's Workflow step 7 was read as satisfied by the in-session pipeline alone,
+  and the session moved straight to "propose commit." **For META to weigh:** is the gap (a)
+  a missing explicit trigger — AI_TASK_PROTOCOL.md/AI_REVIEW_PIPELINE.md should say
+  "in-session pipeline passing is necessary but not sufficient for a security-sensitive or
+  architecturally novel block; open a cross-review thread before proposing commit" in so many
+  words, rather than leaving the two documents' relationship (partially stated in
+  AI_CROSS_REVIEW.md's Scope line: "is NOT replaced by this document") to be inferred; (b) a
+  missing end-of-IMPL checklist the session is required to run through explicitly before
+  "propose commit" (task-file Workflow steps do not currently enumerate cross-review as a
+  distinct, checkable step for tasks whose own "How to run" block flags them as
+  architecture/security-sensitive); or (c) something to fix in how task files signal "this one
+  needs independent review" up front (today it is implied by "Executor: claude ... not
+  delegable" plus prose in Context, not a first-class field a session would reliably scan for
+  at Workflow-step-7 time). Not resolved here — filed for META to think through and decide. —
+  resolved: AI_TASK_PROTOCOL.md (new section "Independent Review Is Mandatory"),
+  AI_REVIEW_PIPELINE.md (Execution Order step 8; Pipeline Status; When to Run), and
+  STAGE_TASK_TEMPLATE.md (Workflow step 7, Reporting). **Root cause (META 2026-07-14):** none of
+  the three branches (a)/(b)/(c) was the real gap — **no document said when a cross-review is
+  required at all.** AI_CROSS_REVIEW.md defines only *how* a thread runs (statuses, queue, turns);
+  AI_TASK_PROTOCOL.md's Post-Review Fix Loop opens with "When an independent review **is** run",
+  and the task template said "**If** an independent review is run" — both conditional, so the
+  decision to open one belonged to nobody and simply fell out of the process. That is why the two
+  signals the session did hold (the stage-log line about owning its review loop; the task file's
+  own security framing) failed: they said the session would *own* a review, never that one was
+  *required*. **Owner decision:** the cross-review is now a **gate, not a judgment call** — every
+  IMPL block that changed source code opens a thread before proposing a commit, exactly like
+  `pnpm qg`; the only exemption is the docs-only/analysis-only case that already skips the
+  pipeline. `READY FOR DEVELOPER REVIEW` explicitly no longer licenses proposing a commit on a
+  code block — that right arrives at **consensus**. Rationale for a blanket default over a
+  risk-class threshold: Codex is free to the owner today and parallel IMPL work is rare (the
+  one-active-thread queue is not a bottleneck yet), while a threshold is a judgment made by a
+  session at the end of its own work — precisely where this check just failed. The protocol
+  records the revisit condition: if Codex becomes costly or the single review slot starts
+  blocking, swap the blanket rule for a risk-class trigger, never drop the gate.
+- 2026-07-14 — **`pnpm qg` re-run cost measured, and one class of re-run removed.** Owner asked
+  (META, 2026-07-14) whether IMPL sessions re-run the gates more often than necessary — typically
+  after implementation, after fixes, and again after updating documentation — and whether the
+  token/time cost justifies trimming. Measured on this repo: `lint` 7.7s / `typecheck` 2.6s /
+  `test` 26.4s / `build` 14.1s ≈ **51s wall-clock and ~74 lines of output for a full green run**.
+  Conclusion: a *green* run is nearly free in context — what is expensive is a *red* run (triage,
+  fixes, re-run), which is exactly the thing the gate exists to catch, so "run the gates less" is
+  optimizing the wrong resource. Only one of the three re-runs was genuinely wasted: **the one
+  after a durable-doc update**. AI_REVIEW_PIPELINE.md already said "skip when only documentation
+  changed", but its re-arm rule was written absolutely ("**any** further file change re-arms the
+  gates") and overrode it, so sessions correctly followed the stricter line — a contradiction
+  inside one document, not session over-caution. Re-runs after code fixes (including fixes from
+  an independent review) stay mandatory and were not touched: a green run is valid only for the
+  exact tree it ran on. — resolved: AI_REVIEW_PIPELINE.md (When to Run — re-arm scoped to source
+  code / tests / gate-affecting config; durable docs explicitly do not re-arm) and
+  STAGE_TASK_TEMPLATE.md (Reporting).
+- 2026-07-14 — **There is no protocol for asking an independent AI to *research an open question*.
+  The only mechanism is the review thread, which reviews finished work — so a research request has
+  to be disguised as a review of something that does not exist yet.** Concrete case (Stage 6 Item
+  1): the Codex review of the upload-flow architecture found that the FS's 10 MB file limit is
+  undeliverable through a Vercel Function (4.5 MB platform limit). The fix direction — client-side
+  image compression, which FS §4.3 explicitly permits — is a genuinely open question needing real
+  investigation: compress only over-limit files or all of them (the artist needs full quality to
+  judge a design), what output parameters are adequate, how to handle HEIC (browsers cannot decode
+  it natively), and what comparable products actually do. That is a **research task**, not a review:
+  there is no diff, no block, nothing to hand off. AI_CROSS_REVIEW.md offers only `## Handoff` →
+  `## Review N` → `## Response N` → `## Consensus`, all built around "a reviewed block". The owner
+  explicitly asked for a research request to Codex and the session had nowhere to put it. Two
+  further frictions compound it: (a) the **one-active-thread rule** — a research thread opened while
+  a review is live must sit `queued`, even though research and review do not contend for the same
+  attention in any real sense; (b) research output has no defined destination — a review reaches
+  `## Consensus` and closes, but a research answer is *input to a future decision*, so it belongs in
+  PROJECT_BACKLOG.md or a task file, and nothing says so. **For META:** (1) is the fix a new
+  lightweight thread type (`RESEARCH_<date>_<slug>.md`, statuses `awaiting-research` /
+  `awaiting-response` / `closed`, with the outcome required to land in PROJECT_BACKLOG.md or a task
+  file rather than dying in the thread), or a documented convention for reusing the review thread
+  with an explicit "this is a question, not a block" marker? (2) does a research thread contend for
+  the single active-thread slot, or does it get its own? (3) is Codex even the right reviewer for
+  research that requires *external* knowledge (how other products solve this) rather than repo
+  knowledge — or is this the `Reviewer: external` role's natural home? Filed rather than improvised:
+  inventing a thread format mid-IMPL is exactly the kind of silent process drift the framework's
+  own rules exist to prevent. — resolved: AI_CROSS_REVIEW.md (new section "Research Threads";
+  Scope and Owner Effort updated) + AGENTS.md (researcher role; `docs/project/research/` added to
+  the write surface; "Answering a research thread"). Owner decisions 2026-07-14, answering the
+  three questions: **(1) a separate lightweight thread type** —
+  `docs/project/research/RESEARCH_<date>_<slug>.md`, statuses `awaiting-research` /
+  `awaiting-response` / `closed`, turns `## Question` → `## Findings <N>` → `## Response <N>` →
+  `## Outcome`. Reusing the review thread with a marker was rejected: `## Handoff` demands finished
+  work and `## Consensus` closes a verdict — both lie about an open question. **(2) research does
+  NOT contend for the review slot** — the one-active-thread rule exists to keep a live *review*
+  dialogue unambiguous and the owner's ping resolvable; research blocks no commit and reviews no
+  diff, so it gets its own slot (several may be open), with the same anti-rot duty: whoever
+  reports the review queue also reports open research threads. **(3) Codex, not `external`** —
+  owner's call, and correct: handing the *whole thread* outward buys nothing and costs the
+  automation — Codex reads the thread and writes its answer itself, whereas an external AI needs
+  the owner to carry every turn by copy-paste. Note this settles who **owns** the thread, not
+  whether Codex may reach outward at all — see (ii) below, which says it must.
+  **The hazard this creates is not left implicit — and it is answered with a route, not a
+  warning.** Codex's external reach is limited (the owner checked with Codex directly: some
+  constraints, not crippling), so two rules go into both docs. (i) Findings are labelled by
+  provenance — *verified against the repo* vs. *model knowledge* (what other products do, how a
+  browser behaves) — the latter being a lead to confirm, never a fact to build on; that is the
+  existing "never launder a report into a fact" rule (Session Duties) applied to research. (ii)
+  **Codex may and must delegate outward when the question needs reach it lacks** (owner decision
+  2026-07-14): where an answer turns on *current external facts* (competitor behavior, browser/
+  platform behavior today, a library's real size/API, a service's limits or pricing), Codex writes
+  the prompt for an external AI itself, the owner carries it (`.request.md` → `.answer.md`, status
+  `awaiting-external`), and Codex folds the reply into its own `## Findings`. Two design points
+  that make this more than a gesture: the trigger is the **kind of question, not Codex's
+  confidence** ("ask if unsure" would be a dead rule — models are rarely unsure); and **Codex
+  stays the owner of the answer** — the external AI is its instrument, not a second voice in the
+  thread, so a raw external reply is never pasted in as a finding of its own (nobody would then
+  own its verification), it is normalized with a third provenance label, *external AI,
+  unverified*. Also fixed, since the mechanism
+  would otherwise be decorative: **a research thread never decides anything** — its answer is
+  input to an owner decision, so the thread closes only by landing its `## Outcome` in a durable
+  doc (PROJECT_BACKLOG.md if the question stays open work — the usual case; a `draft` task file if
+  the approach is now settled; PROJECT_DECISIONS.md only if the owner actually made the call).
+  Filing "Codex said so" as a decision would be the same rubber-stamp failure the framework
+  already rejected for a final STRAT sign-off. The triggering question (client-side image
+  compression) already sits in PROJECT_BACKLOG.md with its four sub-questions — it is the first
+  candidate for a research thread, not a leftover.

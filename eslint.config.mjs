@@ -34,6 +34,8 @@ const eslintConfig = defineConfig([
             "**/features/*/validation",
             "**/features/*/validation/**",
             "**/features/*/types",
+            "**/features/*/config",
+            "**/features/*/config/**",
             "@hookform/resolvers/*",
             "zod/v3",
             "zod/v4",

@@ -17,7 +17,7 @@ import { getAdminRequestDetail } from "../requests"
 
 const STUDIO_ID = "a1b2c3d4-0000-4000-8000-000000000001"
 const REQUEST_ID = "req-uuid-1"
-const STORAGE_PATH = `${STUDIO_ID}/sub-id/reference/reference-01.jpg`
+const STORAGE_PATH = `${STUDIO_ID}/sub-id/artist_work/abc.jpg`
 
 const baseDbDetail = {
   id: REQUEST_ID,
@@ -39,7 +39,7 @@ const baseDbDetail = {
       id: "file-uuid-1",
       storagePath: STORAGE_PATH,
       originalName: "ref.jpg",
-      type: "reference",
+      type: "artist_work",
       mimeType: "image/jpeg",
       size: 512000,
     },
@@ -79,7 +79,7 @@ describe("getAdminRequestDetail", () => {
         status: "available",
         id: "file-uuid-1",
         originalName: "ref.jpg",
-        type: "reference",
+        type: "artist_work",
         signedUrl: "https://signed.example/reference-01.jpg",
       },
     ])
@@ -105,10 +105,10 @@ describe("getAdminRequestDetail", () => {
         status: "available",
         id: "file-ok",
         originalName: "ref.jpg",
-        type: "reference",
+        type: "artist_work",
         signedUrl: "https://signed.example/ok.jpg",
       },
-      { status: "unavailable", id: "file-fail", originalName: "ref.jpg", type: "reference" },
+      { status: "unavailable", id: "file-fail", originalName: "ref.jpg", type: "artist_work" },
     ])
   })
 

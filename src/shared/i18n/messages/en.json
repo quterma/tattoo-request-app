@@ -79,19 +79,21 @@
     "ideaDescriptionPlaceholder": "Tell me about your tattoo idea — style, motif, mood, anything that inspires you",
     "ideaDescriptionHint": "Minimum 10 characters",
 
-    "referenceImagesLabel": "Reference images",
-    "referenceImagesHint": "Up to {maxFiles} images. Photos of tattoos, artwork, or anything that captures the style or feel you want.",
-    "uploadFormatsHint": "JPG, PNG, WEBP, HEIC/HEIF · max 10 MB per image",
-
     "placementLabel": "Placement",
     "placementPlaceholder": "Select placement",
 
-    "placementImagesLabel": "Placement photos",
-    "placementImagesHint": "Up to {maxFiles} photos of the area where you want the tattoo.",
+    "uploadFormatsHint": "JPG, PNG, WEBP, HEIC/HEIF · max 4 MB per image",
 
-    "uploadButtonText": "Choose up to {maxFiles} images.",
-    "uploadMaxFilesWarning": "You can upload up to {maxFiles} images. Extra files were not added.",
-    "uploadRemoveFile": "Remove {fileName}",
+    "uploads": {
+      "artistWorkLabel": "Artist work you like",
+      "inspirationLabel": "External inspiration",
+      "placementPhotoLabel": "Body placement photo",
+      "buttonText": "Choose up to {maxFiles} images.",
+      "maxFilesWarning": "You can upload up to {maxFiles} images per category.",
+      "uploadingLabel": "Uploading",
+      "retryLabel": "Retry",
+      "removeFile": "Remove {fileName}"
+    },
 
     "sizeLabel": "Size",
     "sizePlaceholder": "Select size",
@@ -153,11 +155,7 @@
       "ideaDescriptionRequired": "Please describe your idea",
       "ideaDescriptionTooShort": "Please write at least 10 characters",
       "ideaDescriptionTooLong": "Description must be 2000 characters or less",
-      "referenceImagesRequired": "Please add at least one reference image",
-      "referenceImagesTooMany": "You can upload up to 3 reference images",
       "placementRequired": "Please select a placement",
-      "placementImagesRequired": "Please add at least one placement photo",
-      "placementImagesTooMany": "You can upload up to 3 placement photos",
       "sizeRequired": "Please select a size",
       "colorRequired": "Please select a color style",
       "budgetTooLong": "Budget must be 50 characters or less",
@@ -166,8 +164,11 @@
       "contactOtherTooLong": "This field must be 50 characters or less",
       "consentRequired": "You must agree to the policies to proceed",
       "atLeastOneContactRequired": "Please provide at least one way to reach you",
-      "fileTypeInvalid": "Only JPG, PNG, WEBP, HEIC/HEIF images are allowed",
-      "fileTooLarge": "Each image must be 10 MB or less"
+      "uploadTypeInvalid": "Only JPG, PNG, WEBP, HEIC/HEIF images are allowed",
+      "uploadTooLarge": "This image is over 4 MB. Please use a smaller one — a screenshot usually works.",
+      "uploadTooMany": "Too many images. Please remove some and try again.",
+      "uploadExpired": "Your images timed out while the form was open. Press Retry on each one, then send again — nothing else you typed was lost.",
+      "uploadInvalid": "Your images could not be attached. Press Retry on each one, then send again — nothing else you typed was lost."
     }
   },
   "admin": {
@@ -224,8 +225,9 @@
     "contactEmailLabel": "Email",
     "contactPhoneLabel": "Phone",
     "contactOtherLabel": "Other contact",
-    "referenceImagesTitle": "Reference images",
-    "placementImagesTitle": "Placement images",
+    "artistWorkImagesTitle": "Artist work the client likes",
+    "inspirationImagesTitle": "External inspiration",
+    "placementPhotoImagesTitle": "Body placement photos",
     "imageUnavailable": "Image unavailable",
     "imageViewerClose": "Close",
     "createdAtLabel": "Submitted",

@@ -111,9 +111,13 @@ latter case restoring the two links is a one-line change and needs no test.
 
 ---
 
-## MIME Type Verification (post-MVP)
+## MIME Type Verification — done (Stage 6 Item 1, 2026-07-14)
 
-`validateFiles` in BFF trusts `file.type` from the multipart Content-Type header (browser-provided). No magic-byte verification is done. Acceptable for MVP at low volume with a known artist audience. Add magic-byte MIME checking if abuse is observed post-launch.
+Resolved as part of the upload-flow architecture redesign: `src/bff/validateFiles.ts`
+(`validateSingleFile`) now sniffs the first bytes of every uploaded file and checks them against
+the file's own declared MIME type (JPEG/PNG/WEBP/HEIC magic numbers), not just the
+browser-provided `Content-Type` header. See PROJECT_DECISIONS.md — "Stage 6 Upload-Flow
+Architecture", §1.
 
 ---
 
@@ -210,6 +214,77 @@ orphans (still awaiting explicit owner confirmation before deletion) and the gen
 orphaned-object reconciliation/cleanup mechanism are accepted operational debt; best-effort
 in-request cleanup (`cleanupRequestFiles`) remains the only automatic mechanism. Revisit
 post-launch or if orphan volume grows.
+
+**Stage 6 Item 1 update (2026-07-14):** the upload-flow redesign (selection-time upload, before a
+request row exists) structurally increases orphan volume — anticipated and accepted by
+D-Blueprint 5(a). "Orphaned" is now precisely definable: a Storage object with no `request_files`
+row referencing its path. New expected sources beyond the original finding: abandoned forms (the
+dominant one), client-side file removal (deliberately does not delete server-side — see
+PROJECT_DECISIONS.md §4), a retry after a timeout-that-actually-succeeded, and expired upload
+handles (~2h TTL). Containment added instead of a cleanup job: a 12-object per-session Storage cap
+and an in-memory per-IP rate limit on `/api/upload`. `cleanupRequestFiles` remains the only
+automatic mechanism (now used only for the original in-request case, not on submit-time races/
+failures — see PROJECT_DECISIONS.md §5). No reconciliation job is built here; still revisit
+post-launch or if volume grows. Full context: PROJECT_DECISIONS.md — "Stage 6 Upload-Flow
+Architecture", §6.
+
+---
+
+## Unbounded automated storage growth on `/api/upload` — PRE-LAUNCH BLOCKER (Stage 6 Item 1, 2026-07-14)
+
+**Not a "revisit if abuse appears" item — a known-open hole with an owner-accepted deferral.** Raised
+by the independent Codex review of Stage 6 Item 1 (`docs/project/reviews/done/
+REVIEW_2026-07-14_stage6-item1-upload-flow.md`, Finding 3), which correctly showed that the
+architecture's stated abuse ceiling does not exist.
+
+`POST /api/upload` is public and unauthenticated. Its two supposed bounds both fail against an
+automated caller:
+
+- the **per-session object cap** (12 objects per `clientSubmissionId`) is *caller-resettable* — the
+  id is chosen by the client, so a bot mints a fresh UUID per upload and never approaches the cap.
+  It bounds an honest session, not a hostile one. (Concurrent uploads under one id can also all read
+  the same pre-upload count and pass the check before any write lands.)
+- the **in-memory per-IP rate limiter** (`src/bff/rateLimit.ts`) is per-instance on Vercel's
+  multi-instance runtime, so a distributed caller gets some multiple of the configured limit.
+
+What *does* hold: each object is size-capped (4 MB) and must be a real image (MIME allowlist +
+magic-byte check), and the bucket is private with no public read path. So the exposure is storage
+growth and cost, not data exposure.
+
+**Accepted for now** because the site is not publicly launched and takes ~5–20 real requests/week.
+**Must be closed before public launch** with one non-caller-resettable control:
+- durable rate limiting (Upstash Redis / Vercel KV) — a new paid external dependency, the reason it
+  was not done in Item 1;
+- or a server-issued upload capability carrying a durable quota;
+- or platform-level protection (e.g. Vercel WAF/bot filtering).
+
+PROJECT_DECISIONS.md — "Stage 6 Upload-Flow Architecture" §1 records the same, and explicitly
+withdraws the earlier false claim that the session cap was "the real ceiling".
+
+---
+
+## Client-side image compression for uploads — needs research (Stage 6 Item 1, 2026-07-14)
+
+Per-file upload limit is **4 MB**, forced by Vercel's 4.5 MB Function request-body ceiling (see
+PROJECT_DECISIONS.md — "Stage 6 Upload-Flow Architecture", "Per-file size ceiling"). FS §4.3 permits
+client-side downscaling/compression but Stage 6 does not implement it: an oversized file is simply
+rejected with a clear message telling the visitor to use a smaller image.
+
+**Residual risk this leaves:** a high-resolution phone photo (48 MP JPEG, or an unconverted HEIC) can
+exceed 4 MB, and the visitor must reduce it themselves. Expected inputs (Instagram screenshots,
+reference images, ordinary phone photos of a body area) sit well under the limit, so this may never
+bite — but a body-placement photo taken on a modern phone is exactly the case most likely to.
+
+**Open questions for research (owner: do not implement before these are answered):**
+- Only compress files *over* the limit, leaving everything else untouched at original quality? (The
+  artist needs full quality to judge a design — blanket compression is not acceptable.)
+- What output parameters are adequate for judging a tattoo design (long-edge px, JPEG quality)?
+- HEIC: browsers cannot decode it natively — accept the gap (iOS usually converts to JPEG on web
+  form upload anyway), or take a decoding dependency (`heic2any`, ~200 KB)?
+- What do comparable products do — is rejection-with-a-message actually the norm, making this a
+  non-problem?
+
+Not blocking Item 1: the form works and complies with FS without it.
 
 ---
 

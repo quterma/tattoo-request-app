@@ -1166,7 +1166,11 @@ consensus changed:
   mutable` finding from `supabase db advisors`) — a narrow function-definition fix, not a policy
   change
 - **Added:** Storage bucket MIME-type/file-size Dashboard limits (10 MB per file, matching the
-  existing app-layer `validateFiles` check) — Dashboard configuration, not code or policy
+  app-layer `validateFiles` check as it stood then) — Dashboard configuration, not code or policy.
+  **Superseded 2026-07-14:** the app-layer limit is now 4 MB (see "Stage 6 Upload-Flow Architecture"
+  — the Vercel Function request-body ceiling). The bucket's 10 MB Dashboard limit is left in place
+  as a harmless outer backstop — it no longer *matches* the app limit, it simply cannot be reached
+  through the application, since a >4 MB file is rejected before Storage is touched.
 - **Added:** Auth Dashboard verification (redirect URLs, custom SMTP status, rate limits, enabling
   "Leaked Password Protection") — Dashboard verification, not code
 - Everything else previously planned for Stage 5B (environment separation, production environment
@@ -1757,6 +1761,229 @@ FS §3.6/§3.7) is owner-supplied as:
   to expect on the day."
 - `aftercare.intro`: "Your tattoo is done — here's how to care for it while it heals."
 Wording is owner-adjustable without changing meaning (FS Appendix A convention); meaning is fixed.
+
+---
+
+# Stage 6 Upload-Flow Architecture — decided 2026-07-14 (Item 1)
+
+Resolves the Codex blocker finding recorded under "Stage 6 UX Blueprint Decisions — Upload-flow
+architecture prerequisite": the shipped batch-upload-at-submit, two-category pipeline could not
+support FS §4.3's selection-time upload, D-Blueprint 4's three-category stack, or D-Blueprint
+5(a)'s in-session persistence. This is a full redesign of a public, unauthenticated write surface.
+Task file: `docs/project/tasks/done/STAGE_6_TASK_01_upload_flow_architecture.md`.
+
+**This entry supersedes, in part:** "File Data Model Decisions" (the two-value `type`), "Storage
+Decisions → Folder Structure / Storage Filenames" (deterministic `{type}-{NN}.{ext}` naming),
+"Failure Handling Decisions" (all-or-nothing submission with cleanup-on-DB-failure), and narrows
+"Upload UX Decisions" ("no thumbnails" — thumbnails are now shown, rendered client-side from the
+selected `File`, not fetched). Everything else in those sections (bucket name/privacy, signed-URL
+admin access, per-file retry-with-backoff mechanics) is unchanged.
+
+## 1. Selection-time upload endpoint and authorization
+
+New `POST /api/upload` (`app/api/upload/route.ts`): one file + `clientSubmissionId` + category per
+call, uploaded via the service layer, returns an **encrypted opaque handle** — never a storage path.
+
+- **Handle = AES-256-GCM ciphertext** (`src/services/uploadToken.ts`, `UPLOAD_TOKEN_SECRET` env var,
+  32 random bytes base64, read via `requireEnv`). Plaintext payload: `{ csid, cat, path,
+  originalName, mimeType, size, iat }`. Encrypted, not merely signed: a signed-but-readable token
+  would put a storage path in the browser, violating the never-expose-storage-path rule
+  (PROJECT_ARCHITECTURE.md — Admin Dashboard Flow). TTL ~2h, checked at adoption.
+- **Why a raw `clientSubmissionId` is not sufficient authorization.** It is client-generated —
+  trusting it for adoption (e.g. "adopt everything under this session's storage prefix") would let
+  an attacker who observes a victim's id upload a file under it and have it silently adopted into
+  the victim's request, and would make the per-request file cap unenforceable (upload unboundedly,
+  submit once). The encrypted handle is the ownership token instead: only the session that uploaded
+  a file holds its handle.
+- **Progress uses `XMLHttpRequest`, not `fetch`** (`src/features/request/lib/upload.ts`): `fetch`
+  has no upload-progress event; FS §4.3 requires per-file progress. XHR also gives `abort()` for
+  the remove-while-uploading case.
+- **Thumbnails are rendered client-side** from the selected `File` via `URL.createObjectURL` —
+  no signed URL is ever issued to the public; signed URLs remain admin-only.
+- **Abuse controls**, all in the route handler (`proxy.ts` middleware excludes `/api/*`): a
+  `Content-Length` pre-check before buffering; MIME allowlist + the per-file size ceiling + a
+  magic-byte sniff checked against the file's *own* declared type (`src/bff/validateFiles.ts` — not
+  "matches any allowed format", which would let a mislabeled file through); a per-session Storage
+  object cap of 12 (`countObjectsForSubmission`); an in-memory per-IP rate limit
+  (`src/bff/rateLimit.ts`, fixed window, no new dependency).
+- **Automated bucket-filling is NOT currently bounded — owner-accepted risk, corrected 2026-07-14
+  after an independent review.** An earlier version of this entry claimed the per-session object cap
+  was "the real ceiling against bucket-filling" and that orphan growth was bounded to a few hundred
+  MB/year. **Both claims were false**, and the error is worth recording because it justified one
+  weak control with another: `clientSubmissionId` is *caller-chosen*, so an automated caller simply
+  mints a fresh UUID per upload and never approaches the 12-object cap (which bounds an honest
+  session, not a hostile one); and the only cross-session control is the in-memory per-IP limiter,
+  which is per-instance on Vercel's multi-instance runtime and therefore not a bound either.
+  Concurrent uploads under one id can also all observe the same pre-upload count and pass the cap
+  check before any write lands. **What is actually true:** the controls above bound the *size* of any
+  single object and the *shape* of what can be stored (real images only), but nothing currently
+  bounds the *number* of objects an automated caller can create. Accepted for now — the site is not
+  publicly launched, takes ~5–20 real requests/week, and the bucket is private with no read path for
+  the public. **Before public launch this must be closed** with one non-caller-resettable control
+  (durable rate limiting via Upstash/Vercel KV, a server-issued upload capability with a durable
+  quota, or platform-level protection) — tracked in PROJECT_BACKLOG.md. Adding it now was rejected
+  only on dependency cost, not on principle.
+- **Rejected: direct-to-Supabase signed upload URLs.** `storage.objects` RLS is enabled with zero
+  policies (Stage 5A, verified live) — this would require a new Storage access policy, move
+  validation client-side (bypassable by a scripted attacker), and put a storage path in the
+  browser. **Caveat added 2026-07-14:** this rejection is what forces every byte through a Vercel
+  Function, which is what caps the per-file size at 4 MB (below). If the size ceiling ever becomes
+  the binding product constraint, this is the decision to revisit — the trade is "no browser-side
+  Supabase access" against "files must fit through a serverless function".
+
+### Per-file size ceiling: 4 MB, and why it is not 10 MB (owner decision 2026-07-14)
+
+FS §4.3 originally specified 10 MB per file. **That was not deliverable on this hosting and was
+amended to 4 MB** (FS §4.3 updated first, then the code — PRD §9 change control). The constraint is
+the platform, not a preference: **Vercel Node Functions reject any request body over 4.5 MB at the
+edge, before application code runs.** Since the design routes every upload through a Function (see
+the rejection above), a 10 MB file could never reach `validateSingleFile` — the endpoint would have
+advertised a limit it structurally could not honor. Found by an independent review, not by the
+in-session pipeline: the route's unit tests call `POST()` directly with a mocked `formData()`, which
+bypasses the platform entirely, so no test could have caught it.
+
+- **Per file, not per submission.** Each file is uploaded in its own request (one file per
+  `POST /api/upload`), so 9 files of 4 MB are 9 independent requests and never sum against the
+  limit. The final `POST /api/request` carries only text plus opaque handle strings — kilobytes.
+- **Enforced on both sides**: the client checks before sending (an oversized body dies at the edge
+  with an opaque failure, so the visitor would otherwise wait out a doomed upload), and the server
+  checks again because the client cannot be trusted. The constant lives once, in
+  `src/features/request/config` — the shared, isomorphic layer both sides already read.
+- **Accepted residual risk:** a high-resolution phone photo (a 48 MP JPEG, or an unconverted HEIC)
+  can exceed 4 MB, and such a visitor must reduce it themselves — the error message says so plainly.
+  Expected inputs (Instagram screenshots, reference images, ordinary phone photos of a body area)
+  sit well under the limit. **Client-side compression is permitted by FS §4.3 but is not implemented
+  in Stage 6** — it would let a visitor submit any-size file transparently, and is the natural fix
+  if the residual risk proves real. Deferred pending research (PROJECT_BACKLOG.md): it needs a
+  decision on what to compress (only files over the limit, preserving originals otherwise), what
+  quality is adequate for judging a tattoo design, and how to handle HEIC, which browsers cannot
+  decode natively.
+
+## 2. Client-side handle and `clientSubmissionId` lifecycle
+
+A plain module-level singleton store (`src/features/request/store/requestDraft.ts`), read via
+`useSyncExternalStore` (`useRequestDraft.ts` — React built-in, no new dependency). Not React
+context: a context Provider would need mounting at the layout level, pushing a client-boundary
+concern onto the whole public layout for no benefit a module singleton doesn't already give.
+
+- `clientSubmissionId` is generated **once, lazily**, on first store access — replacing the shipped
+  `useState(() => crypto.randomUUID())` in `RequestForm.tsx`, which regenerated on every mount and
+  could not survive a navigation.
+- Per-file client state (`UploadSlot`): `slotId`, `category`, the retained `File` (for retry),
+  `previewUrl`, `status` (`uploading | uploaded | failed`), `progress`, and `handle` once uploaded.
+  No storage path is ever held client-side.
+- Module state survives client-side navigation by construction (the module isn't re-evaluated) and
+  is lost on reload — exactly D-Blueprint 5(a)'s guarantee boundary, with no invalidation code
+  needed. It also gives Item 4's Success-page gate its "refresh → redirect to Home" behavior for
+  free.
+- **Reset (`resetDraft()`) happens only on a successful submit**: revokes preview object URLs,
+  clears slots, and mints a **fresh** `clientSubmissionId` (so a second request in the same session
+  isn't collapsed into the first by idempotency). It does **not** reset on submit failure — FS §4.5
+  requires entered data and uploaded images preserved in place for retry.
+- **Implementation note for future work on this store:** with `reactCompiler: true`, every mutation
+  must replace the state object rather than mutate in place, so `getSnapshot()` stays referentially
+  stable between writes — otherwise `useSyncExternalStore` loops.
+
+## 3. Three upload categories
+
+Replaces `FileType = "reference" | "placement"` with `UPLOAD_CATEGORIES = ["artist_work",
+"inspiration", "placement_photo"]` (`src/services/storage.ts`), matching FS §4.2 fields 5–7 exactly.
+
+- `placement_photo`, not `placement` — deliberately distinct from the unrelated `requests.placement`
+  body-area column, and changing both category strings (not just adding the third) turns every
+  leftover `"reference"`/`"placement"` literal into a compile error, which is how "no code path
+  still assumes two categories" is enforced by the type checker.
+- **DB migration** `supabase/migrations/20260714025850_three_upload_categories.sql`: drops and
+  re-adds the `request_files.type` CHECK constraint (verify the auto-generated constraint name live
+  before applying, per "Database Stage Completion Criteria"), with a backfill (`reference` →
+  `artist_work`, `placement` → `placement_photo`; owner-confirmed 2026-07-14 that all live rows are
+  test/dev data, so the `reference` split is an engineering call, not a product one). **No change
+  to the `create_request` RPC** — it writes `p_files[].type` verbatim as JSONB, so only the
+  constraint changes; this avoids the Stage 5A staging-environment gate that a RPC signature/
+  behavior change would otherwise trigger.
+- **Storage path scheme changes** from `{studioId}/{csid}/{type}/{type}-{NN}.{ext}` (a positional
+  index, only knowable for a complete batch) to `{studioId}/{csid}/{category}/{uuid}.{ext}` (a
+  server-generated UUID per object) — required because selection-time upload has no batch: files
+  arrive one at a time, can be removed/retried out of order, and a positional index risks two
+  concurrent uploads computing the same name.
+- **Admin viewer** (`RequestImageViewer.tsx`) takes a `groups: { title, files }[]` prop instead of
+  fixed `referenceFiles`/`placementFiles` pairs — three groups instead of two, same signed-URL and
+  per-file-unavailable behavior.
+
+## 4. Per-file progress, retry, remove
+
+State machine per `UploadSlot`: born `uploading` on selection (FS §4.3 — upload starts immediately,
+no `idle` state), transitions to `uploaded` (handle set) or `failed` (retryable with the same
+retained `File`, producing a new object/handle) or is removed.
+
+- **Remove deletes nothing server-side** — this was reconsidered during design (an earlier instinct
+  favored immediate deletion) and rejected: a delete-by-handle endpoint would be a second public
+  unauthenticated write surface whose only job is destruction, and holding an unexpired handle would
+  be sufficient to delete — a griefing vector (replay a captured handle to destroy a victim's
+  in-flight file before they submit) that the design otherwise doesn't have. The only benefit is
+  avoiding an orphaned Storage object, and orphan cleanup is already accepted, tracked, out-of-scope
+  operational debt (PROJECT_BACKLOG.md). Not worth a new endpoint at this volume.
+- **Submit waits for in-flight uploads to settle** (owner decision — FS §4.5 is silent on this
+  specific case): the CTA shows a sending state until every `uploading` slot resolves, then submits
+  whatever is `uploaded`. A `failed` slot still never blocks submission (FS §4.5) — it is simply
+  skipped once resolved.
+
+## 5. Final-submit adoption
+
+`POST /api/request` drops the `referenceImages`/`placementImages` File fields and gains a repeated
+`uploadHandles` field. `src/bff/adoptUploads.ts` — `adoptUploadHandles(handles, clientSubmissionId,
+studioId)` — decrypts each handle, checks `payload.csid === clientSubmissionId` (**the ownership
+check**: not "any file with this id exists", but "this exact session minted this exact handle"),
+checks TTL and the studio+session path prefix, enforces per-category (≤3) and total (≤9) caps, and
+dedupes by path. Any invalid handle rejects the whole submit (400) — a server-minted handle can only
+fail these checks if tampered, replayed cross-session, or expired, so silently dropping it would make
+a visitor's images vanish from a request they believed included them; this is not the FS §4.5
+per-file-upload-failure case, which concerns upload failures, not a corrupt token.
+
+**Rejected: a `pending_uploads` DB table**, adopted by `WHERE client_submission_id = $1`. It doesn't
+by itself satisfy the ownership requirement (an attacker who knows a victim's id can still insert a
+row via `/api/upload` and have it adopted) — closing that gap still requires a per-file secret
+returned to the client, arriving back at tokens plus a table, plus a new migration/grants and an
+orphan-*row* problem on top of the orphan-*object* one. **Rejected: Storage-listing the session's
+path prefix at submit** — this is the vulnerable design the token model exists to avoid.
+
+### The regression this design required removing
+
+Both `cleanupRequestFiles()` calls in the old `app/api/request/route.ts` — on the Postgres unique-
+violation race and on a generic DB-insert failure — **are removed, not preserved**. Under batch
+upload-at-submit, cleanup-on-failure was safe because the files belonged only to the failing
+request. Under selection-time upload, files are uploaded *before* submit; on a race, the losing
+request's cleanup call would delete the **winning** request's live files, because both point at the
+identical storage paths. On a generic DB failure, the visitor's retry needs the same files at the
+same paths to succeed. `cleanupRequestFiles` survives only as the primitive for a future orphan-
+cleanup job. Regression-tested explicitly in `app/api/request/__tests__/route.test.ts`.
+
+## 6. Orphaned uploads
+
+**Orphaned** = a Storage object with no `request_files` row referencing its path. Now precisely
+definable given the handle model: abandoned forms (the dominant source, anticipated by D-Blueprint
+5(a)), client-side removes, timeout-after-success retries, expired handles, and any attacker upload
+that never gets a matching session to submit it. **No cleanup job is implemented** — already tracked
+in PROJECT_BACKLOG.md ("Orphaned Storage Objects") as post-launch/operational and explicitly out of
+this task's scope.
+
+**Honest bound (corrected 2026-07-14 — the first version of this line was wrong).** For *legitimate*
+traffic, orphan volume is small and self-limiting: the per-session object cap plus the per-file size
+ceiling bound what one honest visitor's abandoned form can leave behind, and at ~5–20 requests/week
+that is negligible. For *hostile* traffic, orphan volume is **not bounded at all** — see §1: the
+per-session cap is caller-resettable (a fresh `clientSubmissionId` per upload) and the in-memory
+rate limiter is per-instance. The earlier claim that these controls kept total orphan volume to "a
+few hundred MB/year" conflated the two cases and is withdrawn. Closing the hostile case (a
+non-caller-resettable control, pre-launch) is what makes the orphan story bounded; until then, the
+accepted position is that automated storage growth is unbounded and the mitigation is that the site
+is unlaunched.
+
+## Dependencies
+
+**No new dependency.** AES-256-GCM via Node's built-in `node:crypto`; progress/abort via
+`XMLHttpRequest`; the client store via React's built-in `useSyncExternalStore`; rate limiting via a
+module-level `Map`. One new required env var: `UPLOAD_TOKEN_SECRET` (documented in `.env.example`;
+rotating it invalidates in-flight handles, bounded by the ~2h TTL).
 
 ---
 

@@ -7,6 +7,10 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": resolve(__dirname, "src"),
+      // server-only throws if imported outside a React Server Component. Under vitest
+      // (jsdom) there is no RSC boundary, so alias it to a no-op; the server/client
+      // split is enforced by Next at build time, not by tests.
+      "server-only": resolve(__dirname, "src/shared/test/serverOnlyStub.ts"),
     },
   },
   test: {

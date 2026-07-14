@@ -46,8 +46,14 @@ export function RequestDetail({ request, locale, t, updateStatusAction }: Reques
     ? t(`colorLabels.${request.color}`)
     : request.color
 
-  const referenceFiles = request.files.filter((file) => file.type === "reference")
-  const placementFiles = request.files.filter((file) => file.type === "placement")
+  const imageGroups = [
+    { title: t("artistWorkImagesTitle"), files: request.files.filter((f) => f.type === "artist_work") },
+    { title: t("inspirationImagesTitle"), files: request.files.filter((f) => f.type === "inspiration") },
+    {
+      title: t("placementPhotoImagesTitle"),
+      files: request.files.filter((f) => f.type === "placement_photo"),
+    },
+  ]
 
   return (
     <main>
@@ -145,10 +151,7 @@ export function RequestDetail({ request, locale, t, updateStatusAction }: Reques
 
       <div className="mt-6">
         <RequestImageViewer
-          referenceFiles={referenceFiles}
-          placementFiles={placementFiles}
-          referenceImagesTitle={t("referenceImagesTitle")}
-          placementImagesTitle={t("placementImagesTitle")}
+          groups={imageGroups}
           unavailableLabel={t("imageUnavailable")}
           closeLabel={t("imageViewerClose")}
         />

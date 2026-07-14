@@ -3,27 +3,34 @@
 import { useEffect, useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useTranslations } from "next-intl"
-import { useController, useForm, useWatch } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
 import { API_ERROR_CODES, REQUEST_FIELDS } from "@/shared/api"
-import { getContactGroupError, getFieldError } from "../lib/errors"
+import { getContactGroupError, getFieldError, getValidationKeyMessage } from "../lib/errors"
 import { COLOR_OPTIONS, MAX_FILES_PER_FIELD, PLACEMENT_OPTIONS, SIZE_OPTIONS } from "../config"
+import {
+  getClientSubmissionId,
+  invalidateUploadedSlots,
+  resetDraft,
+  useRequestDraft,
+} from "../store"
 import type { RequestFormData, RequestFormInput } from "../types"
 import { requestFormSchema } from "../validation"
 import { Button } from "./Button"
 import { CheckboxInput } from "./CheckboxInput"
-import { FileUploadInput } from "./FileUploadInput"
 import { SelectInput } from "./SelectInput"
 import { TextInput } from "./TextInput"
 import { TextareaInput } from "./TextareaInput"
+import { UploadCategoryInput } from "./UploadCategoryInput"
 
 type SubmitStatus = "idle" | "submitting" | "success" | "error"
 
 export function RequestForm() {
   const t = useTranslations("request")
 
-  const [clientSubmissionId] = useState(() => crypto.randomUUID())
+  const draft = useRequestDraft()
   const [status, setStatus] = useState<SubmitStatus>("idle")
   const [referenceCode, setReferenceCode] = useState<string | null>(null)
+  const [uploadHandlesError, setUploadHandlesError] = useState<string | null>(null)
 
   const {
     register,
@@ -37,9 +44,7 @@ export function RequestForm() {
     defaultValues: {
       clientName: "",
       ideaDescription: "",
-      referenceImages: [],
       placement: "",
-      placementImages: [],
       size: "",
       color: "",
       budget: "",
@@ -50,9 +55,6 @@ export function RequestForm() {
     },
   })
 
-  const referenceImages = useController({ name: "referenceImages", control })
-  const placementImages = useController({ name: "placementImages", control })
-
   const [email, phone, contactOther] = useWatch({ control, name: ["email", "phone", "contactOther"] })
   useEffect(() => {
     if (errors.contactOther?.message && (email || phone || contactOther)) {
@@ -60,14 +62,20 @@ export function RequestForm() {
     }
   }, [email, phone, contactOther, errors.contactOther?.message, clearErrors])
 
+  // Submit waits for any in-flight upload to settle: a file the visitor watched
+  // uploading must not be silently dropped. A failed upload still never blocks
+  // submission (FS §4.5) — it resolves to "failed" and is skipped.
+  const hasUploadingSlot = draft.slots.some((slot) => slot.status === "uploading")
+
   async function onSubmit(data: RequestFormData) {
     setStatus("submitting")
+    setUploadHandlesError(null)
 
     try {
       const formData = new FormData()
       const f = REQUEST_FIELDS
 
-      formData.append(f.clientSubmissionId, clientSubmissionId)
+      formData.append(f.clientSubmissionId, getClientSubmissionId())
       formData.append(f.clientName, data.clientName)
       formData.append(f.ideaDescription, data.ideaDescription)
       formData.append(f.placement, data.placement)
@@ -80,11 +88,10 @@ export function RequestForm() {
       if (data.phone) formData.append(f.phone, data.phone)
       if (data.contactOther) formData.append(f.contactOther, data.contactOther)
 
-      for (const file of data.referenceImages) {
-        formData.append(f.referenceImages, file)
-      }
-      for (const file of data.placementImages) {
-        formData.append(f.placementImages, file)
+      for (const slot of draft.slots) {
+        if (slot.status === "uploaded" && slot.handle) {
+          formData.append(f.uploadHandles, slot.handle)
+        }
       }
 
       const res = await fetch("/api/request", { method: "POST", body: formData })
@@ -93,8 +100,24 @@ export function RequestForm() {
       if (response.ok === true) {
         setReferenceCode(response.referenceCode ?? null)
         setStatus("success")
+        resetDraft()
       } else if (response.error?.code === API_ERROR_CODES.VALIDATION_ERROR) {
         const fieldErrors = response.error.fieldErrors as Record<string, string[]>
+
+        // uploadHandles is not a rendered form control, so setError() on it would be
+        // invisible — the visitor would press Submit and see nothing happen. The handles
+        // the form holds are dead (expired TTL or otherwise unadoptable), so surface it as
+        // a recoverable state instead: flip the uploaded slots back to `failed` (their
+        // per-file Retry re-uploads the retained File and mints a fresh handle) and show a
+        // message saying what to do.
+        const uploadError = fieldErrors[REQUEST_FIELDS.uploadHandles]?.[0]
+        if (uploadError) {
+          invalidateUploadedSlots(uploadError)
+          setUploadHandlesError(uploadError)
+          setStatus("idle")
+          return
+        }
+
         const fields = Object.keys(fieldErrors) as (keyof RequestFormInput)[]
         if (fields.length > 0) {
           for (const field of fields) {
@@ -146,6 +169,7 @@ export function RequestForm() {
   }
 
   const isSubmitting = status === "submitting"
+  const uploadHint = `${t("uploads.buttonText", { maxFiles: MAX_FILES_PER_FIELD })} ${t("uploadFormatsHint")}`
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-6">
@@ -168,20 +192,6 @@ export function RequestForm() {
         {...register("ideaDescription")}
       />
 
-      {/* Reference images */}
-      <FileUploadInput
-        id="referenceImages"
-        label={t("referenceImagesLabel")}
-        hint={`${t("referenceImagesHint", { maxFiles: MAX_FILES_PER_FIELD })} ${t("uploadFormatsHint")}`}
-        buttonText={t("uploadButtonText", { maxFiles: MAX_FILES_PER_FIELD })}
-        maxFilesWarning={t("uploadMaxFilesWarning", { maxFiles: MAX_FILES_PER_FIELD })}
-        removeFileLabel={(fileName) => t("uploadRemoveFile", { fileName })}
-        error={err("referenceImages")}
-        value={referenceImages.field.value ?? []}
-        onChange={referenceImages.field.onChange}
-        maxFiles={MAX_FILES_PER_FIELD}
-      />
-
       {/* Placement */}
       <SelectInput
         id="placement"
@@ -192,18 +202,43 @@ export function RequestForm() {
         {...register("placement")}
       />
 
-      {/* Placement images */}
-      <FileUploadInput
-        id="placementImages"
-        label={t("placementImagesLabel")}
-        hint={`${t("placementImagesHint", { maxFiles: MAX_FILES_PER_FIELD })} ${t("uploadFormatsHint")}`}
-        buttonText={t("uploadButtonText", { maxFiles: MAX_FILES_PER_FIELD })}
-        maxFilesWarning={t("uploadMaxFilesWarning", { maxFiles: MAX_FILES_PER_FIELD })}
-        removeFileLabel={(fileName) => t("uploadRemoveFile", { fileName })}
-        error={err("placementImages")}
-        value={placementImages.field.value ?? []}
-        onChange={placementImages.field.onChange}
-        maxFiles={MAX_FILES_PER_FIELD}
+      {/* Reference uploads — three categories (FS §4.2 fields 5–7). The motivation-card
+          copy (FS Appendix A.1) is added in Item 3; this ships the upload plumbing. */}
+      <UploadCategoryInput
+        id="upload-artist_work"
+        category="artist_work"
+        label={t("uploads.artistWorkLabel")}
+        buttonText={t("uploads.buttonText", { maxFiles: MAX_FILES_PER_FIELD })}
+        hint={uploadHint}
+        uploadingLabel={t("uploads.uploadingLabel")}
+        errorMessage={(errorKey) => getValidationKeyMessage(errorKey, t)}
+        retryLabel={t("uploads.retryLabel")}
+        removeFileLabel={(fileName) => t("uploads.removeFile", { fileName })}
+        maxFilesWarning={t("uploads.maxFilesWarning", { maxFiles: MAX_FILES_PER_FIELD })}
+      />
+      <UploadCategoryInput
+        id="upload-inspiration"
+        category="inspiration"
+        label={t("uploads.inspirationLabel")}
+        buttonText={t("uploads.buttonText", { maxFiles: MAX_FILES_PER_FIELD })}
+        hint={uploadHint}
+        uploadingLabel={t("uploads.uploadingLabel")}
+        errorMessage={(errorKey) => getValidationKeyMessage(errorKey, t)}
+        retryLabel={t("uploads.retryLabel")}
+        removeFileLabel={(fileName) => t("uploads.removeFile", { fileName })}
+        maxFilesWarning={t("uploads.maxFilesWarning", { maxFiles: MAX_FILES_PER_FIELD })}
+      />
+      <UploadCategoryInput
+        id="upload-placement_photo"
+        category="placement_photo"
+        label={t("uploads.placementPhotoLabel")}
+        buttonText={t("uploads.buttonText", { maxFiles: MAX_FILES_PER_FIELD })}
+        hint={uploadHint}
+        uploadingLabel={t("uploads.uploadingLabel")}
+        errorMessage={(errorKey) => getValidationKeyMessage(errorKey, t)}
+        retryLabel={t("uploads.retryLabel")}
+        removeFileLabel={(fileName) => t("uploads.removeFile", { fileName })}
+        maxFilesWarning={t("uploads.maxFilesWarning", { maxFiles: MAX_FILES_PER_FIELD })}
       />
 
       {/* Size */}
@@ -278,13 +313,22 @@ export function RequestForm() {
         {...register("consent")}
       />
 
+      {/* The server rejected this submit's upload handles (expired or unadoptable). The
+          affected slots have been flipped back to `failed` above, so each shows its own
+          Retry control; this line tells the visitor what happened and what to do. */}
+      {uploadHandlesError && (
+        <p role="alert" className="text-sm text-destructive">
+          {getValidationKeyMessage(uploadHandlesError, t)}
+        </p>
+      )}
+
       {status === "error" && (
         <p role="alert" className="text-sm text-destructive">
           {t("errorMessage")}
         </p>
       )}
 
-      <Button type="submit" disabled={isSubmitting}>
+      <Button type="submit" disabled={isSubmitting || hasUploadingSlot}>
         {isSubmitting ? t("submitButtonLoading") : t("submitButton")}
       </Button>
     </form>

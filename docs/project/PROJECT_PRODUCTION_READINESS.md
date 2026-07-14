@@ -51,6 +51,13 @@ Complete before public launch:
 - No secrets committed to the repository
 - `.env*` files confirmed in `.gitignore`
 - `SUPABASE_SECRET_KEY` is `service_role` key — never exposed to client
+- **`UPLOAD_TOKEN_SECRET` — NEW, required, added by Stage 6 Item 1 (2026-07-14). OWNER ACTION:
+  must be set in Vercel before the next deploy or the build fails** (`requireEnv` throws at module
+  load — deliberately fails loudly, not silently). Generate a fresh value for production (do not
+  reuse the local dev value): `openssl rand -base64 32` → 32 random bytes, base64. It encrypts the
+  opaque upload handles handed to public visitors (AES-256-GCM, `src/services/uploadToken.ts`).
+  Rotating it invalidates all in-flight handles — a visitor mid-form must re-add their images;
+  blast radius is bounded by the ~2 h handle TTL, so rotation is safe, just briefly disruptive.
 
 ## Supabase RLS Review
 
@@ -136,10 +143,31 @@ Before public launch:
 
 ## Upload Security Review
 
-- File size limit enforced server-side (10 MB per file)
-- MIME type validated server-side against allow-list
-- Magic-byte verification not implemented (documented in PROJECT_BACKLOG.md — acceptable for MVP at low volume)
-- File count per field enforced by schema validation before upload
+**Rewritten 2026-07-14** — Stage 6 Item 1 replaced the batch-upload-at-submit pipeline with
+selection-time upload (`POST /api/upload`, public and unauthenticated). See PROJECT_DECISIONS.md —
+"Stage 6 Upload-Flow Architecture".
+
+- File size limit enforced **both client- and server-side (4 MB per file** — amended from 10 MB;
+  bounded by Vercel's 4.5 MB Function request-body ceiling, not by preference). Per file, not per
+  submission.
+- MIME type validated server-side against an allow-list
+- **Magic-byte verification implemented** — the first bytes of every upload are checked against the
+  file's *own* declared type, so a mislabeled non-image is rejected (closes the former backlog item)
+- File count enforced server-side at adoption (≤3 per category, ≤9 total), not only by client schema
+- Uploaded files are bound to their session by an **encrypted, server-minted handle** (AES-256-GCM);
+  final submit adopts only handles minted for the submitting `clientSubmissionId`, so one visitor
+  cannot attach another's upload. Storage paths never reach the client.
+- ❌ **OPEN — PRE-LAUNCH BLOCKER: automated storage growth is unbounded.** The per-session object cap
+  is caller-resettable (`clientSubmissionId` is chosen by the client — a bot mints a fresh UUID per
+  upload) and the per-IP rate limiter is in-memory, therefore per-instance on Vercel. Objects are
+  still size-capped and must be real images, and the bucket is private with no public read path — so
+  the exposure is storage cost, not data exposure. **Must be closed before public launch** with one
+  non-caller-resettable control (durable rate limiting via Upstash/Vercel KV, a server-issued upload
+  capability with a durable quota, or platform-level bot protection). Tracked in PROJECT_BACKLOG.md;
+  folded into Stage 6 Item 10.
+- ⚠️ **No cleanup job for orphaned Storage objects** (uploads never submitted). Pre-existing,
+  post-launch/operational — but selection-time upload structurally increases their volume. Tracked
+  in PROJECT_BACKLOG.md.
 
 ## API Validation Boundary Review
 

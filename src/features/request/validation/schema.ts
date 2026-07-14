@@ -1,5 +1,5 @@
 import { z } from "zod/v3"
-import { COLOR_OPTIONS, MAX_FILES_PER_FIELD, PLACEMENT_OPTIONS, SIZE_OPTIONS } from "../config"
+import { COLOR_OPTIONS, MAX_FILES_TOTAL, PLACEMENT_OPTIONS, SIZE_OPTIONS } from "../config"
 import { VALIDATION_KEYS as K } from "./validationKeys"
 
 export const requestFormSchema = z
@@ -13,19 +13,19 @@ export const requestFormSchema = z
       .string({ required_error: K.IDEA_REQUIRED })
       .min(10, { message: K.IDEA_TOO_SHORT })
       .max(2000, { message: K.IDEA_TOO_LONG }),
-    referenceImages: z
-      .array(z.instanceof(File))
-      .min(1, { message: K.REFERENCE_IMAGES_REQUIRED })
-      .max(MAX_FILES_PER_FIELD, { message: K.REFERENCE_IMAGES_TOO_MANY }),
     placement: z
       .string()
       .refine((v) => (PLACEMENT_OPTIONS as readonly string[]).includes(v) && v !== "", {
         message: K.PLACEMENT_REQUIRED,
       }),
-    placementImages: z
-      .array(z.instanceof(File))
-      .min(1, { message: K.PLACEMENT_IMAGES_REQUIRED })
-      .max(MAX_FILES_PER_FIELD, { message: K.PLACEMENT_IMAGES_TOO_MANY }),
+    // Opaque upload handles (services/uploadToken.ts). Uploads are optional
+    // (FS §4.2 fields 5–7); the per-category cap and ownership binding are
+    // enforced server-side in bff/adoptUploads.ts, not here. The overall
+    // ceiling is a cheap guard against an oversized payload.
+    uploadHandles: z
+      .array(z.string())
+      .max(MAX_FILES_TOTAL, { message: K.UPLOAD_TOO_MANY })
+      .optional(),
     size: z
       .string()
       .refine((v) => (SIZE_OPTIONS as readonly string[]).includes(v) && v !== "", {

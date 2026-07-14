@@ -96,34 +96,23 @@ describe("parseRequestFormData", () => {
     expect(result.contactOther).toBe("telegram")
   })
 
-  it("returns empty arrays when no file entries are present", () => {
+  it("returns an empty array when no upload handles are present", () => {
     const fd = makeFormData(baseFields())
 
     const result = parseRequestFormData(fd)
 
-    expect(result.referenceImages).toEqual([])
-    expect(result.placementImages).toEqual([])
+    expect(result.uploadHandles).toEqual([])
   })
 
-  it("collects multiple file entries into arrays", () => {
-    const fd = new FormData()
-    for (const [k, v] of Object.entries(baseFields())) fd.append(k, v)
-
-    const file1 = new File(["a"], "ref1.png", { type: "image/png" })
-    const file2 = new File(["b"], "ref2.png", { type: "image/png" })
-    const file3 = new File(["c"], "place1.png", { type: "image/png" })
-
-    fd.append("referenceImages", file1)
-    fd.append("referenceImages", file2)
-    fd.append("placementImages", file3)
+  it("collects multiple upload handles into an array", () => {
+    const fd = makeFormData({
+      ...baseFields(),
+      uploadHandles: ["handle-a", "handle-b", "handle-c"],
+    })
 
     const result = parseRequestFormData(fd)
 
-    expect(result.referenceImages).toHaveLength(2)
-    expect(result.referenceImages[0].name).toBe("ref1.png")
-    expect(result.referenceImages[1].name).toBe("ref2.png")
-    expect(result.placementImages).toHaveLength(1)
-    expect(result.placementImages[0].name).toBe("place1.png")
+    expect(result.uploadHandles).toEqual(["handle-a", "handle-b", "handle-c"])
   })
 })
 

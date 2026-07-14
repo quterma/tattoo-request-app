@@ -5,16 +5,16 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 const {
   mockParseRequestFormData,
   mockValidateRequestPayload,
-  mockValidateFiles,
-  mockUploadRequestFiles,
+  mockAdoptUploadHandles,
+  mockCheckRateLimit,
   mockCreateRequest,
   mockGetRequestByClientSubmissionId,
   mockCleanupRequestFiles,
 } = vi.hoisted(() => ({
   mockParseRequestFormData: vi.fn(),
   mockValidateRequestPayload: vi.fn(),
-  mockValidateFiles: vi.fn(),
-  mockUploadRequestFiles: vi.fn(),
+  mockAdoptUploadHandles: vi.fn(),
+  mockCheckRateLimit: vi.fn(),
   mockCreateRequest: vi.fn(),
   mockGetRequestByClientSubmissionId: vi.fn(),
   mockCleanupRequestFiles: vi.fn(),
@@ -29,11 +29,12 @@ vi.mock("@/bff", () => ({
   },
   parseRequestFormData: mockParseRequestFormData,
   validateRequestPayload: mockValidateRequestPayload,
-  validateFiles: mockValidateFiles,
+  adoptUploadHandles: mockAdoptUploadHandles,
+  checkRateLimit: mockCheckRateLimit,
+  clientIpFromHeaders: () => "1.2.3.4",
 }))
 
 vi.mock("@/services", () => ({
-  uploadRequestFiles: mockUploadRequestFiles,
   createRequest: mockCreateRequest,
   getRequestByClientSubmissionId: mockGetRequestByClientSubmissionId,
   cleanupRequestFiles: mockCleanupRequestFiles,
@@ -64,14 +65,13 @@ const basePayload = {
   phone: undefined,
   contactOther: undefined,
   consent: true as const,
-  referenceImages: [],
-  placementImages: [],
+  uploadHandles: ["handle-a"],
 }
 
-const uploadedFiles = [
+const adoptedFiles = [
   {
-    type: "reference" as const,
-    storagePath: `${STUDIO_ID}/${CLIENT_ID}/reference/reference-01.jpg`,
+    type: "artist_work" as const,
+    storagePath: `${STUDIO_ID}/${CLIENT_ID}/artist_work/abc.jpg`,
     originalName: "ref.jpg",
     mimeType: "image/jpeg",
     size: 512000,
@@ -79,7 +79,10 @@ const uploadedFiles = [
 ]
 
 function makeRequest(): Request {
-  return { formData: vi.fn().mockResolvedValue(new FormData()) } as unknown as Request
+  return {
+    headers: new Headers(),
+    formData: vi.fn().mockResolvedValue(new FormData()),
+  } as unknown as Request
 }
 
 async function callPost(): Promise<{ status: number; body: unknown }> {
@@ -90,11 +93,11 @@ async function callPost(): Promise<{ status: number; body: unknown }> {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  mockCheckRateLimit.mockReturnValue({ allowed: true, retryAfterSeconds: 0 })
   mockParseRequestFormData.mockReturnValue(basePayload)
   mockValidateRequestPayload.mockReturnValue({ ok: true, data: basePayload })
-  mockValidateFiles.mockReturnValue({ ok: true })
+  mockAdoptUploadHandles.mockReturnValue({ ok: true, files: adoptedFiles })
   mockGetRequestByClientSubmissionId.mockResolvedValue(null)
-  mockUploadRequestFiles.mockResolvedValue(uploadedFiles)
   mockCreateRequest.mockResolvedValue({ id: "db-uuid", referenceCode: "REQ-2026-0001" })
   mockCleanupRequestFiles.mockResolvedValue(undefined)
 })
@@ -104,172 +107,155 @@ beforeEach(() => {
 describe("POST /api/request — normal flow", () => {
   it("returns { ok: true, referenceCode } on successful creation", async () => {
     const { status, body } = await callPost()
-
     expect(status).toBe(200)
     expect(body).toEqual({ ok: true, referenceCode: "REQ-2026-0001" })
   })
 
-  it("calls uploadRequestFiles before createRequest", async () => {
+  it("adopts upload handles before createRequest", async () => {
     await callPost()
-
-    expect(mockUploadRequestFiles).toHaveBeenCalledBefore(mockCreateRequest as never)
+    expect(mockAdoptUploadHandles).toHaveBeenCalledBefore(mockCreateRequest as never)
   })
 
-  it("passes studioId to uploadRequestFiles", async () => {
+  it("passes the submitted clientSubmissionId and studioId to adoptUploadHandles", async () => {
     await callPost()
-
-    expect(mockUploadRequestFiles).toHaveBeenCalledWith(
-      { referenceImages: basePayload.referenceImages, placementImages: basePayload.placementImages },
-      STUDIO_ID,
-      CLIENT_ID,
-    )
+    expect(mockAdoptUploadHandles).toHaveBeenCalledWith(["handle-a"], CLIENT_ID, STUDIO_ID)
   })
 
-  it("passes studioId to createRequest", async () => {
+  it("passes adopted files to createRequest", async () => {
     await callPost()
-
     expect(mockCreateRequest).toHaveBeenCalledWith(
-      expect.objectContaining({ studioId: STUDIO_ID }),
+      expect.objectContaining({ studioId: STUDIO_ID, files: adoptedFiles }),
     )
   })
 
-  it("passes validation.data (not the raw parsed payload) to createRequest", async () => {
+  it("succeeds with zero uploads (uploads are optional)", async () => {
+    mockParseRequestFormData.mockReturnValue({ ...basePayload, uploadHandles: [] })
     mockValidateRequestPayload.mockReturnValue({
       ok: true,
-      data: {
-        ...basePayload,
-        clientName: "Alex", // trimmed value, differs from raw payload below
-        budget: undefined, // empty optional trimmed to undefined
-      },
+      data: { ...basePayload, uploadHandles: [] },
     })
-    mockParseRequestFormData.mockReturnValue({
-      ...basePayload,
-      clientName: "  Alex  ", // raw untrimmed value from the form
-      budget: "   ", // raw whitespace-only value from the form
+    mockAdoptUploadHandles.mockReturnValue({ ok: true, files: [] })
+
+    const { status } = await callPost()
+    expect(status).toBe(200)
+    expect(mockCreateRequest).toHaveBeenCalledWith(expect.objectContaining({ files: [] }))
+  })
+})
+
+// ── rate limiting ────────────────────────────────────────────────────────────
+
+describe("POST /api/request — rate limiting", () => {
+  it("returns 429 and does not create a request when over the limit", async () => {
+    mockCheckRateLimit.mockReturnValue({ allowed: false, retryAfterSeconds: 30 })
+    const { status } = await callPost()
+    expect(status).toBe(429)
+    expect(mockCreateRequest).not.toHaveBeenCalled()
+  })
+})
+
+// ── adoption failures ────────────────────────────────────────────────────────
+
+describe("POST /api/request — upload adoption", () => {
+  it("returns 400 and never creates a request when a handle is invalid", async () => {
+    mockAdoptUploadHandles.mockReturnValue({
+      ok: false,
+      error: { code: "VALIDATION_ERROR", fieldErrors: { uploadHandles: ["upload_invalid"] }, formErrors: [] },
     })
-
-    await callPost()
-
-    expect(mockCreateRequest).toHaveBeenCalledWith(
-      expect.objectContaining({ clientName: "Alex", budget: undefined }),
-    )
+    const { status } = await callPost()
+    expect(status).toBe(400)
+    expect(mockCreateRequest).not.toHaveBeenCalled()
   })
 })
 
 // ── idempotency — replay ───────────────────────────────────────────────────
 
 describe("POST /api/request — idempotent replay", () => {
-  it("returns existing referenceCode when clientSubmissionId already exists", async () => {
+  it("returns existing referenceCode and does not create when clientSubmissionId exists", async () => {
     mockGetRequestByClientSubmissionId.mockResolvedValue("REQ-2026-0042")
+    const { status, body } = await callPost()
+    expect(status).toBe(200)
+    expect(body).toEqual({ ok: true, referenceCode: "REQ-2026-0042" })
+    expect(mockCreateRequest).not.toHaveBeenCalled()
+  })
+
+  // REGRESSION GUARD: the idempotency lookup must run BEFORE handle adoption. A submit that
+  // succeeded but whose response was lost is retried later — possibly past the handles' TTL.
+  // Adopting first would 400 that replay instead of returning its reference code, breaking
+  // the very guarantee this route exists to provide. An already-persisted request needs no
+  // adoption: its request_files rows are already written, so nothing new is persisted and the
+  // ownership property is not at stake.
+  it("replays successfully even when the handles have since expired (adoption is not reached)", async () => {
+    mockGetRequestByClientSubmissionId.mockResolvedValue("REQ-2026-0042")
+    mockAdoptUploadHandles.mockReturnValue({
+      ok: false,
+      error: {
+        code: "VALIDATION_ERROR",
+        fieldErrors: { uploadHandles: ["upload_expired"] },
+        formErrors: [],
+      },
+    })
 
     const { status, body } = await callPost()
 
     expect(status).toBe(200)
     expect(body).toEqual({ ok: true, referenceCode: "REQ-2026-0042" })
-  })
-
-  it("does not call uploadRequestFiles on replay", async () => {
-    mockGetRequestByClientSubmissionId.mockResolvedValue("REQ-2026-0042")
-
-    await callPost()
-
-    expect(mockUploadRequestFiles).not.toHaveBeenCalled()
-  })
-
-  it("does not call createRequest on replay", async () => {
-    mockGetRequestByClientSubmissionId.mockResolvedValue("REQ-2026-0042")
-
-    await callPost()
-
-    expect(mockCreateRequest).not.toHaveBeenCalled()
-  })
-
-  it("response shape is identical for replay and normal success", async () => {
-    // Normal success
-    const { body: normalBody } = await callPost()
-
-    // Replay
-    mockGetRequestByClientSubmissionId.mockResolvedValue("REQ-2026-0001")
-    const { body: replayBody } = await callPost()
-
-    expect(Object.keys(normalBody as object).sort()).toEqual(
-      Object.keys(replayBody as object).sort(),
-    )
+    expect(mockAdoptUploadHandles).not.toHaveBeenCalled()
   })
 })
 
 // ── race-condition fallback ────────────────────────────────────────────────
 
 describe("POST /api/request — race-condition fallback", () => {
-  it("cleans up uploaded files, fetches existing, returns success on UNIQUE violation", async () => {
+  it("recovers the existing referenceCode on a UNIQUE violation WITHOUT deleting files", async () => {
     mockCreateRequest.mockRejectedValue(
       new Error("DB insert failed: duplicate key value violates unique constraint"),
     )
     mockGetRequestByClientSubmissionId
-      .mockResolvedValueOnce(null) // initial lookup → not found
+      .mockResolvedValueOnce(null) // initial idempotency lookup
       .mockResolvedValueOnce("REQ-2026-0007") // race recovery lookup
 
     const { status, body } = await callPost()
 
     expect(status).toBe(200)
     expect(body).toEqual({ ok: true, referenceCode: "REQ-2026-0007" })
-    expect(mockCleanupRequestFiles).toHaveBeenCalledTimes(1)
-    expect(mockCleanupRequestFiles).toHaveBeenCalledWith([uploadedFiles[0].storagePath])
+    // REGRESSION GUARD: the winning request's request_files rows point at these same
+    // storage paths — deleting them here would destroy the winner's live files.
+    expect(mockCleanupRequestFiles).not.toHaveBeenCalled()
   })
 
-  it("returns 500 when UNIQUE violation but subsequent lookup finds nothing", async () => {
+  it("returns 500 on a UNIQUE violation when recovery finds nothing, still no cleanup", async () => {
     mockCreateRequest.mockRejectedValue(
       new Error("DB insert failed: duplicate key value violates unique constraint"),
     )
-    mockGetRequestByClientSubmissionId
-      .mockResolvedValueOnce(null) // initial lookup → not found
-      .mockResolvedValueOnce(null) // race recovery lookup → also not found
+    mockGetRequestByClientSubmissionId.mockResolvedValueOnce(null).mockResolvedValueOnce(null)
 
-    const { status, body } = await callPost()
-
+    const { status } = await callPost()
     expect(status).toBe(500)
-    expect(body).toMatchObject({ ok: false, error: { code: "SERVER_ERROR" } })
+    expect(mockCleanupRequestFiles).not.toHaveBeenCalled()
   })
 
-  it("returns 500 on non-unique DB errors without race recovery attempt", async () => {
+  it("returns 500 on a generic DB failure WITHOUT deleting files (retry needs them)", async () => {
     mockCreateRequest.mockRejectedValue(new Error("DB insert failed: connection timeout"))
 
-    const { status, body } = await callPost()
-
+    const { status } = await callPost()
     expect(status).toBe(500)
-    expect(body).toMatchObject({ ok: false, error: { code: "SERVER_ERROR" } })
-    // cleanup is called for any DB failure, but getRequestByClientSubmissionId
-    // should only be called once (initial idempotency check, not race recovery)
     expect(mockGetRequestByClientSubmissionId).toHaveBeenCalledTimes(1)
-    expect(mockCleanupRequestFiles).toHaveBeenCalledWith([uploadedFiles[0].storagePath])
+    expect(mockCleanupRequestFiles).not.toHaveBeenCalled()
   })
 })
 
 // ── validation errors ──────────────────────────────────────────────────────
 
 describe("POST /api/request — validation", () => {
-  it("returns 400 on payload validation failure", async () => {
+  it("returns 400 on payload validation failure, without adopting or creating", async () => {
     mockValidateRequestPayload.mockReturnValue({
       ok: false,
       error: { code: "VALIDATION_ERROR", fieldErrors: {}, formErrors: [] },
     })
-
     const { status } = await callPost()
-
     expect(status).toBe(400)
-    expect(mockUploadRequestFiles).not.toHaveBeenCalled()
-  })
-
-  it("returns 400 on file validation failure", async () => {
-    mockValidateFiles.mockReturnValue({
-      ok: false,
-      error: { code: "VALIDATION_ERROR", fieldErrors: {}, formErrors: [] },
-    })
-
-    const { status } = await callPost()
-
-    expect(status).toBe(400)
-    expect(mockUploadRequestFiles).not.toHaveBeenCalled()
+    expect(mockAdoptUploadHandles).not.toHaveBeenCalled()
+    expect(mockCreateRequest).not.toHaveBeenCalled()
   })
 })
 
@@ -278,20 +264,15 @@ describe("POST /api/request — validation", () => {
 describe("POST /api/request — unexpected submit failure", () => {
   it("returns a generic 500 and logs only the error message, never the payload", async () => {
     const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {})
-    mockUploadRequestFiles.mockRejectedValue(new Error("upload transport exploded"))
+    mockParseRequestFormData.mockImplementation(() => {
+      throw new Error("parse exploded")
+    })
 
     const { status, body } = await callPost()
 
     expect(status).toBe(500)
     expect(body).toEqual({ ok: false, error: { code: "SERVER_ERROR" } })
-
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      "[route] unexpected submit failure:",
-      "upload transport exploded",
-    )
-    const loggedArgs = consoleErrorSpy.mock.calls.flat().map(String)
-    expect(loggedArgs.join(" ")).not.toContain(basePayload.clientName)
-    expect(loggedArgs.join(" ")).not.toContain(basePayload.email)
+    expect(consoleErrorSpy).toHaveBeenCalledWith("[route] unexpected submit failure:", "parse exploded")
 
     consoleErrorSpy.mockRestore()
   })

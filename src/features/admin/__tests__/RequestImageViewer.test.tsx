@@ -36,19 +36,29 @@ vi.mock("yet-another-react-lightbox", () => ({
   },
 }))
 
-const referenceFiles: AdminRequestFile[] = [
+const artistWorkFiles: AdminRequestFile[] = [
   {
     status: "available",
     id: "ref-1",
     originalName: "reference-01.jpg",
-    type: "reference",
+    type: "artist_work",
     signedUrl: "https://storage.example.com/signed/reference-01.jpg?token=abc",
   },
   {
     status: "unavailable",
     id: "ref-2",
     originalName: "reference-02.jpg",
-    type: "reference",
+    type: "artist_work",
+  },
+]
+
+const inspirationFiles: AdminRequestFile[] = [
+  {
+    status: "available",
+    id: "insp-1",
+    originalName: "inspiration-01.jpg",
+    type: "inspiration",
+    signedUrl: "https://storage.example.com/signed/inspiration-01.jpg?token=insp",
   },
 ]
 
@@ -57,7 +67,7 @@ const placementFiles: AdminRequestFile[] = [
     status: "available",
     id: "placement-1",
     originalName: "placement-01.jpg",
-    type: "placement",
+    type: "placement_photo",
     signedUrl: "https://storage.example.com/signed/placement-01.jpg?token=xyz",
   },
 ]
@@ -65,10 +75,11 @@ const placementFiles: AdminRequestFile[] = [
 function renderViewer() {
   return render(
     <RequestImageViewer
-      referenceFiles={referenceFiles}
-      placementFiles={placementFiles}
-      referenceImagesTitle="Reference images"
-      placementImagesTitle="Placement images"
+      groups={[
+        { title: "Artist work", files: artistWorkFiles },
+        { title: "External inspiration", files: inspirationFiles },
+        { title: "Placement photos", files: placementFiles },
+      ]}
       unavailableLabel="Image unavailable"
       closeLabel="Close"
     />,
@@ -97,7 +108,7 @@ describe("RequestImageViewer", () => {
     )
   })
 
-  it("opens the viewer at the clicked placement image, at the correct combined index", () => {
+  it("opens the viewer at the clicked placement image, across three groups, at the correct combined index", () => {
     renderViewer()
     fireEvent.click(screen.getByRole("button", { name: /placement-01\.jpg/i }))
 
@@ -108,11 +119,12 @@ describe("RequestImageViewer", () => {
     )
   })
 
-  it("builds the combined slide set as reference images first, then placement images", () => {
+  it("builds the combined slide set across all groups in order (available files only)", () => {
     renderViewer()
     fireEvent.click(screen.getByRole("button", { name: /reference-01\.jpg/i }))
 
-    expect(screen.getByTestId("slide-count")).toHaveTextContent("2")
+    // artist_work-01 + inspiration-01 + placement-01 available; reference-02 unavailable.
+    expect(screen.getByTestId("slide-count")).toHaveTextContent("3")
   })
 
   it("does not include unavailable files in the slide set and renders them as non-interactive", () => {

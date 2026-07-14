@@ -18,8 +18,11 @@ export const VALIDATION_KEYS = {
   CONTACT_OTHER_TOO_LONG: "contact_other_too_long",
   CONSENT_REQUIRED: "consent_required",
   CONTACT_REQUIRED: "contact_required",
-  FILE_TYPE_INVALID: "file_type_invalid",
-  FILE_TOO_LARGE: "file_too_large",
+  UPLOAD_TYPE_INVALID: "upload_type_invalid",
+  UPLOAD_TOO_LARGE: "upload_too_large",
+  UPLOAD_TOO_MANY: "upload_too_many",
+  UPLOAD_EXPIRED: "upload_expired",
+  UPLOAD_INVALID: "upload_invalid",
 } as const
 
 export type ValidationKey = (typeof VALIDATION_KEYS)[keyof typeof VALIDATION_KEYS]

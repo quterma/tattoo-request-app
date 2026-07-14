@@ -3,6 +3,7 @@ import { render, screen, cleanup } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { API_ERROR_CODES } from "@/shared/api"
 import { RequestForm } from "../ui/RequestForm"
+import { __resetDraftStoreForTests } from "../store"
 import messages from "@/shared/i18n/messages/en.json"
 
 // Mock next-intl
@@ -35,12 +36,8 @@ function fillRequiredFields(user: ReturnType<typeof userEvent.setup>) {
         "A dragon on my arm, very detailed and colorful",
       )
 
-      const refFile = new File(["ref"], "ref.png", { type: "image/png" })
-      const placeFile = new File(["place"], "place.png", { type: "image/png" })
-
-      const [refInput, placeInput] = document.querySelectorAll('input[type="file"]')
-      await user.upload(refInput as HTMLElement, refFile)
-      await user.upload(placeInput as HTMLElement, placeFile)
+      // Uploads are optional (FS §4.2) and go through /api/upload via XHR, which jsdom
+      // does not drive; this suite exercises the submit path, so no files are added.
 
       await user.selectOptions(screen.getByRole("combobox", { name: /placement/i }), "arm")
       await user.selectOptions(screen.getByRole("combobox", { name: /size/i }), "medium")
@@ -56,6 +53,7 @@ function fillRequiredFields(user: ReturnType<typeof userEvent.setup>) {
 describe("RequestForm – submission flow", () => {
   beforeEach(() => {
     vi.restoreAllMocks()
+    __resetDraftStoreForTests()
   })
 
   afterEach(() => {
@@ -210,6 +208,32 @@ describe("RequestForm – submission flow", () => {
     expect(await screen.findByText(/budget must be 50 characters or less/i)).toBeInTheDocument()
   })
 
+  // REGRESSION GUARD: uploadHandles is not a rendered control, so routing its error through
+  // RHF's setError would be invisible — the visitor would press Submit and see nothing happen.
+  it("surfaces an expired-upload-handle error as a visible, actionable message", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+      json: () =>
+        Promise.resolve({
+          ok: false,
+          error: {
+            code: API_ERROR_CODES.VALIDATION_ERROR,
+            fieldErrors: { uploadHandles: ["upload_expired"] },
+            formErrors: [],
+          },
+        }),
+    }))
+
+    const user = userEvent.setup()
+    render(<RequestForm />)
+
+    await fillRequiredFields(user).fill()
+    await user.click(screen.getByRole("button", { name: /send request/i }))
+
+    expect(await screen.findByText(/timed out while the form was open/i)).toBeInTheDocument()
+    // The form stays usable so the visitor can retry the uploads and resend.
+    expect(screen.getByRole("button", { name: /send request/i })).toBeInTheDocument()
+  })
+
   it("shows generic error when VALIDATION_ERROR has no fieldErrors", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
       json: () =>
@@ -297,11 +321,6 @@ describe("RequestForm – contact group error UX", () => {
           screen.getByRole("textbox", { name: /describe your idea/i }),
           "A dragon on my arm, very detailed and colorful",
         )
-        const refFile = new File(["ref"], "ref.png", { type: "image/png" })
-        const placeFile = new File(["place"], "place.png", { type: "image/png" })
-        const [refInput, placeInput] = document.querySelectorAll('input[type="file"]')
-        await user.upload(refInput as HTMLElement, refFile)
-        await user.upload(placeInput as HTMLElement, placeFile)
         await user.selectOptions(screen.getByRole("combobox", { name: /placement/i }), "arm")
         await user.selectOptions(screen.getByRole("combobox", { name: /size/i }), "medium")
         await user.selectOptions(screen.getByRole("combobox", { name: /color/i }), "black")
@@ -312,6 +331,7 @@ describe("RequestForm – contact group error UX", () => {
 
   beforeEach(() => {
     vi.restoreAllMocks()
+    __resetDraftStoreForTests()
     vi.stubGlobal("fetch", vi.fn())
   })
 

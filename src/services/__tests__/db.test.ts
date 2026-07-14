@@ -39,8 +39,8 @@ const baseParams = {
 
 const sampleFiles: UploadedFile[] = [
   {
-    type: "reference",
-    storagePath: "a1b2c3d4-0000-4000-8000-000000000001/uuid/reference/reference-01.jpg",
+    type: "artist_work",
+    storagePath: "a1b2c3d4-0000-4000-8000-000000000001/uuid/artist_work/abc.jpg",
     originalName: "ref.jpg",
     mimeType: "image/jpeg",
     size: 512000,
@@ -77,8 +77,8 @@ describe("createRequest", () => {
       p_consent: true,
       p_files: [
         {
-          type: "reference",
-          storagePath: "a1b2c3d4-0000-4000-8000-000000000001/uuid/reference/reference-01.jpg",
+          type: "artist_work",
+          storagePath: "a1b2c3d4-0000-4000-8000-000000000001/uuid/artist_work/abc.jpg",
           originalName: "ref.jpg",
           mimeType: "image/jpeg",
           size: 512000,
@@ -330,9 +330,9 @@ describe("getRequestForStudio", () => {
     request_files: [
       {
         id: "file-uuid-1",
-        storage_path: `${STUDIO_ID}/sub-id/reference/reference-01.jpg`,
+        storage_path: `${STUDIO_ID}/sub-id/artist_work/abc.jpg`,
         original_name: "ref.jpg",
-        type: "reference",
+        type: "artist_work",
         mime_type: "image/jpeg",
         size: 512000,
       },
@@ -394,9 +394,9 @@ describe("getRequestForStudio", () => {
       files: [
         {
           id: "file-uuid-1",
-          storagePath: `${STUDIO_ID}/sub-id/reference/reference-01.jpg`,
+          storagePath: `${STUDIO_ID}/sub-id/artist_work/abc.jpg`,
           originalName: "ref.jpg",
-          type: "reference",
+          type: "artist_work",
           mimeType: "image/jpeg",
           size: 512000,
         },

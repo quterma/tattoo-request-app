@@ -26,8 +26,11 @@ const MESSAGE_TO_I18N_KEY: Record<ValidationKey, string> = {
   contact_other_too_long: "errors.contactOtherTooLong",
   consent_required: "errors.consentRequired",
   contact_required: "errors.atLeastOneContactRequired",
-  file_type_invalid: "errors.fileTypeInvalid",
-  file_too_large: "errors.fileTooLarge",
+  upload_type_invalid: "errors.uploadTypeInvalid",
+  upload_too_large: "errors.uploadTooLarge",
+  upload_too_many: "errors.uploadTooMany",
+  upload_expired: "errors.uploadExpired",
+  upload_invalid: "errors.uploadInvalid",
 }
 
 export function getFieldError(
@@ -50,4 +53,17 @@ export function getContactGroupError(
 ): string | undefined {
   if (errors.contactOther?.message !== VALIDATION_KEYS.CONTACT_REQUIRED) return undefined
   return t("errors.atLeastOneContactRequired")
+}
+
+/**
+ * Translates a bare validation key that did not arrive through react-hook-form.
+ *
+ * The upload-handle errors (`upload_expired`, `upload_invalid`, …) belong to no rendered
+ * form control — `uploadHandles` is a synthetic field carrying opaque tokens — so they
+ * cannot be routed through getFieldError. Falls back to the generic submit error rather
+ * than rendering a raw key if the server ever sends an unmapped one.
+ */
+export function getValidationKeyMessage(key: string, t: T): string {
+  const i18nKey = MESSAGE_TO_I18N_KEY[key as ValidationKey]
+  return i18nKey ? t(i18nKey as Parameters<T>[0]) : t("errorMessage")
 }

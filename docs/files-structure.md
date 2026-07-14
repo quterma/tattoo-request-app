@@ -73,7 +73,11 @@ tattoo-request-app/
 │   │       └── request/
 │   │           └── page.tsx
 │   ├── api/
-│   │   └── request/
+│   │   ├── request/
+│   │   │   ├── route.ts
+│   │   │   └── __tests__/
+│   │   │       └── route.test.ts
+│   │   └── upload/
 │   │       ├── route.ts
 │   │       └── __tests__/
 │   │           └── route.test.ts
@@ -117,6 +121,11 @@ tattoo-request-app/
 │       ├── STAGE_6_FUNCTIONAL_SPECIFICATION.md
 │       ├── STAGE_6_IMPLEMENTATION_PLAN.md
 │       ├── STAGE_6_PRODUCT_DEFINITION.md
+│       ├── research/
+│       │   ├── .gitkeep
+│       │   ├── RESEARCH_2026-07-14_open-question-trigger-and-thread-visibility.md
+│       │   └── done/
+│       │       └── .gitkeep
 │       ├── reviews/
 │       │   ├── .gitkeep
 │       │   └── done/
@@ -128,7 +137,8 @@ tattoo-request-app/
 │       │       ├── REVIEW_2026-07-13_framework-process-audit.md
 │       │       ├── REVIEW_2026-07-13_stage6-item2-shell.md
 │       │       ├── REVIEW_2026-07-13_stage6-ux-blueprint-batch2.md
-│       │       └── REVIEW_2026-07-13_stage6-ux-blueprint-full.md
+│       │       ├── REVIEW_2026-07-13_stage6-ux-blueprint-full.md
+│       │       └── REVIEW_2026-07-14_stage6-item1-upload-flow.md
 │       └── tasks/
 │           ├── STAGE_6_STRAT_BRIEF.md
 │           ├── STAGE_6_TASK_01_upload_flow_architecture.md
@@ -139,10 +149,14 @@ tattoo-request-app/
 │   └── update-structure.mjs
 ├── src/
 │   ├── bff/
+│   │   ├── adoptUploads.ts
 │   │   ├── index.ts
+│   │   ├── rateLimit.ts
 │   │   ├── request.ts
 │   │   ├── validateFiles.ts
 │   │   └── __tests__/
+│   │       ├── adoptUploads.test.ts
+│   │       ├── rateLimit.test.ts
 │   │       ├── request.test.ts
 │   │       ├── validateFiles.test.ts
 │   │       └── validateRequestPayload.test.ts
@@ -178,12 +192,20 @@ tattoo-request-app/
 │   │       ├── __tests__/
 │   │       │   ├── FileUploadInput.test.tsx
 │   │       │   ├── RequestForm.submission.test.tsx
-│   │       │   └── schema.test.ts
+│   │       │   ├── schema.test.ts
+│   │       │   └── UploadCategoryInput.test.tsx
 │   │       ├── config/
 │   │       │   ├── form.ts
 │   │       │   └── index.ts
 │   │       ├── lib/
-│   │       │   └── errors.ts
+│   │       │   ├── errors.ts
+│   │       │   └── upload.ts
+│   │       ├── store/
+│   │       │   ├── index.ts
+│   │       │   ├── requestDraft.ts
+│   │       │   ├── useRequestDraft.ts
+│   │       │   └── __tests__/
+│   │       │       └── requestDraft.test.ts
 │   │       ├── types/
 │   │       │   └── index.ts
 │   │       ├── ui/
@@ -195,6 +217,7 @@ tattoo-request-app/
 │   │       │   ├── SelectInput.tsx
 │   │       │   ├── TextareaInput.tsx
 │   │       │   ├── TextInput.tsx
+│   │       │   ├── UploadCategoryInput.tsx
 │   │       │   └── field/
 │   │       │       ├── FieldError.tsx
 │   │       │       ├── FieldHint.tsx
@@ -213,13 +236,15 @@ tattoo-request-app/
 │   │   ├── storage.ts
 │   │   ├── supabase.ts
 │   │   ├── supabaseAuth.ts
+│   │   ├── uploadToken.ts
 │   │   └── __tests__/
 │   │       ├── auth.test.ts
 │   │       ├── authLog.test.ts
 │   │       ├── db.test.ts
 │   │       ├── requests.test.ts
 │   │       ├── storage.test.ts
-│   │       └── supabaseAuth.test.ts
+│   │       ├── supabaseAuth.test.ts
+│   │       └── uploadToken.test.ts
 │   ├── shared/
 │   │   ├── index.ts
 │   │   ├── api/
@@ -242,6 +267,7 @@ tattoo-request-app/
 │   │   │   └── tokens.css
 │   │   ├── test/
 │   │   │   ├── index.ts
+│   │   │   ├── serverOnlyStub.ts
 │   │   │   └── setup.ts
 │   │   ├── ui/
 │   │   │   ├── app-nav.tsx
@@ -272,5 +298,6 @@ tattoo-request-app/
         ├── 20260623000000_make_client_name_not_null.sql
         ├── 20260629154719_domain_foundation.sql
         ├── 20260702114509_update_request_status_values.sql
-        └── 20260705155244_harden_create_request_search_path.sql
+        ├── 20260705155244_harden_create_request_search_path.sql
+        └── 20260714025850_three_upload_categories.sql
 ```

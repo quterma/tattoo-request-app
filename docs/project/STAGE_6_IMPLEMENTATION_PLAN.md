@@ -45,7 +45,7 @@ file may contradict these without first escalating a PRD/FS/blueprint change.
 
 | # | Item | Depends on | Status | Blueprint ref |
 | --- | --- | --- | --- | --- |
-| 1 | Upload-flow architecture (endpoint/auth model, opaque client handle + `clientSubmissionId` lifecycle, 3-category DB/Storage/admin representation, per-file retry/remove/progress, atomic adopt-at-submit, cleanup/idempotency) | — | **task ready** (`STAGE_6_TASK_01_upload_flow_architecture.md`) | PROJECT_DECISIONS.md — Request page, "Upload-flow architecture prerequisite" (Codex blocker finding) |
+| 1 | Upload-flow architecture (endpoint/auth model, opaque client handle + `clientSubmissionId` lifecycle, 3-category DB/Storage/admin representation, per-file retry/remove/progress, atomic adopt-at-submit, cleanup/idempotency) | — | **done** (`STAGE_6_TASK_01_upload_flow_architecture.md`, moved to `tasks/done/`) | PROJECT_DECISIONS.md — "Stage 6 Upload-Flow Architecture" |
 | 2 | Site-wide shell (nav item set → Home/Process/Request/Location; footer strips `mailto:`/`tel:`; shared CTA-at-end-of-page component; `policies` → `process` route rename **with content carried over as-is**; inbound-link sweep; Location's missing CTA pulled forward) | — | **done** (`STAGE_6_TASK_02_site_wide_shell.md`, moved to `tasks/done/`) | PROJECT_DECISIONS.md — Navigation and CTA placement |
 | 3 | Request form rebuild (field model, states, single-scroll format, upload card stack, required in-session persistence incl. clearing on submit) | Item 1 | not started | PROJECT_DECISIONS.md — Request page — form format |
 | 4 | Success page (new route; client store gate incl. bfcache guard; contact echo; one-time read) | Item 3 (shares the persistence store) | not started | PROJECT_DECISIONS.md — Success page |
@@ -54,7 +54,7 @@ file may contradict these without first escalating a PRD/FS/blueprint change.
 | 7 | Location polish (real map embed + real studio photos replacing placeholders) — the missing CTA is pulled forward into Item 2 | Item 2 | not started, **asset-blocked** — needs real studio photos | PROJECT_DECISIONS.md — Location page |
 | 8 | Preparation / Aftercare split (two routes from the current combined `aftercare` page; drop policies links; **footer discovery links added**; no cross-link) | Item 2 | **task ready** (`STAGE_6_TASK_08_preparation_aftercare_split.md`, `Executor: codex`) — Q1/Q2/Q3 resolved 2026-07-14 | PROJECT_DECISIONS.md — Preparation/Aftercare in-product discovery |
 | 9 | Reference-code format (6-char uppercase alphanumeric, excludes O/0/I/1) | Item 3 (generated at submit) | not started | FS §4.6; PROJECT_DECISIONS.md — Stage 6 note under Reference Code Decision |
-| 10 | Abuse mitigation on the submit endpoint (honeypot and/or rate limiting, invisible to legitimate visitors, no CAPTCHA) | Item 1 (shares the endpoint) | not started | FS §4.5 |
+| 10 | Abuse mitigation, **both endpoints** (honeypot on submit; **a non-caller-resettable control on `/api/upload` — now a pre-launch blocker**, see below) | Item 1 (shares the endpoints) | not started — **scope grew after the Item 1 Codex review** | FS §4.5; PROJECT_BACKLOG.md — "Unbounded automated storage growth"; PROJECT_DECISIONS.md — Stage 6 Upload-Flow Architecture §1 |
 | 11 | Public error/404 UX polish (localized 404, public error boundary) | — | not started, pre-existing backlog item | PROJECT_BACKLOG.md; PROJECT_STAGE_LOG.md 2026-07-09 Fix Pass 2 entry |
 | 12 | Favicon / OG / basic SEO | — | not started | PROJECT_IMPLEMENTATION_PLAN.md — Stage 6 |
 | 13 | Final FS §6 acceptance sweep (all 13 criteria) + manual mobile QA | Items 1–10 | not started | FS §6 |
@@ -103,10 +103,41 @@ existing i18n keys (`beforeAppointment*` + `tattooDay*` → Preparation; `afterc
 
 ---
 
+## Open items left by Item 1 (owner-decided, not Item 1's tail — added 2026-07-14)
+
+Item 1 is **done** (implemented, independently reviewed, review closed at consensus). It left two
+questions that belong to **no item** and are the owner's to decide, plus one nit that belongs to
+Item 3. Recorded here so a STRAT session planning the next block does not have to reconstruct them
+from the review thread.
+
+1. **Client-side image compression — needs research, then a decision.** The per-file limit is
+   **4 MB**, forced by Vercel's 4.5 MB Function request-body ceiling (FS §4.3 was amended 10 MB →
+   4 MB by owner decision). FS permits client-side compression, which would remove the ceiling for
+   the visitor entirely; Stage 6 does **not** implement it — an oversized file is rejected with a
+   clear message. Residual risk: a high-resolution phone photo (48 MP JPEG, unconverted HEIC) can
+   exceed 4 MB. Open questions (compress only over-limit files? what output parameters? HEIC, which
+   browsers cannot decode?) are in PROJECT_BACKLOG.md. **Not blocking anything** — the form works
+   and complies with FS without it.
+2. **Unbounded automated storage growth on `/api/upload` — PRE-LAUNCH BLOCKER.** The endpoint's
+   stated abuse ceiling does not exist: `clientSubmissionId` is caller-chosen, so a bot mints a
+   fresh UUID per upload and never hits the per-session object cap, and the in-memory per-IP limiter
+   is per-instance on Vercel. Objects are still size-capped and must be real images, and the bucket
+   is private — so the exposure is storage cost, not data. Closing it needs one non-caller-resettable
+   control (durable rate limiting via Upstash/Vercel KV — a new paid dependency; a server-issued
+   upload capability with a durable quota; or platform-level protection). **Folded into Item 10**,
+   whose scope grew accordingly. Full record: PROJECT_BACKLOG.md.
+3. **Item 3 inherits one UI nit:** the submit CTA is currently *disabled* while an upload is in
+   flight, whereas PROJECT_DECISIONS.md describes accepting the click and showing a "Sending…" wait
+   state. Behavior is correct (a *failed* upload never blocks submit, per FS §4.5) — the wording and
+   the UI simply disagree, and Item 3 owns the form's UX.
+
+---
+
 ## Sequencing notes (not a rigid schedule)
 
 - **Item 1 blocks Item 3 blocks Item 4.** This is the critical path — the upload redesign is
   also the single most architecturally risky piece (public unauthenticated upload surface).
+  **Item 1 is done (2026-07-14); Items 3 and 4 are unblocked.**
 - **Item 2 (done) unblocked 5/6/7/8 in code** — all four content pages needed the nav/footer shell
   to exist first. Code-unblocked is not the same as ready to cut: 6 and 7 are content/asset-blocked
   and 8 is blocked on the three owner questions above.

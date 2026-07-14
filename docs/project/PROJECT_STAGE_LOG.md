@@ -37,6 +37,65 @@ require updating them first. See PROJECT_DECISIONS.md — Stage 6 Product Docume
 
 Current focus:
 
+- **Stage 6 Item 1 — upload-flow architecture — implemented, independently reviewed, review closed
+  at consensus 2026-07-14; pending owner commit approval.**
+  `STAGE_6_TASK_01_upload_flow_architecture.md` implemented in full: new `POST /api/upload`
+  (selection-time, single-file, encrypted opaque handle — AES-256-GCM via
+  `src/services/uploadToken.ts`, no storage path ever reaches the client); `src/bff/adoptUploads.ts`
+  verifies and adopts exactly the calling session's uploads at final submit (the ownership check —
+  a handle's embedded `clientSubmissionId` must match the one being submitted); three upload
+  categories (`artist_work` / `inspiration` / `placement_photo`) replace the old two
+  (`reference`/`placement`) across DB (`supabase/migrations/20260714025850_three_upload_categories.sql`),
+  Storage path scheme, and the admin viewer (`RequestImageViewer` now takes a `groups` prop); a
+  module-level client store (`src/features/request/store/`, `useSyncExternalStore`) replaces the
+  shipped `useState`-regenerated `clientSubmissionId`, giving it the lazy-once lifecycle
+  D-Blueprint 5(a) needs; per-file upload/retry/remove UI (`UploadCategoryInput.tsx`) with
+  `XMLHttpRequest`-based progress and FS §4.3 thumbnails. **Regression guarded explicitly:** the old
+  `cleanupRequestFiles()` calls on the idempotency-race and generic-DB-failure paths in
+  `app/api/request/route.ts` were removed (under selection-time upload they would delete a racing
+  winner's live files or a legitimate retry's files) — proven by dedicated tests. Full architecture
+  record: PROJECT_DECISIONS.md — "Stage 6 Upload-Flow Architecture".
+
+  **The independent Codex review found two blockers the in-session pipeline had missed** — recorded
+  plainly because the first version of this entry claimed a clean pass and said nothing of them
+  (`docs/project/reviews/done/REVIEW_2026-07-14_stage6-item1-upload-flow.md`, closed at consensus,
+  all 5 findings accepted):
+  1. **FS's 10 MB file limit was undeliverable** — Vercel Functions reject request bodies over
+     4.5 MB at the platform edge, and the design routes every upload through a Function. Unit tests
+     could not catch it (they call `POST()` with a mocked `formData()`, bypassing the platform).
+     **FS §4.3 amended by owner decision: 10 MB → 4 MB per file** (spec first, then code). The limit
+     is **per file, not per submission** — each file rides its own request. Enforced client- and
+     server-side. Client-side compression (permitted by FS, would remove the ceiling for the
+     visitor) is **deliberately not implemented** — deferred to research, see PROJECT_BACKLOG.md.
+  2. **An expired upload handle was a silent dead end, and idempotent replay was broken** — adoption
+     ran before the `clientSubmissionId` lookup, so a successful-but-lost-response submit retried
+     past the 2 h TTL returned 400 instead of its reference code. Both fixed (lookup reordered; a
+     `invalidateUploadedSlots` store action + a visible, actionable message), both regression-tested.
+  Three should-fix/nit findings were also accepted: thumbnails were specified and documented but
+  never rendered (now rendered); the abuse-model claims were false (below); and a whitespace nit
+  traced to the docs' pre-existing CRLF storage, not this change.
+
+  **Abuse posture — corrected, and now an open pre-launch item.** The architecture entry originally
+  claimed the per-session Storage object cap was "the real ceiling against bucket-filling". **That
+  was false and is withdrawn:** `clientSubmissionId` is caller-chosen, so an automated caller mints
+  a fresh UUID per upload and never approaches the cap; the only cross-session control is an
+  in-memory per-IP limiter, which is per-instance on Vercel. What holds: each object is size-capped
+  (4 MB) and must be a real image, and the bucket is private with no public read path — so the
+  exposure is storage growth/cost, not data. **Automated storage growth is currently unbounded,
+  owner-accepted while the site is unlaunched, and re-filed in PROJECT_BACKLOG.md as a PRE-LAUNCH
+  BLOCKER** (needs one non-caller-resettable control: durable rate limiting, a server-issued
+  capability with a durable quota, or platform-level protection).
+
+  `pnpm qg` fully green after the review fixes (structure / lint / typecheck / **274** tests /
+  build). Task file status `done`; **not yet committed** — awaiting explicit owner approval per
+  CLAUDE.md Workflow (the task file's move to `tasks/done/` and the review thread's move to
+  `reviews/done/` land in that commit). **Unblocks Item 3** (Request form rebuild) **and Item 4**
+  (Success page). Two follow-ups belong to no item and are owner-decided, not Item 1's tail:
+  **client-side compression** (research) and **durable rate limiting** (pre-launch) — both in
+  PROJECT_BACKLOG.md. One deferred UI nit belongs to **Item 3**: the submit CTA is currently
+  disabled while an upload is in flight, whereas PROJECT_DECISIONS.md describes accepting the click
+  and showing a "Sending…" state; behavior is correct (a *failed* upload never blocks submit, per
+  FS §4.5), but the wording and the UI disagree.
 - **Stage 6 Item 8 — three open questions resolved; task file cut; PRD/FS amended — STRAT
   2026-07-14.** Item 8 (Preparation/Aftercare split) was briefly `blocked` after repo verification
   (2026-07-13) exposed that the brief's "fully unblocked" claim was false and surfaced three

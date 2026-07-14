@@ -13,8 +13,7 @@ export interface ParsedRequestPayload {
   phone: string | undefined
   contactOther: string | undefined
   consent: true | undefined
-  referenceImages: File[]
-  placementImages: File[]
+  uploadHandles: string[]
 }
 
 export interface ValidationErrorResult {
@@ -71,8 +70,7 @@ export function parseRequestFormData(formData: FormData): ParsedRequestPayload {
     phone: (formData.get(f.phone) as string | null) ?? undefined,
     contactOther: (formData.get(f.contactOther) as string | null) ?? undefined,
     consent: formData.get(f.consent) === "true" ? true : undefined,
-    referenceImages: formData.getAll(f.referenceImages) as File[],
-    placementImages: formData.getAll(f.placementImages) as File[],
+    uploadHandles: formData.getAll(f.uploadHandles).filter((v): v is string => typeof v === "string"),
   }
 }
 

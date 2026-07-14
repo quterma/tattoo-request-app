@@ -3,10 +3,6 @@ import { API_ERROR_CODES } from "@/shared/api"
 import { validateRequestPayload } from "../request"
 import type { ParsedRequestPayload } from "../request"
 
-function makeFile(name = "photo.png"): File {
-  return new File(["x"], name, { type: "image/png" })
-}
-
 const validPayload: ParsedRequestPayload = {
   clientSubmissionId: "550e8400-e29b-41d4-a716-446655440000",
   clientName: "Alex",
@@ -19,8 +15,7 @@ const validPayload: ParsedRequestPayload = {
   budget: undefined,
   phone: undefined,
   contactOther: undefined,
-  referenceImages: [makeFile("ref.png")],
-  placementImages: [makeFile("place.png")],
+  uploadHandles: [],
 }
 
 describe("validateRequestPayload – success", () => {
@@ -102,13 +97,18 @@ describe("validateRequestPayload – validation errors", () => {
     }
   })
 
-  it("returns fieldErrors.referenceImages when referenceImages is empty", () => {
-    const payload = { ...validPayload, referenceImages: [] }
+  it("succeeds with zero upload handles (uploads are optional per FS §4.2)", () => {
+    const result = validateRequestPayload({ ...validPayload, uploadHandles: [] })
+    expect(result.ok).toBe(true)
+  })
+
+  it("returns fieldErrors.uploadHandles when more than 9 handles are provided", () => {
+    const payload = { ...validPayload, uploadHandles: Array.from({ length: 10 }, (_, i) => `h${i}`) }
     const result = validateRequestPayload(payload)
 
     expect(result.ok).toBe(false)
     if (!result.ok) {
-      expect(result.error.fieldErrors.referenceImages).toBeDefined()
+      expect(result.error.fieldErrors.uploadHandles).toBeDefined()
     }
   })
 })
