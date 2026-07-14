@@ -513,3 +513,75 @@ AI_WORKFLOW_MASTER.md. Format: date — observation — status (`open` / `resolv
   already rejected for a final STRAT sign-off. The triggering question (client-side image
   compression) already sits in PROJECT_BACKLOG.md with its four sub-questions — it is the first
   candidate for a research thread, not a leftover.
+- 2026-07-14 — **An IMPL session can leave behind mandatory follow-up actions (apply a DB migration,
+  set a new required env var, run a live verification) and the framework has no mechanism that
+  guarantees anyone ever does them.** They get written into PROJECT_STAGE_LOG.md, and the log is a
+  *journal* — nothing obliges a later session to convert an entry into work. Concrete case (Stage 6
+  Item 1, upload-flow architecture): the commit landed with green gates, but (a) the DB migration was
+  **not applied** — the code writes three new category values while the live DB still had the old
+  two-value CHECK constraint, so **every request with an image would fail on insert**, and unit tests
+  could not catch it because they mock the DB; (b) a **new mandatory env var** (`UPLOAD_TOKEN_SECRET`)
+  was introduced, without which the production build fails at module load; (c) a **live end-to-end
+  verification** was required by PROJECT_DECISIONS.md's own "Database Stage Completion Criteria"
+  ("unit tests are insufficient to verify database-related stages") and had not been run. All three
+  were recorded in the durable docs — and all three would still have been missed, because the *owner*
+  asked "did you record the migration and the token?" The session had recorded them; it had not made
+  them **actionable**. Had he not asked, the next IMPL session (Item 3) would have started building
+  on a database its predecessor had silently broken, and would have spent its time debugging a
+  failure that belonged to the previous item. **The gap is structural, not a lapse:** a green
+  `pnpm qg` certifies the *tree*, not the *deployed system*; the task file's Reporting section says
+  "update the Stage Log", not "file the follow-ups as work"; and no rule says a STRAT session must
+  read the previous item's leftovers and triage them into the plan. **For META:** (1) should a task
+  file gain an explicit **"Deferred actions / not-done-by-this-session"** section, whose entries a
+  session is *required* to file as work (a task file, a plan item, or a named backlog entry with a
+  blocking flag) rather than only narrating them in the log? (2) should there be a standing STRAT
+  duty — "before planning the next item, read the previous item's deferred actions and triage them
+  for blocking/priority" — so the handoff does not depend on the owner noticing? (3) is there a case
+  for a lightweight machine-checkable marker (e.g. a `⛔ BLOCKER` convention at the top of the Stage
+  Log's Current Focus, or a `docs/project/OPEN_ACTIONS.md`) so an unapplied migration cannot hide in
+  the middle of a long prose entry? (4) more generally: the project has repeatedly hit the pattern
+  "the durable doc says the right thing, but nothing *acts* on it" — is the fix per-case, or does the
+  framework need one explicit rule that **anything a session did not do, but which must be done,
+  becomes a tracked work item, not a sentence in a journal**? Raised by the owner directly. — open
+- 2026-07-14 — **One IMPL session produced one commit of 60 files / +3,496 −938, and neither the
+  task protocol nor the review protocol had anything to say about it. Nobody can review that
+  volume well — the owner said so plainly, and he is right.** Concrete case (Stage 6 Item 1,
+  upload-flow architecture): 28 production files, 18 test files, 10 docs, 4 config/migration/env.
+  It is not "bloated by tests and docs" — the production core alone is 28 files, because the task
+  genuinely was a pipeline redesign. **The owner's diagnosis and his proposed fix are worth
+  separating, because there are two distinct defects here and his fix only addresses one.**
+
+  **Defect A — no rule anywhere says a task's work should land as more than one commit.** The task
+  file describes an Item; the session silently equated "one task" with "one commit". Yet Item 1 had
+  obvious seams, each leaving a *working tree with green gates*: (1) DB migration + `FileType` +
+  admin viewer (the three-category data model); (2) `uploadToken` + `adoptUploads` (the ownership
+  model); (3) `/api/upload` + rate limiting + validation (the endpoint); (4) client store + upload UI
+  + rewritten submit (closing the loop). Four reviewable commits were available and nothing asked for
+  them. The owner's suggested fix — *keep one task per IMPL session, but commit at natural
+  review-friendly seams inside it* — addresses exactly this, and looks right: it costs the session
+  almost nothing (it already reaches green states at those points) and it is strictly better than
+  splitting the task itself, which would multiply task-file overhead and force artificial boundaries
+  through a design that is genuinely one decision.
+
+  **Defect B — the one his fix does NOT reach, and it is the more serious one.** The independent
+  review ran **once, at the end, over everything**. It found two blockers (an undeliverable 10 MB
+  limit; a broken idempotent-replay path), and their fixes landed in the same commit as the code
+  they fixed. **Splitting commits would not have changed this**: the reviewer would still have been
+  handed 28 production files in one go, because the *review* was still one review, at the end. The
+  volume problem is not primarily a commit-granularity problem — it is that **review is positioned
+  after the work instead of alongside it**. Note the review protocol's own unit is "one reviewed
+  block" (AI_CROSS_REVIEW.md), and the block has silently come to mean "the whole Item".
+
+  **For META to decide:** (1) adopt the owner's rule — *one task per IMPL session, but multiple
+  commits at reviewable seams* — and say so explicitly in AI_TASK_PROTOCOL.md, with guidance on what
+  a seam is (a coherent change that leaves the tree green and is independently comprehensible)?
+  (2) Should there be a **size trigger**: past some threshold (files touched? production files?),
+  the session must either commit in stages or flag at *plan time* that the Item is too big and ask
+  STRAT to split it — the plan being the only point where a too-large scope is still cheap to fix?
+  (3) **Should a large Item get more than one review checkpoint** rather than one review at the end
+  — e.g. an independent review after the risky architectural core (here: the ownership model) lands,
+  before the remaining two-thirds is built on top of it? Both blockers in this case were *design*
+  defects that a mid-flight review of the core would have caught before the UI, the store, and 18
+  test files were written against them. (4) Who decides granularity — STRAT at task-cutting time
+  (it knows the shape), or the IMPL session at plan time (it knows the seams)? Raised by the owner.
+  — open

@@ -103,12 +103,46 @@ existing i18n keys (`beforeAppointment*` + `tattooDay*` → Preparation; `afterc
 
 ---
 
+## ⛔ Item 1 is committed but NOT LIVE — the DB migration is not applied (2026-07-14)
+
+**Read this before planning or starting Item 3.** Item 1's code is committed (`480c721`) and all
+gates are green, **but the application does not work end-to-end yet**: the code writes the new
+category values (`artist_work` / `inspiration` / `placement_photo`) while the database still carries
+the old `CHECK (type IN ('reference','placement'))` constraint. **Any request with an image will
+fail on insert until the migration is applied.** Unit tests cannot catch this — they mock the DB
+(PROJECT_DECISIONS.md — Database Stage Completion Criteria: unit tests do not verify a DB stage).
+
+Migrations are **never automatic** — no CI step, no deploy hook applies them (PROJECT_DECISIONS.md —
+Migration Workflow Decisions). Required, in order:
+
+1. **Verify the live constraint name first** — Supabase Dashboard → Database → Tables →
+   `request_files` → Constraints. The original CHECK was declared inline and unnamed, so Postgres
+   auto-named it (expected: `request_files_type_check`). **If the real name differs, the migration's
+   `DROP CONSTRAINT IF EXISTS` silently does nothing** and the old two-value constraint survives —
+   the failure mode is silent, which is why this step is not optional.
+2. `pnpm exec supabase db push`
+3. `pnpm exec supabase migration list` — Local and Remote must match
+4. **Live end-to-end verification** (the only thing that actually proves this stage): submit one
+   real request with an image in each of the three categories; confirm it persists and renders in
+   the admin viewer. Also confirm `create_request`'s signature and grants are unchanged (this
+   migration deliberately does not touch the RPC — that would trigger the Stage 5A staging gate).
+
+**Also required before any deploy: `UPLOAD_TOKEN_SECRET` must be set in Vercel** — a new mandatory
+env var (`requireEnv` throws at module load, so the build fails loudly without it). Generate a fresh
+production value: `openssl rand -base64 32`. Details in PROJECT_PRODUCTION_READINESS.md.
+
+Owner's call whether this runs as its own small task file or as a step at the head of Item 3 — but
+it must happen **before** Item 3's work is verified against the database, or Item 3 will be debugging
+a failure that belongs to Item 1.
+
+---
+
 ## Open items left by Item 1 (owner-decided, not Item 1's tail — added 2026-07-14)
 
-Item 1 is **done** (implemented, independently reviewed, review closed at consensus). It left two
-questions that belong to **no item** and are the owner's to decide, plus one nit that belongs to
-Item 3. Recorded here so a STRAT session planning the next block does not have to reconstruct them
-from the review thread.
+Item 1 is **done** (implemented, independently reviewed, review closed at consensus). Beyond the
+migration blocker above, it left two questions that belong to **no item** and are the owner's to
+decide, plus one nit that belongs to Item 3. Recorded here so a STRAT session planning the next
+block does not have to reconstruct them from the review thread.
 
 1. **Client-side image compression — needs research, then a decision.** The per-file limit is
    **4 MB**, forced by Vercel's 4.5 MB Function request-body ceiling (FS §4.3 was amended 10 MB →

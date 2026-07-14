@@ -37,8 +37,21 @@ require updating them first. See PROJECT_DECISIONS.md — Stage 6 Product Docume
 
 Current focus:
 
+- **⛔ BLOCKER — Item 1's DB migration is NOT applied. The app does not work end-to-end until it
+  is.** Item 1 is committed (`480c721`) with green gates, but the code writes the new category
+  values (`artist_work` / `inspiration` / `placement_photo`) while the database still has the old
+  `CHECK (type IN ('reference','placement'))`. **Any request with an image fails on insert.** Unit
+  tests cannot catch this (they mock the DB — see "Database Stage Completion Criteria").
+  **Migrations are never automatic** (PROJECT_DECISIONS.md — Migration Workflow Decisions): verify
+  the live constraint name in the Dashboard first (an unnamed inline CHECK was auto-named by
+  Postgres; if the real name differs, `DROP CONSTRAINT IF EXISTS` **silently does nothing** and the
+  old constraint survives), then `pnpm exec supabase db push`, then `migration list` (Local ==
+  Remote), then a live end-to-end submit with an image in each of the three categories. **Also:
+  `UPLOAD_TOKEN_SECRET` must be set in Vercel before any deploy** — new mandatory env var, the build
+  fails loudly without it. Full steps: STAGE_6_IMPLEMENTATION_PLAN.md (top) and
+  PROJECT_PRODUCTION_READINESS.md. **Must be cleared before Item 3 is verified against the DB.**
 - **Stage 6 Item 1 — upload-flow architecture — implemented, independently reviewed, review closed
-  at consensus 2026-07-14; pending owner commit approval.**
+  at consensus 2026-07-14; committed `480c721` (migration still to apply — see the blocker above).**
   `STAGE_6_TASK_01_upload_flow_architecture.md` implemented in full: new `POST /api/upload`
   (selection-time, single-file, encrypted opaque handle — AES-256-GCM via
   `src/services/uploadToken.ts`, no storage path ever reaches the client); `src/bff/adoptUploads.ts`
