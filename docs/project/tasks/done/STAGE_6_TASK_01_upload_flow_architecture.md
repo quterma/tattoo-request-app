@@ -2,7 +2,17 @@
 
 ## Status
 
-`ready` · created 2026-07-13 · done: <date · PROJECT_STAGE_LOG.md entry pointer>
+`done` · created 2026-07-13 · done: 2026-07-14 · PROJECT_STAGE_LOG.md, "Stage 6 Item 1 — upload-flow
+architecture" entry (Current Focus section). Architecture record: PROJECT_DECISIONS.md — "Stage 6
+Upload-Flow Architecture". Independent review closed at consensus:
+`docs/project/reviews/done/REVIEW_2026-07-14_stage6-item1-upload-flow.md` (5 findings, all accepted —
+2 blockers). Commits: `480c721` (implementation + review fixes), `48d9964` (migration blocker flagged).
+
+**⛔ Code is committed but NOT live** — the DB migration
+(`supabase/migrations/20260714025850_three_upload_categories.sql`) is **not applied**. Until it is,
+any request with an image fails on insert. See PROJECT_STAGE_LOG.md (Current Focus) and
+STAGE_6_IMPLEMENTATION_PLAN.md (top) for the steps. `UPLOAD_TOKEN_SECRET` must also be set in Vercel
+before any deploy.
 
 ## Execution
 
