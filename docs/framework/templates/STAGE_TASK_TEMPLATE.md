@@ -40,7 +40,11 @@ contain the hash of the commit that first records it; git history is the commit 
 - Executor: `claude | codex` — who implements this task
 - Reviewer: `claude` — Claude Code always reviews; for a Codex-executed task this is the
   mandatory independent review pass (AI_TASK_PROTOCOL.md — Delegating IMPL Tasks to Codex)
-- Baseline commit: <hash the work starts from — the executor stops if HEAD differs>
+- Baseline: **the commit that introduced this task file** — do NOT write a hash here. A file
+  cannot name the commit that carries it; a hash written by the author is stale on arrival and
+  makes the task undelegatable forever (AI_TASK_PROTOCOL.md — Delegating IMPL Tasks to Codex).
+  The executor derives it (`git log -1 --format=%H -- <this file>`) and stops only if the Allowed
+  Write Surface has moved since then, or is dirty — not merely because HEAD advanced.
 - Allowed Write Surface: <explicit list of paths the executor may write; nothing outside it.
   Required for `Executor: codex`; recommended for any task>
 - May touch dependencies / migrations / generated files / shared docs: <no by default>
@@ -92,10 +96,12 @@ contain the hash of the commit that first records it; git history is the commit 
 6. After implementation: run the Review Pipeline per AI_REVIEW_PIPELINE.md (Test Agent →
    Quality Gates `pnpm qg` → Review Agent); self-review for architecture conformance,
    regressions, and documentation updates; report remaining risks explicitly.
-7. If an independent review (Codex / external) is run on this block, the IMPL session owns that
-   loop end to end — it writes the handoff, processes the findings, applies accepted fixes,
-   re-runs the gates, and closes the thread; it stays open until consensus rather than ending at
-   "READY FOR DEVELOPER REVIEW" (AI_TASK_PROTOCOL.md — Post-Review Fix Loop).
+7. **Open an independent cross-review thread (AI_CROSS_REVIEW.md) — mandatory whenever this task
+   changed source code**, right after the pipeline goes green. A green pipeline is NOT a licence
+   to propose the commit; that right arrives at consensus (AI_TASK_PROTOCOL.md — Independent
+   Review Is Mandatory). The IMPL session owns the loop end to end — handoff, findings, accepted
+   fixes, gate re-run, close — and stays open until consensus rather than ending at "READY FOR
+   DEVELOPER REVIEW" (AI_TASK_PROTOCOL.md — Post-Review Fix Loop).
 8. Never expand scope. If product behavior needs to change, STOP and request a spec update
    first (see this project's PROJECT_DECISIONS.md for the applicable authority rule, e.g.
    Stage 6 Product Documentation Authority).
@@ -110,8 +116,11 @@ project's Source of Truth defines one>
 **If `Executor: claude`:**
 
 - Update PROJECT_STAGE_LOG.md (progress) and PROJECT_DECISIONS.md (if a decision was made).
+  These are durable docs — writing them after a green gate run does not re-arm the gates
+  (AI_REVIEW_PIPELINE.md — When to Run).
 - Set Status to `done` (date + stage-log pointer, no commit hash); move this file to
-  `docs/project/tasks/done/`; propose the commit for owner approval.
+  `docs/project/tasks/done/`; propose the commit for owner approval — for a code block, only
+  after the cross-review thread reached consensus (Workflow step 7).
 
 **If `Executor: codex`:** Codex does NOT do any of the above. It appends an Execution Report to
 this file (what changed, final `pnpm lint`/`typecheck`/`test` results, anything unresolved, any

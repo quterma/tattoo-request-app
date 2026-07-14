@@ -4,10 +4,11 @@ Codex (repo access) or an external AI (no repo access): review-thread files, tur
 statuses, and cleanup.
 
 Scope
-Cross-tool review workflow only. Session organization lives in AI_TASK_PROTOCOL.md; the
-in-session review pipeline (Test Agent / Quality Gates / Review Agent) lives in
-AI_REVIEW_PIPELINE.md and is NOT replaced by this document. Codex behavior rules live in
-AGENTS.md (repository root).
+Cross-tool workflow between Claude Code and an independent AI: **review threads** (a finished
+block is checked) and **research threads** (an open question is investigated — see Research
+Threads below). Session organization lives in AI_TASK_PROTOCOL.md; the in-session review pipeline
+(Test Agent / Quality Gates / Review Agent) lives in AI_REVIEW_PIPELINE.md and is NOT replaced by
+this document. Codex behavior rules live in AGENTS.md (repository root).
 
 Audience
 Claude Code sessions, Codex sessions, and the owner.
@@ -51,9 +52,10 @@ reasoning — the Handoff section states scope and questions, not the author's c
 - The whole dialogue lives in this one file as appended sections; history is preserved in git.
 - **A thread is ACTIVE if it is not `queued` — i.e. its status is `awaiting-review`,
   `awaiting-response`, or `consensus` — and it still sits in `docs/project/reviews/` (not
-  `done/`). At most one thread may be active at a time.** A dialogue mid-flight is still
-  occupying the slot: do not create a new active thread just because nothing is currently in
-  `awaiting-review`.
+  `done/`). At most one **review** thread may be active at a time.** A dialogue mid-flight is
+  still occupying the slot: do not create a new active thread just because nothing is currently in
+  `awaiting-review`. (This slot counts review threads only — research threads live in
+  `docs/project/research/` and never occupy it; see Research Threads below.)
 - Parallel review requests are allowed via the queue: a thread created while another is active
   starts as `queued` (parked — nobody acts on it). Before creating a thread, scan all three
   active statuses, not just `awaiting-review`.
@@ -85,7 +87,12 @@ reasoning — the Handoff section states scope and questions, not the author's c
    range or file list, scope boundary, specific focus questions. No self-assessment beyond
    facts — the reviewer must stay independent.
 2. `## Review <N>` — Codex: numbered findings (severity: blocker / should-fix / nit /
-   question), each with file/line pointers; optionally the non-mutating quality-gate results
+   question), each with file/line pointers. **Always check external-boundary feasibility**: does
+   the block actually survive the limits of systems nobody here owns (platform request/response
+   ceilings, runtime and payload limits, browser capabilities, third-party API behavior)? Unit
+   tests routinely exercise a handler *below* such a boundary and cannot see the violation — this
+   is where that class is caught (AI_TASK_PROTOCOL.md — Name the basis of a claim the repo does not
+   own). Optionally include the non-mutating quality-gate results
    (`pnpm lint` / `pnpm typecheck` / `pnpm test` — the reviewer never runs `pnpm qg`,
    `pnpm structure`, or `pnpm build`, which write files); open questions. Set Status
    `awaiting-response`.
@@ -117,6 +124,87 @@ Anti-rot: any session that reports the review queue to the owner also reports op
 items it filed or found (one line each: what, where it's filed, what it's waiting on). Same
 cost as the queue-size report, same purpose — nothing accepted quietly disappears.
 
+# Research Threads (an open question, not a reviewed block)
+
+A review answers "is this finished work correct?". A **research thread** answers "what should we
+do about X?" — an open question that needs investigation before anyone can decide or implement.
+It has no diff, no block, and nothing to hand off, so it cannot be dressed up as a review: the
+`## Handoff` turn demands finished work and the `## Consensus` turn closes a verdict, neither of
+which exists here. (Real case, 2026-07-14: the Codex review of the upload flow found the FS's
+10 MB limit undeliverable through a Vercel Function; the fix direction — client-side image
+compression — was a genuinely open question, and the session had nowhere to put it.)
+
+- Location: `docs/project/research/RESEARCH_<YYYY-MM-DD>_<slug>.md`. Never deleted; closed
+  threads move to `docs/project/research/done/`, same convention as reviews and task files.
+- Header: `Status:` (table below), `Researcher: codex` (default — see below), `Requested by:`
+  (the session that opened it, by title).
+- **A research thread does NOT occupy the review slot.** The one-active-thread rule exists so a
+  live *review* dialogue is unambiguous and the owner's ping resolves to exactly one thread;
+  research contends with none of that — it blocks no commit and reviews no diff. Research threads
+  have their own slot, and more than one may be open. The same anti-rot duty applies: any session
+  reporting the review queue also reports open research threads (one line each: question, where
+  filed, what it's waiting on).
+- **Researcher is `codex` by default** (owner decision 2026-07-14). Handing the *whole thread* to
+  an external AI buys nothing and costs the automation: Codex reads the thread and writes its
+  answer itself, whereas an external AI needs the owner to carry every turn by copy-paste. That is
+  an argument about who **owns** the thread — not a ban on reaching outward, which Codex can and
+  sometimes must do for part of a question (next bullet but one).
+- **Codex's reach is limited, and it must route around that rather than guess.** Findings are
+  labelled by provenance: *verified against the repo* (a file was read, a command was run) vs.
+  *model knowledge* (what comparable products do, how a browser behaves, what a library weighs) —
+  the latter is a lead to confirm, never a fact to build on. This is the existing rule against
+  laundering a report into a fact (AI_TASK_PROTOCOL.md — Session Duties), applied to research.
+- **Codex may — and on some questions must — delegate part of the research to an external AI**
+  (owner decision 2026-07-14). Where an answer turns on *current external facts* — what comparable
+  products actually do, how a browser or platform behaves today, a library's real size or API,
+  a service's limits or pricing — Codex does not answer from model knowledge and call it research:
+  it **writes the prompt for the external AI itself** and hands it to the owner, who carries it
+  out and brings the answer back. "Ask if unsure" would be a dead rule (models are rarely unsure);
+  the trigger is the *kind* of question, not Codex's confidence in it.
+  - **Codex stays the owner of the answer.** The external AI is Codex's instrument, not a second
+    voice in the thread: Codex normalizes the returned answer into its own `## Findings` — what it
+    accepted, what it discarded, what it could cross-check against the repo — and keeps labelling
+    provenance (now with a third label: *external AI, unverified*). A raw external answer is never
+    pasted in as a finding of its own; nobody would then own its verification.
+  - Transport is the owner's, same as `Reviewer: external`: Codex writes
+    `RESEARCH_<date>_<slug>.request.md` next to the thread and leaves an empty
+    `RESEARCH_<date>_<slug>.answer.md`; the owner pastes the reply in and pings Codex again. On
+    close, both buffers are deleted — their content already lives in the thread.
+
+| Status | Meaning | Who acts |
+| --- | --- | --- |
+| `awaiting-research` | Question written, research requested | Codex |
+| `awaiting-external` | Codex wrote a prompt for an external AI; `.request.md` ready | Owner (carries it out, pastes the reply into `.answer.md`, pings Codex) |
+| `awaiting-response` | Findings written | Claude Code |
+| `awaiting-owner` | Findings processed; the remaining choice is the owner's | Owner (decides; a Claude session then files the `## Outcome`) |
+| `closed` | Outcome filed in a durable doc | — (thread moves to `research/done/`) |
+
+`awaiting-owner` is the normal terminal state of a useful research thread, not an exception: the
+thread's whole purpose is to inform a decision it may not make itself. Do not park a decided
+question there — once the owner has chosen, file the `## Outcome` and close.
+
+Turn structure: `## Question` (Claude Code — the open question, why it is open, what a usable
+answer must cover, and the constraints the answer must respect: the relevant PRD/FS sections,
+platform limits, decisions already made) → `## Findings <N>` (Codex — the investigation, each
+finding labelled by provenance per above; options with trade-offs, not a verdict) → `## Response
+<N>` (Claude Code — what is usable, what needs confirmation, what is still open; a short Russian
+summary for the owner) → repeat if a follow-up round is needed → `## Outcome`.
+
+**A research thread never decides anything.** Its answer is *input to a decision the owner makes*
+— filing it as a decision would replace the owner's judgment with "Codex said so", the same
+rubber-stamp failure the framework already rejected for STRAT sign-off. The thread therefore
+closes only by **landing its outcome in a durable doc**, and the `## Outcome` section names where:
+
+- **PROJECT_BACKLOG.md** — the question stays open work (the usual case: the answer sharpens the
+  options but the owner has not chosen);
+- **a `draft` task file** — the answer settled the approach and the work is now concrete enough
+  to execute;
+- **PROJECT_DECISIONS.md** — only when the owner has actually made the call on the strength of
+  the findings.
+
+Never leave the answer to die in the thread: a research thread is a discussion record, not a work
+tracker (same rule as reviews — Consensus and Cleanup above).
+
 # External Reviewer Flow (`Reviewer: external`)
 
 The external AI cannot read the repository, so the owner is the transport and the request
@@ -141,7 +229,9 @@ Round flow:
 
 Transient-file cleanup: `request.md` / `answer.md` are copy buffers — their content is always
 duplicated into the thread, so on Consensus they are **deleted** (the never-delete convention
-applies to threads, not to these buffers). Only the thread moves to `done/`.
+applies to threads, not to these buffers). Only the thread moves to `done/`. The same holds for a
+research thread's `RESEARCH_<date>_<slug>.request.md` / `.answer.md` when Codex delegates part of
+a question outward: deleted on close, once the content is folded into `## Findings`.
 
 # Consensus and Cleanup
 
@@ -165,3 +255,14 @@ External thread — two one-line pings plus the copy-paste transport:
 
 - to Claude Code: `Подготовь внешнее ревью: <тема>` → get two links (request → answer)
 - carry the request out, paste the answer in, then: `Process the external review`
+
+Research thread — same shape, one ping per side (Codex reads and writes the thread itself, which
+is exactly why research does not go to an "external" AI):
+
+- to Codex: `Research per AGENTS.md` (it finds the `awaiting-research` thread itself)
+- to Claude Code: `Process the research` (it finds the `awaiting-response` thread itself)
+
+If Codex decides part of the question needs an external AI, it sets `awaiting-external` and hands
+you two links (copy from `.request.md` → paste into `.answer.md`). Carry it, then ping Codex again
+with the same `Research per AGENTS.md` — it picks its own thread back up and folds the answer into
+its findings.

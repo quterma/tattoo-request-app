@@ -159,6 +159,8 @@ Before a commit is finalized, when production or source code was changed:
 - Review Agent inspects changed files (read-only, subagent_type: "Explore")
 - AI must fix all issues reported by the pipeline
 - pipeline status must be READY FOR DEVELOPER REVIEW before proposing a commit
+- an independent cross-review thread is then mandatory and must reach consensus before the commit
+  is proposed (AI_TASK_PROTOCOL.md — Independent Review Is Mandatory; AI_CROSS_REVIEW.md)
 - AI must summarize the change and present pipeline results to the developer
 - the developer must review and approve before the commit is created
 

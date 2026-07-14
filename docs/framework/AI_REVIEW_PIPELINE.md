@@ -44,10 +44,17 @@ Skip when:
 - only documentation changed
 - task is exploratory or analysis-only
 
-**After the first gate run, any further file change re-arms the gates**: re-run the affected
-gates (full pipeline if production/source behavior changed) before declaring
-READY FOR DEVELOPER REVIEW. A "small fix" to a test or config after a green run is exactly how
-a red build reaches a commit.
+**After the first gate run, any further change to source code, tests, or gate-affecting config
+re-arms the gates**: re-run the affected gates (full pipeline if production/source behavior
+changed) before declaring READY FOR DEVELOPER REVIEW. A "small fix" to a test or config after a
+green run is exactly how a red build reaches a commit. This applies to fixes made after an
+independent review, too — those are code changes like any other.
+
+**Durable docs do NOT re-arm the gates.** Editing PROJECT_STAGE_LOG.md, PROJECT_DECISIONS.md, a
+task file, or a review thread after a green run does not require re-running `pnpm qg` — such a
+file cannot change what lint, typecheck, test, or build do. (`pnpm structure` regenerates
+`docs/files-structure.md` and is not a gate.) Scope the re-run to what the gates can actually
+observe; the reason to keep a re-run is a real risk of a red build, not ceremony.
 
 ---
 
@@ -147,7 +154,10 @@ Agent({
 5. Fix all reported issues
 6. Re-run pipeline if fixes touched production or source code
 7. Confirm pipeline status is READY FOR DEVELOPER REVIEW
-8. Developer approves → commit
+8. **Open the independent cross-review thread** (AI_CROSS_REVIEW.md) — mandatory for any block
+   that changed source code (AI_TASK_PROTOCOL.md — Independent Review Is Mandatory). Apply
+   accepted findings, re-run the gates on the fixes, reach consensus.
+9. Developer approves → commit
 
 ---
 
@@ -196,3 +206,10 @@ AI must determine and report final pipeline status before proposing a commit:
 - **READY FOR DEVELOPER REVIEW** — pipeline passed and AI has no remaining concerns
 
 AI must NOT propose a commit unless pipeline status is **READY FOR DEVELOPER REVIEW**.
+
+**And for a block that changed source code, that status is not enough on its own.** This pipeline
+is the in-session check — Claude reviewing its own diff in the context that produced it. A code
+block additionally requires an independent cross-review thread taken to **consensus** before its
+commit may be proposed (AI_TASK_PROTOCOL.md — Independent Review Is Mandatory;
+AI_CROSS_REVIEW.md). Reaching READY FOR DEVELOPER REVIEW means "open the thread", not "propose
+the commit".

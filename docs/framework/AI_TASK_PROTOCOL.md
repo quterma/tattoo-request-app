@@ -187,6 +187,40 @@ Corollary: the task file's `Status` field is the source of truth for task state.
 may point at it; they must not restate it as prose that can silently drift (in the case above,
 the task file was correct — the narrative docs were the ones that lied).
 
+### Name the basis of a claim the repo does not own
+
+The two rules above cover claims about a *conversation* and about the *repository*. A third class
+escaped both, and cost a full task: a claim about **a system nobody here owns** — a platform's
+limits, a browser's capabilities, a third-party library's behavior or size, a service's pricing.
+Such a claim cannot be checked by reading the repo, and being confident about it proves nothing.
+
+**When you write an execution-critical claim of this class into a durable doc — a PRD/FS
+requirement, a decision, a task file — name what it rests on, in one line, right there.** Exactly
+one of:
+
+1. **Owner policy** — a product choice, not a feasibility claim ("we want 10 MB uploads"). Note
+   that this does not make it deliverable; the delivery path is a *separate* claim needing its own
+   basis.
+2. **Repo evidence** — existing code, config, a test, or a command that proves it here.
+3. **External evidence** — a dated primary source, or a probe that actually crossed the real
+   boundary.
+4. **No adequate basis** → it is an **open question, not a settled requirement**: open a research
+   thread (AI_CROSS_REVIEW.md — Research Threads) and do not mark the task `ready` or the spec
+   settled until it is answered.
+
+The trigger is the **class of claim, not your confidence** — "ask if you're unsure" is a dead rule,
+because the failure mode is precisely a session that felt sure. It fires rarely, costs one line
+when it fires, and adds no owner round-trip.
+
+(Real case, 2026-07-14: FS §4.3 specified a 10 MB per-file upload limit. A payload that size cannot
+cross a Vercel Function's 4.5 MB request-body ceiling — so the requirement was undeliverable from
+the moment it was written. STRAT wrote it, IMPL implemented against it, unit tests exercised the
+handler *below* the platform boundary and could not see it, and the in-session pipeline passed. It
+surfaced only in the independent Codex review, after the spec, the architecture, the code and the
+tests had all been built on it. Note what does **not** save you here: the number entered the world
+in a **docs-only change**, which skips the Review Pipeline entirely — the mandatory code review is
+a backstop, not a substitute for this rule.)
+
 ## Lifecycle
 
 `draft → ready → in progress → done` — tracked in the file's Status header. A delegated task
@@ -210,6 +244,36 @@ that hash, so it cannot contain it; git history already provides the commit prov
 
 A task that is cancelled or replaced gets status `superseded` (with a one-line reason and a
 pointer to its replacement, if any) and also moves to `docs/project/tasks/done/`.
+
+## Independent Review Is Mandatory (when to open a thread)
+
+**Every IMPL block that changed source code gets an independent cross-review thread
+(AI_CROSS_REVIEW.md) before its commit is proposed — exactly like `pnpm qg`, and for the same
+reason: it is a gate, not a judgment call.** Skip it only for a block that skips the Review
+Pipeline too (documentation-only or analysis-only — AI_REVIEW_PIPELINE.md, When to Run).
+
+Consequences, stated plainly because the previous wording left them to be inferred:
+
+- **A green in-session Review Pipeline is necessary but NOT sufficient.**
+  `READY FOR DEVELOPER REVIEW` (AI_REVIEW_PIPELINE.md) means the gates pass — it does **not**
+  license proposing a commit on a code block. That right arrives only at **consensus** on the
+  review thread.
+- The IMPL session opens the thread itself, right after its pipeline goes green, and stays open
+  through the loop below. It does not wait to be told, and does not end at a green pipeline.
+- The in-session Review Agent is Claude reviewing Claude inside the context that produced the
+  diff; the cross-review is a second, repo-aware reader that never saw the reasoning. The two
+  are not substitutes (AI_CROSS_REVIEW.md — Scope).
+
+Why the default is "always" rather than a risk threshold (owner decision 2026-07-14): Codex costs
+the owner nothing today and parallel IMPL work is rare, so the one-active-thread queue is not yet
+a bottleneck — and a threshold ("security-sensitive or architecturally novel") is a judgment made
+by a session at the end of its own work, which is exactly where this check already failed once
+(2026-07-14: a public unauthenticated upload endpoint went green in-session and headed straight
+for a commit; the owner caught it). **Revisit if the premise changes** — if Codex becomes costly
+or parallel IMPL sessions make the single review slot a bottleneck, replace the blanket rule with
+a risk-class trigger (public/security surface, new architecture or abstraction,
+migrations/RLS/secrets, concurrency/idempotency — the same list that makes a task non-delegable)
+rather than dropping the gate.
 
 ## Post-Review Fix Loop
 
@@ -267,14 +331,29 @@ Requirements:
   reason neither applies); an **Allowed Write Surface** (the explicit list of paths Codex may
   write — nothing outside it, ever); whether deps/migrations/generated files/shared docs may be
   touched (default: no); and `Executor: codex` / `Reviewer: claude` stated in the task file.
-- **Baseline and ownership must be recorded and checked, not assumed.** The task file states
-  the baseline commit the work starts from. At startup, before planning, Codex reports the
-  working tree's actual state and stops if any path in its Allowed Write Surface is already
-  dirty or if HEAD differs from the recorded baseline — unless the task explicitly names and
-  assigns that pre-existing diff to this task. Rationale: without this, a formally valid task
-  can run against someone else's uncommitted work, and Claude cannot later separate Codex's
-  changes from the pre-existing ones in the final diff. "Don't delegate tasks touching files
-  another session may be editing" is a design guideline; this is the check that enforces it.
+- **Baseline and ownership must be recorded and checked, not assumed.** At startup, before
+  planning, Codex reports the working tree's actual state and **stops if any path in its Allowed
+  Write Surface is already dirty** — unless the task explicitly names and assigns that
+  pre-existing diff to this task. Rationale: without this, a formally valid task can run against
+  someone else's uncommitted work, and Claude cannot later separate Codex's changes from the
+  pre-existing ones in the final diff. "Don't delegate tasks touching files another session may
+  be editing" is a design guideline; this is the check that enforces it.
+
+  **The baseline is the commit that introduced the task file — never a hash written into it.**
+  A task file cannot name the commit that carries it (the hash does not exist while the file is
+  being written), so an author who fills in a hash necessarily writes a *stale* one, and the
+  "stop if HEAD differs" check then fires forever: the task is undelegatable by construction. This
+  is the same self-reference the Lifecycle section already forbids at the other end (a task file
+  may not record the hash of the commit that completes it). Codex derives the baseline itself with
+  `git log -1 --format=%H -- <task file>` and, rather than demanding `HEAD == baseline`, checks
+  what actually matters: **has anything in the Allowed Write Surface changed since that commit**
+  (`git diff --stat <baseline>..HEAD -- <surface paths>`, plus the dirty-tree check above)?
+  Unrelated commits on top of the baseline are normal and must not block the task. If the surface
+  *has* moved, Codex stops and asks — the task was written against a different world.
+  (Real case, 2026-07-14: `STAGE_6_TASK_08` recorded `Baseline commit: da6861f` but was introduced
+  by `4dd7593`, so `HEAD == da6861f` was never true; the task would have halted a Codex session at
+  its first startup check. Found by Codex while researching an unrelated question — no human or AI
+  pass over that file had noticed.)
 - Codex stops and asks rather than improvising when repo evidence conflicts with the task, an
   acceptance criterion admits materially different behaviors, a required decision/asset is
   missing, or the diff would need to expand beyond the declared boundary.

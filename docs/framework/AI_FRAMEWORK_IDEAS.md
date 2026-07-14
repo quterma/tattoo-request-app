@@ -513,6 +513,50 @@ AI_WORKFLOW_MASTER.md. Format: date — observation — status (`open` / `resolv
   already rejected for a final STRAT sign-off. The triggering question (client-side image
   compression) already sits in PROJECT_BACKLOG.md with its four sub-questions — it is the first
   candidate for a research thread, not a leftover.
+- 2026-07-14 — **Two gaps found by the owner right after the mechanisms next to them were built,
+  taken to Codex as the first-ever research thread
+  (`research/done/RESEARCH_2026-07-14_open-question-trigger-and-thread-visibility.md`).** (Q1) A
+  review thread now has a hard trigger (code changed → thread), but a *research* thread has none:
+  it opens only if a session happens to notice that what it faces is an open question rather than a
+  task — pure luck. The live proof: FS §4.3's 10 MB upload limit is undeliverable through a Vercel
+  Function (4.5 MB ceiling); STRAT wrote it, IMPL built against it, unit tests exercised the handler
+  *below* the platform boundary and could not see it, the in-session pipeline passed, and only the
+  independent Codex review caught it — at the last possible moment. (Q2) Nothing shows what is open
+  right now: the anti-rot duty relies on a session remembering, and directory listings cannot
+  express *kinds* of state (readiness integrity, blocked work, deferred-accepted findings). —
+  resolved: three outcomes, owner decisions 2026-07-14. **(Q1 — both barriers, they are not
+  alternatives.)** Upstream: AI_TASK_PROTOCOL.md — Session Duties, new subsection **"Name the basis
+  of a claim the repo does not own"**. A third class of claim escaped the two existing rules (about
+  a *conversation*, about the *repository*): a claim about **a system nobody here owns** — platform
+  limits, browser capabilities, a library's behavior/size, a service's pricing. Writing one into a
+  durable doc now requires naming its basis in one line: owner policy (a product wish, explicitly
+  *not* a feasibility claim) / repo evidence / dated external evidence / **no basis → it is an open
+  question, open a research thread and do not mark the spec settled**. The trigger is the *class of
+  claim, not confidence* — "ask if unsure" is dead, because the failing session felt sure.
+  Downstream: AI_CROSS_REVIEW.md — the mandatory review's `## Review` turn always checks
+  external-boundary feasibility. **Why both:** the review costs nothing extra (it is mandatory
+  anyway) but is a backstop only — the 10 MB number entered the world in a **docs-only change**,
+  which skips the code pipeline entirely, so only the upstream rule covers where this defect
+  actually originated. **(Q2 — build the command.)** `pnpm project:status`, filed as
+  `tasks/TOOLING_TASK_01_project_status_command.md` (`draft`, `Executor: codex`): read-only,
+  derived from the canonical files, git as an overlay only, prints integrity warnings, **writes
+  nothing**. Persisting the view into a file was rejected outright — a generated status doc rots
+  exactly like the hand-written ones this project already has scars from (and it would collide with
+  the newer rule that task `Status` is canonical and narrative docs must not restate it; the
+  deferred `PROJECT_CURRENT_STATE.md` backlog item needs reconciling against that when executed).
+  Schema normalization (a `blocked` status, uniform backlog fields) was NOT decided and stays open.
+  **(Bug, no decision needed — and the strongest argument for Q2.)** Codex, while answering a
+  question about *visibility*, found that `STAGE_6_TASK_08` was **undelegatable by construction**:
+  it recorded `Baseline commit: da6861f` while the file itself was introduced by `4dd7593`, so
+  `HEAD == baseline` was never true and the "stop if HEAD differs" check fired forever — a Codex
+  session would have burned on its first startup check. This is the same self-reference the
+  Lifecycle section already forbids at the other end (a task file may not carry the hash of the
+  commit that completes it); the baseline field reintroduced it from the front. Fixed in
+  AI_TASK_PROTOCOL.md / STAGE_TASK_TEMPLATE.md / AGENTS.md / the live task file: the baseline is
+  **derived** (`git log -1 --format=%H -- <task file>`), never typed, and the executor stops only
+  if the Allowed Write Surface is dirty or has moved since it — an advanced HEAD with unrelated
+  commits is normal. Four passes over that file (STRAT authoring it, an owner read, a META read,
+  a Codex review of its stage) had not noticed; a machine check found it immediately.
 - 2026-07-14 — **An IMPL session can leave behind mandatory follow-up actions (apply a DB migration,
   set a new required env var, run a live verification) and the framework has no mechanism that
   guarantees anyone ever does them.** They get written into PROJECT_STAGE_LOG.md, and the log is a

@@ -77,7 +77,10 @@ If improvement is possible:
 
 - After each TODO: short summary
 - Run Review Pipeline (see AI_REVIEW_PIPELINE.md)
-- Propose commit only after pipeline status is READY FOR DEVELOPER REVIEW
+- Propose commit only after pipeline status is READY FOR DEVELOPER REVIEW — and, if the block
+  changed source code, only after its mandatory independent cross-review thread reached consensus
+  (AI_TASK_PROTOCOL.md — Independent Review Is Mandatory). A green pipeline alone is not a licence
+  to propose a commit on code.
 - Commits ONLY with explicit, manual owner approval — no exceptions.
   Applies to every session type (STRAT / IMPL / META), subagents, and automated/scheduled
   sessions. No framework or project doc may override this rule; a doc instructing an
@@ -126,10 +129,15 @@ Run all three stages in order — see AI_REVIEW_PIPELINE.md (source of truth for
 2. Quality Gates — run `pnpm qg` (runs structure + lint + typecheck + test + build in one command).
    Report PASS / FAIL / NOT CONFIGURED for each gate. Do not skip.
 3. Review Agent — subagent_type: "Explore", read-only inspection of changed files
+4. Independent cross-review — mandatory for any block that changed source code: open a thread per
+   AI_CROSS_REVIEW.md, apply accepted findings, re-run the gates on them, take it to consensus
+   (AI_TASK_PROTOCOL.md — Independent Review Is Mandatory)
 
-Re-run after ANY file change made post-pipeline — source, test, or config alike. A green run is
-only valid for the exact tree it ran on.
-Do NOT propose commit unless pipeline status is READY FOR DEVELOPER REVIEW.
+Re-run the gates after any post-pipeline change to source, tests, or gate-affecting config — a
+green run is only valid for the exact tree it ran on. Durable docs (PROJECT_*, task files, review
+threads) do NOT re-arm the gates; they cannot change what lint/typecheck/test/build do.
+Do NOT propose commit unless pipeline status is READY FOR DEVELOPER REVIEW **and** — for a code
+block — its cross-review thread reached consensus.
 
 ### Architecture
 

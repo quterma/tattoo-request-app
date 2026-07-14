@@ -11,8 +11,13 @@
   architecture, or visual-taste decision remains (all resolved in PROJECT_DECISIONS.md —
   Preparation/Aftercare in-product discovery, 2026-07-14). Delegable per AI_TASK_PROTOCOL.md.
 - Reviewer: `claude` — mandatory independent review pass + full `pnpm qg`.
-- Baseline commit: `da6861f` — the executor stops if HEAD differs, or if any path in the Allowed
-  Write Surface is already dirty, unless this task explicitly assigns that diff here (it does not).
+- Baseline: the commit that introduced this task file — derive it with
+  `git log -1 --format=%H -- docs/project/tasks/STAGE_6_TASK_08_preparation_aftercare_split.md`
+  (AI_TASK_PROTOCOL.md — Delegating IMPL Tasks to Codex). Stop only if any path in the Allowed
+  Write Surface is dirty, or has changed since that baseline; an advanced HEAD with unrelated
+  commits is normal and must not stop you. (This field previously carried a literal hash,
+  `da6861f`, which the file's own introducing commit could never equal — the task was
+  undelegatable by construction. Corrected 2026-07-14.)
 - Allowed Write Surface (nothing outside it):
   - `app/[locale]/(public)/aftercare/page.tsx` (rewritten to the Aftercare-only page)
   - `app/[locale]/(public)/preparation/page.tsx` (new)

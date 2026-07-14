@@ -123,9 +123,9 @@ tattoo-request-app/
 │       ├── STAGE_6_PRODUCT_DEFINITION.md
 │       ├── research/
 │       │   ├── .gitkeep
-│       │   ├── RESEARCH_2026-07-14_open-question-trigger-and-thread-visibility.md
 │       │   └── done/
-│       │       └── .gitkeep
+│       │       ├── .gitkeep
+│       │       └── RESEARCH_2026-07-14_open-question-trigger-and-thread-visibility.md
 │       ├── reviews/
 │       │   ├── .gitkeep
 │       │   └── done/
@@ -141,9 +141,10 @@ tattoo-request-app/
 │       │       └── REVIEW_2026-07-14_stage6-item1-upload-flow.md
 │       └── tasks/
 │           ├── STAGE_6_STRAT_BRIEF.md
-│           ├── STAGE_6_TASK_01_upload_flow_architecture.md
 │           ├── STAGE_6_TASK_08_preparation_aftercare_split.md
+│           ├── TOOLING_TASK_01_project_status_command.md
 │           └── done/
+│               ├── STAGE_6_TASK_01_upload_flow_architecture.md
 │               └── STAGE_6_TASK_02_site_wide_shell.md
 ├── scripts/
 │   └── update-structure.mjs
@@ -190,7 +191,6 @@ tattoo-request-app/
 │   │   │       └── RequestStatusForm.tsx
 │   │   └── request/
 │   │       ├── __tests__/
-│   │       │   ├── FileUploadInput.test.tsx
 │   │       │   ├── RequestForm.submission.test.tsx
 │   │       │   ├── schema.test.ts
 │   │       │   └── UploadCategoryInput.test.tsx
@@ -211,7 +211,6 @@ tattoo-request-app/
 │   │       ├── ui/
 │   │       │   ├── Button.tsx
 │   │       │   ├── CheckboxInput.tsx
-│   │       │   ├── FileUploadInput.tsx
 │   │       │   ├── index.ts
 │   │       │   ├── RequestForm.tsx
 │   │       │   ├── SelectInput.tsx

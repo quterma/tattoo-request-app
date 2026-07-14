@@ -116,6 +116,9 @@ When production or source code was changed:
 - fix all reported issues before proceeding
 - re-run pipeline if fixes touched production or source code
 - pipeline status must be READY FOR DEVELOPER REVIEW before proposing a commit
+- then open the mandatory independent cross-review thread and take it to consensus — a green
+  pipeline is necessary but not sufficient for a code block (AI_TASK_PROTOCOL.md — Independent
+  Review Is Mandatory; AI_CROSS_REVIEW.md)
 
 When only documentation changed:
 

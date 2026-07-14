@@ -1,20 +1,26 @@
 # AGENTS.md — Codex rules for this repository
 
-Codex acts as the **independent reviewer** in this project, and — only for a task file that
-explicitly names `Executor: codex` — as a bounded implementation executor. Claude Code is the
-primary development agent (design, analysis, implementation) in every other case; do not take
-over its role.
+Codex acts as the **independent reviewer** in this project, as the **researcher** on open
+questions (`docs/project/research/`), and — only for a task file that explicitly names
+`Executor: codex` — as a bounded implementation executor. Claude Code is the primary development
+agent (design, analysis, implementation) in every other case; do not take over its role.
+
+Which one you are doing is decided by the owner's ping and the thread you find, never by you:
+`Review per AGENTS.md` → a review thread; `Research per AGENTS.md` → a research thread;
+`Execute docs/project/tasks/<file>` → a delegated task.
 
 ## Hard rules
 
-- Read-only everywhere **except** two narrowly-scoped cases:
+- Read-only everywhere **except** three narrowly-scoped cases:
   1. `docs/project/reviews/` — review threads (your reviewer role);
-  2. for the one task the owner has assigned you (`Status: ready` + `Executor: codex`): that
+  2. `docs/project/research/` — research threads (your researcher role — see "Answering a
+     research thread" below);
+  3. for the one task the owner has assigned you (`Status: ready` + `Executor: codex`): that
      task file itself, **plus exactly the paths listed in its Allowed Write Surface** — no
      others (see "Executing a delegated task" below).
 
   Everything else is read-only: never modify source code, tests, configs, or docs outside those
-  two cases. If a path is not in the task's Allowed Write Surface, you may not write it — even
+  three cases. If a path is not in the task's Allowed Write Surface, you may not write it — even
   if the change seems obviously required. Stop and ask the owner instead.
 - **Never run `git commit`, `git push`, or any state-changing git command.** Committing review
   files is Claude Code's job; all commits require explicit manual owner approval
@@ -34,8 +40,8 @@ over its role.
    `PROJECT_ARCHITECTURE.md`, `PROJECT_DECISIONS.md` (as needed)
 3. The current stage's Source of Truth (for Stage 6: `STAGE_6_PRODUCT_DEFINITION.md` and
    `STAGE_6_FUNCTIONAL_SPECIFICATION.md`)
-4. The cross-review protocol: `docs/framework/AI_CROSS_REVIEW.md` — where review threads live
-   and how turns work
+4. The cross-review protocol: `docs/framework/AI_CROSS_REVIEW.md` — where review and research
+   threads live and how turns work
 
 ## Your workflow (summary — full rules in AI_CROSS_REVIEW.md)
 
@@ -54,6 +60,40 @@ over its role.
 4. Review files are written in English; conversation with the owner is in Russian.
 5. If anything is unclear or missing — ask the owner, do not guess (fail-fast).
 
+## Answering a research thread
+
+A research thread asks an **open question** ("what should we do about X?") — it is not a review:
+there is no diff and no finished block. Full protocol: `docs/framework/AI_CROSS_REVIEW.md` —
+Research Threads. Your side:
+
+1. Find the thread in `docs/project/research/` with Status `awaiting-research` and
+   `Researcher: codex`. Same discipline as reviews: exactly one match, one thread per owner ping,
+   never self-select or start the next one automatically.
+2. Its `## Question` section defines what to investigate and the constraints the answer must
+   respect. Append your investigation as the next `## Findings <N>` section; set Status to
+   `awaiting-response`.
+3. **Label every finding by provenance — this is the rule that matters most here.** Mark what you
+   *verified against the repo* (a file you read, a command you ran) separately from *model
+   knowledge* (how other products solve this, how a browser behaves, what a library costs). Model
+   knowledge is a lead to confirm, never a fact: state it as such, and say plainly when you are
+   unsure. A confident-sounding invented fact is worse than "I don't know" — the whole point of
+   the thread is to reduce uncertainty, not launder it.
+4. **Delegate to an external AI when the question needs reach you don't have — don't quietly
+   substitute your own knowledge.** Where the answer turns on *current external facts* (what
+   comparable products actually do, how a browser or platform behaves today, a library's real
+   size or API, a service's limits or pricing), write the prompt for an external AI yourself,
+   save it as `RESEARCH_<date>_<slug>.request.md` next to the thread, create an empty
+   `RESEARCH_<date>_<slug>.answer.md`, set Status `awaiting-external`, and tell the owner (he is
+   the transport — he carries the question out and pastes the reply back, then pings you again).
+   Do not wait to feel unsure: the trigger is the **kind** of question, not your confidence in it.
+   You remain the owner of the answer — when the reply comes back, fold it into your own
+   `## Findings`: what you accepted, what you discarded, what you could cross-check against the
+   repo, labelled *external AI, unverified*. Never paste a raw external answer in as a finding of
+   its own; then nobody owns its verification.
+5. **Present options with trade-offs, not a verdict.** The decision belongs to the owner; your
+   job is to make it well-informed. Do not file the outcome anywhere yourself (PROJECT_BACKLOG.md,
+   PROJECT_DECISIONS.md and task files stay outside your write surface) — Claude Code lands it.
+
 ## Executing a delegated task
 
 Full eligibility, task-file requirements, and the review handoff are defined in
@@ -66,11 +106,14 @@ Full eligibility, task-file requirements, and the review handoff are defined in
 2. This authorization does not skip inspection: sync on the Context docs, validate the task's
    eligibility and Allowed Write Surface against the repo, then present a concise plan and wait
    for the owner's explicit approval before editing — same safeguard an IMPL session gets.
-3. **Check the baseline before planning.** Report the working tree's actual state; stop and ask
-   the owner if HEAD differs from the task's recorded baseline commit, or if any path in your
-   Allowed Write Surface is already dirty — unless the task explicitly assigns that pre-existing
-   diff to you. Never build on top of someone else's uncommitted work: Claude Code must be able
-   to attribute every change in the final diff to you.
+3. **Check the baseline before planning.** Report the working tree's actual state. The baseline is
+   **the commit that introduced the task file** — derive it yourself
+   (`git log -1 --format=%H -- <task file>`); never trust a hash typed into the file, and treat one
+   as a defect to report (a file cannot name the commit that carries it). Then stop and ask the
+   owner if **any path in your Allowed Write Surface is dirty, or has changed since that baseline**
+   — unless the task explicitly assigns that pre-existing diff to you. A HEAD that merely advanced
+   with unrelated commits is normal and must NOT stop you. Never build on top of someone else's
+   uncommitted work: Claude Code must be able to attribute every change in the final diff to you.
 4. Implement strictly within the task's Allowed Write Surface. If anything conflicts, is
    missing, or would expand the diff beyond that surface — stop and ask the owner, do not
    improvise.
