@@ -144,6 +144,7 @@ tattoo-request-app/
 │       └── tasks/
 │           ├── META_TASK_01_framework_consolidation.md
 │           ├── STAGE_6_STRAT_BRIEF.md
+│           ├── STAGE_6_TASK_03_request_form_rebuild.md
 │           ├── STAGE_6_TASK_08_preparation_aftercare_split.md
 │           ├── TOOLING_TASK_01_project_status_command.md
 │           └── done/

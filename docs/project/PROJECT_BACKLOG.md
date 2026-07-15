@@ -52,7 +52,10 @@ latter case restoring the two links is a one-line change and needs no test.
   section for Stage 6). The FS's field-inclusion rule forbids adding any field outside its table
   without escalation. The following remain post-MVP candidates, but each now requires a PRD/FS
   change first (PRD §9 Change Control) before implementation:
-  - budget range (note: the FS §4.2 field model deliberately contains no budget field)
+  - ~~budget range~~ — **resolved 2026-07-14: an optional free-text Budget field was added to
+    FS §4.2 (field 12) by owner decision; now in Stage 6 scope via Item 3, not a backlog candidate.**
+    (The shipped form already carried a `budget` field; Item 3 keeps it and brings it into FS
+    compliance.)
   - willingness to wait
 
 - File upload: prevent selecting the same file twice before submit. Nice-to-have, small,
@@ -63,6 +66,15 @@ latter case restoring the two links is a one-line change and needs no test.
   PROJECT_IMPLEMENTATION_PLAN.md — Post-Launch Roadmap — File Upload UX for the fuller note.
   (2026-07-12: still open; the Stage 6 upload UX itself is specified in FS §4.3–§4.5 —
   thumbnails, per-file progress/failure/remove — and governs any rework of `FileUploadInput`.)
+
+- **Oversized-file error copy — length/wording, for the Item 6 visual pass (2026-07-14, from the
+  Item 1 live check).** The current message ("This image is over 4 MB. Please use a smaller one — a
+  screenshot usually works.") overflows a narrow mobile row when shown next to the thumbnail and the
+  remove control. This is *content/visual polish, not behavior* — it does not belong in Item 3 (which
+  fixes the upload card's structure and behavior). Handle it during the Stage 6 visual/content pass
+  (Item 6-adjacent): shorten the copy and decide whether the "a screenshot usually works" hint stays
+  (owner leans toward dropping it). The i18n key lives in `en.json`; do not change the *behavior*
+  (the 4 MB rejection itself is FS §4.3 and is correct).
 
 ---
 

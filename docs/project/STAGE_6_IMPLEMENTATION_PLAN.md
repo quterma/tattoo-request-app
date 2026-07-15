@@ -47,13 +47,13 @@ file may contradict these without first escalating a PRD/FS/blueprint change.
 | --- | --- | --- | --- | --- |
 | 1 | Upload-flow architecture (endpoint/auth model, opaque client handle + `clientSubmissionId` lifecycle, 3-category DB/Storage/admin representation, per-file retry/remove/progress, atomic adopt-at-submit, cleanup/idempotency) | — | **done** (`STAGE_6_TASK_01_upload_flow_architecture.md`, moved to `tasks/done/`) | PROJECT_DECISIONS.md — "Stage 6 Upload-Flow Architecture" |
 | 2 | Site-wide shell (nav item set → Home/Process/Request/Location; footer strips `mailto:`/`tel:`; shared CTA-at-end-of-page component; `policies` → `process` route rename **with content carried over as-is**; inbound-link sweep; Location's missing CTA pulled forward) | — | **done** (`STAGE_6_TASK_02_site_wide_shell.md`, moved to `tasks/done/`) | PROJECT_DECISIONS.md — Navigation and CTA placement |
-| 3 | Request form rebuild (field model, states, single-scroll format, upload card stack, required in-session persistence incl. clearing on submit) | Item 1 | not started | PROJECT_DECISIONS.md — Request page — form format |
+| 3 | Request form rebuild (field model → FS §4.2, states, single-scroll format, upload card stack + motivation cards, required in-session persistence incl. clearing on submit, **Item 9 reference-code folded in**, upload-card UX fixes from the Item 1 live check) | Item 1 | **task ready** (`STAGE_6_TASK_03_request_form_rebuild.md`) — Item 1 is live; the shipped form is Item 1's plumbing on the OLD field model, so this is a real rebuild | PROJECT_DECISIONS.md — Request page — form format |
 | 4 | Success page (new route; client store gate incl. bfcache guard; contact echo; one-time read) | Item 3 (shares the persistence store) | not started | PROJECT_DECISIONS.md — Success page |
 | 5 | Home rebuild (block order; About folded into Hero/Good Fit, not deleted; footer/Instagram decisions already covered by Item 2) | Item 2 | not started | PROJECT_DECISIONS.md — Home page |
 | 6 | Process page **content rewrite** (the route itself is delivered by Item 2 with the old `policies` copy carried over; Item 6 replaces that copy with the FS §3.2 canonical content: Overview, Good Fit, Design Process, Pricing, Booking Policy, FAQ, in blueprint block order) | Item 2 | not started, **content-blocked** — needs owner-authored copy (pricing, FAQ, Good Fit text) | PROJECT_DECISIONS.md — Process page |
 | 7 | Location polish (real map embed + real studio photos replacing placeholders) — the missing CTA is pulled forward into Item 2 | Item 2 | not started, **asset-blocked** — needs real studio photos | PROJECT_DECISIONS.md — Location page |
 | 8 | Preparation / Aftercare split (two routes from the current combined `aftercare` page; drop policies links; **footer discovery links added**; no cross-link) | Item 2 | **task ready** (`STAGE_6_TASK_08_preparation_aftercare_split.md`, `Executor: codex`) — Q1/Q2/Q3 resolved 2026-07-14 | PROJECT_DECISIONS.md — Preparation/Aftercare in-product discovery |
-| 9 | Reference-code format (6-char uppercase alphanumeric, excludes O/0/I/1) | Item 3 (generated at submit) | not started | FS §4.6; PROJECT_DECISIONS.md — Stage 6 note under Reference Code Decision |
+| 9 | Reference-code format (6-char uppercase alphanumeric, excludes O/0/I/1) | Item 3 (generated at submit) | **folded into Item 3** (owner decision 2026-07-14 — same submit endpoint; task `STAGE_6_TASK_03_request_form_rebuild.md`, scope item 5) | FS §4.6; PROJECT_DECISIONS.md — Stage 6 note under Reference Code Decision |
 | 10 | Abuse mitigation, **both endpoints** (honeypot on submit; **a non-caller-resettable control on `/api/upload` — now a pre-launch blocker**, see below) | Item 1 (shares the endpoints) | not started — **scope grew after the Item 1 Codex review** | FS §4.5; PROJECT_BACKLOG.md — "Unbounded automated storage growth"; PROJECT_DECISIONS.md — Stage 6 Upload-Flow Architecture §1 |
 | 11 | Public error/404 UX polish (localized 404, public error boundary) | — | not started, pre-existing backlog item | PROJECT_BACKLOG.md; PROJECT_STAGE_LOG.md 2026-07-09 Fix Pass 2 entry |
 | 12 | Favicon / OG / basic SEO | — | not started | PROJECT_IMPLEMENTATION_PLAN.md — Stage 6 |
@@ -103,46 +103,26 @@ existing i18n keys (`beforeAppointment*` + `tattooDay*` → Preparation; `afterc
 
 ---
 
-## ⛔ Item 1 is committed but NOT LIVE — the DB migration is not applied (2026-07-14)
+## ✅ Item 1 migration applied and verified live (2026-07-14) — was a blocker, now cleared
 
-**Read this before planning or starting Item 3.** Item 1's code is committed (`480c721`) and all
-gates are green, **but the application does not work end-to-end yet**: the code writes the new
-category values (`artist_work` / `inspiration` / `placement_photo`) while the database still carries
-the old `CHECK (type IN ('reference','placement'))` constraint. **Any request with an image will
-fail on insert until the migration is applied.** Unit tests cannot catch this — they mock the DB
-(PROJECT_DECISIONS.md — Database Stage Completion Criteria: unit tests do not verify a DB stage).
-
-Migrations are **never automatic** — no CI step, no deploy hook applies them (PROJECT_DECISIONS.md —
-Migration Workflow Decisions). Required, in order:
-
-1. **Verify the live constraint name first** — Supabase Dashboard → Database → Tables →
-   `request_files` → Constraints. The original CHECK was declared inline and unnamed, so Postgres
-   auto-named it (expected: `request_files_type_check`). **If the real name differs, the migration's
-   `DROP CONSTRAINT IF EXISTS` silently does nothing** and the old two-value constraint survives —
-   the failure mode is silent, which is why this step is not optional.
-2. `pnpm exec supabase db push`
-3. `pnpm exec supabase migration list` — Local and Remote must match
-4. **Live end-to-end verification** (the only thing that actually proves this stage): submit one
-   real request with an image in each of the three categories; confirm it persists and renders in
-   the admin viewer. Also confirm `create_request`'s signature and grants are unchanged (this
-   migration deliberately does not touch the RPC — that would trigger the Stage 5A staging gate).
-
-**Also required before any deploy: `UPLOAD_TOKEN_SECRET` must be set in Vercel** — a new mandatory
-env var (`requireEnv` throws at module load, so the build fails loudly without it). Generate a fresh
-production value: `openssl rand -base64 32`. Details in PROJECT_PRODUCTION_READINESS.md.
-
-Owner's call whether this runs as its own small task file or as a step at the head of Item 3 — but
-it must happen **before** Item 3's work is verified against the database, or Item 3 will be debugging
-a failure that belongs to Item 1.
+Item 1's DB migration (`20260714025850_three_upload_categories.sql`) is applied to the remote
+database and verified end-to-end. The live constraint name matched (`request_files_type_check`), so
+the silent-failure trap did not fire; the constraint is now the three-category CHECK, the 21 test
+rows were backfilled, and Local == Remote. `UPLOAD_TOKEN_SECRET` is set in Vercel (Production) and a
+real submit with an image in each of the three categories persisted and rendered correctly in the
+admin viewer. Full record: PROJECT_STAGE_LOG.md, 2026-07-14 "Item 1 is now LIVE". **Item 1 is done
+in every sense; Item 3 can be planned and verified against a working database.**
 
 ---
 
 ## Open items left by Item 1 (owner-decided, not Item 1's tail — added 2026-07-14)
 
-Item 1 is **done** (implemented, independently reviewed, review closed at consensus). Beyond the
-migration blocker above, it left two questions that belong to **no item** and are the owner's to
-decide, plus one nit that belongs to Item 3. Recorded here so a STRAT session planning the next
-block does not have to reconstruct them from the review thread.
+Item 1 is **done** (implemented, independently reviewed, review closed at consensus; migration
+applied and verified live — see the section above). Beyond that, it left two questions that belong
+to **no item** and are the owner's to decide, plus one nit that belongs to Item 3. Recorded here so
+a STRAT session planning the next block does not have to reconstruct them from the review thread.
+(The Item 3 nit — submit CTA disabled during upload vs. the "Sending…" wait state — is now folded
+into Item 3's scope; see `STAGE_6_TASK_03_request_form_rebuild.md`.)
 
 1. **Client-side image compression — needs research, then a decision.** The per-file limit is
    **4 MB**, forced by Vercel's 4.5 MB Function request-body ceiling (FS §4.3 was amended 10 MB →
@@ -180,10 +160,13 @@ block does not have to reconstruct them from the review thread.
   parallel with Items 1/3/4, so they aren't the long pole when their turn comes. **Item 8's Q1 is
   the cheapest of them to clear and the one that unlocks a whole parallel work stream** — it is a
   decision, not an asset to produce.
-- **Item 9 and 10 are small** and can be folded into Item 3's task file instead of standing
-  alone, at the next STRAT session's discretion, since they touch the same submit endpoint.
+- **Item 9 is folded into Item 3** (owner decision 2026-07-14 — same submit endpoint). **Item 10 is
+  NOT folded in:** after the Item 1 Codex review it grew from a small honeypot/rate-limit item into a
+  pre-launch blocker (the `/api/upload` durable-quota gap needs a non-caller-resettable control — a
+  new paid dependency). It stays a separate item and must not be pulled into Item 3.
 - Items 11/12 are low-risk, can slot in anywhere there's idle capacity; they don't block or get
-  blocked by anything else.
+  blocked by anything else. **They are the only items cuttable right now without owner content** —
+  everything else waits on Item 3 (→ Item 4) or on owner-supplied copy/photos (5/6/7).
 - Item 13 is the stage-closing gate — do not start it until 1–10 are done.
 
 ---

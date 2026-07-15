@@ -37,21 +37,31 @@ require updating them first. See PROJECT_DECISIONS.md — Stage 6 Product Docume
 
 Current focus:
 
-- **⛔ BLOCKER — Item 1's DB migration is NOT applied. The app does not work end-to-end until it
-  is.** Item 1 is committed (`480c721`) with green gates, but the code writes the new category
-  values (`artist_work` / `inspiration` / `placement_photo`) while the database still has the old
-  `CHECK (type IN ('reference','placement'))`. **Any request with an image fails on insert.** Unit
-  tests cannot catch this (they mock the DB — see "Database Stage Completion Criteria").
-  **Migrations are never automatic** (PROJECT_DECISIONS.md — Migration Workflow Decisions): verify
-  the live constraint name in the Dashboard first (an unnamed inline CHECK was auto-named by
-  Postgres; if the real name differs, `DROP CONSTRAINT IF EXISTS` **silently does nothing** and the
-  old constraint survives), then `pnpm exec supabase db push`, then `migration list` (Local ==
-  Remote), then a live end-to-end submit with an image in each of the three categories. **Also:
-  `UPLOAD_TOKEN_SECRET` must be set in Vercel before any deploy** — new mandatory env var, the build
-  fails loudly without it. Full steps: STAGE_6_IMPLEMENTATION_PLAN.md (top) and
-  PROJECT_PRODUCTION_READINESS.md. **Must be cleared before Item 3 is verified against the DB.**
+- **✅ Item 1 is now LIVE — migration applied and verified end-to-end (2026-07-14, STRAT session).**
+  The blocker above is cleared. Steps actually performed and confirmed against the linked remote
+  database (not just reported):
+  1. **Live constraint name verified before touching anything** (the silent-failure trap): queried
+     `pg_constraint` on `request_files` — the real name was `request_files_type_check`, matching what
+     the migration's `DROP CONSTRAINT IF EXISTS` expects. Had it differed, the drop would have no-op'd
+     silently; it did not.
+  2. `pnpm exec supabase db push` applied `20260714025850_three_upload_categories.sql`.
+  3. **Verified post-state in the remote DB:** constraint is now
+     `CHECK (type IN ('artist_work','inspiration','placement_photo'))`; the 21 existing test rows were
+     backfilled (`reference`→`artist_work` ×11, `placement`→`placement_photo` ×10) with no old values
+     left; `migration list` shows Local == Remote for `20260714025850`.
+  4. **`UPLOAD_TOKEN_SECRET` set in Vercel** (Production only for now — Preview/staging deferred to
+     the pre-release CI/CD stage, owner decision) and the failed deploy re-deployed green.
+  5. **Live end-to-end submit passed:** a real request with an image in each of the three categories
+     persisted and renders correctly grouped in the admin viewer; files upload on selection (visible
+     per-file progress), submit is fast, reference code shown. Owner-run, 2026-07-14.
+  Item 1 is done in every sense now — code committed, reviewed, migration live, e2e proven.
+  **Owner UX observations from the live check** (routed, not fixed here — this is a STRAT session):
+  the upload card's file-name label and the retry control on an oversized-file *validation* rejection
+  are both going into Item 3's scope (retry belongs only on a network/server upload failure, FS §4.5);
+  the long error-text wording is a backlog note for the Item 6 visual pass. FS §4.3 amended to drop the
+  file-name identification requirement (see the FS entry below).
 - **Stage 6 Item 1 — upload-flow architecture — implemented, independently reviewed, review closed
-  at consensus 2026-07-14; committed `480c721` (migration still to apply — see the blocker above).**
+  at consensus 2026-07-14; committed `480c721` (migration applied 2026-07-14 — see the entry above).**
   `STAGE_6_TASK_01_upload_flow_architecture.md` implemented in full: new `POST /api/upload`
   (selection-time, single-file, encrypted opaque handle — AES-256-GCM via
   `src/services/uploadToken.ts`, no storage path ever reaches the client); `src/bff/adoptUploads.ts`
