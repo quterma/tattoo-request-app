@@ -11,8 +11,9 @@ export const requestFormSchema = z
       .max(30, { message: K.CLIENT_NAME_TOO_LONG }),
     ideaDescription: z
       .string({ required_error: K.IDEA_REQUIRED })
-      .min(10, { message: K.IDEA_TOO_SHORT })
-      .max(2000, { message: K.IDEA_TOO_LONG }),
+      .trim()
+      .min(20, { message: K.IDEA_TOO_SHORT })
+      .max(1000, { message: K.IDEA_TOO_LONG }),
     placement: z
       .string()
       .refine((v) => (PLACEMENT_OPTIONS as readonly string[]).includes(v) && v !== "", {
@@ -58,7 +59,7 @@ export const requestFormSchema = z
       .max(50, { message: K.CONTACT_OTHER_TOO_LONG })
       .optional()
       .transform((v) => v?.trim() || undefined),
-    consent: z.custom<true>((v) => v === true, { message: K.CONSENT_REQUIRED, fatal: false }),
+    eligibility: z.custom<true>((v) => v === true, { message: K.ELIGIBILITY_REQUIRED, fatal: false }),
   })
   .superRefine((data, ctx) => {
     const hasContact =

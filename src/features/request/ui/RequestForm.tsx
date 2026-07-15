@@ -6,7 +6,13 @@ import { useTranslations } from "next-intl"
 import { useForm, useWatch } from "react-hook-form"
 import { API_ERROR_CODES, REQUEST_FIELDS } from "@/shared/api"
 import { getContactGroupError, getFieldError, getValidationKeyMessage } from "../lib/errors"
-import { COLOR_OPTIONS, MAX_FILES_PER_FIELD, PLACEMENT_OPTIONS, SIZE_OPTIONS } from "../config"
+import {
+  AGE_THRESHOLD,
+  COLOR_OPTIONS,
+  MAX_FILES_PER_FIELD,
+  PLACEMENT_OPTIONS,
+  SIZE_OPTIONS,
+} from "../config"
 import {
   getClientSubmissionId,
   invalidateUploadedSlots,
@@ -51,7 +57,7 @@ export function RequestForm() {
       email: "",
       phone: "",
       contactOther: "",
-      consent: undefined,
+      eligibility: undefined,
     },
   })
 
@@ -81,7 +87,7 @@ export function RequestForm() {
       formData.append(f.placement, data.placement)
       formData.append(f.size, data.size)
       formData.append(f.color, data.color)
-      formData.append(f.consent, String(data.consent))
+      formData.append(f.eligibility, String(data.eligibility))
 
       if (data.budget) formData.append(f.budget, data.budget)
       if (data.email) formData.append(f.email, data.email)
@@ -305,12 +311,13 @@ export function RequestForm() {
         />
       </div>
 
-      {/* Consent */}
+      {/* Eligibility (18+/for-self, FS §4.2 field 11). Full rebuild — copy with rendered
+          AGE_THRESHOLD + privacy statement — lands in Block B′. */}
       <CheckboxInput
-        id="consent"
-        label={t("consentLabel")}
-        error={err("consent")}
-        {...register("consent")}
+        id="eligibility"
+        label={t("eligibilityLabel", { ageThreshold: AGE_THRESHOLD })}
+        error={err("eligibility")}
+        {...register("eligibility")}
       />
 
       {/* The server rejected this submit's upload handles (expired or unadoptable). The

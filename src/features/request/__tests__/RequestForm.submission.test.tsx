@@ -41,11 +41,11 @@ function fillRequiredFields(user: ReturnType<typeof userEvent.setup>) {
 
       await user.selectOptions(screen.getByRole("combobox", { name: /placement/i }), "arm")
       await user.selectOptions(screen.getByRole("combobox", { name: /size/i }), "medium")
-      await user.selectOptions(screen.getByRole("combobox", { name: /color/i }), "black")
+      await user.selectOptions(screen.getByRole("combobox", { name: /color/i }), "black-and-grey")
 
       await user.type(screen.getByRole("textbox", { name: /email/i }), "user@example.com")
 
-      await user.click(screen.getByRole("checkbox", { name: /pricing/i }))
+      await user.click(screen.getByRole("checkbox", { name: /i confirm i am 18 or older/i }))
     },
   }
 }
@@ -102,9 +102,9 @@ describe("RequestForm – submission flow", () => {
     expect(capturedFormData!.get("ideaDescription")).toContain("dragon")
     expect(capturedFormData!.get("placement")).toBe("arm")
     expect(capturedFormData!.get("size")).toBe("medium")
-    expect(capturedFormData!.get("color")).toBe("black")
+    expect(capturedFormData!.get("color")).toBe("black-and-grey")
     expect(capturedFormData!.get("email")).toBe("user@example.com")
-    expect(capturedFormData!.get("consent")).toBe("true")
+    expect(capturedFormData!.get("eligibility")).toBe("true")
   })
 
   it("does not submit when required fields are missing", async () => {
@@ -183,7 +183,7 @@ describe("RequestForm – submission flow", () => {
     await user.click(screen.getByRole("button", { name: /send request/i }))
 
     expect(screen.queryByRole("alert")).not.toBeInTheDocument()
-    expect(await screen.findByText(/at least 10 characters/i)).toBeInTheDocument()
+    expect(await screen.findByText(/at least 20 characters/i)).toBeInTheDocument()
   })
 
   it("maps a max-length server fieldError to its i18n message", async () => {
@@ -281,7 +281,7 @@ describe("RequestForm – submission flow", () => {
     await fillRequiredFields(user).fill()
     await user.click(screen.getByRole("button", { name: /send request/i }))
 
-    expect(await screen.findByText(/at least 10 characters/i)).toBeInTheDocument()
+    expect(await screen.findByText(/at least 20 characters/i)).toBeInTheDocument()
 
     await user.click(screen.getByRole("button", { name: /send request/i }))
 
@@ -323,8 +323,8 @@ describe("RequestForm – contact group error UX", () => {
         )
         await user.selectOptions(screen.getByRole("combobox", { name: /placement/i }), "arm")
         await user.selectOptions(screen.getByRole("combobox", { name: /size/i }), "medium")
-        await user.selectOptions(screen.getByRole("combobox", { name: /color/i }), "black")
-        await user.click(screen.getByRole("checkbox", { name: /pricing/i }))
+        await user.selectOptions(screen.getByRole("combobox", { name: /color/i }), "black-and-grey")
+        await user.click(screen.getByRole("checkbox", { name: /i confirm i am 18 or older/i }))
       },
     }
   }

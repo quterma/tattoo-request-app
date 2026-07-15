@@ -25,10 +25,22 @@ export const UPLOAD_CATEGORIES = ["artist_work", "inspiration", "placement_photo
 
 export type UploadCategory = (typeof UPLOAD_CATEGORIES)[number]
 
-export const SIZE_OPTIONS = ["small", "medium", "large", "extra-large"] as const
+/**
+ * Age-eligibility threshold (FS §4.2 field 11 / PRD D6). Owner-configurable; the form
+ * renders it into the eligibility copy. Lives in this isomorphic feature config — NOT
+ * `src/config` (which is `server-only` and cannot reach the client that renders the form).
+ */
+export const AGE_THRESHOLD = 18
 
-export const COLOR_OPTIONS = ["black", "color", "mixed"] as const
+export const SIZE_OPTIONS = ["small", "medium", "large", "extra-large", "not-sure"] as const
 
+/** FS §4.2 field 4 (amended 2026-07-15, owner): two options only — Black & grey / Color. */
+export const COLOR_OPTIONS = ["black-and-grey", "color"] as const
+
+/**
+ * FS §4.2 field 2 (amended 2026-07-15): concrete body areas only — the "Other"/free-text
+ * option was removed by owner decision. No free-text placement anywhere.
+ */
 export const PLACEMENT_OPTIONS = [
   "arm",
   "leg",
@@ -38,7 +50,6 @@ export const PLACEMENT_OPTIONS = [
   "neck",
   "hand",
   "foot",
-  "other",
 ] as const
 
 export type SizeOption = (typeof SIZE_OPTIONS)[number]

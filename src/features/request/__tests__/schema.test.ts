@@ -3,15 +3,15 @@ import { requestFormSchema } from "../validation"
 
 const validBase = {
   clientName: "Alex",
-  ideaDescription: "A detailed dragon tattoo on the arm",
+  ideaDescription: "A detailed dragon tattoo on the forearm",
   placement: "arm",
   size: "medium",
-  color: "black",
+  color: "black-and-grey",
   budget: "",
   email: "user@example.com",
   phone: "",
   contactOther: "",
-  consent: true as const,
+  eligibility: true as const,
 }
 
 describe("requestFormSchema – clientName", () => {
@@ -81,8 +81,8 @@ describe("requestFormSchema – required fields", () => {
     }
   })
 
-  it("rejects when ideaDescription is too short", () => {
-    const result = requestFormSchema.safeParse({ ...validBase, ideaDescription: "short" })
+  it("rejects when ideaDescription is under 20 characters", () => {
+    const result = requestFormSchema.safeParse({ ...validBase, ideaDescription: "a".repeat(19) })
     expect(result.success).toBe(false)
     if (!result.success) {
       const messages = result.error.issues.map((i) => i.message)
@@ -90,10 +90,15 @@ describe("requestFormSchema – required fields", () => {
     }
   })
 
-  it("rejects when ideaDescription exceeds 2000 characters", () => {
+  it("accepts ideaDescription at exactly 20 characters", () => {
+    const result = requestFormSchema.safeParse({ ...validBase, ideaDescription: "a".repeat(20) })
+    expect(result.success).toBe(true)
+  })
+
+  it("rejects when ideaDescription exceeds 1000 characters", () => {
     const result = requestFormSchema.safeParse({
       ...validBase,
-      ideaDescription: "a".repeat(2001),
+      ideaDescription: "a".repeat(1001),
     })
     expect(result.success).toBe(false)
     if (!result.success) {
@@ -102,10 +107,38 @@ describe("requestFormSchema – required fields", () => {
     }
   })
 
-  it("accepts ideaDescription at exactly 2000 characters", () => {
+  it("accepts ideaDescription at exactly 1000 characters", () => {
     const result = requestFormSchema.safeParse({
       ...validBase,
-      ideaDescription: "a".repeat(2000),
+      ideaDescription: "a".repeat(1000),
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it("trims ideaDescription before the min check (whitespace-only is too short)", () => {
+    const result = requestFormSchema.safeParse({ ...validBase, ideaDescription: " ".repeat(30) })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      const messages = result.error.issues.map((i) => i.message)
+      expect(messages).toContain("idea_too_short")
+    }
+  })
+
+  it("returns the trimmed ideaDescription on success", () => {
+    const result = requestFormSchema.safeParse({
+      ...validBase,
+      ideaDescription: "  A detailed dragon on the forearm  ",
+    })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.ideaDescription).toBe("A detailed dragon on the forearm")
+    }
+  })
+
+  it("accepts a 1000-char idea wrapped in whitespace (trim happens before max)", () => {
+    const result = requestFormSchema.safeParse({
+      ...validBase,
+      ideaDescription: `  ${"a".repeat(1000)}  `,
     })
     expect(result.success).toBe(true)
   })
@@ -142,12 +175,40 @@ describe("requestFormSchema – required fields", () => {
     }
   })
 
-  it("rejects when consent is not true", () => {
-    const result = requestFormSchema.safeParse({ ...validBase, consent: undefined })
+  it("rejects when eligibility is not true", () => {
+    const result = requestFormSchema.safeParse({ ...validBase, eligibility: undefined })
     expect(result.success).toBe(false)
     if (!result.success) {
       const messages = result.error.issues.map((i) => i.message)
-      expect(messages).toContain("consent_required")
+      expect(messages).toContain("eligibility_required")
+    }
+  })
+
+  it("accepts each of the two color options", () => {
+    for (const color of ["black-and-grey", "color"]) {
+      const result = requestFormSchema.safeParse({ ...validBase, color })
+      expect(result.success).toBe(true)
+    }
+  })
+
+  it("rejects a color option no longer offered (black-only / not-sure)", () => {
+    for (const color of ["black-only", "not-sure"]) {
+      const result = requestFormSchema.safeParse({ ...validBase, color })
+      expect(result.success).toBe(false)
+    }
+  })
+
+  it("accepts size not-sure", () => {
+    const result = requestFormSchema.safeParse({ ...validBase, size: "not-sure" })
+    expect(result.success).toBe(true)
+  })
+
+  it("rejects a placement no longer offered (other)", () => {
+    const result = requestFormSchema.safeParse({ ...validBase, placement: "other" })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      const messages = result.error.issues.map((i) => i.message)
+      expect(messages).toContain("placement_required")
     }
   })
 })
@@ -169,13 +230,13 @@ describe("requestFormSchema – contact group validation", () => {
     }
   })
 
-  it("shows contact_required even when consent is missing", () => {
-    const result = requestFormSchema.safeParse({ ...noContact, consent: undefined })
+  it("shows contact_required even when eligibility is missing", () => {
+    const result = requestFormSchema.safeParse({ ...noContact, eligibility: undefined })
     expect(result.success).toBe(false)
     if (!result.success) {
       const messages = result.error.issues.map((i) => i.message)
       expect(messages).toContain("contact_required")
-      expect(messages).toContain("consent_required")
+      expect(messages).toContain("eligibility_required")
     }
   })
 
@@ -190,7 +251,7 @@ describe("requestFormSchema – contact group validation", () => {
       email: "",
       phone: "",
       contactOther: "",
-      consent: undefined,
+      eligibility: undefined,
     }
     const result = requestFormSchema.safeParse(emptyForm)
     expect(result.success).toBe(false)

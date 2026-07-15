@@ -176,10 +176,17 @@ pointer to a work item that exists by close.
     2026-07-15). Required by: Migration Workflow Decisions (apply via CLI, Local/Remote parity) +
     AI_TASK_PROTOCOL.md (independent review reconciles migrations against completion obligations).
   - Migration 1 — `20260715124427_stage6_reference_code_format.sql` (reference-code format).
-  - Migration 2 — Block C contact-model migration (five contact columns; created in Phase 3).
+    **APPLIED + VERIFIED 2026-07-15:** `db push` succeeded (exit 0); `migration list` shows
+    `20260715124427` Local = Remote. The generator algorithm was verified out-of-band (32-char
+    alphabet excluding O/0/I/1; 200k samples all match `^[A-Z2-9]{6}$`, zero violations). The RPC's
+    signature/return/grant are unchanged by construction (`CREATE OR REPLACE` with the identical
+    13-param list; search_path re-established inline). The `proconfig`/live-submit assertions below
+    fold into CO-1's end-to-end check (a real submit through the built form), runnable only once
+    Block B′ ships the form.
+  - Migration 2 — Block C contact-model migration (five contact columns; created in Phase 3). NOT
+    YET CREATED.
   - Disposition (fill per migration at its apply time, with checkable evidence):
-    - `pnpm exec supabase db push` succeeded; `pnpm exec supabase migration list` shows Local =
-      Remote for the new timestamp.
+    - M1: DONE (see above). M2: pending Phase 3.
     - Affected-object verification: `create_request` still has its 13-param signature (M1) /
       updated signature (M2), `{ id, referenceCode }` return, `service_role` EXECUTE grant, and
       `search_path = public, pg_temp` (`proconfig`) after replacement.
@@ -231,6 +238,14 @@ Contact Model"), so **Block C is unblocked** and is built against it as the fina
 review to consensus. This four-block re-cut is the "legitimate call in the plan" this section
 explicitly allows — the two-block default assumed contact was in-scope for Block A, which it no
 longer is.
+
+**Block C additionally owns two admin-namespace touch-ups deferred from Block A′** (Block A′ review,
+`reviews/done/REVIEW_2026-07-15_stage6_noncontact_contract.md`, findings 3–4): (1) the admin
+request-detail label reads "Consent given/not given" but the visitor now affirms **eligibility**,
+not policy consent — rename the admin presentation; (2) add admin i18n labels for the new
+`sizeOptions`/`colorOptions` values so the admin viewer shows readable labels instead of the raw
+value fallback for newly-submitted requests. Both sit in the admin namespace (walled off from
+Block A′); Block C already touches admin-card rendering, so they land there.
 
 **Final measurement (executor fills before the final review):** record the actual
 execution-affecting surface (files + churn) of each block here. If a block unexpectedly did not

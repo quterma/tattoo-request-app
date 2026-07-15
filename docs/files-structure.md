@@ -130,6 +130,7 @@ tattoo-request-app/
 │       │       └── RESEARCH_2026-07-15_external-framework-audit.md
 │       ├── reviews/
 │       │   ├── .gitkeep
+│       │   ├── REVIEW_2026-07-15_stage6_noncontact_contract.md
 │       │   └── done/
 │       │       ├── .gitkeep
 │       │       ├── REVIEW_2026-07-13_codex-delegation-invocation.md

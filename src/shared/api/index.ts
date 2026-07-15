@@ -18,7 +18,7 @@ export const REQUEST_FIELDS = {
   email: "email",
   phone: "phone",
   contactOther: "contactOther",
-  consent: "consent",
+  eligibility: "eligibility",
   uploadHandles: "uploadHandles",
 } as const
 

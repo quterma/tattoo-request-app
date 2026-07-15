@@ -84,7 +84,10 @@ export async function POST(req: Request) {
         email: data.email,
         phone: data.phone,
         contactOther: data.contactOther,
-        consent: data.consent,
+        // The eligibility confirmation (18+/for-self, FS §4.2 field 11) persists into the
+        // existing `consent` boolean column — same semantics, no migration. The contact
+        // model's own columns change in Block C; this field does not.
+        consent: data.eligibility,
         files: adoption.files,
       })
       referenceCode = result.referenceCode

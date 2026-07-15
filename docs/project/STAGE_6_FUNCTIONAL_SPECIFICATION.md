@@ -103,7 +103,7 @@ Field-inclusion rule (normative): every field must help the artist's initial acc
 | 1 | Idea description | Idea | Multiline text | **Yes** | What does the client want? | Min 20 chars, max 1,000, trimmed; counter shown near limit. |
 | 2 | Placement | Project Details | Select | **Yes** | Where on the body — verbal placement guaranteed regardless of photo (PRD D4). | Owner-configured options, all concrete body areas; **no "Other" / free-text** (amended 2026-07-15 — see below). |
 | 3 | Approximate size | Project Details | Select | **Yes** | Session scale, feasibility. | Owner-configured cm ranges + "Not sure". |
-| 4 | Color preference | Project Details | Select | **Yes** | Style/technique fit. | Black only / Black & grey / Color / Not sure — artist's advice welcome. |
+| 4 | Color preference | Project Details | Select | **Yes** | Style/technique fit. | **Black & grey / Color** — two options only (amended 2026-07-15, owner; the earlier "Black only"/"Not sure" were dropped). Artist's advice welcome. |
 | 5 | Artist work the client likes | Reference Uploads | Image upload | No | Which of the artist's directions resonates. | §4.3. |
 | 6 | External inspiration | Reference Uploads | Image upload | No | Desired mood/style; inspiration, not replication (§A.1 copy). | §4.3. |
 | 7 | Body placement photo | Reference Uploads | Image upload | No | Real anatomy of the intended area. | §4.3. |

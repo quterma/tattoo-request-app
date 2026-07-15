@@ -9,8 +9,8 @@ const validPayload: ParsedRequestPayload = {
   ideaDescription: "A detailed dragon tattoo on the sleeve",
   placement: "arm",
   size: "medium",
-  color: "black",
-  consent: true,
+  color: "black-and-grey",
+  eligibility: true,
   email: "client@example.com",
   budget: undefined,
   phone: undefined,
@@ -84,16 +84,16 @@ describe("validateRequestPayload – validation errors", () => {
     }
   })
 
-  it("returns fieldErrors.consent when consent is not true", () => {
+  it("returns fieldErrors.eligibility when eligibility is not true", () => {
     const payload = {
       ...validPayload,
-      consent: undefined as unknown as true,
+      eligibility: undefined as unknown as true,
     }
     const result = validateRequestPayload(payload)
 
     expect(result.ok).toBe(false)
     if (!result.ok) {
-      expect(result.error.fieldErrors.consent).toBeDefined()
+      expect(result.error.fieldErrors.eligibility).toBeDefined()
     }
   })
 

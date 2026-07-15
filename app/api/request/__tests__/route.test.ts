@@ -59,12 +59,12 @@ const basePayload = {
   ideaDescription: "A wolf",
   placement: "forearm",
   size: "medium",
-  color: "blackAndGrey",
+  color: "black-and-grey",
   budget: undefined,
   email: "client@example.com",
   phone: undefined,
   contactOther: undefined,
-  consent: true as const,
+  eligibility: true as const,
   uploadHandles: ["handle-a"],
 }
 
@@ -126,6 +126,14 @@ describe("POST /api/request — normal flow", () => {
     expect(mockCreateRequest).toHaveBeenCalledWith(
       expect.objectContaining({ studioId: STUDIO_ID, files: adoptedFiles }),
     )
+  })
+
+  // REGRESSION GUARD: the wire/field name is `eligibility`, but it persists into the legacy
+  // `consent` boolean column (no migration). This is the only seam where the new contract
+  // intentionally renames before the unchanged RPC/DB contract — assert the bridge holds.
+  it("maps eligibility to the legacy consent column on createRequest", async () => {
+    await callPost()
+    expect(mockCreateRequest).toHaveBeenCalledWith(expect.objectContaining({ consent: true }))
   })
 
   it("succeeds with zero uploads (uploads are optional)", async () => {

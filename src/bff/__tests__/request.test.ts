@@ -22,8 +22,8 @@ function baseFields(overrides: Record<string, string> = {}): Record<string, stri
     ideaDescription: "A dragon tattoo",
     placement: "arm",
     size: "medium",
-    color: "black",
-    consent: "true",
+    color: "black-and-grey",
+    eligibility: "true",
     ...overrides,
   }
 }
@@ -37,8 +37,8 @@ describe("parseRequestFormData", () => {
     expect(result.ideaDescription).toBe("A dragon tattoo")
     expect(result.placement).toBe("arm")
     expect(result.size).toBe("medium")
-    expect(result.color).toBe("black")
-    expect(result.consent).toBe(true)
+    expect(result.color).toBe("black-and-grey")
+    expect(result.eligibility).toBe(true)
   })
 
   it("parses clientSubmissionId", () => {
@@ -116,22 +116,22 @@ describe("parseRequestFormData", () => {
   })
 })
 
-describe("parseRequestFormData – consent conversion", () => {
-  it('converts consent "true" string to boolean true', () => {
+describe("parseRequestFormData – eligibility conversion", () => {
+  it('converts eligibility "true" string to boolean true', () => {
     const fd = makeFormData(baseFields())
 
     const result = parseRequestFormData(fd)
 
-    expect(result.consent).toBe(true)
+    expect(result.eligibility).toBe(true)
   })
 
-  it("returns undefined-like value when consent is absent", () => {
-    const fd = makeFormData(baseFields({ consent: "false" }))
-    fd.delete("consent")
+  it("returns undefined-like value when eligibility is absent", () => {
+    const fd = makeFormData(baseFields({ eligibility: "false" }))
+    fd.delete("eligibility")
 
     const result = parseRequestFormData(fd)
 
-    expect(result.consent).not.toBe(true)
+    expect(result.eligibility).not.toBe(true)
   })
 })
 

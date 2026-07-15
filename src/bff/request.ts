@@ -12,7 +12,7 @@ export interface ParsedRequestPayload {
   email: string | undefined
   phone: string | undefined
   contactOther: string | undefined
-  consent: true | undefined
+  eligibility: true | undefined
   uploadHandles: string[]
 }
 
@@ -69,7 +69,7 @@ export function parseRequestFormData(formData: FormData): ParsedRequestPayload {
     email: (formData.get(f.email) as string | null) ?? undefined,
     phone: (formData.get(f.phone) as string | null) ?? undefined,
     contactOther: (formData.get(f.contactOther) as string | null) ?? undefined,
-    consent: formData.get(f.consent) === "true" ? true : undefined,
+    eligibility: formData.get(f.eligibility) === "true" ? true : undefined,
     uploadHandles: formData.getAll(f.uploadHandles).filter((v): v is string => typeof v === "string"),
   }
 }
