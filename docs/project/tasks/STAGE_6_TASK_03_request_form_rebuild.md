@@ -71,11 +71,15 @@ Item 1 shipped the upload PLUMBING correctly but deliberately left the form's FI
 old Stages 0–5 form (its own code comment says so). The shipped form diverges from FS §4.2 in
 several places, and closing every one of them is this task:
 
-1. **Contact model is wrong.** Shipped: three always-visible fields (email, phone, contactOther),
-   valid if *any* one is filled. FS §4.2: field 9 is a **Contact-method Select** (WhatsApp / Email
-   / Instagram) that reveals **exactly one** value field (10a Phone / 10b Email / 10c Instagram),
-   each with its own validation, exactly one in the DOM at a time. **Owner-chosen UI: the select,
-   then the single value field appears below it** (not side-by-side, not a morphing control).
+1. **Contact model is wrong — and now expanded (see Block C).** Shipped: three always-visible fields
+   (email, phone, contactOther), valid if *any* one is filled. The target is the **five-method model
+   decided 2026-07-15** (PROJECT_DECISIONS.md — "Stage 6 Contact Model"; FS §4.2 field 9 amended):
+   a Contact-method Select offering **Email / Phone (call) / WhatsApp / Instagram / Telegram** (set
+   per-studio configurable) that reveals **exactly one** value field (10a–e), each with its own
+   validation, one in the DOM at a time. **Owner-chosen UI: the select, then the single value field
+   appears below it** (not side-by-side, not a morphing control). Storage: five nullable columns
+   (migration). **This whole field is Block C, frozen until the contact decision existed — which it
+   now does; Block C is unblocked.**
 2. **Introduction block missing.** FS §4.1 requires a 2–3 sentence intro (what the form is, that it
    replaces a long DM, the 48-hour promise — PRD D5). Not present.
 3. **Eligibility is wrong.** Shipped: a generic `consent` checkbox. FS §4.2 field 11 + PRD D6: a
@@ -107,11 +111,11 @@ required in-session persistence of D-Blueprint 5(a), and the FS §4.6 reference-
 ## Scope
 
 1. **Field model → FS §4.2 exactly.** Rebuild the field set: Introduction block; Idea (min 20);
-   Project Details (Placement with required "Other" free-text; Size incl. "Not sure"; Color =
-   Black only / Black & grey / Color / Not sure; **Budget — optional free text, kept per the
-   2026-07-14 FS amendment**); Reference Uploads (three motivation cards, §4.4/A.1, consuming Item
-   1's `UploadCategoryInput`); Contact (method Select → one revealed value field, §4.2 fields
-   9/10a–c, with per-type validation incl. phone→E.164, Instagram handle charset/@-strip); Name;
+   Project Details (Placement — concrete body areas only, **no "Other"/free-text per the 2026-07-15
+   FS amendment**; Size incl. "Not sure"; Color = Black only / Black & grey / Color / Not sure;
+   **Budget — optional free text, kept per the 2026-07-14 FS amendment**); Reference Uploads (three
+   motivation cards, §4.4/A.1, consuming Item 1's `UploadCategoryInput`); **Contact — the five-method
+   model (Block C), see item below and PROJECT_DECISIONS.md — "Stage 6 Contact Model"**; Name;
    Eligibility (18+/for-self, §4.2 field 11 + PRD D6); Privacy statement by Submit (A.3).
 2. **Block order → FS §4.1**, single continuous scroll (D-Blueprint 1) — no wizard, no accordion.
 3. **Schema + BFF parity.** Update `validation/schema.ts`, `validationKeys.ts`, and the server-side
@@ -163,12 +167,24 @@ pointer to a work item that exists by close.
     what the admin viewer showed, an example code), OR tracked in a named work item>. This is NOT
     covered by unit tests (they mock the DB — the same gap that let Item 1 pass gates while the live
     DB was broken). The DB is live as of 2026-07-14, so this is runnable, not blocked.
-- CO-2 — No new DB migration expected
-  - Required by: contract check — Item 3 changes the form/schema/BFF field model, not the DB. The
-    three-category constraint and reference-code column already exist (Item 1). If the executor's
-    plan turns out to need a schema change (it should not), that becomes a new obligation with the
-    apply-and-verify steps, per Migration Workflow Decisions.
-  - Disposition: expected `None`; confirm at close that no `supabase/migrations/` file was added.
+- CO-2 — DB migrations apply-and-verify (REVISED 2026-07-15; the original "no migration expected"
+  is void — this task adds TWO migrations that recreate `create_request`)
+  - Why revised: the reference-code format (Item 9) lives in the `create_request` RPC, and the
+    contact model (Block C, per "Stage 6 Contact Model" decision) adds five contact columns — both
+    are DB changes the original CO-2 did not anticipate. The staging gate on `create_request` is
+    waived for these two migrations (PROJECT_DECISIONS.md — "Staging Environment", scoped exception
+    2026-07-15). Required by: Migration Workflow Decisions (apply via CLI, Local/Remote parity) +
+    AI_TASK_PROTOCOL.md (independent review reconciles migrations against completion obligations).
+  - Migration 1 — `20260715124427_stage6_reference_code_format.sql` (reference-code format).
+  - Migration 2 — Block C contact-model migration (five contact columns; created in Phase 3).
+  - Disposition (fill per migration at its apply time, with checkable evidence):
+    - `pnpm exec supabase db push` succeeded; `pnpm exec supabase migration list` shows Local =
+      Remote for the new timestamp.
+    - Affected-object verification: `create_request` still has its 13-param signature (M1) /
+      updated signature (M2), `{ id, referenceCode }` return, `service_role` EXECUTE grant, and
+      `search_path = public, pg_temp` (`proconfig`) after replacement.
+    - Live end-to-end (shared with CO-1): a real submit returns a well-formed FS §4.6 code and the
+      chosen contact method persists + renders in the admin viewer.
 - CO-3 — No new required env var / secret expected
   - Required by: contract check. Item 1 introduced `UPLOAD_TOKEN_SECRET`; Item 3 introduces none.
   - Disposition: expected `None`; confirm at close.
@@ -202,9 +218,19 @@ blocks**:
 
 The store's text-field persistence sits in Block B (it is UI-state plumbing the form owns); if the
 IMPL session finds it belongs with the contract instead, that is a legitimate call to make in the
-plan — state it in the plan's Deviations/Review-Granularity section. Do NOT split into four separate
-threads mechanically; two substantial blocks is the target. The IMPL session decides commit
-granularity **within** each block; STRAT fixes only the two review checkpoints.
+plan — state it in the plan's Deviations/Review-Granularity section. The IMPL session decides commit
+granularity **within** each block; STRAT fixes the review checkpoints.
+
+**Re-cut by the approved IMPL plan (2026-07-15), and endorsed here.** The contact block turned out to
+be a product change (five-method model) that had to be escalated to STRAT mid-flight, so the blocks
+were re-cut into: **Block R** (reference code — DB/RPC, risk nucleus #1), **Block A′** (non-contact
+contract), **Block B′** (non-contact form UI + store persistence + upload-card fixes), and **Block C**
+(the contact block — its own contract + UI + five-column migration + admin-card rendering). Block C
+was frozen pending the contact decision; that decision now exists (PROJECT_DECISIONS.md — "Stage 6
+Contact Model"), so **Block C is unblocked** and is built against it as the final block, with its own
+review to consensus. This four-block re-cut is the "legitimate call in the plan" this section
+explicitly allows — the two-block default assumed contact was in-scope for Block A, which it no
+longer is.
 
 **Final measurement (executor fills before the final review):** record the actual
 execution-affecting surface (files + churn) of each block here. If a block unexpectedly did not

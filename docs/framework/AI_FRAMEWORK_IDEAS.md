@@ -57,8 +57,33 @@ and in the linked review/research threads (`docs/project/reviews/done/`, `docs/p
 Compacted because the journal is read into every session (Pre-task Sync + META kickoff) and its
 token weight is a live cost. `open` entries are never compacted. Keep new entries at this density.
 
-- 2026-07-12 — Strategy work lived in ChatGPT with manual two-way context transfer; moved into
-  Claude Code sessions with docs-as-interface. — resolved: AI_TASK_PROTOCOL.md,
+- 2026-07-15 — A STRAT session and an IMPL session, both live for Task 03, **co-authored the same
+  durable docs** (`PROJECT_DECISIONS.md`: STRAT wrote "Stage 6 Contact Model", IMPL added a
+  staging-waiver exception; `STAGE_6_TASK_03_*.md`: STRAT unblocked Block C + removed placement-Other,
+  IMPL rewrote CO-2 from the review). The owner wanted the reference-code (IMPL) and contact-decision
+  (STRAT) work in **separate commits**, but neither shared file can be split by file — the two
+  sessions' hunks sit in one file — and intra-file hunk staging (`git add -p`) is **interactive and
+  blocked** in this harness. The existing shared-index rule (2026-07-13, `df70cae`) governs *staging
+  discipline* (don't stage before approval; name explicit paths) but assumes each file belongs to one
+  session; it has no answer for a **co-authored file that must land in two thematically-separate
+  commits**. Owner chose a single combined commit this instance (safer than risking a bad split) and
+  asked to file this for META. — open: META to decide the protocol — (a) a non-interactive intra-file
+  split mechanism (e.g. `git apply --cached` of a hand-built hunk patch) sanctioned for this harness,
+  or (b) a rule that co-authored durable docs collapse into one commit with a composite message, or
+  (c) a sequencing rule that keeps two live sessions out of the same doc region. CLAUDE.md (Workflow —
+  shared-index/staging), AI_TASK_PROTOCOL.md (Cross-Session Rules).
+- 2026-07-15 — An IMPL session mid-flight hit a product question it must escalate to STRAT (Task 03
+  contact model exceeds FS §4.2) and its plan proposed to carry the escalation by **overwriting
+  `STAGE_6_STRAT_BRIEF.md`** (next topic = the amendment) + pinging the owner to run a new STRAT.
+  But the brief is a *single* file and the STRAT pickup point: it already pointed at the in-flight
+  task, and a live STRAT session (this one, which cut Task 03) was the intended handler — so the
+  overwrite would (a) clobber the current brief mid-stage, desyncing the board, and (b) spawn a
+  second STRAT stream the owner did not want (parallel-session/limit cost). The brief works as a
+  between-STRAT baton but has no defined channel for an **IMPL→STRAT escalation while a STRAT
+  session is already open**. Owner routed this instance straight to the open STRAT session by hand
+  (copy-paste of the plan's contact question) and had IMPL record its request somewhere other than
+  the brief. — open: META to design the IMPL→STRAT escalation channel (where does a mid-flight
+  product question land so it neither overwrites the brief nor forces a new STRAT when one is live?).
   STAGE_TASK_TEMPLATE.md, CLAUDE.md (Task Files & Session Types).
 - 2026-07-12 — Accumulative per-stage task files rejected (executor context bloat, parallel-write
   conflicts); one file per task + `tasks/done/` chosen. — resolved: AI_TASK_PROTOCOL.md (Task

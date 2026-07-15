@@ -66,7 +66,7 @@ Must contain, in order:
 1. Confirmation the request was received; no further action required.
 2. Reference code (§4.6).
 3. Response expectation: reply within 48 hours (PRD D5).
-4. Reply channel echo: all contact methods the visitor provided, displayed as entered (method name + value, unmasked) in a mobile-friendly list rendered from submitted data — not a generic sentence. The list is method-agnostic: it renders whatever methods exist in the submitted request, so adding future methods (e.g., Telegram) requires no change to this section. Under the current field model (§4.2, field 9) exactly one method is provided.
+4. Reply channel echo: all contact methods the visitor provided, displayed as entered (method name + value, unmasked) in a mobile-friendly list rendered from submitted data — not a generic sentence. The list is method-agnostic: it renders whatever methods exist in the submitted request, so adding future methods (e.g., Telegram) requires no change to this section. Under the current field model (§4.2, field 9) exactly one method is provided. (Confirmed unchanged by the 2026-07-15 five-method amendment: still one method per request, and this section was already method-agnostic — Telegram, now a real method, was already named here as the example.)
 5. Channel-specific expectation note for each displayed method (Appendix A §A.2).
 6. Primary CTA: Back to Home.
 
@@ -101,21 +101,41 @@ Field-inclusion rule (normative): every field must help the artist's initial acc
 | # | Field | Block | Type | Required | Purpose | Validation |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Idea description | Idea | Multiline text | **Yes** | What does the client want? | Min 20 chars, max 1,000, trimmed; counter shown near limit. |
-| 2 | Placement | Project Details | Select | **Yes** | Where on the body — verbal placement guaranteed regardless of photo (PRD D4). | Owner-configured options; "Other" reveals required free text (max 100 chars). |
+| 2 | Placement | Project Details | Select | **Yes** | Where on the body — verbal placement guaranteed regardless of photo (PRD D4). | Owner-configured options, all concrete body areas; **no "Other" / free-text** (amended 2026-07-15 — see below). |
 | 3 | Approximate size | Project Details | Select | **Yes** | Session scale, feasibility. | Owner-configured cm ranges + "Not sure". |
 | 4 | Color preference | Project Details | Select | **Yes** | Style/technique fit. | Black only / Black & grey / Color / Not sure — artist's advice welcome. |
 | 5 | Artist work the client likes | Reference Uploads | Image upload | No | Which of the artist's directions resonates. | §4.3. |
 | 6 | External inspiration | Reference Uploads | Image upload | No | Desired mood/style; inspiration, not replication (§A.1 copy). | §4.3. |
 | 7 | Body placement photo | Reference Uploads | Image upload | No | Real anatomy of the intended area. | §4.3. |
 | 8 | Name | Contact | Text | **Yes** | Addressing the reply. | 2–80 chars. |
-| 9 | Contact method | Contact | Select | **Yes** | Reply channel (PRD D3). | WhatsApp / Email / Instagram; reveals exactly one value field (10a–c). |
-| 10a | Phone (if WhatsApp) | Contact | Tel | **Yes**\* | Reply destination. | Valid phone; Israeli formats with or without +972; normalized to E.164 on submit. |
-| 10b | Email (if Email) | Contact | Email | **Yes**\* | Reply destination. | RFC-basic validation. |
-| 10c | Instagram handle (if Instagram) | Contact | Text | **Yes**\* | Reply destination. | 1–30 chars; leading @ stripped; Instagram username charset. |
+| 9 | Contact method | Contact | Select | **Yes** | Reply channel (PRD D3). | **Email / Phone (call) / WhatsApp / Instagram / Telegram** (amended 2026-07-15 — see below); the offered set is per-studio configurable; reveals exactly one value field (10a–e). |
+| 10a | Email (if Email) | Contact | Email | **Yes**\* | Reply destination. | RFC-basic validation. |
+| 10b | Phone (if Phone) | Contact | Tel | **Yes**\* | Reply destination — a **call** number. | Valid phone; Israeli formats with or without +972; normalized to E.164 on submit. |
+| 10c | Phone (if WhatsApp) | Contact | Tel | **Yes**\* | Reply destination — a **WhatsApp** number. | Same as 10b (E.164, Israeli formats). |
+| 10d | Instagram handle (if Instagram) | Contact | Text | **Yes**\* | Reply destination. | 1–30 chars; leading @ stripped; Instagram username charset. |
+| 10e | Telegram (if Telegram) | Contact | Text | **Yes**\* | Reply destination. | Handle/username: leading @ stripped, username charset (same shape as Instagram). |
 | 11 | Eligibility confirmation | Eligibility & Privacy | Checkbox | **Yes** | Age policy + request is for self (PRD D6). | Must be checked; age threshold rendered from owner-configurable value. |
 | 12 | Budget (optional) | Project Details | Text | No | Helps the artist gauge scope/feasibility and the accept/decline decision (owner decision 2026-07-14). | Free text, max 50 chars, trimmed; no format enforced — a range or a note is fine. |
 
-\* Exactly one of 10a/10b/10c exists in the DOM at a time, determined by field 9.
+\* Exactly one of 10a–10e exists in the DOM at a time, determined by field 9.
+
+**Contact-model amendment (owner decision 2026-07-15).** Field 9 offers **five** methods — Email,
+Phone (call), WhatsApp, Instagram, Telegram — not the shipped three. Phone and WhatsApp are separate
+methods on purpose (call vs. message). The offered set is **per-studio configurable** (Stage 6: code
+config in the request feature; no admin UI — post-release backlog). Persistence is five dedicated
+nullable columns; the admin card shows only the filled method. Exactly one method is still chosen per
+request, so the "reveal exactly one value field" model is unchanged — only the count grew. Full
+record, incl. the storage trade-off and validation details: PROJECT_DECISIONS.md — "Stage 6 Contact
+Model".
+
+**Placement "Other" removed (owner decision 2026-07-15).** Field 2 (Placement) no longer has an
+"Other" option or any free-text entry. The select offers only concrete body areas and the visitor
+picks the nearest one. Rationale: the free-text "Other" added a conditional required field and a
+loosely-validated free string for a rare case, and the required placement **photo** (field 7)
+already covers an atypical location far better than a typed phrase. Precision on an unusual spot is
+traded for a simpler, faster mobile select — an acceptable trade for the artist's initial
+accept/decline decision (the §4.1 field-inclusion test). Removes `placementOther` from the field
+model, the schema, and the payload; no DB column is needed for it.
 
 **Budget-field amendment (owner decision 2026-07-14).** Field 12 (Budget) is added as an **optional** field. The earlier field model deliberately omitted it, and PROJECT_BACKLOG.md recorded any budget field as needing a PRD/FS change first — this amendment is that change (PRD §9). Rationale: the artist finds a rough budget genuinely useful for the initial accept/decline decision (the §4.1 field-inclusion test), and as an optional field it adds no friction for a visitor who skips it. It stays **optional** and free-form — no enforced ranges, no required entry, no effect on submit validity. It sits in the Project Details block. Placement in the on-screen order and any label/hint copy are owner-authored (Item 3 / the visual pass), not fixed here.
 
@@ -213,9 +233,14 @@ Quoted copy is normative in intent; the owner may adjust wording without changin
 
 ## A.2 Success page channel notes (§3.4 item 5)
 
+One note per method the visitor may have chosen (five methods per the 2026-07-15 contact-model
+amendment — see §4.2):
+
 - Email: "Check your spam folder just in case."
-- Instagram: "The reply may land in your message requests."
+- Phone (call): "I'll call from an unfamiliar number — that's me."
 - WhatsApp: "The message will come from an unfamiliar number — that's me."
+- Instagram: "The reply may land in your message requests."
+- Telegram: "The message may land in a separate 'requests' or unknown-sender area."
 
 ## A.3 Privacy statement (§4.7)
 
@@ -224,3 +249,8 @@ Quoted copy is normative in intent; the owner may adjust wording without changin
 ## A.4 Failure fallback line (§4.5, last resort only)
 
 "Something's not working on our side — sorry! Your details are still here. You can retry, or message me directly on Instagram: @{handle}."
+
+This line stays **Instagram-specific even under the five-method contact model** (2026-07-15
+amendment): it appears only when the submission itself failed, so it cannot route through the method
+the visitor chose (that value was never submitted). Instagram is the primary acquisition channel
+(PRD D1) — certain to exist and public — so the fallback is independent of field 9 by design.

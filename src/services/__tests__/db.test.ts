@@ -52,15 +52,20 @@ beforeEach(() => {
 })
 
 describe("createRequest", () => {
+  // The reference code is generated inside the create_request RPC (plpgsql) and is
+  // opaque to this TS wrapper — it passes through whatever the RPC returns. The FS §4.6
+  // 6-char format (e.g. "K7M4XP") is asserted against the live DB (task CO-1), not here,
+  // because the RPC is mocked. The fixture below uses a new-format sample to avoid
+  // implying the old REQ-YYYY-NNNN format still lives at this layer.
   it("calls rpc with correct arguments and returns id + referenceCode", async () => {
     mockRpc.mockResolvedValue({
-      data: { id: "db-uuid-1234", referenceCode: "REQ-2026-0001" },
+      data: { id: "db-uuid-1234", referenceCode: "K7M4XP" },
       error: null,
     })
 
     const result = await createRequest({ ...baseParams, files: sampleFiles })
 
-    expect(result).toEqual({ id: "db-uuid-1234", referenceCode: "REQ-2026-0001" })
+    expect(result).toEqual({ id: "db-uuid-1234", referenceCode: "K7M4XP" })
 
     expect(mockRpc).toHaveBeenCalledWith("create_request", {
       p_studio_id: baseParams.studioId,

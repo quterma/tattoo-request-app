@@ -1143,6 +1143,18 @@ Staging **is required** before any future work that:
 Until one of those is scheduled, the single-project model continues, with each live change to the
 real project done carefully and verified immediately (as 5A.2–5A.4 did).
 
+**Scoped exception — Stage 6 `create_request` recreations (owner decision 2026-07-15).** The two
+Stage 6 IMPL-Task-03 migrations that recreate `create_request` — the reference-code format change
+(`20260715124427_stage6_reference_code_format.sql`, FS §4.6) and the Block C contact-model change
+(five contact columns) — are **explicitly waived from the staging prerequisite above**. Basis: the
+single project still holds test-only data (confirmed 5A.3 classification, unchanged), the changes
+are applied via the CLI migration workflow (below) and verified immediately (`migration list`
+parity + a live end-to-end submit), and no staging environment exists yet to gate them against.
+This is a narrow, dated exception for these two named migrations only — it does **not** reopen the
+gate for RLS, browser-side Supabase access, or multi-studio work, and it does not remove the
+pre-launch staging requirement (Section C). The contact-model migration's own record is under
+"Stage 6 Contact Model — decided 2026-07-15".
+
 ## Backup Posture — Deferred, Not Claimed as Ready
 
 Full backup posture (a manual DB dump/export, Storage backup strategy, PITR configuration) is
@@ -1984,6 +1996,69 @@ is unlaunched.
 `XMLHttpRequest`; the client store via React's built-in `useSyncExternalStore`; rate limiting via a
 module-level `Map`. One new required env var: `UPLOAD_TOKEN_SECRET` (documented in `.env.example`;
 rotating it invalidates in-flight handles, bounded by the ~2h TTL).
+
+---
+
+# Stage 6 Contact Model — decided 2026-07-15 (supersedes the FS §4.2 three-method model)
+
+Owner decision, raised during IMPL Task 03 (request-form rebuild) when the contact block turned out
+to exceed FS §4.2 — a product change, escalated to STRAT per Stage 6 Product Documentation Authority
+(engineers do not resolve open product questions in implementation). It **changes the Source of
+Truth**: FS §4.2 (field 9 + value fields), FS §A.2 (channel notes), FS §A.4 (fallback line), and PRD
+D3 were reconciled in the same change (PRD §9 change control — the spec is edited first, then
+implementation). Recorded as a first-class product decision.
+
+- **Decision — five contact methods, one chosen per request.** The Contact-method select (FS §4.2
+  field 9) offers **Email, Phone (call), WhatsApp, Instagram, Telegram**. Phone and WhatsApp are
+  **deliberately separate** methods, not merged: a phone number means "call me", a WhatsApp number
+  means "message me" — the artist wants to know which. Exactly **one** method is chosen and its one
+  value field is revealed (unchanged from FS's reveal-one-field model — only the method count grows
+  from 3 to 5). This supersedes the shipped WhatsApp/Email/Instagram set.
+- **Offered method set is per-studio configurable.** The list of methods the select offers is a
+  **per-studio configuration**, not hard-coded. For Stage 6 it lives in **code config, in the
+  request feature** (`src/features/request/config` — the isomorphic feature config alongside
+  `AGE_THRESHOLD` and the option arrays, NOT `src/config` which is server-only and cannot reach the
+  client that renders the select). A studio can therefore offer a subset (e.g. no Telegram) without
+  a code change to the form itself, only to the config. **No admin UI** for this in Stage 6 — an
+  admin-managed method set is a post-release backlog item (PROJECT_BACKLOG.md).
+- **Storage — five dedicated nullable columns.** The `requests` table gains five columns
+  (`email`, `phone`, `whatsapp`, `instagram`, `telegram`), replacing the shipped three
+  (`email` / `phone` / `contact_other`). Since exactly one method is chosen per request, **four of
+  the five are NULL in every row** — this is an accepted trade-off, chosen for explicitness and
+  type-safety over a compact `contact_method` + `contact_value` pair. **Recorded so a later session
+  does not "optimize" it back to two columns unaware the compact form was considered and rejected:**
+  the five-column shape makes the admin card render trivially (show the non-null columns) and makes
+  each method a first-class, individually-typed field; the compact pair was rejected as less
+  explicit even though it avoids a migration per future method. Adding a sixth method later IS a
+  migration under this decision — accepted, given how rarely the method set changes.
+- **Admin card renders only the filled method(s).** The admin request-detail card shows only the
+  contact column(s) that are non-null — empty methods take no space. Method-agnostic by
+  construction, so a future method needs no admin-card change.
+- **Phone / WhatsApp validation** (both are phone numbers): E.164, Israeli formats with or without
+  +972, normalized to E.164 on submit — already owner-fixed, not reopened by this decision.
+  Instagram: handle charset, leading `@` stripped. Telegram: treated as a handle/username, same
+  `@`-strip and username charset as Instagram (a Telegram value may also be a phone number, but the
+  handle form is the Stage 6 target; refine in implementation if needed).
+- **Success contact echo (FS §3.4 item 4) needs no change.** It is already method-agnostic and
+  already names Telegram as an example future method — it renders whatever method the submitted
+  request carries. Confirmed, not amended.
+- **Fallback line (FS §A.4) stays Instagram-specific.** The last-resort "the form is broken, message
+  me directly" line still points to Instagram regardless of which method the visitor chose. Reason:
+  the fallback exists precisely because the submission channel failed, so it cannot route through the
+  method the visitor picked (that method's value was never submitted). Instagram is the primary
+  acquisition channel (PRD D1), certain to exist and public. So the fallback is independent of the
+  five-method model by design.
+- **PRD D3 unchanged.** "The artist replies using the contact information the visitor provided" is
+  already method-agnostic; five methods do not conflict with it. Noted, not amended.
+- **Migration note.** IMPL Task 03 Phase 1 already recreated `create_request`
+  (`20260715124427_stage6_reference_code_format.sql`) with the three contact params. The contact
+  model's migration (Task 03 Block C) recreates it **again** with the five contact columns/params —
+  the second RPC recreation in this task. The Stage 5A staging gate on `create_request` changes is
+  waived for Stage 6 (single prod project, test-only data — owner decision 2026-07-15, same basis as
+  the reference-code change).
+
+**Implementation:** IMPL Task 03 Block C (`STAGE_6_TASK_03_request_form_rebuild.md`, Phase 3),
+which was frozen pending this decision and now proceeds against it.
 
 ---
 

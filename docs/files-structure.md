@@ -140,7 +140,8 @@ tattoo-request-app/
 │       │       ├── REVIEW_2026-07-13_stage6-item2-shell.md
 │       │       ├── REVIEW_2026-07-13_stage6-ux-blueprint-batch2.md
 │       │       ├── REVIEW_2026-07-13_stage6-ux-blueprint-full.md
-│       │       └── REVIEW_2026-07-14_stage6-item1-upload-flow.md
+│       │       ├── REVIEW_2026-07-14_stage6-item1-upload-flow.md
+│       │       └── REVIEW_2026-07-15_stage6_reference_code.md
 │       └── tasks/
 │           ├── META_TASK_01_framework_consolidation.md
 │           ├── STAGE_6_STRAT_BRIEF.md
@@ -302,5 +303,6 @@ tattoo-request-app/
         ├── 20260629154719_domain_foundation.sql
         ├── 20260702114509_update_request_status_values.sql
         ├── 20260705155244_harden_create_request_search_path.sql
-        └── 20260714025850_three_upload_categories.sql
+        ├── 20260714025850_three_upload_categories.sql
+        └── 20260715124427_stage6_reference_code_format.sql
 ```

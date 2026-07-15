@@ -467,6 +467,32 @@ Completed in Stage 3:
 
 ## Log Entries (reverse chronological)
 
+### 2026-07-15 — IMPL: Stage 6 Item 3 — Block R (reference-code format, Item 9) built + reviewed to consensus
+
+Task `STAGE_6_TASK_03_request_form_rebuild.md`, first of the re-cut blocks (R / A′ / B′ / C — the
+plan split the task's original two blocks into four after the contact model was escalated to STRAT
+mid-flight; see the plan's Review-Granularity section and the task file's endorsement).
+
+- **Block R (reference code)**: new migration `20260715124427_stage6_reference_code_format.sql`
+  recreates the `create_request` RPC so the reference code is FS §4.6 — 6-char uppercase
+  alphanumeric excluding O/0/I/1, unique via a generate-and-retry loop against the existing
+  `reference_code UNIQUE` constraint, `client_submission_id` collisions re-raised for the route's
+  idempotency recovery, `search_path` hardening re-established inline. RPC signature/return/grant
+  unchanged. `src/services/__tests__/db.test.ts` fixture updated to a new-format sample. `pnpm qg`
+  green (274 tests).
+- **Independent Codex cross-review to consensus**: `reviews/done/REVIEW_2026-07-15_stage6_reference_code.md`.
+  3 findings, all accepted/fixed (doc/comment only, no logic change): (1) staging-waiver now
+  recorded at PROJECT_DECISIONS.md → "Staging Environment" as a dated scoped exception for the two
+  Stage 6 `create_request` migrations; (2) task CO-2 rewritten from "no migration expected" to a
+  concrete apply-and-verify obligation; (3) migration `search_path` comment corrected (CREATE OR
+  REPLACE preserves owner/ACL, not `proconfig` — the inline `SET` re-establishes it).
+- **NOT yet applied live**: the migration awaits owner per-migration approval before `db push`.
+  The live format/uniqueness + admin-render check is task CO-1, run after push.
+- **Process**: filed a META observation (AI_FRAMEWORK_IDEAS.md) — STRAT and IMPL co-authored
+  PROJECT_DECISIONS.md and the Task 03 file this session, and the owner-wanted two-commit split is
+  not achievable by file (shared files) with `git add -p` blocked; owner chose one combined commit
+  and asked META to design the protocol.
+
 ### 2026-07-13 — META: shared-git-index hazard removed; state-claim verification rule
 
 Status: Completed. Documentation-only — no source code changed. Owner-approved in-session
