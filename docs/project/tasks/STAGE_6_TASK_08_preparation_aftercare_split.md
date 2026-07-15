@@ -121,8 +121,10 @@ beyond the two owner-supplied intro lines.
 
 ## Workflow (enforced)
 
-1. Read Context; confirm understanding in 3–5 lines; report working-tree state vs baseline
-   `da6861f` and stop if it differs or any Allowed-Write-Surface path is dirty.
+1. Read Context; confirm understanding in 3–5 lines; report working-tree state. Derive the
+   baseline per the Execution section (`git log -1 --format=%H -- <this file>`) and stop only if
+   any Allowed-Write-Surface path is dirty or has changed since it — not merely because HEAD
+   advanced with unrelated commits.
 2. Present a concise plan with a distinct **"Deviations from the task file"** section (or
    "no deviations"). Wait for explicit approval.
 3. Implement within the Allowed Write Surface only.

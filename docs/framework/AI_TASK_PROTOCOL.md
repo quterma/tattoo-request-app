@@ -15,7 +15,7 @@ AI agents and developers working on the project.
 | Type | Prefix | Purpose | Ends with |
 | --- | --- | --- | --- |
 | Strategic | `STRAT:` | discovery, planning, design, decisions | outcomes persisted into docs (task files, PROJECT_DECISIONS.md, PROJECT_STAGE_LOG.md) — never chat-only conclusions |
-| Implementation | `IMPL:` | executing exactly one task file | Review Pipeline + reporting per the task file |
+| Implementation | `IMPL:` | executing exactly one task file | for a source-changing task: in-session Review Pipeline → independent cross-review to **consensus** → reporting (a green pipeline alone does not end it — see Independent Review Is Mandatory); for a docs-only task: Review Pipeline + reporting |
 | Meta | `META:` | improving the AI workflow itself | updates to `docs/framework/*` |
 
 Name sessions with the prefix plus a short topic (e.g. `IMPL: Stage 6 task 01 — success page`),
@@ -231,7 +231,11 @@ Transition owners:
 
 - `draft → ready` — the developer (approval that the task may be executed as written)
 - `ready → in progress` — the executing implementation session, at start
-- `in progress → done` — the executing implementation session, after Review Pipeline + reporting
+- `in progress → done` — the executing implementation session. For a **source-changing** task,
+  only after the in-session Review Pipeline **and** the mandatory independent cross-review has
+  reached consensus (Independent Review Is Mandatory), accepted fixes are applied and gates
+  re-run, completion obligations are reconciled (Completion Obligations), and reporting is done.
+  For a docs-only/analysis-only task, after the Review Pipeline + reporting.
 - for a delegated task: `in progress → awaiting-claude-review` — Codex, after implementing,
   self-reviewing, running its allowed gates, and writing an execution report in the task file;
   `awaiting-claude-review → done` — a Claude Code session only, after its own independent
@@ -318,9 +322,9 @@ Source: <the completed task's completion-obligation entry>
 dependency, not duplicated state. **A hand-maintained `OPEN_ACTIONS.md`, or a `⛔ BLOCKER` marker
 parsed out of Stage Log prose, are both rejected**: the first is the stale-dashboard design this
 project already refused (see `research/done/RESEARCH_2026-07-14_open-question-trigger-and-thread-visibility.md`),
-and the second makes a journal emphasis into a source of truth. `pnpm project:status`
-(`tasks/TOOLING_TASK_01_project_status_command.md`) surfaces `Blocks` and warns when a closed
-task's obligation has no resolvable target.
+and the second makes a journal emphasis into a source of truth. Once built, `pnpm project:status`
+(`tasks/TOOLING_TASK_01_project_status_command.md`, still `draft`) is intended to surface `Blocks`
+and warn when a closed task's obligation has no resolvable target.
 
 ### STRAT's duty is to check canonical work, not to re-read journals
 
@@ -558,8 +562,11 @@ Requirements:
 # Cross-Session Rules
 
 - Any session (STRAT / IMPL / META) that hits workflow friction records it as a one-line entry
-  in AI_FRAMEWORK_IDEAS.md — Workflow Observations (cheap note, no discussion); META sessions
-  discuss and resolve them per AI_WORKFLOW_MASTER.md.
+  in AI_FRAMEWORK_IDEAS.md — Workflow Observations (cheap note, no discussion). Recording is
+  always cheap and always allowed. **Acting on it splits two ways** (AI_WORKFLOW_MASTER.md — What
+  to fix now vs. defer): a live orchestration defect / desync / anything threatening
+  product-security-data is fixed **now**; pure polish waits for the post-MVP retrospective with the
+  entry left `open`. Notice everything; fix live defects immediately; defer only tidiness.
 - Shared documents (PROJECT_STAGE_LOG.md, PROJECT_DECISIONS.md) must have at most one writing
   session at a time — do not run sessions in parallel if more than one will update the same
   shared doc. Task files are conflict-free by design (one file per task); STRAT briefs are

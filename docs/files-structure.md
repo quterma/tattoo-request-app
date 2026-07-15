@@ -126,7 +126,8 @@ tattoo-request-app/
 │       │   └── done/
 │       │       ├── .gitkeep
 │       │       ├── RESEARCH_2026-07-14_deferred-actions-and-review-granularity.md
-│       │       └── RESEARCH_2026-07-14_open-question-trigger-and-thread-visibility.md
+│       │       ├── RESEARCH_2026-07-14_open-question-trigger-and-thread-visibility.md
+│       │       └── RESEARCH_2026-07-15_external-framework-audit.md
 │       ├── reviews/
 │       │   ├── .gitkeep
 │       │   └── done/
@@ -141,6 +142,7 @@ tattoo-request-app/
 │       │       ├── REVIEW_2026-07-13_stage6-ux-blueprint-full.md
 │       │       └── REVIEW_2026-07-14_stage6-item1-upload-flow.md
 │       └── tasks/
+│           ├── META_TASK_01_framework_consolidation.md
 │           ├── STAGE_6_STRAT_BRIEF.md
 │           ├── STAGE_6_TASK_08_preparation_aftercare_split.md
 │           ├── TOOLING_TASK_01_project_status_command.md

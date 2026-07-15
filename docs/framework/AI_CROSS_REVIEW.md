@@ -53,7 +53,8 @@ reasoning — the Handoff section states scope and questions, not the author's c
 ## Header format (both thread types)
 
 The header is **read by machines** — an agent locating the one thread it must act on, and
-`pnpm project:status` — so its shape is fixed:
+(once built — `tasks/TOOLING_TASK_01_project_status_command.md` is still `draft`) the
+`pnpm project:status` command — so its shape is fixed:
 
 - Each field is its own line at the top of the file, `Field: value`, nothing before the colon.
 - **The status value is wrapped in backticks**: `` Status: `awaiting-review` `` — the dominant

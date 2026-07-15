@@ -128,10 +128,15 @@ sentence in PROJECT_STAGE_LOG.md is not a work item.>
 
 ## Review Granularity
 
-<Required only when the task crosses the size trigger — 16 execution-affecting files or 500 lines
-of churn (AI_TASK_PROTOCOL.md — A Large Task Is Reviewed in Checkpoints). Name the proposed blocks,
-which one is the risk nucleus, and whether the task stays whole or returns to STRAT to be split.
-Otherwise: `single` (one block, one review at the end).>
+<Required when the task crosses the size trigger — **16 execution-affecting files, or 500 lines of
+churn, or the plan already has four independently testable seams** (AI_TASK_PROTOCOL.md — A Large
+Task Is Reviewed in Checkpoints). Name the proposed blocks, which one is the risk nucleus, and
+whether the task stays whole or returns to STRAT to be split. Otherwise: `single` (one block, one
+review at the end).
+
+Before the final review, record the **actual** measured surface here (execution-affecting files +
+churn). If it crossed the trigger and the task was not split, state why no legitimate seam existed
+— a session may not silently exempt its own oversized block.>
 
 ## Acceptance Criteria
 
