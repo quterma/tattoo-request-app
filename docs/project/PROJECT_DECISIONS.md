@@ -2036,9 +2036,57 @@ implementation). Recorded as a first-class product decision.
   construction, so a future method needs no admin-card change.
 - **Phone / WhatsApp validation** (both are phone numbers): E.164, Israeli formats with or without
   +972, normalized to E.164 on submit — already owner-fixed, not reopened by this decision.
-  Instagram: handle charset, leading `@` stripped. Telegram: treated as a handle/username, same
-  `@`-strip and username charset as Instagram (a Telegram value may also be a phone number, but the
-  handle form is the Stage 6 target; refine in implementation if needed).
+  Instagram: handle charset, leading `@` stripped. ~~Telegram: treated as a handle/username, same
+  `@`-strip and username charset as Instagram~~ — **superseded 2026-07-16, see the validation
+  amendment below.**
+
+## Contact-validation amendment — decided 2026-07-16 (research-informed)
+
+Three owner decisions taken on the strength of
+`research/done/RESEARCH_2026-07-16_contact-model-validation-and-decomposition.md` (Codex, with an
+owner-carried external pass). Recorded because each **changes** what the entry above said or adds a
+cost the entry did not anticipate.
+
+- **Telegram is validated by Telegram's rule, not Instagram's — the entry above was factually
+  wrong.** Telegram usernames are **5–32 chars, ASCII letters/digits/underscore only, no dots, and
+  must not start with a digit** (`account.checkUsername` + client error strings); Instagram allows
+  dots and 1–30. Implemented as `^(?![0-9])[A-Za-z0-9_]{5,32}$` after trim + one optional `@`-strip
+  — the variant permitting a leading underscore, since no rule prohibiting one was found and the
+  stricter letter-first form risks rejecting a real handle. Reusing the Instagram regex was rejected:
+  it is a **false-accept** risk (the request persists, the artist cannot reach the visitor — the
+  Success echo then reassures with an unusable destination). FS §4.2 field 10e amended first
+  (docs-first, PRD §9). **Instagram itself stays `^[A-Za-z0-9._]{1,30}$`** with **no** dot-position
+  rules — the research found no authoritative Meta grammar for leading/trailing/consecutive dots, so
+  adding them would enforce unverified rules and only risk false rejections.
+- **`libphonenumber-js` (max metadata) is adopted as a new dependency**, used **isomorphically** in
+  the shared schema: `parsePhoneNumberFromString(raw, "IL")` → require `country === "IL"` and
+  `isValid()` → persist `.number` (E.164). Cost accepted: the schema is imported by the client form,
+  so the metadata lands in the client bundle. Rejected alternatives: a hand-rolled Israel-only
+  normalizer (a "strip punctuation, replace leading 0" transform normalizes garbage into a
+  plausible-looking number, accepts unallocated ranges, and mishandles `00972`/foreign input — the
+  project would own prefix allocation forever); and library-on-server-only, which creates two
+  validation semantics and breaks the client/server parity this task exists to hold. `isValid()`
+  over `isPossible()` — fewer unreachable numbers, at the price of a possible false rejection of a
+  brand-new range before a metadata update. The Phone method accepts **any valid Israeli number**
+  (geographic, mobile, recognized `07`), not mobile-only. **The installed version's real API/import
+  path and accept-form behavior must be proven by tests, not assumed** — the research's version and
+  bundle-size figures were external and unverified.
+- **Existing rows are deleted, not backfilled, and a DB `CHECK` enforces exactly one of five.** The
+  old model allowed zero **or several** contacts, so historical rows cannot be assumed to satisfy the
+  new invariant, and `contact_other`'s free text does not reliably map to Instagram vs. Telegram. The
+  data is test-only (5A.3 classification), so a clean start is simpler and stronger than a guessed
+  backfill. The `CHECK` puts the decided "exactly one" invariant below the application layer instead
+  of trusting Zod/TypeScript alone. Deletion is destructive and therefore takes its **own explicit
+  owner approval at apply time**, separate from the migration approval.
+
+**Implementation shape (from the same research, adopted):** the public/service contract is
+`contactMethod` + `contactValue` (which `SuccessPayload` already mirrors), mapped to the five
+nullable SQL params at the service/adapter boundary — so zero/multi-method states are unrepresentable
+in TypeScript rather than merely discouraged. The server validates the submitted method against the
+**configured per-studio offered set**, not just the five-value enum. The Zod resolver hands the form
+the *transformed* value, so the raw entered string is preserved alongside the normalized one — FS
+§3.4 requires the Success echo to show the value **as entered**, while persistence needs it
+normalized.
 - **Success contact echo (FS §3.4 item 4) needs no change.** It is already method-agnostic and
   already names Telegram as an example future method — it renders whatever method the submitted
   request carries. Confirmed, not amended.

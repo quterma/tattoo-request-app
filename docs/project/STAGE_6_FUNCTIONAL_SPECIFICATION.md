@@ -113,7 +113,7 @@ Field-inclusion rule (normative): every field must help the artist's initial acc
 | 10b | Phone (if Phone) | Contact | Tel | **Yes**\* | Reply destination — a **call** number. | Valid phone; Israeli formats with or without +972; normalized to E.164 on submit. |
 | 10c | Phone (if WhatsApp) | Contact | Tel | **Yes**\* | Reply destination — a **WhatsApp** number. | Same as 10b (E.164, Israeli formats). |
 | 10d | Instagram handle (if Instagram) | Contact | Text | **Yes**\* | Reply destination. | 1–30 chars; leading @ stripped; Instagram username charset. |
-| 10e | Telegram (if Telegram) | Contact | Text | **Yes**\* | Reply destination. | Handle/username: leading @ stripped, username charset (same shape as Instagram). |
+| 10e | Telegram (if Telegram) | Contact | Text | **Yes**\* | Reply destination. | Username: leading @ stripped; **5–32 chars, ASCII letters/digits/underscore only, must not start with a digit** — Telegram's own rule, **not** the Instagram shape (corrected 2026-07-16 — see below). |
 | 11 | Eligibility confirmation | Eligibility & Privacy | Checkbox | **Yes** | Age policy + request is for self (PRD D6). | Must be checked; age threshold rendered from owner-configurable value. |
 | 12 | Budget (optional) | Project Details | Text | No | Helps the artist gauge scope/feasibility and the accept/decline decision (owner decision 2026-07-14). | Free text, max 50 chars, trimmed; no format enforced — a range or a note is fine. |
 
@@ -127,6 +127,18 @@ nullable columns; the admin card shows only the filled method. Exactly one metho
 request, so the "reveal exactly one value field" model is unchanged — only the count grew. Full
 record, incl. the storage trade-off and validation details: PROJECT_DECISIONS.md — "Stage 6 Contact
 Model".
+
+**Telegram-validation correction (owner decision 2026-07-16).** The 2026-07-15 amendment described
+field 10e as "the same shape as Instagram". That was **factually wrong**, and the code is not bent to
+match it: a research pass (`research/done/RESEARCH_2026-07-16_contact-model-validation-and-
+decomposition.md`) established that Telegram usernames differ materially from Instagram's — **5–32
+characters, ASCII letters/digits/underscore only, no dots, and must not start with a digit**
+(Telegram's own `account.checkUsername` surfaces and client error strings). Reusing the Instagram
+rule would silently accept Telegram-invalid values (dots, 1–4 chars, digit-first): the request would
+persist and the visitor would be reassured, but the artist could never reach them. Field 10e above is
+therefore the Telegram-correct rule; Instagram (10d) keeps `1–30` chars over letters/digits/dot/
+underscore, with no dot-position rules (no authoritative Meta grammar for those was found, and
+inventing them only risks rejecting real handles).
 
 **Placement "Other" removed (owner decision 2026-07-15).** Field 2 (Placement) no longer has an
 "Other" option or any free-text entry. The select offers only concrete body areas and the visitor

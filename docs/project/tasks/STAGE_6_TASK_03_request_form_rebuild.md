@@ -247,6 +247,47 @@ not policy consent — rename the admin presentation; (2) add admin i18n labels 
 value fallback for newly-submitted requests. Both sit in the admin namespace (walled off from
 Block A′); Block C already touches admin-card rendering, so they land there.
 
+### Block C implementation notes (from `research/done/RESEARCH_2026-07-16_contact-model-validation-and-decomposition.md`)
+
+Decided before implementation; do not re-derive. Full rationale in that thread + PROJECT_DECISIONS.md
+— "Contact-validation amendment".
+
+- **Decomposition = C-B, not a contract/UI split.** `RequestFormData`/`RequestFormInput` are inferred
+  from `requestFormSchema`, so a contract-only commit cannot typecheck while the form still registers
+  `email`/`phone`/`contactOther`. Therefore: (1) a **preparatory commit** touching nothing in the
+  active contract — the `libphonenumber-js` dependency, contact-method config/types, the standalone
+  handle/phone normalizers, and their tests; then (2) **one integrated cutover** — schema +
+  validationKeys + `REQUEST_FIELDS` + BFF + route + `services/db.ts` + the migration + form + admin +
+  i18n + tests, green as one unit. Admin belongs to the cutover (it reads the new DTO), not to a UI
+  commit. Migration-as-its-own-applied-commit is **unsafe here** (unlike Block R): the RPC signature
+  changes, so an applied migration without its callers breaks live submits.
+- **Order:** land the cutover commit → apply the migration (own owner approval) → delete old rows
+  (own owner approval — destructive) → verify live (CO-1). No compatibility window is needed: old
+  rows are being deleted and there is no separately deployed old client to protect.
+- **Migration must be derived from the CURRENT `20260715124427` body**, not from `20260629154719`, or
+  it silently regresses: the 6-char ambiguity-free generator, the generate/insert retry loop, the
+  refcode-vs-`requests_client_submission_id_key` discrimination, `SET search_path = public, pg_temp`,
+  the file-row loop, and the `{ id, referenceCode }` return. Drop the **exact** old 13-param
+  signature (no `IF EXISTS` silent no-op), `REVOKE ALL ... FROM PUBLIC`, `GRANT EXECUTE ... TO
+  service_role`, then verify signature/`proconfig`/Local=Remote parity.
+- **Contract shape:** `contactMethod` + `contactValue` on the wire and in service code (a
+  discriminated value), mapped to the five nullable SQL params at the adapter — not five optional
+  params (which would let TypeScript express zero/multi). `SuccessPayload` already mirrors this pair.
+- **Form:** one stable `contactValue` field (not five registered names — avoids stale hidden values);
+  clear `contactValue` on a real method change; `PERSISTED_FIELDS` → `contactMethod`/`contactValue`;
+  `FIELD_ORDER` → `clientName` → `contactMethod` → `contactValue` → `eligibility`.
+- **Server checks the method against the configured offered set**, not just the five-value enum —
+  otherwise a caller can submit a method this studio disabled.
+- **Raw vs normalized (FS §3.4):** the Zod resolver returns the *transformed* value, so the
+  `@`-stripped/E.164 value is no longer "as entered". Preserve the raw entered string alongside the
+  normalized one so `SuccessPayload.contactValue` can still echo as entered when Item 4 consumes it.
+- **Prove, don't assume:** the installed `libphonenumber-js` API/import path and its accept-forms
+  (`05x…`, `+972…`, `972…`, `00972…` → one identical `+972…`) become tests against the installed
+  version; the research's version/bundle figures were external and unverified. Query the live row
+  distribution before the deletion.
+- **Do NOT rename the `consent` DB column** — eligibility deliberately reuses it (A′), with a route
+  regression test. Only the admin *presentation* label changes.
+
 **Final measurement (executor fills before the final review):** record the actual
 execution-affecting surface (files + churn) of each block here. If a block unexpectedly did not
 cross the trigger, a single review for it is fine; if the whole task somehow stayed under the
