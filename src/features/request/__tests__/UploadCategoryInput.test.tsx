@@ -29,6 +29,7 @@ function renderInput(category: "artist_work" | "inspiration" = "artist_work") {
       id={`upload-${category}`}
       category={category}
       label="Artist work"
+      benefit="Seen something of mine you love?"
       buttonText="Choose images"
       uploadingLabel="Uploading"
       errorMessage={(key) => `error:${key}`}
@@ -131,7 +132,20 @@ describe("UploadCategoryInput", () => {
     await waitFor(() => {
       expect(getSnapshot().slots[0].category).toBe("inspiration")
     })
-    expect(within(container).getByText("insp.jpg")).toBeInTheDocument()
+    // The file name is NOT rendered (FS §4.3 amended) — the thumbnail identifies the file.
+    expect(within(container).queryByText("insp.jpg")).not.toBeInTheDocument()
+    expect(container.querySelector("img")).toBeInTheDocument()
+  })
+
+  // FS §4.3 (amended 2026-07-14): the file name is not displayed in any per-file state.
+  it("never renders the selected file name", async () => {
+    mockXhrUpload.mockResolvedValue({ handle: "h" })
+    const { container } = renderInput()
+
+    pick(container.querySelector('input[type="file"]')!, jpeg("IMG20211022093813.jpg"))
+
+    await waitFor(() => expect(getSnapshot().slots).toHaveLength(1))
+    expect(screen.queryByText("IMG20211022093813.jpg")).not.toBeInTheDocument()
   })
 
   // FS §4.3: "Each image shows a thumbnail with a remove control."
@@ -159,15 +173,45 @@ describe("UploadCategoryInput", () => {
     expect(screen.getByText("error:upload_too_large")).toBeInTheDocument()
   })
 
-  it("does not re-upload an oversized file on retry", async () => {
+  // FS §4.3 (amended 2026-07-14): a validation rejection (over-size) is remove-only —
+  // retrying it is futile, so NO Retry control is offered.
+  it("shows no Retry control for an oversized (validation) failure", async () => {
     const { container } = renderInput()
 
     pick(container.querySelector('input[type="file"]')!, oversizedJpeg("huge.jpg"))
     await waitFor(() => expect(getSnapshot().slots[0].status).toBe("failed"))
 
-    fireEvent.click(screen.getByRole("button", { name: "Retry" }))
+    expect(getSnapshot().slots[0].failureKind).toBe("validation")
+    expect(screen.queryByRole("button", { name: "Retry" })).not.toBeInTheDocument()
+    // Remove is still available.
+    expect(screen.getByRole("button", { name: /Remove huge\.jpg/ })).toBeInTheDocument()
+  })
 
-    await waitFor(() => expect(getSnapshot().slots[0].status).toBe("failed"))
-    expect(mockXhrUpload).not.toHaveBeenCalled()
+  // A transport failure (network/server) IS retryable — Retry is shown.
+  it("shows Retry for a transport (network/server) failure", async () => {
+    const first = deferred<{ handle: string }>()
+    mockXhrUpload.mockReturnValueOnce(first.promise)
+    const { container } = renderInput()
+
+    pick(container.querySelector('input[type="file"]')!, jpeg("a.jpg"))
+    first.reject(new UploadError("upload_invalid", true))
+
+    await screen.findByText("error:upload_invalid")
+    expect(getSnapshot().slots[0].failureKind).toBe("transport")
+    expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument()
+  })
+
+  // A server-side validation rejection (400 → retryable:false) is also remove-only.
+  it("shows no Retry control for a 400 validation rejection from the server", async () => {
+    const first = deferred<{ handle: string }>()
+    mockXhrUpload.mockReturnValueOnce(first.promise)
+    const { container } = renderInput()
+
+    pick(container.querySelector('input[type="file"]')!, jpeg("a.jpg"))
+    first.reject(new UploadError("upload_type_invalid", false))
+
+    await screen.findByText("error:upload_type_invalid")
+    expect(getSnapshot().slots[0].failureKind).toBe("validation")
+    expect(screen.queryByRole("button", { name: "Retry" })).not.toBeInTheDocument()
   })
 })

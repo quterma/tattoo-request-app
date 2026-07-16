@@ -130,7 +130,6 @@ tattoo-request-app/
 │       │       └── RESEARCH_2026-07-15_external-framework-audit.md
 │       ├── reviews/
 │       │   ├── .gitkeep
-│       │   ├── REVIEW_2026-07-15_stage6_noncontact_contract.md
 │       │   └── done/
 │       │       ├── .gitkeep
 │       │       ├── REVIEW_2026-07-13_codex-delegation-invocation.md
@@ -142,12 +141,15 @@ tattoo-request-app/
 │       │       ├── REVIEW_2026-07-13_stage6-ux-blueprint-batch2.md
 │       │       ├── REVIEW_2026-07-13_stage6-ux-blueprint-full.md
 │       │       ├── REVIEW_2026-07-14_stage6-item1-upload-flow.md
-│       │       └── REVIEW_2026-07-15_stage6_reference_code.md
+│       │       ├── REVIEW_2026-07-15_stage6_noncontact_contract.md
+│       │       ├── REVIEW_2026-07-15_stage6_reference_code.md
+│       │       └── REVIEW_2026-07-16_stage6_form_ui.md
 │       └── tasks/
 │           ├── META_TASK_01_framework_consolidation.md
 │           ├── STAGE_6_STRAT_BRIEF.md
 │           ├── STAGE_6_TASK_03_request_form_rebuild.md
 │           ├── STAGE_6_TASK_08_preparation_aftercare_split.md
+│           ├── STAGE_6_TASK_09_placement_freetext.md
 │           ├── TOOLING_TASK_01_project_status_command.md
 │           └── done/
 │               ├── STAGE_6_TASK_01_upload_flow_architecture.md

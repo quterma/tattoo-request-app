@@ -72,6 +72,9 @@
   "request": {
     "title": "Request a Tattoo",
 
+    "__intro_TODO": "Owner-authored copy pending (FS §4.1 — not in Appendix A). Placeholder below; replace in the Stage 6 content/visual pass.",
+    "introduction": "This form replaces a long back-and-forth in my DMs — tell me about your idea in one place and I'll have everything I need to reply. I answer every request within 48 hours.",
+
     "clientNameLabel": "Your name",
     "clientNamePlaceholder": "How should I call you?",
 
@@ -88,6 +91,10 @@
       "artistWorkLabel": "Artist work you like",
       "inspirationLabel": "External inspiration",
       "placementPhotoLabel": "Body placement photo",
+      "artistWorkBenefit": "Seen something of mine you love? It tells me exactly which direction speaks to you.",
+      "inspirationBenefit": "Mood boards welcome — I use them for direction and mood, never for copying another artist's work.",
+      "placementPhotoBenefit": "A quick photo of the area helps me judge size and flow on your body before I reply.",
+      "sectionTitle": "Reference images",
       "buttonText": "Choose up to {maxFiles} images.",
       "maxFilesWarning": "You can upload up to {maxFiles} images per category.",
       "uploadingLabel": "Uploading",
@@ -116,12 +123,21 @@
 
     "eligibilityLabel": "I confirm I am {ageThreshold} or older and this request is for myself",
 
+    "privacyStatement": "Your photos and details are used only to review your tattoo request. They're never shared with third parties for anything else.",
+
+    "ideaBlockTitle": "Your idea",
+    "projectDetailsTitle": "Project details",
+
     "submitButton": "Send Request",
     "submitButtonLoading": "Sending…",
+    "submitButtonWaitingUploads": "Waiting for images…",
     "successTitle": "Request sent",
     "successMessage": "We received your request. We'll be in touch soon.",
     "successReferenceCode": "Your request reference: {referenceCode}",
     "errorMessage": "Something went wrong. Please try again.",
+    "errorDetailsPreserved": "Something went wrong on our side — your details are still here. Please try again.",
+    "errorInstagramFallback": "Something's not working on our side — sorry! Your details are still here. You can retry, or message me directly on Instagram: @{handle}.",
+    "ideaCounter": "{count}/{max}",
 
     "sizeOptions": {
       "small": "Small (up to 5 cm)",

@@ -17,6 +17,8 @@ type UploadCategoryInputProps = {
   id: string
   category: UploadCategory
   label: string
+  /** The A.1 motivation sentence — visually primary (FS §4.4). */
+  benefit: string
   buttonText: string
   hint?: string
   uploadingLabel: string
@@ -34,6 +36,7 @@ export function UploadCategoryInput({
   id,
   category,
   label,
+  benefit,
   buttonText,
   hint,
   uploadingLabel,
@@ -54,7 +57,13 @@ export function UploadCategoryInput({
     // and get an opaque failure. Lives here rather than in handleSelect so Retry is covered
     // by the same check.
     if (slot.file.size > MAX_FILE_SIZE_BYTES) {
-      updateSlot(slot.slotId, { status: "failed", progress: 0, errorKey: K.UPLOAD_TOO_LARGE })
+      // Validation rejection — retrying an over-size file is futile, so remove-only.
+      updateSlot(slot.slotId, {
+        status: "failed",
+        progress: 0,
+        errorKey: K.UPLOAD_TOO_LARGE,
+        failureKind: "validation",
+      })
       return
     }
 
@@ -66,11 +75,24 @@ export function UploadCategoryInput({
         signal: controller.signal,
         onProgress: (percent) => updateSlot(slot.slotId, { progress: percent }),
       })
-      updateSlot(slot.slotId, { status: "uploaded", progress: 100, handle, errorKey: undefined })
+      updateSlot(slot.slotId, {
+        status: "uploaded",
+        progress: 100,
+        handle,
+        errorKey: undefined,
+        failureKind: undefined,
+      })
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return
       const errorKey = err instanceof UploadError ? err.errorKey : K.UPLOAD_INVALID
-      updateSlot(slot.slotId, { status: "failed", errorKey })
+      // UploadError.retryable already encodes the transport (429/5xx/network) vs. validation
+      // (400) split; a non-UploadError (unexpected) is treated as transport, i.e. retryable.
+      const retryable = err instanceof UploadError ? err.retryable : true
+      updateSlot(slot.slotId, {
+        status: "failed",
+        errorKey,
+        failureKind: retryable ? "transport" : "validation",
+      })
     } finally {
       controllers.delete(slot.slotId)
     }
@@ -96,8 +118,9 @@ export function UploadCategoryInput({
   }
 
   function handleRetry(slot: UploadSlot) {
-    updateSlot(slot.slotId, { status: "uploading", progress: 0, errorKey: undefined })
-    void startUpload({ ...slot, status: "uploading", progress: 0, errorKey: undefined })
+    const reset = { status: "uploading" as const, progress: 0, errorKey: undefined, failureKind: undefined }
+    updateSlot(slot.slotId, reset)
+    void startUpload({ ...slot, ...reset })
   }
 
   function handleRemove(slot: UploadSlot) {
@@ -114,14 +137,15 @@ export function UploadCategoryInput({
             {/* FS §4.3: "Each image shows a thumbnail with a remove control." Rendered from the
                 local File via an object URL — no signed URL is ever issued to a public visitor.
                 Plain <img>, not next/image: the source is a blob: URL, which the image optimizer
-                cannot process. */}
+                cannot process. The thumbnail is the file's identifier — the file name is NOT
+                shown (amended 2026-07-14): a gallery name identifies nothing to the visitor and
+                eats horizontal space on a narrow mobile screen. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={slot.previewUrl}
               alt=""
               className="size-10 shrink-0 rounded border border-border object-cover"
             />
-            <span className="truncate">{slot.fileName}</span>
             {slot.status === "uploading" && (
               <span className="shrink-0" role="status">
                 {uploadingLabel} {slot.progress}%
@@ -132,13 +156,18 @@ export function UploadCategoryInput({
                 <span className="shrink-0 text-destructive" role="alert">
                   {errorMessage(slot.errorKey ?? K.UPLOAD_INVALID)}
                 </span>
-                <button
-                  type="button"
-                  onClick={() => handleRetry(slot)}
-                  className="shrink-0 hover:underline"
-                >
-                  {retryLabel}
-                </button>
+                {/* Retry only for a transport failure (network/server) — a validation
+                    rejection (over-size / wrong format) can't succeed on retry, so it is
+                    remove-only (FS §4.3 amended). */}
+                {slot.failureKind === "transport" && (
+                  <button
+                    type="button"
+                    onClick={() => handleRetry(slot)}
+                    className="shrink-0 hover:underline"
+                  >
+                    {retryLabel}
+                  </button>
+                )}
               </>
             )}
             <button
@@ -156,6 +185,9 @@ export function UploadCategoryInput({
 
   return (
     <FormFieldLayout label={label} hint={hint} htmlFor={id} footer={fileList}>
+      {/* Motivation card (FS §4.4 / Appendix A.1): the benefit sentence is visually primary —
+          it, not the category label, is what earns the optional upload (PRD D4). */}
+      <p className="text-sm text-foreground">{benefit}</p>
       <input
         ref={inputRef}
         id={id}

@@ -28,6 +28,13 @@ export interface UploadSlot {
   progress: number
   handle?: string
   errorKey?: string
+  /**
+   * Only set when status is "failed". Distinguishes a transient transport failure
+   * (network/server — retrying can succeed → Retry shown) from a validation rejection
+   * (over-size / wrong format — retrying is futile → remove-only). FS §4.3 (amended
+   * 2026-07-14): retry is a transport-only affordance.
+   */
+  failureKind?: "transport" | "validation"
 }
 
 export interface SuccessPayload {
@@ -36,9 +43,19 @@ export interface SuccessPayload {
   contactValue: string
 }
 
+/**
+ * Entered text/select field values, persisted so they survive a client-side navigation
+ * away from Request and back (D-Blueprint 5(a)). A plain string→string bag rather than the
+ * typed form shape on purpose: the store must not depend on the form's schema types (which
+ * change per block — contacts in Block C), and every persisted control is a string or a
+ * checkbox. Uploads live in `slots`; this covers everything else the visitor typed.
+ */
+export type DraftFields = Record<string, string>
+
 export interface RequestDraftState {
   clientSubmissionId: string
   slots: UploadSlot[]
+  fields: DraftFields
   success: SuccessPayload | null
 }
 
@@ -46,6 +63,7 @@ function createInitialState(): RequestDraftState {
   return {
     clientSubmissionId: crypto.randomUUID(),
     slots: [],
+    fields: {},
     success: null,
   }
 }
@@ -75,6 +93,20 @@ export function getSnapshot(): RequestDraftState {
 
 export function getClientSubmissionId(): string {
   return state.clientSubmissionId
+}
+
+/** Snapshot of the persisted field values (D-Blueprint 5(a)). Empty on a fresh session. */
+export function getFields(): DraftFields {
+  return state.fields
+}
+
+/**
+ * Persists the entered field values so they survive a client-side navigation away and back.
+ * Replaces the whole bag (the form owns the complete set and writes it on change). Does not
+ * touch slots or success. Cleared by resetDraft() on a successful submit.
+ */
+export function setFields(fields: DraftFields): void {
+  setState({ ...state, fields })
 }
 
 export function addSlot(slot: UploadSlot): void {
@@ -108,7 +140,15 @@ export function invalidateUploadedSlots(errorKey: string): void {
     ...state,
     slots: state.slots.map((slot) =>
       slot.status === "uploaded"
-        ? { ...slot, status: "failed", progress: 0, handle: undefined, errorKey }
+        ? {
+            ...slot,
+            status: "failed",
+            progress: 0,
+            handle: undefined,
+            errorKey,
+            // Recoverable: the retained File can be re-uploaded to mint a fresh handle.
+            failureKind: "transport",
+          }
         : slot,
     ),
   })

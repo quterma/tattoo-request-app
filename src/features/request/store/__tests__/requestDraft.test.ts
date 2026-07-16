@@ -3,10 +3,12 @@ import {
   __resetDraftStoreForTests,
   addSlot,
   getClientSubmissionId,
+  getFields,
   getSnapshot,
   invalidateUploadedSlots,
   removeSlot,
   resetDraft,
+  setFields,
   updateSlot,
 } from "../requestDraft"
 import type { UploadSlot } from "../requestDraft"
@@ -87,6 +89,8 @@ describe("requestDraft store", () => {
       expect(slot.status).toBe("failed")
       expect(slot.errorKey).toBe("upload_expired")
       expect(slot.handle).toBeUndefined()
+      // A dead-handle rejection is recoverable → transport, so Retry is offered.
+      expect(slot.failureKind).toBe("transport")
       // Retry re-uploads this File, so it must survive.
       expect(slot.file).toBeInstanceOf(File)
     })
@@ -101,6 +105,44 @@ describe("requestDraft store", () => {
       const slots = getSnapshot().slots
       expect(slots.find((s) => s.slotId === "uploading-slot")?.status).toBe("uploading")
       expect(slots.find((s) => s.slotId === "failed-slot")?.errorKey).toBe("upload_invalid")
+    })
+  })
+
+  // D-Blueprint 5(a): entered text/select values persist across a client-side navigation
+  // away and back, and are cleared on a successful submit.
+  describe("field persistence", () => {
+    it("starts with an empty fields bag", () => {
+      expect(getFields()).toEqual({})
+    })
+
+    it("setFields persists values and getFields reads them back", () => {
+      setFields({ clientName: "Alex", ideaDescription: "a dragon" })
+      expect(getFields()).toEqual({ clientName: "Alex", ideaDescription: "a dragon" })
+      expect(getSnapshot().fields).toEqual({ clientName: "Alex", ideaDescription: "a dragon" })
+    })
+
+    it("setFields replaces the whole bag (the form owns the complete set)", () => {
+      setFields({ clientName: "Alex", email: "a@b.com" })
+      setFields({ clientName: "Alex" })
+      expect(getFields()).toEqual({ clientName: "Alex" })
+    })
+
+    it("emits a new snapshot object on a fields write", () => {
+      const before = getSnapshot()
+      setFields({ clientName: "Alex" })
+      expect(getSnapshot()).not.toBe(before)
+    })
+
+    it("preserves fields across slot mutations", () => {
+      setFields({ clientName: "Alex" })
+      addSlot(makeSlot("s1"))
+      expect(getFields()).toEqual({ clientName: "Alex" })
+    })
+
+    it("resetDraft clears persisted fields (successful submit)", () => {
+      setFields({ clientName: "Alex", email: "a@b.com" })
+      resetDraft()
+      expect(getFields()).toEqual({})
     })
   })
 })
