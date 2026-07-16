@@ -20,6 +20,11 @@ const eslintConfig = defineConfig([
             "react/*",
             "react-dom/*",
             "next-intl/*",
+            // Published entry point, not a reach into internals: libphonenumber-js exposes
+            // ./max in its package exports map. The `max` metadata (not the default `min`) is
+            // required for the strict isValid() the contact model depends on — see
+            // PROJECT_DECISIONS.md, "Contact-validation amendment".
+            "libphonenumber-js/*",
             "@tailwindcss/*",
             "eslint/*",
             "eslint-config-next/*",

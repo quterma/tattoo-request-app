@@ -40,6 +40,33 @@ export const AGE_THRESHOLD = 18
  */
 export const INSTAGRAM_HANDLE = "your_studio"
 
+/**
+ * The five contact methods (FS §4.2 field 9, amended 2026-07-15 — PROJECT_DECISIONS.md
+ * "Stage 6 Contact Model"). Exactly one is chosen per request and reveals its one value field.
+ * Phone and WhatsApp are deliberately separate: a phone number means "call me", a WhatsApp
+ * number means "message me", and the artist wants to know which.
+ */
+export const CONTACT_METHODS = ["whatsapp", "email", "instagram", "telegram", "phone"] as const
+
+export type ContactMethod = (typeof CONTACT_METHODS)[number]
+
+/**
+ * The methods THIS studio offers, in select order (owner decision 2026-07-16: WhatsApp, Email,
+ * Instagram, Telegram, Phone; no default — the select opens on a placeholder).
+ *
+ * Per-studio configuration (Stage 6: code config, no admin UI — a post-release backlog item).
+ * A studio may offer a subset by narrowing this array; the form renders from it and the server
+ * validates the submitted method against it, so a disabled method cannot be submitted by a
+ * crafted request.
+ */
+export const OFFERED_CONTACT_METHODS: readonly ContactMethod[] = [
+  "whatsapp",
+  "email",
+  "instagram",
+  "telegram",
+  "phone",
+]
+
 export const SIZE_OPTIONS = ["small", "medium", "large", "extra-large", "not-sure"] as const
 
 /** FS §4.2 field 4 (amended 2026-07-15, owner): two options only — Black & grey / Color. */
