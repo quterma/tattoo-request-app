@@ -38,6 +38,10 @@ Sessions and task files follow docs/framework/AI_TASK_PROTOCOL.md.
   → Pre-task Sync still applies
 - Strategic (STRAT:) sessions must end by persisting outcomes into docs
   (task files, PROJECT_DECISIONS.md, PROJECT_STAGE_LOG.md) — never chat-only conclusions.
+- AI-engineering scout (AIENG:) sessions study outside practice and **propose** to META
+  (docs/framework/AI_ENGINEERING_SCOUT.md). They are read-only outside their own research
+  threads and proposals — they never edit docs/framework/*, CLAUDE.md, AGENTS.md, task files,
+  or source.
 
 ---
 

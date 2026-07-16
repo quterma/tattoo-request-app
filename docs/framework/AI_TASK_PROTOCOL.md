@@ -16,7 +16,8 @@ AI agents and developers working on the project.
 | --- | --- | --- | --- |
 | Strategic | `STRAT:` | discovery, planning, design, decisions | outcomes persisted into docs (task files, PROJECT_DECISIONS.md, PROJECT_STAGE_LOG.md) — never chat-only conclusions |
 | Implementation | `IMPL:` | executing exactly one task file | for a source-changing task: in-session Review Pipeline → independent cross-review to **consensus** → reporting (a green pipeline alone does not end it — see Independent Review Is Mandatory); for a docs-only task: Review Pipeline + reporting |
-| Meta | `META:` | improving the AI workflow itself | updates to `docs/framework/*` |
+| Meta | `META:` | improving the AI workflow itself, driven by live defects | updates to `docs/framework/*` |
+| AI-engineering scout | `AIENG:` | looking **outward** at agentic-engineering practice and selecting what transfers here | a proposal to META (a research thread's `## Outcome`) — it does **not** edit the framework (AI_ENGINEERING_SCOUT.md) |
 
 Name sessions with the prefix plus a short topic (e.g. `IMPL: Stage 6 task 01 — success page`),
 so each type is findable by search.
@@ -48,8 +49,9 @@ Start every new strategic session with:
 > (commits require explicit owner approval — CLAUDE.md).
 > No chat-only conclusions. List created/updated files in the final message.
 
-(The META kickoff prompt lives in AI_WORKFLOW_MASTER.md; IMPL sessions are started from a task
-file per docs/framework/templates/STAGE_TASK_TEMPLATE.md — How to Use.)
+(The META kickoff prompt lives in AI_WORKFLOW_MASTER.md; the `AIENG:` one in
+AI_ENGINEERING_SCOUT.md; IMPL sessions are started from a task file per
+docs/framework/templates/STAGE_TASK_TEMPLATE.md — How to Use.)
 
 ---
 

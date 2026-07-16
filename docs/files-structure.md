@@ -92,6 +92,7 @@ tattoo-request-app/
 │   │   ├── AI_CROSS_REVIEW.md
 │   │   ├── AI_DEVELOPMENT_RULES.md
 │   │   ├── AI_DEVELOPMENT_WORKFLOW.md
+│   │   ├── AI_ENGINEERING_SCOUT.md
 │   │   ├── AI_FRAMEWORK_IDEAS.md
 │   │   ├── AI_PROJECT_BOOTSTRAP.md
 │   │   ├── AI_REVIEW_PIPELINE.md
@@ -123,11 +124,13 @@ tattoo-request-app/
 │       ├── STAGE_6_PRODUCT_DEFINITION.md
 │       ├── research/
 │       │   ├── .gitkeep
+│       │   ├── RESEARCH_2026-07-16_agentic-engineering-practices-scan.md
 │       │   └── done/
 │       │       ├── .gitkeep
 │       │       ├── RESEARCH_2026-07-14_deferred-actions-and-review-granularity.md
 │       │       ├── RESEARCH_2026-07-14_open-question-trigger-and-thread-visibility.md
-│       │       └── RESEARCH_2026-07-15_external-framework-audit.md
+│       │       ├── RESEARCH_2026-07-15_external-framework-audit.md
+│       │       └── RESEARCH_2026-07-16_contact-model-validation-and-decomposition.md
 │       ├── reviews/
 │       │   ├── .gitkeep
 │       │   └── done/
@@ -199,6 +202,7 @@ tattoo-request-app/
 │   │   │       └── RequestStatusForm.tsx
 │   │   └── request/
 │   │       ├── __tests__/
+│   │       │   ├── contact.test.ts
 │   │       │   ├── RequestForm.submission.test.tsx
 │   │       │   ├── schema.test.ts
 │   │       │   └── UploadCategoryInput.test.tsx
@@ -206,6 +210,7 @@ tattoo-request-app/
 │   │       │   ├── form.ts
 │   │       │   └── index.ts
 │   │       ├── lib/
+│   │       │   ├── contact.ts
 │   │       │   ├── errors.ts
 │   │       │   └── upload.ts
 │   │       ├── store/
