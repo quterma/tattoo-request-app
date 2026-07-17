@@ -72,6 +72,41 @@ token weight is a live cost. `open` entries are never compacted. Keep new entrie
   or (b) a rule that co-authored durable docs collapse into one commit with a composite message, or
   (c) a sequencing rule that keeps two live sessions out of the same doc region. CLAUDE.md (Workflow —
   shared-index/staging), AI_TASK_PROTOCOL.md (Cross-Session Rules).
+- 2026-07-17 — **The stage board goes stale the moment an IMPL task finishes, and no rule closes the
+  gap.** Task 03 closed (`done`, moved to `tasks/done/`, STAGE_LOG entry, Items 3/9 → done+LIVE in
+  STAGE_6_IMPLEMENTATION_PLAN.md), but `STAGE_6_STRAT_BRIEF.md` — the *single* file a fresh STRAT
+  session reads as its pickup point — still said "Item 3 — task ready … **Next: Run Item 3**". The
+  brief may be written **only by that stage's STRAT sessions** (AI_TASK_PROTOCOL — STRAT
+  Next-Session Brief), so the IMPL session that produced the change is forbidden from correcting the
+  one document that routes the next session; the owner has to carry the delta by hand. This is the
+  **completion** direction of the already-open 2026-07-15 escalation entry below (that one is the
+  mid-flight direction) — same root: the brief is STRAT-owned but IMPL is what invalidates it. It is
+  currently backstopped only by the brief's own "re-verify every assumption against the repo" line,
+  i.e. by the next session distrusting its own entry point. Also unresolved by that backstop: a
+  `draft` task whose stated precondition has since been met (`TASK_09` — "deferred until Blocks B′/C
+  land"; they landed) has nothing that flips it to `ready`, since promotion is STRAT's call. — open:
+  META — does the brief get an IMPL-appendable section, a generated board (`pnpm project:status`,
+  `TOOLING_TASK_01`), or an explicit "IMPL states the delta, STRAT reconciles" duty? Second sighting
+  in three days. AI_TASK_PROTOCOL.md (STRAT Next-Session Brief), CLAUDE.md.
+- 2026-07-17 — **An IMPL session cannot see its own context budget, and guessed it wrong in the
+  direction that costs work.** Near the end of Task 03 the session told the owner it had "~10%"
+  left and recommended handing the remaining live-migration + CO-1 verification to a fresh session;
+  the owner's UI showed **33%**, and the work then completed comfortably in-session (migration
+  applied+verified, CO-1 e2e across five contact methods and three upload categories, reporting).
+  The number was a **guess presented as a measurement** — the same failure class the framework
+  already legislates against (AI_TASK_PROTOCOL — "Name the basis of a claim the repo does not own"),
+  but applied to the session's own state, which no existing rule covers. Cost of the error is
+  asymmetric and real: a needless handoff re-reads the whole task context and risks dropping nuance
+  precisely at the live-DB step. **Do not fix this as "cut tasks smaller"** — Task 03 was already
+  correctly cut into four reviewed blocks, and the blocks were not the problem. Owner's framing,
+  worth preserving: a mid-task **IMPL-decided relay** may be the right primitive (STRAT cannot
+  predict exhaustion at planning time, so only the running IMPL session can call it), and some
+  phases (mechanical test-fixture updates, doc sweeps) might belong to subagents on cheaper models
+  — but any such rule needs a *trustworthy* budget signal first, or it will fire on guesses like
+  this one. — open: META — (a) is there a reliable in-session budget signal, and if not, what should
+  a session be allowed to *say* about its remaining capacity? (b) if a relay primitive is added,
+  what is the handoff artifact (the task file + review threads carried this one fine)?
+  AI_TASK_PROTOCOL.md (Session Duties, Session Settings Guidance).
 - 2026-07-15 — An IMPL session mid-flight hit a product question it must escalate to STRAT (Task 03
   contact model exceeds FS §4.2) and its plan proposed to carry the escalation by **overwriting
   `STAGE_6_STRAT_BRIEF.md`** (next topic = the amendment) + pinging the owner to run a new STRAT.

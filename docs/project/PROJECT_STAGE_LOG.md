@@ -467,6 +467,46 @@ Completed in Stage 3:
 
 ## Log Entries (reverse chronological)
 
+### 2026-07-17 — IMPL: Stage 6 Item 3 — request form rebuild complete (Items 3 + 9)
+
+`STAGE_6_TASK_03_request_form_rebuild.md` → `done`. Built and reviewed in four checkpointed blocks
+(the task crossed the size trigger), each with an independent Codex cross-review to consensus:
+
+- **Block R** `5de9329` — FS §4.6 reference code (Item 9): `create_request` recreated with a 6-char
+  ambiguity-free generator + retry loop. Migration `20260715124427` applied 2026-07-15.
+- **Block A′** `4721dcd` — non-contact contract: idea 20/1000 trimmed, size +not-sure, color
+  narrowed to 2 (owner), placement minus "Other" (owner), `consent`→`eligibility` (reusing the
+  legacy `consent` column, no migration), `AGE_THRESHOLD` in isomorphic config.
+- **Block B′** `7eaa7ac` — form UI: FS §4.1 block order, A.1 motivation cards, eligibility + A.3
+  privacy, scroll-to/focus first invalid field, in-session persistence (D-Blueprint 5(a)), idea
+  near-limit counter, click-to-wait submit, A.4 Instagram fallback after ≥2 failures; upload-card
+  UX (no file name; Retry only on transport failure).
+- **Research → docs** `cbcf552` — a Codex research pass (with an owner-carried external leg) caught
+  four things before they shipped: **Telegram's rule is materially different from Instagram's** (the
+  decision's "same shape as Instagram" was factually wrong → FS §4.2 field 10e corrected, docs-first);
+  a contract-only commit **cannot typecheck** (types are inferred from the schema) → decomposition
+  changed; the migration must derive from the **current** RPC body or regress the code generator;
+  and normalized ≠ "as entered" for the FS §3.4 Success echo.
+- **C-prep** `050260a` + **Block C** `0b38243` — five-method contact model:
+  `contactMethod`/`contactValue` (validated against the studio's configured offered set), value held
+  as entered with normalization at the persistence boundary, discriminated contact fanned out to
+  five nullable columns at the service adapter, admin renders only provided methods.
+  `libphonenumber-js/max` adopted; the `country === "IL"` check proven load-bearing (a valid US
+  number passes `isValid()`).
+
+**Live verification (CO-1/CO-2, against the real DB — not mocks):** migration `20260716184220`
+applied, Local=Remote parity; 9 test requests + 30 file rows deleted (owner-approved; 4 held both
+email and phone, so the new exactly-one invariant could not have been backfilled by guessing); the
+`requests_exactly_one_contact` CHECK proven to reject zero and multi; all **five contact methods**
+submitted through the real public endpoint (codes `JVCNL3`/`8C5B6U`/`X6CXER`/`B4PRHM`/`JMMY2X`) with
+exactly one column filled and values normalized (E.164, @-stripped); **an upload in each of the three
+categories** adopted at submit (`69Z8RD`); the admin read path clean against the new schema.
+
+Gates: `pnpm qg` green, 358 tests. **Open follow-ups (not part of this task):** `TASK_09` (placement
+Select → required free-text, `draft`), Item 4 (Success page — consumes this task's store), Item 10
+(abuse mitigation, pre-launch blocker). Owner-authored placeholders flagged in `en.json`: the
+Introduction copy (`__intro_TODO`) and `INSTAGRAM_HANDLE`.
+
 ### 2026-07-15 — IMPL: Stage 6 Item 3 — Block R (reference-code format, Item 9) built + reviewed to consensus
 
 Task `STAGE_6_TASK_03_request_form_rebuild.md`, first of the re-cut blocks (R / A′ / B′ / C — the
