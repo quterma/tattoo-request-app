@@ -40,7 +40,7 @@ const baseRequest: AdminRequestListItem = {
   clientName: "Alex Doe",
   placement: "arm",
   size: "medium",
-  color: "black",
+  color: "black-and-grey",
   status: "new",
   createdAt: "2026-06-30T12:00:00.000Z",
 }

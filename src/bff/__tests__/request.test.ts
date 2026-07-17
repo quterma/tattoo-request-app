@@ -23,6 +23,8 @@ function baseFields(overrides: Record<string, string> = {}): Record<string, stri
     placement: "arm",
     size: "medium",
     color: "black-and-grey",
+    contactMethod: "email",
+    contactValue: "client@example.com",
     eligibility: "true",
     ...overrides,
   }
@@ -67,33 +69,41 @@ describe("parseRequestFormData", () => {
     expect(result.clientName).toBe("")
   })
 
-  it("returns undefined for absent optional fields", () => {
+  it("returns undefined for an absent budget", () => {
     const fd = makeFormData(baseFields())
 
     const result = parseRequestFormData(fd)
 
     expect(result.budget).toBeUndefined()
-    expect(result.email).toBeUndefined()
-    expect(result.phone).toBeUndefined()
-    expect(result.contactOther).toBeUndefined()
   })
 
-  it("parses optional fields when present", () => {
-    const fd = makeFormData(
-      baseFields({
-        budget: "500",
-        email: "test@example.com",
-        phone: "+1234567890",
-        contactOther: "telegram",
-      }),
-    )
+  it("parses the budget when present", () => {
+    const fd = makeFormData(baseFields({ budget: "500" }))
 
     const result = parseRequestFormData(fd)
 
     expect(result.budget).toBe("500")
-    expect(result.email).toBe("test@example.com")
-    expect(result.phone).toBe("+1234567890")
-    expect(result.contactOther).toBe("telegram")
+  })
+
+  it("parses the chosen contact method and its value", () => {
+    const fd = makeFormData(baseFields({ contactMethod: "telegram", contactValue: "@masha_t" }))
+
+    const result = parseRequestFormData(fd)
+
+    expect(result.contactMethod).toBe("telegram")
+    // Parsed as entered — normalization happens at the persistence boundary (FS §3.4).
+    expect(result.contactValue).toBe("@masha_t")
+  })
+
+  it("defaults an absent contact method/value to empty strings (the schema then rejects)", () => {
+    const fields = baseFields()
+    delete (fields as Record<string, string>).contactMethod
+    delete (fields as Record<string, string>).contactValue
+
+    const result = parseRequestFormData(makeFormData(fields))
+
+    expect(result.contactMethod).toBe("")
+    expect(result.contactValue).toBe("")
   })
 
   it("returns an empty array when no upload handles are present", () => {

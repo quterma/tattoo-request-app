@@ -133,6 +133,7 @@ tattoo-request-app/
 │       │       └── RESEARCH_2026-07-16_contact-model-validation-and-decomposition.md
 │       ├── reviews/
 │       │   ├── .gitkeep
+│       │   ├── REVIEW_2026-07-17_stage6_contact_model.md
 │       │   └── done/
 │       │       ├── .gitkeep
 │       │       ├── REVIEW_2026-07-13_codex-delegation-invocation.md
@@ -312,5 +313,6 @@ tattoo-request-app/
         ├── 20260702114509_update_request_status_values.sql
         ├── 20260705155244_harden_create_request_search_path.sql
         ├── 20260714025850_three_upload_categories.sql
-        └── 20260715124427_stage6_reference_code_format.sql
+        ├── 20260715124427_stage6_reference_code_format.sql
+        └── 20260716184220_stage6_contact_model.sql
 ```

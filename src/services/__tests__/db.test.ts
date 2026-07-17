@@ -30,9 +30,7 @@ const baseParams = {
   size: "medium",
   color: "black-and-grey",
   budget: undefined,
-  email: "client@example.com",
-  phone: undefined,
-  contactOther: undefined,
+  contact: { method: "email" as const, value: "client@example.com" },
   consent: true as const,
   files: [] as UploadedFile[],
 }
@@ -76,9 +74,11 @@ describe("createRequest", () => {
       p_size: baseParams.size,
       p_color: baseParams.color,
       p_budget: null,
-      p_email: baseParams.email,
+      p_email: "client@example.com",
       p_phone: null,
-      p_contact_other: null,
+      p_whatsapp: null,
+      p_instagram: null,
+      p_telegram: null,
       p_consent: true,
       p_files: [
         {
@@ -92,27 +92,39 @@ describe("createRequest", () => {
     })
   })
 
-  it("passes clientName to rpc and nulls for absent optional fields", async () => {
+  // The five-column invariant lives in this adapter: exactly one contact param is non-null,
+  // whichever method was chosen. Callers hand over a discriminated {method, value}, so a
+  // zero/multi-method request cannot even be expressed.
+  it.each([
+    ["email", "p_email", "client@example.com"],
+    ["phone", "p_phone", "+972545555555"],
+    ["whatsapp", "p_whatsapp", "+972545555555"],
+    ["instagram", "p_instagram", "masha"],
+    ["telegram", "p_telegram", "masha_t"],
+  ] as const)("fans %s out to exactly one non-null contact param", async (method, param, value) => {
+    mockRpc.mockResolvedValue({ data: { id: "id", referenceCode: "K7M4XP" }, error: null })
+
+    await createRequest({ ...baseParams, contact: { method, value } })
+
+    const call = mockRpc.mock.calls[0][1]
+    const contactParams = ["p_email", "p_phone", "p_whatsapp", "p_instagram", "p_telegram"]
+    expect(call[param]).toBe(value)
+    for (const other of contactParams.filter((p) => p !== param)) {
+      expect(call[other]).toBeNull()
+    }
+  })
+
+  it("passes clientName to rpc and null for an absent budget", async () => {
     mockRpc.mockResolvedValue({
-      data: { id: "db-uuid-2", referenceCode: "REQ-2026-0002" },
+      data: { id: "db-uuid-2", referenceCode: "K7M4XP" },
       error: null,
     })
 
-    await createRequest({
-      ...baseParams,
-      clientName: "Jordan",
-      budget: undefined,
-      email: undefined,
-      phone: undefined,
-      contactOther: undefined,
-    })
+    await createRequest({ ...baseParams, clientName: "Jordan", budget: undefined })
 
     const call = mockRpc.mock.calls[0][1]
     expect(call.p_client_name).toBe("Jordan")
     expect(call.p_budget).toBeNull()
-    expect(call.p_email).toBeNull()
-    expect(call.p_phone).toBeNull()
-    expect(call.p_contact_other).toBeNull()
   })
 
   it("passes budget when provided", async () => {
@@ -328,7 +340,9 @@ describe("getRequestForStudio", () => {
     budget: "500-800",
     email: "alex@example.com",
     phone: null,
-    contact_other: null,
+    whatsapp: null,
+    instagram: null,
+    telegram: null,
     consent: true,
     status: "new",
     created_at: "2026-07-01T10:00:00.000Z",
@@ -351,7 +365,7 @@ describe("getRequestForStudio", () => {
 
     expect(mockFrom).toHaveBeenCalledWith("requests")
     expect(select).toHaveBeenCalledWith(
-      "id, reference_code, client_name, description, placement, size, color, budget, email, phone, contact_other, consent, status, created_at, request_files(id, storage_path, original_name, type, mime_type, size)",
+      "id, reference_code, client_name, description, placement, size, color, budget, email, phone, whatsapp, instagram, telegram, consent, status, created_at, request_files(id, storage_path, original_name, type, mime_type, size)",
     )
     expect(eqId).toHaveBeenCalledWith("id", REQUEST_ID)
     expect(eqStudio).toHaveBeenCalledWith("studio_id", STUDIO_ID)
@@ -392,7 +406,9 @@ describe("getRequestForStudio", () => {
       budget: "500-800",
       email: "alex@example.com",
       phone: null,
-      contactOther: null,
+      whatsapp: null,
+      instagram: null,
+      telegram: null,
       consent: true,
       status: "new",
       createdAt: "2026-07-01T10:00:00.000Z",

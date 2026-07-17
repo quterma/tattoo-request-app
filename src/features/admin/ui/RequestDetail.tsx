@@ -1,7 +1,13 @@
+import { Fragment } from "react"
 import type { getTranslations } from "next-intl/server"
 import { Link } from "@/shared/i18n"
 import { REQUEST_STATUS_OPTIONS } from "../config"
-import type { AdminRequestDetail, RequestStatus, UpdateRequestStatusResult } from "../types"
+import type {
+  AdminRequestContact,
+  AdminRequestDetail,
+  RequestStatus,
+  UpdateRequestStatusResult,
+} from "../types"
 import { RequestImageViewer } from "./RequestImageViewer"
 import { RequestStatusForm } from "./RequestStatusForm"
 
@@ -13,6 +19,25 @@ type RequestDetailProps = {
     prev: UpdateRequestStatusResult | null,
     formData: FormData,
   ) => Promise<UpdateRequestStatusResult>
+}
+
+/**
+ * A directly actionable link for the methods that have one. Instagram/Telegram deep links are
+ * deliberately omitted: the stored value is a handle, and guessing a profile URL from it would
+ * be a fabricated destination — the artist copies it into the app they already use.
+ */
+function contactActionHref(contact: AdminRequestContact): string | null {
+  switch (contact.method) {
+    case "email":
+      return `mailto:${contact.value}`
+    case "phone":
+      return `tel:${contact.value}`
+    case "whatsapp":
+      // wa.me wants the E.164 digits without the leading "+".
+      return `https://wa.me/${contact.value.replace(/^\+/, "")}`
+    default:
+      return null
+  }
 }
 
 function formatCreatedAt(isoDate: string, locale: string) {
@@ -84,23 +109,24 @@ export function RequestDetail({ request, locale, t, updateStatusAction }: Reques
 
       <section className="mt-4">
         <p className="text-base font-semibold text-foreground">{request.clientName}</p>
+        {/* Quick actions for the methods that can be acted on directly. Rendered from the
+            provided contacts only — an absent method takes no space. */}
         <div className="mt-2 flex flex-wrap gap-3">
-          {request.email && (
-            <a
-              href={`mailto:${request.email}`}
-              className="inline-flex min-h-11 items-center rounded-md border border-border px-3 text-sm font-medium text-foreground hover:bg-muted"
-            >
-              {t("emailAction")}
-            </a>
-          )}
-          {request.phone && (
-            <a
-              href={`tel:${request.phone}`}
-              className="inline-flex min-h-11 items-center rounded-md border border-border px-3 text-sm font-medium text-foreground hover:bg-muted"
-            >
-              {t("phoneAction")}
-            </a>
-          )}
+          {request.contacts.map((contact) => {
+            const href = contactActionHref(contact)
+            if (!href) return null
+            return (
+              <a
+                key={contact.method}
+                href={href}
+                className="inline-flex min-h-11 items-center rounded-md border border-border px-3 text-sm font-medium text-foreground hover:bg-muted"
+              >
+                {t.has(`contactAction.${contact.method}`)
+                  ? t(`contactAction.${contact.method}`)
+                  : contact.method}
+              </a>
+            )
+          })}
         </div>
       </section>
 
@@ -123,28 +149,22 @@ export function RequestDetail({ request, locale, t, updateStatusAction }: Reques
         </dl>
       </section>
 
-      {(request.email || request.phone || request.contactOther) && (
+      {/* Only the provided method(s) are listed — method-agnostic by construction, so a future
+          method needs no change here (PROJECT_DECISIONS.md — "Stage 6 Contact Model"). */}
+      {request.contacts.length > 0 && (
         <section className="mt-6">
           <h2 className="text-sm font-semibold text-foreground">{t("contactDetailsTitle")}</h2>
           <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-            {request.email && (
-              <>
-                <dt className="text-muted-foreground">{t("contactEmailLabel")}</dt>
-                <dd className="text-foreground">{request.email}</dd>
-              </>
-            )}
-            {request.phone && (
-              <>
-                <dt className="text-muted-foreground">{t("contactPhoneLabel")}</dt>
-                <dd className="text-foreground">{request.phone}</dd>
-              </>
-            )}
-            {request.contactOther && (
-              <>
-                <dt className="text-muted-foreground">{t("contactOtherLabel")}</dt>
-                <dd className="text-foreground">{request.contactOther}</dd>
-              </>
-            )}
+            {request.contacts.map((contact) => (
+              <Fragment key={contact.method}>
+                <dt className="text-muted-foreground">
+                  {t.has(`contactMethodLabel.${contact.method}`)
+                    ? t(`contactMethodLabel.${contact.method}`)
+                    : contact.method}
+                </dt>
+                <dd className="text-foreground">{contact.value}</dd>
+              </Fragment>
+            ))}
           </dl>
         </section>
       )}
@@ -162,7 +182,9 @@ export function RequestDetail({ request, locale, t, updateStatusAction }: Reques
           {t("createdAtLabel")}: {formatCreatedAt(request.createdAt, locale)}
         </p>
         <p className="mt-1">
-          {request.consent ? t("consentGivenLabel") : t("consentNotGivenLabel")}
+          {/* The visitor now affirms ELIGIBILITY (18+/for-self), not policy consent — the value
+              still persists in the legacy `consent` column, only the wording changes. */}
+          {request.consent ? t("eligibilityConfirmedLabel") : t("eligibilityNotConfirmedLabel")}
         </p>
       </footer>
     </main>

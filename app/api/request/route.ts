@@ -8,7 +8,9 @@ import {
   validateRequestPayload,
 } from "@/bff"
 import { API_ERROR_CODES } from "@/shared/api"
+import { normalizeContactValue } from "@/features/request/lib/contact"
 import { createRequest, getRequestByClientSubmissionId } from "@/services"
+import type { ContactMethodName } from "@/services"
 import { config } from "@/config"
 
 function resolveStudioId(): string {
@@ -46,6 +48,25 @@ export async function POST(req: Request) {
     }
     const data = validation.data
 
+    // Normalize the contact value for storage. The schema validated it against its method's rule
+    // (so null is unreachable here), but the check is explicit rather than a non-null assertion:
+    // a future method whose normalizer is missed would otherwise silently persist a raw value.
+    const contactMethod = data.contactMethod as ContactMethodName
+    const normalizedContactValue = normalizeContactValue(contactMethod, data.contactValue.trim())
+    if (normalizedContactValue === null) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: {
+            code: API_ERROR_CODES.VALIDATION_ERROR,
+            fieldErrors: { contactValue: ["contact_value_invalid"] },
+            formErrors: [],
+          },
+        },
+        { status: 400 },
+      )
+    }
+
     const studioId = resolveStudioId()
 
     // Idempotency check FIRST — before adopting handles.
@@ -81,12 +102,13 @@ export async function POST(req: Request) {
         size: data.size,
         color: data.color,
         budget: data.budget,
-        email: data.email,
-        phone: data.phone,
-        contactOther: data.contactOther,
+        // The schema holds contactValue AS ENTERED (FS §3.4's Success echo needs that);
+        // normalization to the stored form (E.164 / @-stripped) happens here, at the
+        // persistence boundary. The schema already proved the value is valid for its method,
+        // so this cannot be null — the check keeps the type honest rather than trusting that.
+        contact: { method: contactMethod, value: normalizedContactValue },
         // The eligibility confirmation (18+/for-self, FS §4.2 field 11) persists into the
-        // existing `consent` boolean column — same semantics, no migration. The contact
-        // model's own columns change in Block C; this field does not.
+        // existing `consent` boolean column — same semantics, no migration.
         consent: data.eligibility,
         files: adoption.files,
       })

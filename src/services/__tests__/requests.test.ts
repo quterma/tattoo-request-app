@@ -30,7 +30,9 @@ const baseDbDetail = {
   budget: "500-800",
   email: "alex@example.com",
   phone: null,
-  contactOther: null,
+  whatsapp: null,
+  instagram: null,
+  telegram: null,
   consent: true,
   status: "new" as const,
   createdAt: "2026-07-01T10:00:00.000Z",
@@ -183,13 +185,26 @@ describe("getAdminRequestDetail", () => {
       size: "medium",
       color: "black",
       budget: "500-800",
-      email: "alex@example.com",
-      phone: null,
-      contactOther: null,
+      // Only the provided method surfaces — the four empty columns take no space in the DTO.
+      contacts: [{ method: "email", value: "alex@example.com" }],
       consent: true,
       status: "new",
       createdAt: "2026-07-01T10:00:00.000Z",
     })
+  })
+
+  it("collects only the filled contact method, in method order", async () => {
+    mockGetRequestForStudio.mockResolvedValue({
+      ...baseDbDetail,
+      email: null,
+      whatsapp: "+972545555555",
+      files: [],
+    })
+    mockCreateSignedRequestFileUrl.mockResolvedValue("https://signed")
+
+    const result = await getAdminRequestDetail(STUDIO_ID, REQUEST_ID)
+
+    expect(result?.contacts).toEqual([{ method: "whatsapp", value: "+972545555555" }])
   })
 
   it("propagates DB errors instead of swallowing them", async () => {

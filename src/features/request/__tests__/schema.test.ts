@@ -8,9 +8,8 @@ const validBase = {
   size: "medium",
   color: "black-and-grey",
   budget: "",
-  email: "user@example.com",
-  phone: "",
-  contactOther: "",
+  contactMethod: "email",
+  contactValue: "user@example.com",
   eligibility: true as const,
 }
 
@@ -213,75 +212,91 @@ describe("requestFormSchema – required fields", () => {
   })
 })
 
-describe("requestFormSchema – contact group validation", () => {
-  const noContact = {
-    ...validBase,
-    email: "",
-    phone: "",
-    contactOther: "",
-  }
-
-  it("rejects when all contact fields are empty", () => {
-    const result = requestFormSchema.safeParse(noContact)
+// FS §4.2 field 9 + 10a–e: one method, one value, validated per method.
+describe("requestFormSchema – contact model", () => {
+  it("rejects a missing method", () => {
+    const result = requestFormSchema.safeParse({ ...validBase, contactMethod: "" })
     expect(result.success).toBe(false)
     if (!result.success) {
-      const messages = result.error.issues.map((i) => i.message)
-      expect(messages).toContain("contact_required")
+      expect(result.error.issues.map((i) => i.message)).toContain("contact_method_required")
     }
   })
 
-  it("shows contact_required even when eligibility is missing", () => {
-    const result = requestFormSchema.safeParse({ ...noContact, eligibility: undefined })
+  // The offered set is per-studio config, and the schema validates against IT, not the bare
+  // five-value enum — a method the studio disabled must not pass.
+  it("rejects a method outside the offered set", () => {
+    const result = requestFormSchema.safeParse({ ...validBase, contactMethod: "carrier_pigeon" })
     expect(result.success).toBe(false)
     if (!result.success) {
-      const messages = result.error.issues.map((i) => i.message)
-      expect(messages).toContain("contact_required")
-      expect(messages).toContain("eligibility_required")
+      expect(result.error.issues.map((i) => i.message)).toContain("contact_method_required")
     }
   })
 
-  it("shows contact_required on completely empty form submit", () => {
-    const emptyForm = {
+  it("rejects an empty or whitespace-only value", () => {
+    for (const contactValue of ["", "   "]) {
+      const result = requestFormSchema.safeParse({ ...validBase, contactValue })
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error.issues.map((i) => i.message)).toContain("contact_value_required")
+      }
+    }
+  })
+
+  it.each([
+    ["whatsapp", "054-555-5555"],
+    ["phone", "+972 54 555 5555"],
+    ["email", "x@example.com"],
+    ["instagram", "@masha.tattoo"],
+    ["telegram", "@masha_tattoo"],
+  ])("accepts a valid %s value", (contactMethod, contactValue) => {
+    const result = requestFormSchema.safeParse({ ...validBase, contactMethod, contactValue })
+    expect(result.success).toBe(true)
+  })
+
+  it.each([
+    ["email", "not-an-email", "email_invalid"],
+    ["whatsapp", "+1 202 555 0100", "phone_invalid"],
+    ["phone", "054", "phone_invalid"],
+    ["instagram", "masha tattoo", "instagram_invalid"],
+    ["telegram", "masha.tattoo", "telegram_invalid"],
+    ["telegram", "mash", "telegram_invalid"],
+  ])("rejects an invalid %s value with its own message", (contactMethod, contactValue, expected) => {
+    const result = requestFormSchema.safeParse({ ...validBase, contactMethod, contactValue })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.issues.map((i) => i.message)).toContain(expected)
+    }
+  })
+
+  // FS §3.4 needs the Success echo to show what the visitor typed, so the schema must NOT
+  // transform the value — normalization happens at the persistence boundary.
+  it("returns contactValue exactly as entered (no @-strip, no E.164)", () => {
+    const result = requestFormSchema.safeParse({
+      ...validBase,
+      contactMethod: "instagram",
+      contactValue: "@masha.tattoo",
+    })
+    expect(result.success).toBe(true)
+    if (result.success) expect(result.data.contactValue).toBe("@masha.tattoo")
+  })
+
+  it("reports contact and eligibility problems together on an empty submit", () => {
+    const result = requestFormSchema.safeParse({
       clientName: "",
       ideaDescription: "",
       placement: "",
       size: "",
       color: "",
       budget: "",
-      email: "",
-      phone: "",
-      contactOther: "",
+      contactMethod: "",
+      contactValue: "",
       eligibility: undefined,
-    }
-    const result = requestFormSchema.safeParse(emptyForm)
+    })
     expect(result.success).toBe(false)
     if (!result.success) {
       const messages = result.error.issues.map((i) => i.message)
-      expect(messages).toContain("contact_required")
-    }
-  })
-
-  it("accepts when only email is provided", () => {
-    const result = requestFormSchema.safeParse({ ...noContact, email: "x@example.com" })
-    expect(result.success).toBe(true)
-  })
-
-  it("accepts when only phone is provided", () => {
-    const result = requestFormSchema.safeParse({ ...noContact, phone: "+79001234567" })
-    expect(result.success).toBe(true)
-  })
-
-  it("accepts when only contactOther is provided", () => {
-    const result = requestFormSchema.safeParse({ ...noContact, contactOther: "telegram" })
-    expect(result.success).toBe(true)
-  })
-
-  it("rejects invalid email format", () => {
-    const result = requestFormSchema.safeParse({ ...validBase, email: "not-an-email" })
-    expect(result.success).toBe(false)
-    if (!result.success) {
-      const messages = result.error.issues.map((i) => i.message)
-      expect(messages).toContain("email_invalid")
+      expect(messages).toContain("contact_method_required")
+      expect(messages).toContain("eligibility_required")
     }
   })
 })
@@ -319,25 +334,27 @@ describe("requestFormSchema – contact/budget max-length constraints", () => {
     expect(result.success).toBe(true)
   })
 
-  it("rejects phone exceeding 50 characters", () => {
-    const result = requestFormSchema.safeParse({ ...validBase, phone: "1".repeat(51) })
-    expect(result.success).toBe(false)
-    if (!result.success) {
-      const messages = result.error.issues.map((i) => i.message)
-      expect(messages).toContain("phone_too_long")
-    }
-  })
+  // REGRESSION GUARD: there is no shared length cap on contactValue — each method owns its own
+  // bound. A shared cap would enforce a rule the FS does not state and reject this valid address
+  // (FS §4.2 field 10a: RFC-basic validation, nothing more).
+  it("accepts a long but RFC-valid email address", () => {
+    const longEmail = `${"a".repeat(64)}@${"b".repeat(60)}.${"c".repeat(60)}.example.com`
+    expect(longEmail.length).toBeGreaterThan(100)
 
-  it("rejects contactOther exceeding 50 characters", () => {
     const result = requestFormSchema.safeParse({
       ...validBase,
-      email: "",
-      contactOther: "a".repeat(51),
+      contactMethod: "email",
+      contactValue: longEmail,
     })
+    expect(result.success).toBe(true)
+  })
+
+  it("still guards against an unbounded payload on the public write surface", () => {
+    const result = requestFormSchema.safeParse({ ...validBase, contactValue: "a".repeat(321) })
     expect(result.success).toBe(false)
     if (!result.success) {
       const messages = result.error.issues.map((i) => i.message)
-      expect(messages).toContain("contact_other_too_long")
+      expect(messages).toContain("contact_value_invalid")
     }
   })
 })

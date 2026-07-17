@@ -1,20 +1,22 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useTranslations } from "next-intl"
 import { useForm, useWatch } from "react-hook-form"
 import type { FieldErrors } from "react-hook-form"
 import { API_ERROR_CODES, REQUEST_FIELDS } from "@/shared/api"
-import { getContactGroupError, getFieldError, getValidationKeyMessage } from "../lib/errors"
+import { getFieldError, getValidationKeyMessage } from "../lib/errors"
 import {
   AGE_THRESHOLD,
   COLOR_OPTIONS,
   INSTAGRAM_HANDLE,
   MAX_FILES_PER_FIELD,
+  OFFERED_CONTACT_METHODS,
   PLACEMENT_OPTIONS,
   SIZE_OPTIONS,
 } from "../config"
+import type { ContactMethod } from "../config"
 import {
   getClientSubmissionId,
   getFields,
@@ -44,6 +46,19 @@ const IDEA_COUNTER_THRESHOLD = 900
 // Instagram fallback (FS §4.5 / A.4) appears only after this many consecutive failed submits.
 const FALLBACK_AFTER_ATTEMPTS = 2
 
+/** The revealed value field's input type per method (FS §4.2 fields 10a–e). */
+const CONTACT_INPUT_TYPE: Record<ContactMethod, string> = {
+  email: "email",
+  phone: "tel",
+  whatsapp: "tel",
+  instagram: "text",
+  telegram: "text",
+}
+
+function isContactMethod(v: string | undefined): v is ContactMethod {
+  return !!v && (OFFERED_CONTACT_METHODS as readonly string[]).includes(v)
+}
+
 // The text/select/checkbox fields whose entered values persist across a client-side navigation
 // away from Request and back (D-Blueprint 5(a): "all entered values"). Persisted as strings —
 // eligibility as "true"/"" — in the module store's fields bag.
@@ -54,9 +69,8 @@ const PERSISTED_FIELDS = [
   "size",
   "color",
   "budget",
-  "email",
-  "phone",
-  "contactOther",
+  "contactMethod",
+  "contactValue",
   "eligibility",
 ] as const
 
@@ -70,9 +84,8 @@ const FIELD_ORDER: (keyof RequestFormInput)[] = [
   "color",
   "budget",
   "clientName",
-  "email",
-  "phone",
-  "contactOther",
+  "contactMethod",
+  "contactValue",
   "eligibility",
 ]
 
@@ -85,9 +98,8 @@ function readPersistedDefaults(): Partial<RequestFormInput> {
     size: saved.size ?? "",
     color: saved.color ?? "",
     budget: saved.budget ?? "",
-    email: saved.email ?? "",
-    phone: saved.phone ?? "",
-    contactOther: saved.contactOther ?? "",
+    contactMethod: saved.contactMethod ?? "",
+    contactValue: saved.contactValue ?? "",
     // A confirmation made earlier in the same live session is restored (D-Blueprint 5(a) —
     // all entered values); a fresh session starts unchecked.
     eligibility: saved.eligibility === "true" ? true : undefined,
@@ -126,6 +138,7 @@ export function RequestForm() {
     handleSubmit,
     setError,
     setFocus,
+    setValue,
     clearErrors,
     formState: { errors },
   } = useForm<RequestFormInput, unknown, RequestFormData>({
@@ -153,15 +166,22 @@ export function RequestForm() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watchedKey])
 
-  const [email, phone, contactOther, ideaValue] = useWatch({
+  const [contactMethod, ideaValue] = useWatch({
     control,
-    name: ["email", "phone", "contactOther", "ideaDescription"],
+    name: ["contactMethod", "ideaDescription"],
   })
+
+  // Changing the method reinterprets the value (an email is not an Instagram handle), so the
+  // value field is cleared on a real change — never on the first render, which would wipe a
+  // value restored from the store (D-Blueprint 5(a)).
+  const previousMethod = useRef<string | undefined>(undefined)
   useEffect(() => {
-    if (errors.contactOther?.message && (email || phone || contactOther)) {
-      clearErrors("contactOther")
+    if (previousMethod.current !== undefined && previousMethod.current !== contactMethod) {
+      setValue("contactValue", "")
+      clearErrors("contactValue")
     }
-  }, [email, phone, contactOther, errors.contactOther?.message, clearErrors])
+    previousMethod.current = contactMethod
+  }, [contactMethod, setValue, clearErrors])
 
   // FS §4.5 / D-Blueprint 5(c): on a blocked submit, smooth-scroll the FIRST invalid field
   // into view. Scroll, not a state change — the visitor keeps their place in the single scroll.
@@ -203,11 +223,11 @@ export function RequestForm() {
       formData.append(f.size, data.size)
       formData.append(f.color, data.color)
       formData.append(f.eligibility, String(data.eligibility))
+      // Sent as entered; the server normalizes for storage (FS §3.4 needs the raw form).
+      formData.append(f.contactMethod, data.contactMethod)
+      formData.append(f.contactValue, data.contactValue)
 
       if (data.budget) formData.append(f.budget, data.budget)
-      if (data.email) formData.append(f.email, data.email)
-      if (data.phone) formData.append(f.phone, data.phone)
-      if (data.contactOther) formData.append(f.contactOther, data.contactOther)
 
       for (const slot of getSnapshot().slots) {
         if (slot.status === "uploaded" && slot.handle) {
@@ -286,8 +306,12 @@ export function RequestForm() {
     label: t(`colorOptions.${v}`),
   }))
 
+  const contactMethodOptions = OFFERED_CONTACT_METHODS.map((v) => ({
+    value: v,
+    label: t(`contactMethodOptions.${v}`),
+  }))
+
   const err = (field: keyof RequestFormInput) => getFieldError(field, errors, t)
-  const contactGroupError = getContactGroupError(errors, t)
 
   if (status === "success") {
     return (
@@ -416,33 +440,29 @@ export function RequestForm() {
         <div>
           <p className="text-sm font-medium text-foreground">{t("contactSectionTitle")}</p>
           <p className="text-xs text-muted-foreground mt-0.5">{t("contactSectionHint")}</p>
-          {contactGroupError && (
-            <p className="text-xs text-destructive mt-1">{contactGroupError}</p>
-          )}
         </div>
-        <TextInput
-          id="email"
-          label={t("emailLabel")}
-          placeholder={t("emailPlaceholder")}
-          type="email"
-          error={err("email")}
-          {...register("email")}
+        <SelectInput
+          id="contactMethod"
+          label={t("contactMethodLabel")}
+          placeholder={t("contactMethodPlaceholder")}
+          options={contactMethodOptions}
+          error={err("contactMethod")}
+          {...register("contactMethod")}
         />
-        <TextInput
-          id="phone"
-          label={t("phoneLabel")}
-          placeholder={t("phonePlaceholder")}
-          type="tel"
-          error={err("phone")}
-          {...register("phone")}
-        />
-        <TextInput
-          id="contactOther"
-          label={t("contactOtherLabel")}
-          placeholder={t("contactOtherPlaceholder")}
-          error={err("contactOther")}
-          {...register("contactOther")}
-        />
+        {/* Exactly one value field exists in the DOM at a time (FS §4.2, 10a–e). One stable
+            `contactValue` control rather than five registered names: five would retain hidden
+            values that could be submitted. Its type/label/placeholder follow the method. */}
+        {isContactMethod(contactMethod) && (
+          <TextInput
+            id="contactValue"
+            label={t(`contactValueLabel.${contactMethod}`)}
+            placeholder={t(`contactValuePlaceholder.${contactMethod}`)}
+            type={CONTACT_INPUT_TYPE[contactMethod]}
+            inputMode={contactMethod === "phone" || contactMethod === "whatsapp" ? "tel" : undefined}
+            error={err("contactValue")}
+            {...register("contactValue")}
+          />
+        )}
       </section>
 
       {/* Eligibility & Privacy block (FS §4.2 field 11 + §4.7 / A.3). */}

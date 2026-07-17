@@ -9,9 +9,8 @@ export interface ParsedRequestPayload {
   size: string
   color: string
   budget: string | undefined
-  email: string | undefined
-  phone: string | undefined
-  contactOther: string | undefined
+  contactMethod: string
+  contactValue: string
   eligibility: true | undefined
   uploadHandles: string[]
 }
@@ -66,9 +65,8 @@ export function parseRequestFormData(formData: FormData): ParsedRequestPayload {
     size: formData.get(f.size) as string,
     color: formData.get(f.color) as string,
     budget: (formData.get(f.budget) as string | null) ?? undefined,
-    email: (formData.get(f.email) as string | null) ?? undefined,
-    phone: (formData.get(f.phone) as string | null) ?? undefined,
-    contactOther: (formData.get(f.contactOther) as string | null) ?? undefined,
+    contactMethod: (formData.get(f.contactMethod) as string | null) ?? "",
+    contactValue: (formData.get(f.contactValue) as string | null) ?? "",
     eligibility: formData.get(f.eligibility) === "true" ? true : undefined,
     uploadHandles: formData.getAll(f.uploadHandles).filter((v): v is string => typeof v === "string"),
   }

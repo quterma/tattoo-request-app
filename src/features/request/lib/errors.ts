@@ -1,7 +1,6 @@
 import type { useTranslations } from "next-intl"
 import type { FieldErrors } from "react-hook-form"
 import type { RequestFormInput } from "../types"
-import { VALIDATION_KEYS } from "../validation"
 import type { ValidationKey } from "../validation"
 
 type T = ReturnType<typeof useTranslations<"request">>
@@ -18,10 +17,13 @@ const MESSAGE_TO_I18N_KEY: Record<ValidationKey, string> = {
   color_required: "errors.colorRequired",
   budget_too_long: "errors.budgetTooLong",
   email_invalid: "errors.emailInvalid",
-  phone_too_long: "errors.phoneTooLong",
-  contact_other_too_long: "errors.contactOtherTooLong",
   eligibility_required: "errors.eligibilityRequired",
-  contact_required: "errors.atLeastOneContactRequired",
+  contact_method_required: "errors.contactMethodRequired",
+  contact_value_required: "errors.contactValueRequired",
+  contact_value_invalid: "errors.contactValueInvalid",
+  phone_invalid: "errors.phoneInvalid",
+  instagram_invalid: "errors.instagramInvalid",
+  telegram_invalid: "errors.telegramInvalid",
   upload_type_invalid: "errors.uploadTypeInvalid",
   upload_too_large: "errors.uploadTooLarge",
   upload_too_many: "errors.uploadTooMany",
@@ -36,19 +38,8 @@ export function getFieldError(
 ): string | undefined {
   const message = errors[field]?.message
   if (!message) return undefined
-  // contact_required is rendered once as the shared contact-group error (see
-  // getContactGroupError below), never as this field's own inline error.
-  if (message === VALIDATION_KEYS.CONTACT_REQUIRED) return undefined
   const key = MESSAGE_TO_I18N_KEY[message as ValidationKey]
   return key ? t(key as Parameters<T>[0]) : undefined
-}
-
-export function getContactGroupError(
-  errors: FieldErrors<RequestFormInput>,
-  t: T,
-): string | undefined {
-  if (errors.contactOther?.message !== VALIDATION_KEYS.CONTACT_REQUIRED) return undefined
-  return t("errors.atLeastOneContactRequired")
 }
 
 /**

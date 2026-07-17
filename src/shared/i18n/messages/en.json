@@ -113,13 +113,34 @@
     "budgetHint": "Helps me understand your expectations. Not binding.",
 
     "contactSectionTitle": "How to reach you",
-    "contactSectionHint": "At least one contact method is required.",
-    "emailLabel": "Email",
-    "emailPlaceholder": "your@email.com",
-    "phoneLabel": "Phone",
-    "phonePlaceholder": "e.g. 054-000-0000",
-    "contactOtherLabel": "Other",
-    "contactOtherPlaceholder": "Telegram, Instagram handle, etc.",
+    "contactSectionHint": "Choose how you'd like me to reply — I'll use only this.",
+
+    "contactMethodLabel": "Contact method",
+    "contactMethodPlaceholder": "Choose a contact method",
+
+    "contactMethodOptions": {
+      "whatsapp": "WhatsApp",
+      "email": "Email",
+      "instagram": "Instagram",
+      "telegram": "Telegram",
+      "phone": "Phone call"
+    },
+
+    "contactValueLabel": {
+      "whatsapp": "WhatsApp number",
+      "email": "Email",
+      "instagram": "Instagram handle",
+      "telegram": "Telegram username",
+      "phone": "Phone number"
+    },
+
+    "contactValuePlaceholder": {
+      "whatsapp": "e.g. 054-000-0000",
+      "email": "your@email.com",
+      "instagram": "@yourhandle",
+      "telegram": "@yourusername",
+      "phone": "e.g. 054-000-0000"
+    },
 
     "eligibilityLabel": "I confirm I am {ageThreshold} or older and this request is for myself",
 
@@ -175,10 +196,13 @@
       "colorRequired": "Please select a color style",
       "budgetTooLong": "Budget must be 50 characters or less",
       "emailInvalid": "Please enter a valid email address",
-      "phoneTooLong": "Phone number must be 50 characters or less",
-      "contactOtherTooLong": "This field must be 50 characters or less",
       "eligibilityRequired": "Please confirm your eligibility to proceed",
-      "atLeastOneContactRequired": "Please provide at least one way to reach you",
+      "contactMethodRequired": "Please choose how I should reply",
+      "contactValueRequired": "Please enter your contact details",
+      "contactValueInvalid": "Please check this contact detail",
+      "phoneInvalid": "Please enter a valid Israeli phone number, e.g. 054-000-0000",
+      "instagramInvalid": "Please enter a valid Instagram handle (letters, numbers, dots, underscores)",
+      "telegramInvalid": "Please enter a valid Telegram username (5–32 letters, numbers or underscores, not starting with a number)",
       "uploadTypeInvalid": "Only JPG, PNG, WEBP, HEIC/HEIF images are allowed",
       "uploadTooLarge": "This image is over 4 MB. Please use a smaller one — a screenshot usually works.",
       "uploadTooMany": "Too many images. Please remove some and try again.",
@@ -228,8 +252,11 @@
     "requestListRetry": "Try again",
 
     "backToRequests": "Back to requests",
-    "emailAction": "Email",
-    "phoneAction": "Call",
+    "contactAction": {
+      "email": "Email",
+      "phone": "Call",
+      "whatsapp": "WhatsApp"
+    },
     "descriptionLabel": "Description",
     "placementLabel": "Placement",
     "sizeLabel": "Size",
@@ -237,17 +264,21 @@
     "budgetLabel": "Budget",
     "contactDetailsTitle": "Contact details",
     "clientNameLabel": "Name",
-    "contactEmailLabel": "Email",
-    "contactPhoneLabel": "Phone",
-    "contactOtherLabel": "Other contact",
+    "contactMethodLabel": {
+      "whatsapp": "WhatsApp",
+      "email": "Email",
+      "instagram": "Instagram",
+      "telegram": "Telegram",
+      "phone": "Phone"
+    },
     "artistWorkImagesTitle": "Artist work the client likes",
     "inspirationImagesTitle": "External inspiration",
     "placementPhotoImagesTitle": "Body placement photos",
     "imageUnavailable": "Image unavailable",
     "imageViewerClose": "Close",
     "createdAtLabel": "Submitted",
-    "consentGivenLabel": "Consent given",
-    "consentNotGivenLabel": "Consent not given",
+    "eligibilityConfirmedLabel": "Eligibility confirmed (18+, for self)",
+    "eligibilityNotConfirmedLabel": "Eligibility not confirmed",
 
     "requestDetailErrorTitle": "Something went wrong",
     "requestDetailErrorMessage": "Could not load this request. Please try again.",
@@ -286,13 +317,13 @@
       "small": "Small (up to 5 cm)",
       "medium": "Medium (5–10 cm)",
       "large": "Large (10–20 cm)",
-      "extra-large": "Extra large (20 cm+)"
+      "extra-large": "Extra large (20 cm+)",
+      "not-sure": "Not sure"
     },
 
     "colorLabels": {
-      "black": "Black",
-      "color": "Color",
-      "mixed": "Mixed"
+      "black-and-grey": "Black & grey",
+      "color": "Color"
     }
   },
   "footer": {

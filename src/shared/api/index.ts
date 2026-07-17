@@ -15,9 +15,8 @@ export const REQUEST_FIELDS = {
   size: "size",
   color: "color",
   budget: "budget",
-  email: "email",
-  phone: "phone",
-  contactOther: "contactOther",
+  contactMethod: "contactMethod",
+  contactValue: "contactValue",
   eligibility: "eligibility",
   uploadHandles: "uploadHandles",
 } as const

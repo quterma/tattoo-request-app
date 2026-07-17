@@ -43,11 +43,9 @@ const baseRequest: AdminRequestDetail = {
   description: "A large black-and-grey wolf on the forearm.",
   placement: "arm",
   size: "medium",
-  color: "black",
+  color: "black-and-grey",
   budget: "$300",
-  email: "alex@example.com",
-  phone: "+15551234567",
-  contactOther: "@alexdoe on Instagram",
+  contacts: [{ method: "whatsapp" as const, value: "+972545555555" }],
   consent: true,
   status: "new",
   createdAt: "2026-06-30T12:00:00.000Z",
@@ -91,49 +89,58 @@ describe("RequestDetail", () => {
     expect(screen.getByText(/wolf on the forearm/)).toBeInTheDocument()
     expect(screen.getByText("Arm")).toBeInTheDocument()
     expect(screen.getByText("Medium (5–10 cm)")).toBeInTheDocument()
-    expect(screen.getByText("Black")).toBeInTheDocument()
+    expect(screen.getByText("Black & grey")).toBeInTheDocument()
     expect(screen.getByText("$300")).toBeInTheDocument()
   })
 
-  it("renders mailto/tel quick actions when email/phone are present", () => {
+  it.each([
+    ["email", "alex@example.com", "Email", "mailto:alex@example.com"],
+    ["phone", "+972545555555", "Call", "tel:+972545555555"],
+    ["whatsapp", "+972545555555", "WhatsApp", "https://wa.me/972545555555"],
+  ] as const)("renders a %s quick action linking to the right target", (method, value, name, href) => {
     render(
       <RequestDetail
-        request={baseRequest}
+        request={{ ...baseRequest, contacts: [{ method, value }] }}
         locale="en"
         t={makeT()}
         updateStatusAction={noopUpdateStatusAction}
       />,
     )
 
-    expect(screen.getByRole("link", { name: "Email" })).toHaveAttribute(
-      "href",
-      "mailto:alex@example.com",
-    )
-    expect(screen.getByRole("link", { name: "Call" })).toHaveAttribute(
-      "href",
-      "tel:+15551234567",
-    )
+    expect(screen.getByRole("link", { name })).toHaveAttribute("href", href)
   })
 
-  it("only renders present contact fields, and renders contactOther as plain text", () => {
-    const request: AdminRequestDetail = {
-      ...baseRequest,
-      email: null,
-      phone: null,
-    }
+  // Only the provided method appears — an empty method takes no space on the card
+  // (PROJECT_DECISIONS.md — "Stage 6 Contact Model").
+  it("renders only the provided contact method, not the absent ones", () => {
     render(
       <RequestDetail
-        request={request}
+        request={{ ...baseRequest, contacts: [{ method: "instagram", value: "masha" }] }}
         locale="en"
         t={makeT()}
         updateStatusAction={noopUpdateStatusAction}
       />,
     )
 
+    expect(screen.getByText("masha")).toBeInTheDocument()
     expect(screen.queryByRole("link", { name: "Email" })).not.toBeInTheDocument()
     expect(screen.queryByRole("link", { name: "Call" })).not.toBeInTheDocument()
-    expect(screen.getByText("@alexdoe on Instagram")).toBeInTheDocument()
-    expect(screen.queryByRole("link", { name: "@alexdoe on Instagram" })).not.toBeInTheDocument()
+    expect(screen.queryByRole("link", { name: "WhatsApp" })).not.toBeInTheDocument()
+  })
+
+  // A handle is not a URL: guessing a profile link from it would fabricate a destination.
+  it("renders an Instagram/Telegram handle as plain text, not a link", () => {
+    render(
+      <RequestDetail
+        request={{ ...baseRequest, contacts: [{ method: "telegram", value: "masha_t" }] }}
+        locale="en"
+        t={makeT()}
+        updateStatusAction={noopUpdateStatusAction}
+      />,
+    )
+
+    expect(screen.getByText("masha_t")).toBeInTheDocument()
+    expect(screen.queryByRole("link", { name: "masha_t" })).not.toBeInTheDocument()
   })
 
   it("renders an available image with a meaningful alt and its signed URL as src", () => {

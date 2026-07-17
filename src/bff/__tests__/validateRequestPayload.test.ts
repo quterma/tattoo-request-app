@@ -11,10 +11,9 @@ const validPayload: ParsedRequestPayload = {
   size: "medium",
   color: "black-and-grey",
   eligibility: true,
-  email: "client@example.com",
+  contactMethod: "email",
+  contactValue: "client@example.com",
   budget: undefined,
-  phone: undefined,
-  contactOther: undefined,
   uploadHandles: [],
 }
 
@@ -69,19 +68,62 @@ describe("validateRequestPayload – validation errors", () => {
     }
   })
 
-  it("returns fieldErrors.contactOther with contact_required when no contact provided", () => {
-    const payload = {
-      ...validPayload,
-      email: undefined,
-      phone: undefined,
-      contactOther: undefined,
-    }
-    const result = validateRequestPayload(payload)
+  it("rejects a missing contact method", () => {
+    const result = validateRequestPayload({ ...validPayload, contactMethod: "" })
 
     expect(result.ok).toBe(false)
     if (!result.ok) {
-      expect(result.error.fieldErrors.contactOther).toContain("contact_required")
+      expect(result.error.fieldErrors.contactMethod).toContain("contact_method_required")
     }
+  })
+
+  // The server must not trust the client's method list: a method this studio disabled is
+  // rejected even though it is one of the five known values.
+  it("rejects a method outside the studio's offered set", () => {
+    const result = validateRequestPayload({ ...validPayload, contactMethod: "carrier_pigeon" })
+
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error.fieldErrors.contactMethod).toContain("contact_method_required")
+    }
+  })
+
+  it("rejects an empty contact value", () => {
+    const result = validateRequestPayload({ ...validPayload, contactValue: "   " })
+
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error.fieldErrors.contactValue).toContain("contact_value_required")
+    }
+  })
+
+  it.each([
+    ["email", "not-an-email", "email_invalid"],
+    ["whatsapp", "+1 202 555 0100", "phone_invalid"],
+    ["phone", "not a phone", "phone_invalid"],
+    ["instagram", "masha tattoo", "instagram_invalid"],
+    ["telegram", "masha.tattoo", "telegram_invalid"],
+  ])("rejects a value invalid for method %s", (contactMethod, contactValue, expected) => {
+    const result = validateRequestPayload({ ...validPayload, contactMethod, contactValue })
+
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error.fieldErrors.contactValue).toContain(expected)
+    }
+  })
+
+  it.each([
+    ["email", "client@example.com"],
+    ["whatsapp", "054-555-5555"],
+    ["phone", "+972 54 555 5555"],
+    ["instagram", "@masha.tattoo"],
+    ["telegram", "@masha_tattoo"],
+  ])("accepts a valid value for method %s", (contactMethod, contactValue) => {
+    const result = validateRequestPayload({ ...validPayload, contactMethod, contactValue })
+
+    expect(result.ok).toBe(true)
+    // Held AS ENTERED — normalization is the persistence boundary's job (FS §3.4).
+    if (result.ok) expect(result.data.contactValue).toBe(contactValue)
   })
 
   it("returns fieldErrors.eligibility when eligibility is not true", () => {

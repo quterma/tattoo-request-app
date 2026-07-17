@@ -44,7 +44,8 @@ function fillRequiredFields(user: ReturnType<typeof userEvent.setup>) {
       await user.selectOptions(screen.getByRole("combobox", { name: /size/i }), "medium")
       await user.selectOptions(screen.getByRole("combobox", { name: /color/i }), "black-and-grey")
 
-      await user.type(screen.getByRole("textbox", { name: /email/i }), "user@example.com")
+      await user.selectOptions(screen.getByRole("combobox", { name: /contact method/i }), "email")
+      await user.type(screen.getByRole("textbox", { name: /^email$/i }), "user@example.com")
 
       await user.click(screen.getByRole("checkbox", { name: /i confirm i am 18 or older/i }))
     },
@@ -104,7 +105,8 @@ describe("RequestForm – submission flow", () => {
     expect(capturedFormData!.get("placement")).toBe("arm")
     expect(capturedFormData!.get("size")).toBe("medium")
     expect(capturedFormData!.get("color")).toBe("black-and-grey")
-    expect(capturedFormData!.get("email")).toBe("user@example.com")
+    expect(capturedFormData!.get("contactMethod")).toBe("email")
+    expect(capturedFormData!.get("contactValue")).toBe("user@example.com")
     expect(capturedFormData!.get("eligibility")).toBe("true")
   })
 
@@ -334,98 +336,76 @@ describe("RequestForm – submission flow", () => {
   })
 })
 
-describe("RequestForm – contact group error UX", () => {
-  const contactErrorText = /please provide at least one way to reach you/i
 
-  function fillRequiredExceptContact(user: ReturnType<typeof userEvent.setup>) {
-    return {
-      async fill() {
-        await user.type(screen.getByRole("textbox", { name: /your name/i }), "Alex")
-
-        await user.type(
-          screen.getByRole("textbox", { name: /describe your idea/i }),
-          "A dragon on my arm, very detailed and colorful",
-        )
-        await user.selectOptions(screen.getByRole("combobox", { name: /placement/i }), "arm")
-        await user.selectOptions(screen.getByRole("combobox", { name: /size/i }), "medium")
-        await user.selectOptions(screen.getByRole("combobox", { name: /color/i }), "black-and-grey")
-        await user.click(screen.getByRole("checkbox", { name: /i confirm i am 18 or older/i }))
-      },
-    }
-  }
-
+// FS §4.2 field 9: the method select reveals exactly one value field.
+describe("RequestForm – contact method select", () => {
   beforeEach(() => {
     vi.restoreAllMocks()
     __resetDraftStoreForTests()
     vi.stubGlobal("fetch", vi.fn())
   })
+  afterEach(() => cleanup())
 
-  afterEach(() => {
-    cleanup()
+  it("shows no value field until a method is chosen", () => {
+    render(<RequestForm />)
+    expect(screen.getByRole("combobox", { name: /contact method/i })).toHaveValue("")
+    expect(screen.queryByLabelText(/whatsapp number|instagram handle|telegram username/i)).not.toBeInTheDocument()
   })
 
-  it("shows contact error after submitting with all contact fields empty", async () => {
+  it.each([
+    ["whatsapp", /whatsapp number/i],
+    ["email", /^email$/i],
+    ["instagram", /instagram handle/i],
+    ["telegram", /telegram username/i],
+    ["phone", /phone number/i],
+  ])("reveals exactly one value field for %s", async (method, labelRe) => {
     const user = userEvent.setup()
     render(<RequestForm />)
 
-    await fillRequiredExceptContact(user).fill()
-    await user.click(screen.getByRole("button", { name: /send request/i }))
+    await user.selectOptions(screen.getByRole("combobox", { name: /contact method/i }), method)
 
-    expect(screen.getByText(contactErrorText)).toBeInTheDocument()
+    expect(screen.getByLabelText(labelRe)).toBeInTheDocument()
+    // Exactly one value input exists in the DOM at a time (FS §4.2, 10a–e).
+    expect(document.querySelectorAll("#contactValue")).toHaveLength(1)
   })
 
-  it("clears contact error immediately when email is entered", async () => {
+  // Changing the method reinterprets the value — an email is not an Instagram handle.
+  it("clears the value when the method changes", async () => {
     const user = userEvent.setup()
     render(<RequestForm />)
 
-    await fillRequiredExceptContact(user).fill()
-    await user.click(screen.getByRole("button", { name: /send request/i }))
-    expect(screen.getByText(contactErrorText)).toBeInTheDocument()
+    await user.selectOptions(screen.getByRole("combobox", { name: /contact method/i }), "email")
+    await user.type(screen.getByLabelText(/^email$/i), "a@b.com")
+    expect(screen.getByLabelText(/^email$/i)).toHaveValue("a@b.com")
 
-    await user.type(screen.getByRole("textbox", { name: /email/i }), "a@b.com")
+    await user.selectOptions(screen.getByRole("combobox", { name: /contact method/i }), "instagram")
 
-    expect(screen.queryByText(contactErrorText)).not.toBeInTheDocument()
+    expect(screen.getByLabelText(/instagram handle/i)).toHaveValue("")
   })
 
-  it("clears contact error immediately when phone is entered", async () => {
+  it("blocks submit and shows the method's own message for an invalid value", async () => {
+    const mockFetch = vi.fn()
+    vi.stubGlobal("fetch", mockFetch)
     const user = userEvent.setup()
     render(<RequestForm />)
 
-    await fillRequiredExceptContact(user).fill()
-    await user.click(screen.getByRole("button", { name: /send request/i }))
-    expect(screen.getByText(contactErrorText)).toBeInTheDocument()
+    await user.type(screen.getByRole("textbox", { name: /your name/i }), "Alex")
+    await user.type(
+      screen.getByRole("textbox", { name: /describe your idea/i }),
+      "A dragon on my arm, very detailed and colorful",
+    )
+    await user.selectOptions(screen.getByRole("combobox", { name: /placement/i }), "arm")
+    await user.selectOptions(screen.getByRole("combobox", { name: /size/i }), "medium")
+    await user.selectOptions(screen.getByRole("combobox", { name: /color/i }), "black-and-grey")
+    await user.click(screen.getByRole("checkbox", { name: /i confirm i am 18 or older/i }))
 
-    await user.type(screen.getByRole("textbox", { name: /phone/i }), "+1234")
-
-    expect(screen.queryByText(contactErrorText)).not.toBeInTheDocument()
-  })
-
-  it("clears contact error immediately when other contact is entered", async () => {
-    const user = userEvent.setup()
-    render(<RequestForm />)
-
-    await fillRequiredExceptContact(user).fill()
-    await user.click(screen.getByRole("button", { name: /send request/i }))
-    expect(screen.getByText(contactErrorText)).toBeInTheDocument()
-
-    await user.type(screen.getByRole("textbox", { name: /other/i }), "@telegram")
-
-    expect(screen.queryByText(contactErrorText)).not.toBeInTheDocument()
-  })
-
-  it("restores contact error when all contact fields are cleared and form is resubmitted", async () => {
-    const user = userEvent.setup()
-    render(<RequestForm />)
-
-    await fillRequiredExceptContact(user).fill()
-    await user.type(screen.getByRole("textbox", { name: /email/i }), "a@b.com")
-    await user.click(screen.getByRole("button", { name: /send request/i }))
-    expect(screen.queryByText(contactErrorText)).not.toBeInTheDocument()
-
-    await user.clear(screen.getByRole("textbox", { name: /email/i }))
+    await user.selectOptions(screen.getByRole("combobox", { name: /contact method/i }), "telegram")
+    // Valid Instagram, invalid Telegram — the exact case the 2026-07-16 correction exists for.
+    await user.type(screen.getByLabelText(/telegram username/i), "masha.tattoo")
     await user.click(screen.getByRole("button", { name: /send request/i }))
 
-    expect(screen.getByText(contactErrorText)).toBeInTheDocument()
+    expect(await screen.findByText(/valid Telegram username/i)).toBeInTheDocument()
+    expect(mockFetch).not.toHaveBeenCalled()
   })
 })
 
@@ -451,7 +431,8 @@ describe("RequestForm – in-session field persistence", () => {
       "A dragon on my arm, very detailed and colorful",
     )
     await user.selectOptions(screen.getByRole("combobox", { name: /placement/i }), "arm")
-    await user.type(screen.getByRole("textbox", { name: /email/i }), "user@example.com")
+    await user.selectOptions(screen.getByRole("combobox", { name: /contact method/i }), "instagram")
+    await user.type(screen.getByLabelText(/instagram handle/i), "@masha")
 
     unmount()
     render(<RequestForm />)
@@ -461,7 +442,10 @@ describe("RequestForm – in-session field persistence", () => {
       "A dragon on my arm, very detailed and colorful",
     )
     expect(screen.getByRole("combobox", { name: /placement/i })).toHaveValue("arm")
-    expect(screen.getByRole("textbox", { name: /email/i })).toHaveValue("user@example.com")
+    // The restored method must not trigger the clear-on-method-change effect (which would wipe
+    // the value it just restored) — that is what the first-render guard protects.
+    expect(screen.getByRole("combobox", { name: /contact method/i })).toHaveValue("instagram")
+    expect(screen.getByLabelText(/instagram handle/i)).toHaveValue("@masha")
   })
 
   // D-Blueprint 5(a) covers ALL entered values, including the eligibility confirmation made

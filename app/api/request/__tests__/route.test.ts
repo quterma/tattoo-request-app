@@ -61,9 +61,8 @@ const basePayload = {
   size: "medium",
   color: "black-and-grey",
   budget: undefined,
-  email: "client@example.com",
-  phone: undefined,
-  contactOther: undefined,
+  contactMethod: "email",
+  contactValue: "client@example.com",
   eligibility: true as const,
   uploadHandles: ["handle-a"],
 }
@@ -134,6 +133,26 @@ describe("POST /api/request — normal flow", () => {
   it("maps eligibility to the legacy consent column on createRequest", async () => {
     await callPost()
     expect(mockCreateRequest).toHaveBeenCalledWith(expect.objectContaining({ consent: true }))
+  })
+
+  // The schema holds contactValue AS ENTERED (FS §3.4's Success echo needs it); the route is
+  // where it becomes the stored form. Persisting the raw value would break click-to-WhatsApp.
+  it.each([
+    ["whatsapp", "054-555-5555", "+972545555555"],
+    ["phone", "+972 54 555 5555", "+972545555555"],
+    ["instagram", "@masha.tattoo", "masha.tattoo"],
+    ["telegram", "@masha_tattoo", "masha_tattoo"],
+    ["email", " client@example.com ", "client@example.com"],
+  ])("normalizes a %s value before persisting it", async (contactMethod, raw, normalized) => {
+    const payload = { ...basePayload, contactMethod, contactValue: raw }
+    mockParseRequestFormData.mockReturnValue(payload)
+    mockValidateRequestPayload.mockReturnValue({ ok: true, data: payload })
+
+    await callPost()
+
+    expect(mockCreateRequest).toHaveBeenCalledWith(
+      expect.objectContaining({ contact: { method: contactMethod, value: normalized } }),
+    )
   })
 
   it("succeeds with zero uploads (uploads are optional)", async () => {

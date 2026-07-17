@@ -93,9 +93,12 @@ interface RequestDetailDbRecord {
   size: string
   color: string
   budget: string | null
+  // The five contact columns; exactly one is non-null per request (FS §4.2 field 9).
   email: string | null
   phone: string | null
-  contactOther: string | null
+  whatsapp: string | null
+  instagram: string | null
+  telegram: string | null
   consent: boolean
   status: RequestStatus
   createdAt: string
@@ -122,7 +125,9 @@ interface RequestDetailRow {
   budget: string | null
   email: string | null
   phone: string | null
-  contact_other: string | null
+  whatsapp: string | null
+  instagram: string | null
+  telegram: string | null
   consent: boolean
   status: string
   created_at: string
@@ -145,7 +150,9 @@ function mapRequestDetailRow(row: RequestDetailRow): RequestDetailDbRecord {
     budget: row.budget,
     email: row.email,
     phone: row.phone,
-    contactOther: row.contact_other,
+    whatsapp: row.whatsapp,
+    instagram: row.instagram,
+    telegram: row.telegram,
     consent: row.consent,
     status: row.status,
     createdAt: row.created_at,
@@ -172,7 +179,7 @@ export async function getRequestForStudio(
   const { data, error } = await supabase
     .from("requests")
     .select(
-      "id, reference_code, client_name, description, placement, size, color, budget, email, phone, contact_other, consent, status, created_at, request_files(id, storage_path, original_name, type, mime_type, size)",
+      "id, reference_code, client_name, description, placement, size, color, budget, email, phone, whatsapp, instagram, telegram, consent, status, created_at, request_files(id, storage_path, original_name, type, mime_type, size)",
     )
     .eq("id", requestId)
     .eq("studio_id", studioId)
@@ -228,6 +235,20 @@ export async function getRequestByClientSubmissionId(
   return data ? (data as { reference_code: string }).reference_code : null
 }
 
+/** The five reply channels (FS §4.2 field 9). Mirrors the request feature's ContactMethod. */
+export type ContactMethodName = "whatsapp" | "email" | "instagram" | "telegram" | "phone"
+
+/**
+ * Exactly one method with its normalized value — the five-column model's invariant expressed so
+ * TypeScript cannot represent a zero- or multi-method request. The adapter below fans it out to
+ * the five nullable RPC params; callers never assemble those by hand.
+ */
+export interface RequestContact {
+  method: ContactMethodName
+  /** Already normalized for persistence (E.164 / @-stripped) — see features/request/lib/contact.ts. */
+  value: string
+}
+
 interface CreateRequestParams {
   studioId: string
   clientSubmissionId: string
@@ -237,9 +258,7 @@ interface CreateRequestParams {
   size: string
   color: string
   budget: string | undefined
-  email: string | undefined
-  phone: string | undefined
-  contactOther: string | undefined
+  contact: RequestContact
   consent: true
   files: UploadedFile[]
 }
@@ -254,9 +273,13 @@ export async function createRequest(params: CreateRequestParams): Promise<Create
     p_size: params.size,
     p_color: params.color,
     p_budget: params.budget ?? null,
-    p_email: params.email ?? null,
-    p_phone: params.phone ?? null,
-    p_contact_other: params.contactOther ?? null,
+    // Fan the one chosen method out to the five nullable columns: exactly one is non-null, which
+    // the DB CHECK also enforces. Doing it here (not in callers) is what keeps the invariant.
+    p_email: params.contact.method === "email" ? params.contact.value : null,
+    p_phone: params.contact.method === "phone" ? params.contact.value : null,
+    p_whatsapp: params.contact.method === "whatsapp" ? params.contact.value : null,
+    p_instagram: params.contact.method === "instagram" ? params.contact.value : null,
+    p_telegram: params.contact.method === "telegram" ? params.contact.value : null,
     p_consent: params.consent,
     p_files: params.files.map((f) => ({
       type: f.type,
