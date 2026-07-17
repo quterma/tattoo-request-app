@@ -2,7 +2,8 @@
 
 ## Status
 
-`ready` · created 2026-07-14 · done: <date · PROJECT_STAGE_LOG.md entry pointer>
+`done` · created 2026-07-14 · done: 2026-07-17 · PROJECT_STAGE_LOG.md → "2026-07-17 — IMPL: Stage 6
+Item 3 — request form rebuild complete (Items 3 + 9)"
 
 ## Execution
 
@@ -163,10 +164,22 @@ pointer to a work item that exists by close.
   - Required by: Acceptance Criteria (last bullet) + FS §6 — a request submitted through the
     rebuilt form, exercising each contact method and an upload in each category, persists and
     renders correctly in the admin viewer, with a well-formed FS §4.6 reference code.
-  - Disposition: <the executor fills this — completed with checkable evidence (what was submitted,
-    what the admin viewer showed, an example code), OR tracked in a named work item>. This is NOT
-    covered by unit tests (they mock the DB — the same gap that let Item 1 pass gates while the live
-    DB was broken). The DB is live as of 2026-07-14, so this is runnable, not blocked.
+  - Disposition: **DONE 2026-07-17, against the live DB via the real public endpoints.**
+    - **All five contact methods** submitted through `POST /api/request` (dev server → live DB →
+      recreated RPC), each returning 200 + a well-formed FS §4.6 code: whatsapp `JVCNL3`, email
+      `8C5B6U`, instagram `X6CXER`, telegram `B4PRHM`, phone `JMMY2X`.
+    - **Persistence verified per row: exactly one contact column filled**, normalized at the
+      boundary — `054-555-1111` → `+972545551111`, `+972 54 555 2222` → `+972545552222` (E.164);
+      `@co1.handle` → `co1.handle`, `@co1_handle` → `co1_handle` (@-stripped). Eligibility landed in
+      the legacy `consent` column (the A′ bridge).
+    - **An upload in each category**: three files through `POST /api/upload`
+      (artist_work / inspiration / placement_photo) → handles adopted at submit → code `69Z8RD`,
+      with all three `request_files` rows persisted with the correct `type`.
+    - **Admin read path** verified: the exact SELECT `getRequestForStudio` issues runs clean against
+      the new five-column schema, files join intact.
+    - Noted, not a defect: the submit rate limiter (5/10min per IP) fired mid-verification — the
+      guard working as designed. The service-role key has **no DELETE grant on `requests`** (the app
+      never deletes), so the CO-1/verification rows remain as test data.
 - CO-2 — DB migrations apply-and-verify (REVISED 2026-07-15; the original "no migration expected"
   is void — this task adds TWO migrations that recreate `create_request`)
   - Why revised: the reference-code format (Item 9) lives in the `create_request` RPC, and the
@@ -183,10 +196,25 @@ pointer to a work item that exists by close.
     13-param list; search_path re-established inline). The `proconfig`/live-submit assertions below
     fold into CO-1's end-to-end check (a real submit through the built form), runnable only once
     Block B′ ships the form.
-  - Migration 2 — Block C contact-model migration (five contact columns; created in Phase 3). NOT
-    YET CREATED.
+  - Migration 2 — `20260716184220_stage6_contact_model.sql` (five contact columns).
+    **APPLIED + VERIFIED 2026-07-17:** `db push` succeeded; `migration list` shows `20260716184220`
+    Local = Remote. Affected-object verification against the live DB:
+    - **Rows deleted as decided**: 9 requests + 30 request_files → 0/0 (owner approved 2026-07-17
+      after reviewing the exact rows; 4 of the 9 held BOTH email and phone, confirming the old model
+      could not satisfy the new exactly-one invariant — the backfill would have been a guess).
+    - **Schema**: the five contact columns are readable; `contact_other` is gone (42703).
+    - **RPC**: a real `create_request` call succeeded at the new 15-param signature (so the
+      `service_role` grant survived the drop/recreate) and returned code `3VRBHH` — **6 chars,
+      FS §4.6-valid, proving the generator/retry body survived the second recreation**, with the
+      WhatsApp value in its own column and the other four `null`.
+    - **CHECK proven to bite**: an RPC call with **zero** contacts → rejected by
+      `requests_exactly_one_contact`; with **two** contacts → rejected. The invariant holds below
+      the application layer, not just in Zod/TypeScript.
+    - Storage note: deleting the rows did **not** remove the 30 underlying Storage objects — they
+      are now orphans in the private bucket. Not a regression (orphan cleanup is an existing
+      operational backlog item), recorded so it is not mistaken for a leak introduced here.
   - Disposition (fill per migration at its apply time, with checkable evidence):
-    - M1: DONE (see above). M2: pending Phase 3.
+    - M1: DONE (see above). M2: DONE (see above).
     - Affected-object verification: `create_request` still has its 13-param signature (M1) /
       updated signature (M2), `{ id, referenceCode }` return, `service_role` EXECUTE grant, and
       `search_path = public, pg_temp` (`proconfig`) after replacement.
