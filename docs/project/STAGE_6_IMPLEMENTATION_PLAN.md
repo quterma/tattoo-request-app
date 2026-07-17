@@ -57,7 +57,8 @@ file may contradict these without first escalating a PRD/FS/blueprint change.
 | 10 | Abuse mitigation, **both endpoints** (honeypot on submit; **a non-caller-resettable control on `/api/upload` — now a pre-launch blocker**, see below) | Item 1 (shares the endpoints) | not started — **scope grew after the Item 1 Codex review** | FS §4.5; PROJECT_BACKLOG.md — "Unbounded automated storage growth"; PROJECT_DECISIONS.md — Stage 6 Upload-Flow Architecture §1 |
 | 11 | Public error/404 UX polish (localized 404, public error boundary) | — | not started, pre-existing backlog item | PROJECT_BACKLOG.md; PROJECT_STAGE_LOG.md 2026-07-09 Fix Pass 2 entry |
 | 12 | Favicon / OG / basic SEO | — | not started | PROJECT_IMPLEMENTATION_PLAN.md — Stage 6 |
-| 13 | Final FS §6 acceptance sweep (all 13 criteria) + manual mobile QA | Items 1–10 | not started | FS §6 |
+| 13 | Final FS §6 acceptance sweep (all 13 criteria) + manual mobile QA | Items 1–10, 14 | not started | FS §6 |
+| 14 | **Placement → required free-text** (Select over fixed body areas → a typed area description) — a product reversal raised during Task 03 Block A′, deliberately kept out of it | Item 3 (rebuilds the field Block A′ shipped) | **task ready** (`STAGE_6_TASK_09_placement_freetext.md`; promoted 2026-07-17). FS §4.2 field 2 already amended by STRAT — the executor implements against it, no FS work first. | FS §4.2 field 2 (2026-07-17 amendment, supersedes the 2026-07-15 "Other removed" one) |
 
 **Not itemized separately, folded into the items above:** the "policies inbound-link check" and
 the `policies` → `process` route rename (both in Item 2 — see the Item 2/6 boundary decision

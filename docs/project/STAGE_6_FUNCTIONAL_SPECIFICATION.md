@@ -101,7 +101,7 @@ Field-inclusion rule (normative): every field must help the artist's initial acc
 | # | Field | Block | Type | Required | Purpose | Validation |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Idea description | Idea | Multiline text | **Yes** | What does the client want? | Min 20 chars, max 1,000, trimmed; counter shown near limit. |
-| 2 | Placement | Project Details | Select | **Yes** | Where on the body — verbal placement guaranteed regardless of photo (PRD D4). | Owner-configured options, all concrete body areas; **no "Other" / free-text** (amended 2026-07-15 — see below). |
+| 2 | Placement | Project Details | **Text** | **Yes** | Where on the body — verbal placement guaranteed regardless of photo (PRD D4). | **Required free text** (amended 2026-07-17 — see below): trimmed, min 1 char after trim, max ~100; no fixed option list. |
 | 3 | Approximate size | Project Details | Select | **Yes** | Session scale, feasibility. | Owner-configured cm ranges + "Not sure". |
 | 4 | Color preference | Project Details | Select | **Yes** | Style/technique fit. | **Black & grey / Color** — two options only (amended 2026-07-15, owner; the earlier "Black only"/"Not sure" were dropped). Artist's advice welcome. |
 | 5 | Artist work the client likes | Reference Uploads | Image upload | No | Which of the artist's directions resonates. | §4.3. |
@@ -140,14 +140,25 @@ therefore the Telegram-correct rule; Instagram (10d) keeps `1–30` chars over l
 underscore, with no dot-position rules (no authoritative Meta grammar for those was found, and
 inventing them only risks rejecting real handles).
 
-**Placement "Other" removed (owner decision 2026-07-15).** Field 2 (Placement) no longer has an
-"Other" option or any free-text entry. The select offers only concrete body areas and the visitor
-picks the nearest one. Rationale: the free-text "Other" added a conditional required field and a
-loosely-validated free string for a rare case, and the required placement **photo** (field 7)
-already covers an atypical location far better than a typed phrase. Precision on an unusual spot is
-traded for a simpler, faster mobile select — an acceptable trade for the artist's initial
-accept/decline decision (the §4.1 field-inclusion test). Removes `placementOther` from the field
-model, the schema, and the payload; no DB column is needed for it.
+**Placement is a required free-text input (owner decision 2026-07-17) — supersedes both the original
+Select model and the 2026-07-15 "Other removed" amendment below.** Field 2 stops being a Select over
+fixed body areas and becomes a **required free-text input**: the visitor types the intended area in
+their own words, guided by a hint. Rationale (owner): a typed description captures intent no fixed
+list can ("inner left forearm, wrapping toward the elbow"), while a *required* text still guarantees
+the artist always knows the area in words — which is the entire purpose of the field (PRD D4). The
+optional placement **photo** (field 7) remains complementary, and the two are grouped together in the
+form since they describe the same thing. `PLACEMENT_OPTIONS` ceases to exist; the DB column is already
+free `TEXT` and the admin viewer already renders it verbatim via its label fallback, so no migration
+is required. Implemented by `STAGE_6_TASK_09_placement_freetext.md`.
+
+**Superseded — Placement "Other" removed (owner decision 2026-07-15).** *Kept as the record of what
+was decided and shipped between 2026-07-15 and the 2026-07-17 amendment above; no longer in force.*
+Field 2 had its "Other" option and free-text entry removed, leaving a Select of concrete body areas
+only. Rationale at the time: the free-text "Other" added a conditional required field and a
+loosely-validated free string for a rare case, while the placement photo already covered atypical
+locations. That trade was re-weighed on 2026-07-17 in favour of describing placement in words for
+*every* request, not just unusual ones. (Task 03 Block A′ shipped this Select-only model; TASK_09
+replaces it.)
 
 **Budget-field amendment (owner decision 2026-07-14).** Field 12 (Budget) is added as an **optional** field. The earlier field model deliberately omitted it, and PROJECT_BACKLOG.md recorded any budget field as needing a PRD/FS change first — this amendment is that change (PRD §9). Rationale: the artist finds a rough budget genuinely useful for the initial accept/decline decision (the §4.1 field-inclusion test), and as an optional field it adds no friction for a visitor who skips it. It stays **optional** and free-form — no enforced ranges, no required entry, no effect on submit validity. It sits in the Project Details block. Placement in the on-screen order and any label/hint copy are owner-authored (Item 3 / the visual pass), not fixed here.
 

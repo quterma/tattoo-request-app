@@ -2,11 +2,20 @@
 
 ## Status
 
-`draft` · created 2026-07-15 · done: <date · PROJECT_STAGE_LOG.md entry pointer>
+`ready` · created 2026-07-15 · promoted `draft`→`ready` 2026-07-17 (STRAT) · done: <date ·
+PROJECT_STAGE_LOG.md entry pointer>
 
 Owner product change (2026-07-15), raised during Task 03 Block A′. Deferred to run **after** Task 03
 Blocks B′ and C land (owner decision 2026-07-15) — it is a distinct product change, kept out of the
 current form rebuild so it gets its own contract + review rather than swelling B′.
+
+**Unblocked 2026-07-17:** Task 03 is `done` (all four blocks landed and verified live), so the
+dependency is cleared. **Scope item 1 below is already done by STRAT:** FS §4.2 field 2 now specifies
+the required free-text model (amended 2026-07-17; the 2026-07-15 "Other removed" amendment is marked
+superseded in place). The executor therefore does **not** need to amend the FS first — it implements
+against a spec that already backs it. Note this task **reverses** what Block A′ shipped two days
+earlier (Select over fixed body areas); that is deliberate and recorded, not a regression to
+"restore".
 
 ## Execution
 
@@ -46,9 +55,10 @@ coordinates the grouping with whatever B′ shipped.
 
 ## Scope
 
-1. **FS §4.2 field 2 amendment first** (docs-first, PRD §9 change control): Type Select →
-   Text, Validation → required free-text (trimmed, max ~100), drop the "concrete body areas /
-   no Other" note (obsolete once it's free-text). Record the owner decision.
+1. ~~**FS §4.2 field 2 amendment first**~~ — **already done by STRAT 2026-07-17.** FS §4.2 field 2
+   now reads Type **Text**, required free text (trimmed, min 1, max ~100, no option list); the
+   2026-07-15 "Other removed" amendment is marked superseded in place, with the rationale for the
+   reversal. Nothing to amend — verify the FS says this, then implement against it.
 2. **Contract**: `schema.ts` placement → required trimmed string (1–~100); remove the
    `PLACEMENT_OPTIONS` enum refine; `validationKeys.ts` (placement message stays or is reworded);
    `config/form.ts` (remove `PLACEMENT_OPTIONS`/`PlacementOption` if unused); `REQUEST_FIELDS`
