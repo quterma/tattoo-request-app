@@ -57,6 +57,16 @@ and in the linked review/research threads (`docs/project/reviews/done/`, `docs/p
 Compacted because the journal is read into every session (Pre-task Sync + META kickoff) and its
 token weight is a live cost. `open` entries are never compacted. Keep new entries at this density.
 
+- 2026-07-17 — `PROJECT_STAGE_LOG.md` has grown past the point where a session can read it whole
+  (~3,940 lines / >256 KB; the Read tool refuses it, and two sessions in a row — a STRAT and the
+  Item 14 IMPL — fell back to reading only the tail). It is a Pre-task Sync doc read at the start of
+  **every** session, so its size is a live per-session token cost, and "read only recent entries"
+  is an undocumented workaround each session reinvents. Note the same journal already compacted
+  itself on 2026-07-15 for exactly this reason (729→237 lines); the stage log has no such discipline
+  and is ~16× larger. Options for META: a documented "read the tail + grep for specifics" rule (like
+  the PROJECT_DECISIONS.md targeted-read rule already filed), and/or splitting closed stages
+  (0–5) into an archive file the way PROJECT_IMPLEMENTATION_PLAN.md's history was flagged. Not
+  urgent (sessions cope), but recurring. — open: META to decide compaction/archive/targeted-read.
 - 2026-07-15 — A STRAT session and an IMPL session, both live for Task 03, **co-authored the same
   durable docs** (`PROJECT_DECISIONS.md`: STRAT wrote "Stage 6 Contact Model", IMPL added a
   staging-waiver exception; `STAGE_6_TASK_03_*.md`: STRAT unblocked Block C + removed placement-Other,
