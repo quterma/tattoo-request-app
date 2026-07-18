@@ -37,6 +37,20 @@ require updating them first. See PROJECT_DECISIONS.md — Stage 6 Product Docume
 
 Current focus:
 
+- **Stage 6 Item 7 (map half) — done, 2026-07-19.** `STAGE_6_TASK_07_location_map_embed.md`:
+  the Location page's empty map placeholder (`app/[locale]/(public)/location/page.tsx`) replaced
+  with a real Google Maps iframe embed (keyless `maps.google.com/maps?q=...&output=embed`, owner
+  decision), reusing the file's existing `addressQuery` constant (Herzl 100, Tel Aviv); new i18n
+  key `location.mapTitle`. `pnpm qg` green; CO-1 (live render) verified by the owner in a real
+  browser; CO-2 confirmed — no CSP exists anywhere in the app, so no `frame-src` regression is
+  possible. Independent Codex cross-review reached consensus
+  (`docs/project/reviews/done/REVIEW_2026-07-19_location-map-embed.md`): the keyless embed
+  endpoint is undocumented by Google (only the paid, API-keyed Embed API is officially documented)
+  — owner decision 2026-07-19: **accept the risk as-is**, no follow-up task (the three
+  provider-links remain a working fallback). Everything else on the page (address, provider links,
+  how-to-find-us, the four studio-photo placeholders, CTA) is unchanged. **Item 7's photo half
+  remains open** — real studio photos are a separate pre-deploy asset swap, not code work. Task
+  file moved to `tasks/done/`.
 - **Stage 6 Item 8 — Preparation/Aftercare split — implemented (Codex), independently reviewed
   (Claude, 2026-07-18), `pnpm qg` green; ready for owner commit.**
   `STAGE_6_TASK_08_preparation_aftercare_split.md` done: the combined `/aftercare` route was split

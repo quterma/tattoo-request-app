@@ -38,7 +38,12 @@ export default function LocationPage() {
       </Section>
 
       <Section className="py-2 sm:py-3">
-        <div className="aspect-video w-full rounded-md bg-muted" />
+        <iframe
+          src={`https://maps.google.com/maps?q=${addressQuery}&output=embed`}
+          title={t("mapTitle")}
+          loading="lazy"
+          className="aspect-video w-full rounded-md border-0"
+        />
       </Section>
 
       <Section className="py-2 sm:py-3">

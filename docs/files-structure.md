@@ -153,17 +153,20 @@ tattoo-request-app/
 │       │       ├── REVIEW_2026-07-16_stage6_form_ui.md
 │       │       ├── REVIEW_2026-07-17_stage6_contact_model.md
 │       │       ├── REVIEW_2026-07-17_stage6_placement_freetext.md
-│       │       └── REVIEW_2026-07-18_stage6_success_page.md
+│       │       ├── REVIEW_2026-07-18_stage6_success_page.md
+│       │       └── REVIEW_2026-07-19_location-map-embed.md
 │       └── tasks/
 │           ├── META_TASK_01_framework_consolidation.md
 │           ├── STAGE_6_STRAT_BRIEF.md
-│           ├── STAGE_6_TASK_08_preparation_aftercare_split.md
+│           ├── STAGE_6_TASK_11_public_error_404.md
+│           ├── STAGE_6_TASK_12_favicon_og_seo.md
 │           ├── TOOLING_TASK_01_project_status_command.md
 │           └── done/
 │               ├── STAGE_6_TASK_01_upload_flow_architecture.md
 │               ├── STAGE_6_TASK_02_site_wide_shell.md
 │               ├── STAGE_6_TASK_03_request_form_rebuild.md
 │               ├── STAGE_6_TASK_04_success_page.md
+│               ├── STAGE_6_TASK_07_location_map_embed.md
 │               ├── STAGE_6_TASK_08_preparation_aftercare_split.md
 │               └── STAGE_6_TASK_09_placement_freetext.md
 ├── scripts/

@@ -2,7 +2,8 @@
 
 ## Status
 
-`ready` · created 2026-07-19 · done: <date · PROJECT_STAGE_LOG.md entry pointer>
+`done` · created 2026-07-19 · done: 2026-07-19 · PROJECT_STAGE_LOG.md — "Stage 6 Item 7 (map half)
+— done, 2026-07-19" entry
 
 ## Execution
 
@@ -89,13 +90,20 @@ studio address, satisfying FS §3.5's "map" must-contain item — leaving the re
 - CO-1 — The embedded map renders the correct location in a real browser (not just "the iframe tag
   is present"): load /location, confirm the map shows Herzl 100, Tel Aviv, and the page layout is
   unchanged (photos still placeholders, spacing intact).
-  - Required by: FS §3.5 "map" must-contain + §6. Disposition: executor fills with what was observed.
+  - Required by: FS §3.5 "map" must-contain + §6. Disposition: DONE — owner verified live at
+    /en/location on 2026-07-19: map renders, shows Herzl 100, Tel Aviv; rest of page unchanged.
 - CO-2 — No CSP/frame-src regression: if the app sets a CSP, confirm the iframe is allowed (or flag
   the needed frame-src as a separate security-config decision, per Out of Scope).
-  - Disposition: executor states whether a CSP exists and whether frame-src was affected.
+  - Disposition: DONE — no CSP exists anywhere in the app (no `headers()` in next.config.ts, no
+    `Content-Security-Policy` string in the repo); nothing to widen, no regression possible.
 - CO-3 — Studio-photo placeholders are a known pre-deploy swap, not part of this task.
   - Disposition: tracked — real studio photos remain an owner asset item (STRAT brief / plan Item 7
     note). This task does not close the photo half; it closes the map half.
+- CO-4 — Codex cross-review flagged the keyless embed URL
+  (`maps.google.com/maps?q=...&output=embed`) as undocumented by Google (only the paid, API-keyed
+  Embed API is officially documented). Owner decision 2026-07-19: **accept the risk as-is**; the
+  three provider links (Google/Apple/Waze) remain a working fallback if the endpoint ever breaks.
+  No follow-up task filed. See `docs/project/reviews/done/REVIEW_2026-07-19_location-map-embed.md`.
 ```
 
 ## Review Granularity
