@@ -2,7 +2,7 @@
 
 ## Status
 
-`ready` · created 2026-07-18 · done: <date · PROJECT_STAGE_LOG.md entry pointer>
+`done` · created 2026-07-18 · done 2026-07-18 (PROJECT_STAGE_LOG.md — "Stage 6 Item 4 — Success page")
 
 ## Execution
 
@@ -120,6 +120,21 @@ guard, and form-state clearing the blueprint requires.
   - Disposition: expected None; confirm at close (client-only task).
 ```
 
+### Reconciliation (2026-07-18)
+
+- **CO-1 — MET (owner live pass).** Owner ran a manual real-browser submit and confirmed `/success`
+  shows the returned code, the 48-hour line, the entered method+value, and the method's A.2 note,
+  and "Back to Home" works ("проверил руками — вроде всё ок", 2026-07-18). Unit coverage backs the
+  render + one-time read; the live pass covers the real-browser gate/redirect the owner exercised.
+- **CO-2 — MET (owner live pass).** Owner confirmed direct-open, refresh, and browser-back all
+  redirect to Home (the last exercises the bfcache `pageshow` guard). jsdom tests cover the handler
+  logic (`SuccessView.test.tsx`: empty-store redirect, second-mount redirect, persisted-`pageshow`
+  redirect); the browser-behaviour part is the owner's live confirmation. Automated e2e coverage of
+  the real-browser gate/bfcache is deferred → PROJECT_BACKLOG.md "Automated E2E / Integration Tests
+  (pre-release)" (Success page gate + bfcache entry, 2026-07-18). Not a blocker for this task.
+- **CO-3 — MET (None).** Client-only: no migration, no new env var, no dependency. Confirmed against
+  the diff (no `supabase/`, no `.env*`, no `package.json` change).
+
 ## Review Granularity
 
 Expected to be **single** (one block, one review at the end): the surface is one new route + one
@@ -128,6 +143,15 @@ execution-affecting files / 500 churn). Measure the actual surface before the fi
 record it here; if it unexpectedly crosses the trigger (e.g. the submit-flow rewire ripples wider
 than expected), split into a store/flow block and a page block, contract-first — but do not
 manufacture two blocks if the change stays small.
+
+**Measured (2026-07-18):** this task's own surface is 9 execution-affecting files (~1 new route dir
+= 2 files: `success/page.tsx`, `SuccessView.tsx`; `store/{requestDraft.ts,index.ts}`;
+`ui/{RequestForm.tsx,index.ts}`; `messages/en.json`; two test files) at ~200 churn — well under the
+16-file / 500-churn trigger. **Granularity: single** (one block, one review at the end), as
+expected. NOTE: the working tree also carries **Task 08's** unrelated changes (preparation/aftercare
+split — `preparation/`, `aftercare/page.tsx`, `process/page.tsx`, `public-footer.tsx`, its task
+file, and part of the regenerated `docs/files-structure.md`); those are a foreign session's paths
+and are NOT part of this task's commit (CLAUDE.md — "Commit only your own paths").
 
 ## Workflow (enforced)
 

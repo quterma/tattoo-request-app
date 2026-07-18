@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl"
 import { useForm, useWatch } from "react-hook-form"
 import type { FieldErrors } from "react-hook-form"
 import { API_ERROR_CODES, REQUEST_FIELDS } from "@/shared/api"
+import { useRouter } from "@/shared/i18n"
 import { getFieldError, getValidationKeyMessage } from "../lib/errors"
 import {
   AGE_THRESHOLD,
@@ -23,6 +24,7 @@ import {
   invalidateUploadedSlots,
   resetDraft,
   setFields,
+  setSuccess,
   subscribe,
   useRequestDraft,
 } from "../store"
@@ -35,7 +37,7 @@ import { TextInput } from "./TextInput"
 import { TextareaInput } from "./TextareaInput"
 import { UploadCategoryInput } from "./UploadCategoryInput"
 
-type SubmitStatus = "idle" | "submitting" | "success" | "error"
+type SubmitStatus = "idle" | "submitting" | "error"
 
 const IDEA_MAX = 1000
 // Show the character counter only once the visitor is near the limit (FS §4.2 "counter shown
@@ -125,10 +127,10 @@ function waitForUploads(): Promise<void> {
 
 export function RequestForm() {
   const t = useTranslations("request")
+  const router = useRouter()
 
   const draft = useRequestDraft()
   const [status, setStatus] = useState<SubmitStatus>("idle")
-  const [referenceCode, setReferenceCode] = useState<string | null>(null)
   const [uploadHandlesError, setUploadHandlesError] = useState<string | null>(null)
   // Consecutive technical (network/server) failures — drives the A.4 Instagram fallback.
   const [failedAttempts, setFailedAttempts] = useState(0)
@@ -239,11 +241,33 @@ export function RequestForm() {
       const res = await fetch("/api/request", { method: "POST", body: formData })
       const response = await res.json()
 
-      if (response.ok === true) {
-        setReferenceCode(response.referenceCode ?? null)
-        setStatus("success")
+      // A usable reference code is required before the destructive success transition: resetDraft()
+      // revokes previews, clears the field bag, and rotates clientSubmissionId, and /success is a
+      // read-once page. `res.json()` is untyped, so a malformed `{ ok: true }` (missing/empty/
+      // non-string code) must NOT take that path — it would strand the visitor on a Success page
+      // showing an invalid code with nothing recoverable. Treat it as a technical failure instead,
+      // preserving the same clientSubmissionId + form data for an idempotent retry.
+      const referenceCode: unknown = response.referenceCode
+      if (response.ok === true && typeof referenceCode === "string" && referenceCode.length > 0) {
+        // Build the Success payload from the RAW entered values the client still holds (before any
+        // server normalization) — the contact echo (FS §3.4 item 4) shows them as entered. Order
+        // matters: resetDraft() mints a fresh state (which also nulls `success`), so setSuccess()
+        // must run AFTER it, or the payload would be wiped. resetDraft() also clears the field bag,
+        // so returning to Request in this session shows an empty form.
+        const payload = {
+          referenceCode,
+          contactMethod: data.contactMethod,
+          contactValue: data.contactValue,
+        }
         setFailedAttempts(0)
         resetDraft()
+        setSuccess(payload)
+        router.push("/success")
+      } else if (response.ok === true) {
+        // Server claimed success but the response is unusable (no valid reference code). Nothing was
+        // reset, so the retry path stays intact; surface it as a technical failure.
+        setStatus("error")
+        setFailedAttempts((n) => n + 1)
       } else if (response.error?.code === API_ERROR_CODES.VALIDATION_ERROR) {
         const fieldErrors = response.error.fieldErrors as Record<string, string[]>
 
@@ -308,20 +332,6 @@ export function RequestForm() {
   }))
 
   const err = (field: keyof RequestFormInput) => getFieldError(field, errors, t)
-
-  if (status === "success") {
-    return (
-      <div className="flex flex-col gap-3 rounded-md border border-border p-6">
-        <p className="text-lg font-semibold text-foreground">{t("successTitle")}</p>
-        <p className="text-sm text-muted-foreground">{t("successMessage")}</p>
-        {referenceCode && (
-          <p className="text-sm font-mono text-foreground">
-            {t("successReferenceCode", { referenceCode })}
-          </p>
-        )}
-      </div>
-    )
-  }
 
   const isSubmitting = status === "submitting"
   const hasUploadingSlot = draft.slots.some((slot) => slot.status === "uploading")

@@ -169,6 +169,20 @@ export function setSuccess(payload: SuccessPayload): void {
   setState({ ...state, success: payload })
 }
 
+/**
+ * One-time read of the success payload for the Success page (FS §3.4). Returns the payload and
+ * clears it from the store in the same call, so a second read (a revisit, or React strict-mode's
+ * double-invoked mount effect) finds nothing — which the Success gate turns into a redirect Home.
+ * Centralizing the read-then-clear here keeps the clear atomic and testable, rather than spread
+ * across a component effect. The caller must guard against invoking it twice on one real mount
+ * (a `consumed` ref) so the payload it captured is not lost to strict-mode's second run.
+ */
+export function consumeSuccess(): SuccessPayload | null {
+  const payload = state.success
+  if (payload) setState({ ...state, success: null })
+  return payload
+}
+
 /** Test-only: force the store back to a fresh initial state. */
 export function __resetDraftStoreForTests(): void {
   for (const slot of state.slots) URL.revokeObjectURL(slot.previewUrl)

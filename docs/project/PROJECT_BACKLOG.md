@@ -164,6 +164,13 @@ The following flows have no test touching a real database or storage layer:
 - replay with same `clientSubmissionId`: same `referenceCode`, no duplicate DB row
 - UNIQUE constraint race fallback: cleanup + existing referenceCode returned
 - failed DB insert: uploaded storage files deleted
+- **Success page gate + bfcache in a real browser** (Stage 6 Item 4, 2026-07-18): CO-1/CO-2 were
+  verified by a manual owner pass, not automated. jsdom unit tests cover the handler logic
+  (empty-store redirect, one-time read, second-mount redirect, persisted-`pageshow` redirect —
+  `SuccessView.test.tsx`), but the real-browser behaviours — a successful submit landing on
+  `/success`, and browser-back/refresh/direct-open redirecting via the back-forward cache — need an
+  e2e test. From `reviews/done/REVIEW_2026-07-18_stage6_success_page.md` (Requested by: IMPL: Stage 6
+  Task 04); owner flagged intent to add "нормальные тесты" for this.
 
 Address before production release (Stage 5). Options:
 - Vitest integration tests with a real Supabase test project (separate from production)

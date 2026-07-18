@@ -467,6 +467,29 @@ Completed in Stage 3:
 
 ## Log Entries (reverse chronological)
 
+### 2026-07-18 — IMPL: Stage 6 Task 04 — Success page (done)
+
+`STAGE_6_TASK_04_success_page.md` → `done` (→ `tasks/done/`). `/success` shipped as a real gated
+public route (`app/[locale]/(public)/success/`) rendering FS §3.4's six items in order from the
+module store; the request submit flow is rewired off its interim inline success block to
+store-transport + client-side navigation. Access mechanics per PROJECT_DECISIONS.md "Success page
+(FS §3.4)": module-store transport with a clean URL, mount gate (empty store → redirect Home),
+**one-time read** via new `consumeSuccess()` guarded by a `consumedRef` flag (strict-mode
+double-invoke provably cannot self-redirect or lose the payload), and a `pageshow`/`persisted`
+**bfcache guard**. Submit order is load-bearing: `resetDraft()` → `setSuccess(payload)` →
+`push("/success")` (reset nulls `success`, so setSuccess must follow). Contact echo is rendered
+method-agnostically from the payload (value as entered, unmasked) reusing `contactMethodOptions`
+labels; A.2 channel notes added to `en.json`. Client-only — no API/BFF/DB/migration/dependency.
+
+**Verification:** `pnpm qg` green (375 tests). Codex cross-review to consensus in one round
+(`reviews/done/REVIEW_2026-07-18_stage6_success_page.md`): two findings applied — (1) validate a
+usable string `referenceCode` **before** the destructive reset so a malformed `ok:true` takes the
+technical-failure/retry path (+ regression test); (2) dedupe method labels by reusing the form's
+`contactMethodOptions`. Residual test-file load-flakiness fixed with a file-level `testTimeout`.
+**CO-1/CO-2 owner-verified live in a real browser** (2026-07-18); automated e2e of the gate/bfcache
+deferred → PROJECT_BACKLOG.md "Automated E2E / Integration Tests". No FS/PRD change (blueprint was
+complete).
+
 ### 2026-07-18 — IMPL: Stage 6 Task 09 — placement Select → required free-text (done)
 
 `STAGE_6_TASK_09_placement_freetext.md` → `done`. Field 2 (Placement) converted from a Select over

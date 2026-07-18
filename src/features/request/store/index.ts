@@ -1,6 +1,7 @@
 export {
   __resetDraftStoreForTests,
   addSlot,
+  consumeSuccess,
   getClientSubmissionId,
   getFields,
   getSnapshot,

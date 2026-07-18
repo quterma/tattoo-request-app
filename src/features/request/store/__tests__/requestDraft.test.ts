@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest"
 import {
   __resetDraftStoreForTests,
   addSlot,
+  consumeSuccess,
   getClientSubmissionId,
   getFields,
   getSnapshot,
@@ -9,6 +10,7 @@ import {
   removeSlot,
   resetDraft,
   setFields,
+  setSuccess,
   updateSlot,
 } from "../requestDraft"
 import type { UploadSlot } from "../requestDraft"
@@ -143,6 +145,38 @@ describe("requestDraft store", () => {
       setFields({ clientName: "Alex", email: "a@b.com" })
       resetDraft()
       expect(getFields()).toEqual({})
+    })
+  })
+
+  // Success page transport (FS §3.4): one-time read. The payload is read and cleared in one call,
+  // so a revisit (or React strict-mode's double-invoked mount effect) finds the store empty and
+  // the Success gate redirects.
+  describe("success payload one-time read", () => {
+    const payload = { referenceCode: "REQ-2026-0001", contactMethod: "email", contactValue: "a@b.com" }
+
+    it("consumeSuccess returns the payload then leaves the store empty", () => {
+      setSuccess(payload)
+      expect(consumeSuccess()).toEqual(payload)
+      expect(getSnapshot().success).toBeNull()
+    })
+
+    it("a second consumeSuccess returns null (one-time read)", () => {
+      setSuccess(payload)
+      consumeSuccess()
+      expect(consumeSuccess()).toBeNull()
+    })
+
+    it("consumeSuccess on an empty store returns null without mutating", () => {
+      const before = getSnapshot()
+      expect(consumeSuccess()).toBeNull()
+      // No payload → no write → same snapshot reference.
+      expect(getSnapshot()).toBe(before)
+    })
+
+    it("resetDraft clears an unread success payload too", () => {
+      setSuccess(payload)
+      resetDraft()
+      expect(getSnapshot().success).toBeNull()
     })
   })
 })

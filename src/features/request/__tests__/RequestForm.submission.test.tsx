@@ -3,9 +3,22 @@ import { render, screen, cleanup, fireEvent, waitFor } from "@testing-library/re
 import userEvent from "@testing-library/user-event"
 import { API_ERROR_CODES } from "@/shared/api"
 import { RequestForm } from "../ui/RequestForm"
-import { __resetDraftStoreForTests, addSlot, updateSlot } from "../store"
+import { __resetDraftStoreForTests, addSlot, getFields, getSnapshot, updateSlot } from "../store"
 import type { UploadSlot } from "../store"
 import messages from "@/shared/i18n/messages/en.json"
+
+// This suite drives many full form fill-ins through userEvent; even with `{ delay: null }` it is
+// the heaviest file in the repo, and under the parallel run its first tests can occasionally miss
+// the default 5s per-test timeout purely from CPU contention (not logic). Raise the file-level
+// timeout so the suite is deterministic under load.
+vi.setConfig({ testTimeout: 20000 })
+
+// The submit flow now navigates to /success via the i18n router; mock it so success asserts the
+// navigation + store payload rather than an inline success block (removed in Task 04).
+const push = vi.fn()
+vi.mock("@/shared/i18n", () => ({
+  useRouter: () => ({ push, replace: vi.fn() }),
+}))
 
 // Mock next-intl
 vi.mock("next-intl", () => ({
@@ -55,6 +68,7 @@ function fillRequiredFields(user: ReturnType<typeof userEvent.setup>) {
 describe("RequestForm – submission flow", () => {
   beforeEach(() => {
     vi.restoreAllMocks()
+    push.mockClear()
     __resetDraftStoreForTests()
   })
 
@@ -68,7 +82,7 @@ describe("RequestForm – submission flow", () => {
     })
     vi.stubGlobal("fetch", mockFetch)
 
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     render(<RequestForm />)
 
     await fillRequiredFields(user).fill()
@@ -90,7 +104,7 @@ describe("RequestForm – submission flow", () => {
     })
     vi.stubGlobal("fetch", mockFetch)
 
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     render(<RequestForm />)
 
     await fillRequiredFields(user).fill()
@@ -114,7 +128,7 @@ describe("RequestForm – submission flow", () => {
     const mockFetch = vi.fn()
     vi.stubGlobal("fetch", mockFetch)
 
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     render(<RequestForm />)
 
     await user.click(screen.getByRole("button", { name: /send request/i }))
@@ -126,7 +140,7 @@ describe("RequestForm – submission flow", () => {
     const mockFetch = vi.fn()
     vi.stubGlobal("fetch", mockFetch)
 
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     render(<RequestForm />)
 
     await user.type(screen.getByRole("textbox", { name: /your name/i }), "Alex")
@@ -148,20 +162,69 @@ describe("RequestForm – submission flow", () => {
     expect(screen.getByRole("textbox", { name: /placement/i })).toHaveFocus()
   })
 
-  it("shows success block and hides form after successful submission", async () => {
+  it("stores the success payload (raw entered values + code) and navigates to /success", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
       json: () => Promise.resolve({ ok: true, referenceCode: "REQ-2026-0003" }),
     }))
 
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     render(<RequestForm />)
 
     await fillRequiredFields(user).fill()
     await user.click(screen.getByRole("button", { name: /send request/i }))
 
-    expect(screen.getByText(/request sent/i)).toBeInTheDocument()
-    expect(screen.getByText(/REQ-2026-0003/)).toBeInTheDocument()
-    expect(screen.queryByRole("button", { name: /send request/i })).not.toBeInTheDocument()
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/success"))
+    // Payload carries the returned code + the contact method/value exactly as entered (FS §3.4).
+    expect(getSnapshot().success).toEqual({
+      referenceCode: "REQ-2026-0003",
+      contactMethod: "email",
+      contactValue: "user@example.com",
+    })
+    // The field bag is cleared on a successful submit so returning to Request shows an empty form.
+    expect(getFields()).toEqual({})
+  })
+
+  // REGRESSION GUARD (Codex review 2026-07-18, finding 1): a malformed `{ ok: true }` without a
+  // usable string code must NOT trigger the destructive success transition (resetDraft + read-once
+  // /success). It takes the technical-failure path instead, keeping the form + data for retry.
+  it("treats ok:true without a usable reference code as a technical failure (no reset, no nav)", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+      json: () => Promise.resolve({ ok: true }), // no referenceCode
+    }))
+
+    const user = userEvent.setup({ delay: null })
+    render(<RequestForm />)
+
+    await fillRequiredFields(user).fill()
+    await user.click(screen.getByRole("button", { name: /send request/i }))
+
+    // Surfaced as a technical failure; nothing was reset or navigated.
+    expect(await screen.findByRole("alert")).toBeInTheDocument()
+    expect(push).not.toHaveBeenCalled()
+    expect(getSnapshot().success).toBeNull()
+    // Data preserved for retry.
+    expect(getFields().clientName).toBe("Alex")
+    expect(screen.getByRole("button", { name: /send request/i })).toBeInTheDocument()
+  })
+
+  it("clears the form on success: a fresh mount after submit shows empty fields", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+      json: () => Promise.resolve({ ok: true, referenceCode: "REQ-2026-0006" }),
+    }))
+
+    const user = userEvent.setup({ delay: null })
+    const { unmount } = render(<RequestForm />)
+
+    await fillRequiredFields(user).fill()
+    await user.click(screen.getByRole("button", { name: /send request/i }))
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/success"))
+
+    unmount()
+    render(<RequestForm />)
+
+    expect(screen.getByRole("textbox", { name: /your name/i })).toHaveValue("")
+    expect(screen.getByRole("textbox", { name: /describe your idea/i })).toHaveValue("")
+    expect(screen.getByRole("combobox", { name: /contact method/i })).toHaveValue("")
   })
 
   it("shows error message and keeps form visible on API failure", async () => {
@@ -169,7 +232,7 @@ describe("RequestForm – submission flow", () => {
       json: () => Promise.resolve({ ok: false }),
     }))
 
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     render(<RequestForm />)
 
     await fillRequiredFields(user).fill()
@@ -182,7 +245,7 @@ describe("RequestForm – submission flow", () => {
   it("shows error message and keeps form visible on network error", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("Network failure")))
 
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     render(<RequestForm />)
 
     await fillRequiredFields(user).fill()
@@ -206,7 +269,7 @@ describe("RequestForm – submission flow", () => {
         }),
     }))
 
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     render(<RequestForm />)
 
     await fillRequiredFields(user).fill()
@@ -229,7 +292,7 @@ describe("RequestForm – submission flow", () => {
         }),
     }))
 
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     render(<RequestForm />)
 
     await fillRequiredFields(user).fill()
@@ -252,7 +315,7 @@ describe("RequestForm – submission flow", () => {
         }),
     }))
 
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     render(<RequestForm />)
 
     await fillRequiredFields(user).fill()
@@ -276,7 +339,7 @@ describe("RequestForm – submission flow", () => {
         }),
     }))
 
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     render(<RequestForm />)
 
     await fillRequiredFields(user).fill()
@@ -300,7 +363,7 @@ describe("RequestForm – submission flow", () => {
         }),
     }))
 
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     render(<RequestForm />)
 
     await fillRequiredFields(user).fill()
@@ -328,7 +391,7 @@ describe("RequestForm – submission flow", () => {
       })
     vi.stubGlobal("fetch", mockFetch)
 
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     render(<RequestForm />)
 
     await fillRequiredFields(user).fill()
@@ -338,7 +401,7 @@ describe("RequestForm – submission flow", () => {
 
     await user.click(screen.getByRole("button", { name: /send request/i }))
 
-    expect(await screen.findByText(/request sent/i)).toBeInTheDocument()
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/success"))
   })
 
   it("clears error message and re-enables retry on subsequent submission", async () => {
@@ -347,7 +410,7 @@ describe("RequestForm – submission flow", () => {
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true, referenceCode: "REQ-2026-0005" }) })
     vi.stubGlobal("fetch", mockFetch)
 
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     render(<RequestForm />)
 
     await fillRequiredFields(user).fill()
@@ -358,7 +421,7 @@ describe("RequestForm – submission flow", () => {
     await user.click(screen.getByRole("button", { name: /send request/i }))
 
     expect(screen.queryByRole("alert")).not.toBeInTheDocument()
-    expect(screen.getByText(/request sent/i)).toBeInTheDocument()
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/success"))
   })
 })
 
@@ -385,7 +448,7 @@ describe("RequestForm – contact method select", () => {
     ["telegram", /telegram username/i],
     ["phone", /phone number/i],
   ])("reveals exactly one value field for %s", async (method, labelRe) => {
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     render(<RequestForm />)
 
     await user.selectOptions(screen.getByRole("combobox", { name: /contact method/i }), method)
@@ -397,7 +460,7 @@ describe("RequestForm – contact method select", () => {
 
   // Changing the method reinterprets the value — an email is not an Instagram handle.
   it("clears the value when the method changes", async () => {
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     render(<RequestForm />)
 
     await user.selectOptions(screen.getByRole("combobox", { name: /contact method/i }), "email")
@@ -412,7 +475,7 @@ describe("RequestForm – contact method select", () => {
   it("blocks submit and shows the method's own message for an invalid value", async () => {
     const mockFetch = vi.fn()
     vi.stubGlobal("fetch", mockFetch)
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     render(<RequestForm />)
 
     await user.type(screen.getByRole("textbox", { name: /your name/i }), "Alex")
@@ -448,7 +511,7 @@ describe("RequestForm – in-session field persistence", () => {
   afterEach(() => cleanup())
 
   it("restores entered text/select values after unmount and remount", async () => {
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     const { unmount } = render(<RequestForm />)
 
     await user.type(screen.getByRole("textbox", { name: /your name/i }), "Alex")
@@ -477,7 +540,7 @@ describe("RequestForm – in-session field persistence", () => {
   // D-Blueprint 5(a) covers ALL entered values, including the eligibility confirmation made
   // in the same live session — client-side navigation is not a new session.
   it("restores the eligibility checkbox after unmount and remount", async () => {
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     const { unmount } = render(<RequestForm />)
 
     await user.click(screen.getByRole("checkbox", { name: /i confirm i am 18 or older/i }))
@@ -504,7 +567,7 @@ describe("RequestForm – technical failure & Instagram fallback (FS §4.5 / A.4
 
   it("shows the 'details preserved' message but NOT the Instagram fallback after one failure", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("network")))
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     render(<RequestForm />)
 
     await fillRequiredFields(user).fill()
@@ -516,7 +579,7 @@ describe("RequestForm – technical failure & Instagram fallback (FS §4.5 / A.4
 
   it("shows the Instagram fallback after two consecutive failures", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("network")))
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     render(<RequestForm />)
 
     await fillRequiredFields(user).fill()
@@ -533,14 +596,14 @@ describe("RequestForm – technical failure & Instagram fallback (FS §4.5 / A.4
       .mockRejectedValueOnce(new Error("network"))
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true, referenceCode: "K7M4XP" }) })
     vi.stubGlobal("fetch", mockFetch)
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     render(<RequestForm />)
 
     await fillRequiredFields(user).fill()
     await user.click(screen.getByRole("button", { name: /send request/i })) // fail 1
     await user.click(screen.getByRole("button", { name: /send request/i })) // success → resets
 
-    expect(await screen.findByText(/request sent/i)).toBeInTheDocument()
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/success"))
   })
 
   it("does not count a validation rejection toward the fallback", async () => {
@@ -558,7 +621,7 @@ describe("RequestForm – technical failure & Instagram fallback (FS §4.5 / A.4
           }),
       }),
     )
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     render(<RequestForm />)
 
     await fillRequiredFields(user).fill()
@@ -602,7 +665,7 @@ describe("RequestForm – click-to-wait for in-flight uploads", () => {
 
     addSlot(uploadingSlot())
 
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     render(<RequestForm />)
     await fillRequiredFields(user).fill()
 
@@ -633,7 +696,7 @@ describe("RequestForm – idea character counter", () => {
   afterEach(() => cleanup())
 
   it("shows no counter for a short idea, and a counter near the limit", async () => {
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
     render(<RequestForm />)
 
     const idea = screen.getByRole("textbox", { name: /describe your idea/i })
