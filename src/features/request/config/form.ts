@@ -72,21 +72,5 @@ export const SIZE_OPTIONS = ["small", "medium", "large", "extra-large", "not-sur
 /** FS §4.2 field 4 (amended 2026-07-15, owner): two options only — Black & grey / Color. */
 export const COLOR_OPTIONS = ["black-and-grey", "color"] as const
 
-/**
- * FS §4.2 field 2 (amended 2026-07-15): concrete body areas only — the "Other"/free-text
- * option was removed by owner decision. No free-text placement anywhere.
- */
-export const PLACEMENT_OPTIONS = [
-  "arm",
-  "leg",
-  "back",
-  "chest",
-  "ribs",
-  "neck",
-  "hand",
-  "foot",
-] as const
-
 export type SizeOption = (typeof SIZE_OPTIONS)[number]
 export type ColorOption = (typeof COLOR_OPTIONS)[number]
-export type PlacementOption = (typeof PLACEMENT_OPTIONS)[number]

@@ -202,12 +202,42 @@ describe("requestFormSchema – required fields", () => {
     expect(result.success).toBe(true)
   })
 
-  it("rejects a placement no longer offered (other)", () => {
-    const result = requestFormSchema.safeParse({ ...validBase, placement: "other" })
+  it("accepts free-text placement not on the old fixed list", () => {
+    const result = requestFormSchema.safeParse({
+      ...validBase,
+      placement: "inner left forearm, wrapping toward the elbow",
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it("rejects when placement is whitespace-only", () => {
+    const result = requestFormSchema.safeParse({ ...validBase, placement: "   " })
     expect(result.success).toBe(false)
     if (!result.success) {
       const messages = result.error.issues.map((i) => i.message)
       expect(messages).toContain("placement_required")
+    }
+  })
+
+  it("rejects placement exceeding 100 characters", () => {
+    const result = requestFormSchema.safeParse({ ...validBase, placement: "a".repeat(101) })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      const messages = result.error.issues.map((i) => i.message)
+      expect(messages).toContain("placement_too_long")
+    }
+  })
+
+  it("accepts placement at exactly 100 characters", () => {
+    const result = requestFormSchema.safeParse({ ...validBase, placement: "a".repeat(100) })
+    expect(result.success).toBe(true)
+  })
+
+  it("trims placement before validation", () => {
+    const result = requestFormSchema.safeParse({ ...validBase, placement: "  arm  " })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.placement).toBe("arm")
     }
   })
 })

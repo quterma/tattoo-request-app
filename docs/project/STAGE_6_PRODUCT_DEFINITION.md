@@ -76,7 +76,9 @@ Fixed for Stage 6. Each decision is stated once, here; the Functional Specificat
 
 **D3 — Reply channel.** The artist replies using the contact information the visitor provided. No in-app communication.
 
-**D4 — Uploads.** All three reference uploads (artist work the client likes; external inspiration; body placement photo) are optional. The required Placement select guarantees the artist always knows the intended body area in words. Upload completion is driven by prominent, scannable motivation content (FS §4.4), never by enforcement. Review trigger: if the Section 3 evaluation shows missing placement photos recurrently causing clarification rounds, the placement photo's optionality is re-decided.
+**D4 — Uploads.** All three reference uploads (artist work the client likes; external inspiration; body placement photo) are optional. The required Placement field guarantees the artist always knows the intended body area in words. Upload completion is driven by prominent, scannable motivation content (FS §4.4), never by enforcement. Review trigger: if the Section 3 evaluation shows missing placement photos recurrently causing clarification rounds, the placement photo's optionality is re-decided.
+
+**D4 amendment (owner decision 2026-07-18).** "Placement select" above is amended to "Placement field": the field's *type* (Select vs. free text) is an implementation detail, not a product decision this section governs — what D4 actually guarantees is that the artist always receives the intended body area in words, regardless of how that text is collected. This substance is unchanged; only the word "select" was stale after the 2026-07-17 owner decision to make Placement a required free-text input (`STAGE_6_FUNCTIONAL_SPECIFICATION.md` §4.2 field 2, implemented by `STAGE_6_TASK_09_placement_freetext.md`), which this amendment brings into alignment per §9's PRD-wins-on-conflict rule.
 
 **D5 — Response promise.** Reply within 48 hours. Confirmed operationally sustainable. Single source for the promise; all copy derives from it.
 

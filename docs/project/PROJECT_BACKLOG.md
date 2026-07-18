@@ -67,6 +67,20 @@ latter case restoring the two links is a one-line change and needs no test.
   (2026-07-12: still open; the Stage 6 upload UX itself is specified in FS §4.3–§4.5 —
   thumbnails, per-file progress/failure/remove — and governs any rework of `FileUploadInput`.)
 
+- **`required_error` not reachable when a required string field is entirely absent from submitted
+  FormData (found during Codex review of TASK_09, 2026-07-18).** Every required string field in
+  `requestFormSchema` (`clientName`, `ideaDescription`, `placement`, `contactMethod`, etc.) is read
+  in `src/bff/request.ts` via `formData.get(f.<field>) as string` — a type assertion with no
+  runtime coercion. `FormData.get()` returns `null`, not `undefined`, when a key is absent, so a
+  malformed/missing submission reaches zod as `null` rather than `undefined`. Zod's
+  `{ required_error }` only fires for `undefined`; a `null` falls through to Zod's own untranslated
+  default type-error message instead of the field's stable `..._required` key. Not a regression
+  from any one field's task — it's the shared BFF-parsing pattern, so a fix (e.g. `?? ""` at each
+  read, or an `invalid_type_error` alongside each `required_error`) should be done once across all
+  affected fields, not per-field. Low priority: only reachable via a hand-crafted request bypassing
+  the client form (the client always sends a string), so it affects API error-key stability for
+  malformed direct POSTs, not any real user path.
+
 - **Oversized-file error copy — length/wording, for the Item 6 visual pass (2026-07-14, from the
   Item 1 live check).** The current message ("This image is over 4 MB. Please use a smaller one — a
   screenshot usually works.") overflows a narrow mobile row when shown next to the thumbnail and the

@@ -147,7 +147,8 @@ tattoo-request-app/
 │       │       ├── REVIEW_2026-07-15_stage6_noncontact_contract.md
 │       │       ├── REVIEW_2026-07-15_stage6_reference_code.md
 │       │       ├── REVIEW_2026-07-16_stage6_form_ui.md
-│       │       └── REVIEW_2026-07-17_stage6_contact_model.md
+│       │       ├── REVIEW_2026-07-17_stage6_contact_model.md
+│       │       └── REVIEW_2026-07-17_stage6_placement_freetext.md
 │       └── tasks/
 │           ├── META_TASK_01_framework_consolidation.md
 │           ├── STAGE_6_STRAT_BRIEF.md
@@ -157,7 +158,8 @@ tattoo-request-app/
 │           └── done/
 │               ├── STAGE_6_TASK_01_upload_flow_architecture.md
 │               ├── STAGE_6_TASK_02_site_wide_shell.md
-│               └── STAGE_6_TASK_03_request_form_rebuild.md
+│               ├── STAGE_6_TASK_03_request_form_rebuild.md
+│               └── STAGE_6_TASK_09_placement_freetext.md
 ├── scripts/
 │   └── update-structure.mjs
 ├── src/

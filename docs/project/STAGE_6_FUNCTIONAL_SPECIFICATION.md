@@ -101,7 +101,7 @@ Field-inclusion rule (normative): every field must help the artist's initial acc
 | # | Field | Block | Type | Required | Purpose | Validation |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Idea description | Idea | Multiline text | **Yes** | What does the client want? | Min 20 chars, max 1,000, trimmed; counter shown near limit. |
-| 2 | Placement | Project Details | **Text** | **Yes** | Where on the body — verbal placement guaranteed regardless of photo (PRD D4). | **Required free text** (amended 2026-07-17 — see below): trimmed, min 1 char after trim, max ~100; no fixed option list. |
+| 2 | Placement | Reference Uploads (amended 2026-07-18 — see below) | **Text** | **Yes** | Where on the body — verbal placement guaranteed regardless of photo (PRD D4). | **Required free text** (amended 2026-07-17 — see below): trimmed, min 1 char after trim, max ~100; no fixed option list. |
 | 3 | Approximate size | Project Details | Select | **Yes** | Session scale, feasibility. | Owner-configured cm ranges + "Not sure". |
 | 4 | Color preference | Project Details | Select | **Yes** | Style/technique fit. | **Black & grey / Color** — two options only (amended 2026-07-15, owner; the earlier "Black only"/"Not sure" were dropped). Artist's advice welcome. |
 | 5 | Artist work the client likes | Reference Uploads | Image upload | No | Which of the artist's directions resonates. | §4.3. |
@@ -151,6 +151,24 @@ form since they describe the same thing. `PLACEMENT_OPTIONS` ceases to exist; th
 free `TEXT` and the admin viewer already renders it verbatim via its label fallback, so no migration
 is required. Implemented by `STAGE_6_TASK_09_placement_freetext.md`.
 
+**Placement's Block reassigned to Reference Uploads (owner decision 2026-07-18).** The field table
+above lists field 2's Block as **Reference Uploads**, not Project Details — a correction, not a new
+change: the 2026-07-17 amendment already said Placement and the placement photo (field 7) "are
+grouped together in the form," and the implementation placed Placement as the first field inside the
+Reference Uploads section, directly above the placement-photo upload card. This amendment brings the
+field table into agreement with that grouping rather than leaving Placement recorded in its old block
+while it visually and structurally sits in a different one. The Reference Uploads section heading
+("Reference images") and its introductory framing now also describe Placement's required-field
+status, not only the three optional image uploads — see the section heading amendment immediately
+below. Raised and confirmed via Codex cross-review of `STAGE_6_TASK_09_placement_freetext.md`
+(`docs/project/reviews/done/REVIEW_2026-07-17_stage6_placement_freetext.md`).
+
+**Reference Uploads section heading amended to cover Placement (owner decision 2026-07-18).** The
+section heading rendered above Placement and the three upload cards is retitled from "Reference
+images" to **"Reference images & placement"** (i18n key `request.uploads.sectionTitle`) so it
+accurately introduces a section that begins with a required text field, not only optional image
+uploads. The three upload-motivation cards (§4.4 / Appendix A.1) and their copy are unchanged.
+
 **Superseded — Placement "Other" removed (owner decision 2026-07-15).** *Kept as the record of what
 was decided and shipped between 2026-07-15 and the 2026-07-17 amendment above; no longer in force.*
 Field 2 had its "Other" option and free-text entry removed, leaving a Select of concrete body areas
@@ -162,7 +180,7 @@ replaces it.)
 
 **Budget-field amendment (owner decision 2026-07-14).** Field 12 (Budget) is added as an **optional** field. The earlier field model deliberately omitted it, and PROJECT_BACKLOG.md recorded any budget field as needing a PRD/FS change first — this amendment is that change (PRD §9). Rationale: the artist finds a rough budget genuinely useful for the initial accept/decline decision (the §4.1 field-inclusion test), and as an optional field it adds no friction for a visitor who skips it. It stays **optional** and free-form — no enforced ranges, no required entry, no effect on submit validity. It sits in the Project Details block. Placement in the on-screen order and any label/hint copy are owner-authored (Item 3 / the visual pass), not fixed here.
 
-**Owner-configurable values.** All owner-configurable values in this document (age threshold, placement options, size ranges) are implementation-level configuration — constants or config files maintained by the developer. No administration UI for them exists, is implied, or may be built in Stage 6.
+**Owner-configurable values.** All owner-configurable values in this document (age threshold, size ranges) are implementation-level configuration — constants or config files maintained by the developer. (Placement stopped being an owner-configurable option list on 2026-07-17 when field 2 became required free text — see the placement amendment above; `PLACEMENT_OPTIONS` no longer exists.) No administration UI for them exists, is implied, or may be built in Stage 6.
 
 ### 4.3 Upload constraints (fields 5–7, identically)
 

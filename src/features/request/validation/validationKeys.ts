@@ -6,6 +6,7 @@ export const VALIDATION_KEYS = {
   IDEA_TOO_SHORT: "idea_too_short",
   IDEA_TOO_LONG: "idea_too_long",
   PLACEMENT_REQUIRED: "placement_required",
+  PLACEMENT_TOO_LONG: "placement_too_long",
   SIZE_REQUIRED: "size_required",
   COLOR_REQUIRED: "color_required",
   BUDGET_TOO_LONG: "budget_too_long",

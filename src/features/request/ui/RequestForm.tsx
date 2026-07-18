@@ -13,7 +13,6 @@ import {
   INSTAGRAM_HANDLE,
   MAX_FILES_PER_FIELD,
   OFFERED_CONTACT_METHODS,
-  PLACEMENT_OPTIONS,
   SIZE_OPTIONS,
 } from "../config"
 import type { ContactMethod } from "../config"
@@ -75,14 +74,16 @@ const PERSISTED_FIELDS = [
 ] as const
 
 // DOM render order — used to scroll/focus the FIRST invalid field on a blocked submit
-// (FS §4.5 / D-Blueprint 5(c)). Kept explicit so it tracks the visual block order. Name sits
-// in the Contact block (FS §4.2 field 8), after the project fields.
+// (FS §4.5 / D-Blueprint 5(c)). Kept explicit so it tracks the visual block order. Placement
+// sits in the Reference Uploads block (grouped with the placement photo, owner decision
+// 2026-07-17 — STAGE_6_TASK_09), after Project Details. Name sits in the Contact block
+// (FS §4.2 field 8), after the project fields.
 const FIELD_ORDER: (keyof RequestFormInput)[] = [
   "ideaDescription",
-  "placement",
   "size",
   "color",
   "budget",
+  "placement",
   "clientName",
   "contactMethod",
   "contactValue",
@@ -291,11 +292,6 @@ export function RequestForm() {
     }
   }
 
-  const placementOptions = PLACEMENT_OPTIONS.map((v) => ({
-    value: v,
-    label: t(`placementOptions.${v}`),
-  }))
-
   const sizeOptions = SIZE_OPTIONS.map((v) => ({
     value: v,
     label: t(`sizeOptions.${v}`),
@@ -372,14 +368,6 @@ export function RequestForm() {
       <section className="flex flex-col gap-6">
         <h2 className="text-base font-semibold text-foreground">{t("projectDetailsTitle")}</h2>
         <SelectInput
-          id="placement"
-          label={t("placementLabel")}
-          placeholder={t("placementPlaceholder")}
-          options={placementOptions}
-          error={err("placement")}
-          {...register("placement")}
-        />
-        <SelectInput
           id="size"
           label={t("sizeLabel")}
           placeholder={t("sizePlaceholder")}
@@ -406,9 +394,20 @@ export function RequestForm() {
       </section>
 
       {/* Reference Uploads block — three motivation cards (FS §4.2 fields 5–7, §4.4 / A.1),
-          consuming Item 1's upload plumbing. Uploads are optional; no requiredness is implied. */}
+          consuming Item 1's upload plumbing. The three uploads are optional; no requiredness is
+          implied for THEM. Placement (FS §4.2 field 2, required free text) is this section's Block
+          per the field table (amended 2026-07-18 to match the 2026-07-17 grouping decision) — it
+          is required even though the uploads beside it are not. */}
       <section className="flex flex-col gap-6">
         <h2 className="text-base font-semibold text-foreground">{t("uploads.sectionTitle")}</h2>
+        <TextInput
+          id="placement"
+          label={t("placementLabel")}
+          placeholder={t("placementPlaceholder")}
+          hint={t("placementHint")}
+          error={err("placement")}
+          {...register("placement")}
+        />
         {uploadCards.map((card) => (
           <UploadCategoryInput
             key={card.category}

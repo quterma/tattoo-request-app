@@ -1,11 +1,5 @@
 import { z } from "zod/v3"
-import {
-  COLOR_OPTIONS,
-  MAX_FILES_TOTAL,
-  OFFERED_CONTACT_METHODS,
-  PLACEMENT_OPTIONS,
-  SIZE_OPTIONS,
-} from "../config"
+import { COLOR_OPTIONS, MAX_FILES_TOTAL, OFFERED_CONTACT_METHODS, SIZE_OPTIONS } from "../config"
 import type { ContactMethod } from "../config"
 import { normalizeContactValue } from "../lib/contact"
 import { VALIDATION_KEYS as K } from "./validationKeys"
@@ -38,10 +32,10 @@ export const requestFormSchema = z
       .min(20, { message: K.IDEA_TOO_SHORT })
       .max(1000, { message: K.IDEA_TOO_LONG }),
     placement: z
-      .string()
-      .refine((v) => (PLACEMENT_OPTIONS as readonly string[]).includes(v) && v !== "", {
-        message: K.PLACEMENT_REQUIRED,
-      }),
+      .string({ required_error: K.PLACEMENT_REQUIRED })
+      .trim()
+      .min(1, { message: K.PLACEMENT_REQUIRED })
+      .max(100, { message: K.PLACEMENT_TOO_LONG }),
     // Opaque upload handles (services/uploadToken.ts). Uploads are optional
     // (FS §4.2 fields 5–7); the per-category cap and ownership binding are
     // enforced server-side in bff/adoptUploads.ts, not here. The overall

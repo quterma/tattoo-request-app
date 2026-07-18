@@ -329,11 +329,17 @@ Stage 4B (reduced scope) — see PROJECT_DECISIONS.md, Stage 4B Admin Dashboard 
 - `RequestDetailSkeleton` — data-free placeholder mirroring the header/client/brief/images
   structure, `aria-hidden="true"`; used by the detail route's `loading.tsx`
 - Barrel: `features/admin/ui/index.ts` exports all nine components
-- **Label ownership note:** `admin.placementLabels`/`sizeLabels`/`colorLabels` are presentation
-  text only, keyed by the value strings already owned by `features/request/config`
-  (`PLACEMENT_OPTIONS`/`SIZE_OPTIONS`/`COLOR_OPTIONS`); `features/admin` does not import
-  `features/request` (forbidden — features must not depend on other features directly) and does
-  not read the `request` i18n namespace either, to avoid a silent cross-feature coupling
+- **Label ownership note:** `admin.sizeLabels`/`colorLabels` are presentation text only, keyed by
+  the value strings already owned by `features/request/config` (`SIZE_OPTIONS`/`COLOR_OPTIONS`).
+  `admin.placementLabels` is a **legacy fallback map only** (amended 2026-07-18,
+  `STAGE_6_TASK_09_placement_freetext.md`): Placement stopped being a fixed-option Select and
+  `PLACEMENT_OPTIONS` was deleted from `features/request/config`, so new requests store free text
+  that will not match any `placementLabels` key. `RequestDetail`/`RequestCard` look the raw value
+  up via `t.has()` and fall back to rendering it verbatim when no match is found; `placementLabels`
+  is kept only so pre-2026-07-18 rows with an old fixed-option value (e.g. `"arm"`) still render a
+  translated label. `features/admin` does not import `features/request` (forbidden — features must
+  not depend on other features directly) and does not read the `request` i18n namespace either, to
+  avoid a silent cross-feature coupling
 
 ---
 

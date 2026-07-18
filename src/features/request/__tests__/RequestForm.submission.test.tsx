@@ -40,7 +40,7 @@ function fillRequiredFields(user: ReturnType<typeof userEvent.setup>) {
       // Uploads are optional (FS §4.2) and go through /api/upload via XHR, which jsdom
       // does not drive; this suite exercises the submit path, so no files are added.
 
-      await user.selectOptions(screen.getByRole("combobox", { name: /placement/i }), "arm")
+      await user.type(screen.getByRole("textbox", { name: /placement/i }), "arm")
       await user.selectOptions(screen.getByRole("combobox", { name: /size/i }), "medium")
       await user.selectOptions(screen.getByRole("combobox", { name: /color/i }), "black-and-grey")
 
@@ -120,6 +120,32 @@ describe("RequestForm – submission flow", () => {
     await user.click(screen.getByRole("button", { name: /send request/i }))
 
     expect(mockFetch).not.toHaveBeenCalled()
+  })
+
+  it("blocks submit and focuses Placement when every other required field is valid but Placement is empty", async () => {
+    const mockFetch = vi.fn()
+    vi.stubGlobal("fetch", mockFetch)
+
+    const user = userEvent.setup()
+    render(<RequestForm />)
+
+    await user.type(screen.getByRole("textbox", { name: /your name/i }), "Alex")
+    await user.type(
+      screen.getByRole("textbox", { name: /describe your idea/i }),
+      "A dragon on my arm, very detailed and colorful",
+    )
+    // Placement deliberately left empty.
+    await user.selectOptions(screen.getByRole("combobox", { name: /size/i }), "medium")
+    await user.selectOptions(screen.getByRole("combobox", { name: /color/i }), "black-and-grey")
+    await user.selectOptions(screen.getByRole("combobox", { name: /contact method/i }), "email")
+    await user.type(screen.getByRole("textbox", { name: /^email$/i }), "user@example.com")
+    await user.click(screen.getByRole("checkbox", { name: /i confirm i am 18 or older/i }))
+
+    await user.click(screen.getByRole("button", { name: /send request/i }))
+
+    expect(mockFetch).not.toHaveBeenCalled()
+    expect(await screen.findByText(/please enter a placement/i)).toBeInTheDocument()
+    expect(screen.getByRole("textbox", { name: /placement/i })).toHaveFocus()
   })
 
   it("shows success block and hides form after successful submission", async () => {
@@ -394,7 +420,7 @@ describe("RequestForm – contact method select", () => {
       screen.getByRole("textbox", { name: /describe your idea/i }),
       "A dragon on my arm, very detailed and colorful",
     )
-    await user.selectOptions(screen.getByRole("combobox", { name: /placement/i }), "arm")
+    await user.type(screen.getByRole("textbox", { name: /placement/i }), "arm")
     await user.selectOptions(screen.getByRole("combobox", { name: /size/i }), "medium")
     await user.selectOptions(screen.getByRole("combobox", { name: /color/i }), "black-and-grey")
     await user.click(screen.getByRole("checkbox", { name: /i confirm i am 18 or older/i }))
@@ -430,7 +456,7 @@ describe("RequestForm – in-session field persistence", () => {
       screen.getByRole("textbox", { name: /describe your idea/i }),
       "A dragon on my arm, very detailed and colorful",
     )
-    await user.selectOptions(screen.getByRole("combobox", { name: /placement/i }), "arm")
+    await user.type(screen.getByRole("textbox", { name: /placement/i }), "arm")
     await user.selectOptions(screen.getByRole("combobox", { name: /contact method/i }), "instagram")
     await user.type(screen.getByLabelText(/instagram handle/i), "@masha")
 
@@ -441,7 +467,7 @@ describe("RequestForm – in-session field persistence", () => {
     expect(screen.getByRole("textbox", { name: /describe your idea/i })).toHaveValue(
       "A dragon on my arm, very detailed and colorful",
     )
-    expect(screen.getByRole("combobox", { name: /placement/i })).toHaveValue("arm")
+    expect(screen.getByRole("textbox", { name: /placement/i })).toHaveValue("arm")
     // The restored method must not trigger the clear-on-method-change effect (which would wipe
     // the value it just restored) — that is what the first-render guard protects.
     expect(screen.getByRole("combobox", { name: /contact method/i })).toHaveValue("instagram")

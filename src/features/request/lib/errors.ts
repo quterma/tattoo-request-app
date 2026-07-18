@@ -13,6 +13,7 @@ const MESSAGE_TO_I18N_KEY: Record<ValidationKey, string> = {
   idea_too_short: "errors.ideaDescriptionTooShort",
   idea_too_long: "errors.ideaDescriptionTooLong",
   placement_required: "errors.placementRequired",
+  placement_too_long: "errors.placementTooLong",
   size_required: "errors.sizeRequired",
   color_required: "errors.colorRequired",
   budget_too_long: "errors.budgetTooLong",

@@ -2,8 +2,9 @@
 
 ## Status
 
-`ready` · created 2026-07-15 · promoted `draft`→`ready` 2026-07-17 (STRAT) · done: <date ·
-PROJECT_STAGE_LOG.md entry pointer>
+`done` · created 2026-07-15 · promoted `draft`→`ready` 2026-07-17 (STRAT) · done 2026-07-18
+(IMPL — see PROJECT_STAGE_LOG.md 2026-07-18 entry; Codex cross-review to consensus at
+`reviews/done/REVIEW_2026-07-17_stage6_placement_freetext.md`, 5 rounds).
 
 Owner product change (2026-07-15), raised during Task 03 Block A′. Deferred to run **after** Task 03
 Blocks B′ and C land (owner decision 2026-07-15) — it is a distinct product change, kept out of the
@@ -23,10 +24,18 @@ earlier (Select over fixed body areas); that is deliberate and recorded, not a r
   UI — a product change touching validation and the persisted contract; not delegable).
 - Reviewer: `claude` + mandatory independent Codex cross-review to consensus (AI_CROSS_REVIEW.md).
 - Baseline: the commit that introduces this file (executor derives it).
-- Allowed Write Surface: `src/features/request/config/form.ts`, `.../validation/schema.ts`,
-  `.../validation/validationKeys.ts`, `.../lib/errors.ts`, `.../ui/RequestForm.tsx`,
-  `src/bff/request.ts`, `src/shared/api/index.ts`, `src/shared/i18n/messages/en.json`,
-  `docs/project/STAGE_6_FUNCTIONAL_SPECIFICATION.md` (FS §4.2 field 2 amendment), the tests for the
+- Allowed Write Surface: `src/features/request/config/form.ts`,
+  `.../config/index.ts` (barrel re-export of the same names removed from `form.ts` — added
+  retroactively 2026-07-18 after Codex review Finding 3 flagged it as undeclared but necessary),
+  `.../validation/schema.ts`, `.../validation/validationKeys.ts`, `.../lib/errors.ts`,
+  `.../ui/RequestForm.tsx`, `src/bff/request.ts`, `src/shared/api/index.ts`,
+  `src/shared/i18n/messages/en.json`,
+  `docs/project/STAGE_6_FUNCTIONAL_SPECIFICATION.md` (FS §4.2 field 2 amendment + the 2026-07-18
+  block-reassignment / section-heading amendments),
+  `docs/project/STAGE_6_PRODUCT_DEFINITION.md` (PRD D4 wording amendment — added retroactively
+  2026-07-18 after Codex review Finding 1 was owner-resolved: the FS could not be brought into
+  agreement without amending D4, since PRD §9 makes the PRD win on conflict; not a `PROJECT_*` file,
+  so it was not covered by the reporting-docs clause), the tests for the
   above, and the PROJECT_* reporting docs. **No admin migration** expected (placement is already a
   free `TEXT` column; the admin viewer already renders it via a `placementLabels` fallback).
 

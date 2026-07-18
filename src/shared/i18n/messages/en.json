@@ -83,7 +83,8 @@
     "ideaDescriptionHint": "Minimum 20 characters",
 
     "placementLabel": "Placement",
-    "placementPlaceholder": "Select placement",
+    "placementPlaceholder": "e.g. inner forearm, upper back",
+    "placementHint": "Where on your body do you want it?",
 
     "uploadFormatsHint": "JPG, PNG, WEBP, HEIC/HEIF · max 4 MB per image",
 
@@ -94,7 +95,7 @@
       "artistWorkBenefit": "Seen something of mine you love? It tells me exactly which direction speaks to you.",
       "inspirationBenefit": "Mood boards welcome — I use them for direction and mood, never for copying another artist's work.",
       "placementPhotoBenefit": "A quick photo of the area helps me judge size and flow on your body before I reply.",
-      "sectionTitle": "Reference images",
+      "sectionTitle": "Reference images & placement",
       "buttonText": "Choose up to {maxFiles} images.",
       "maxFilesWarning": "You can upload up to {maxFiles} images per category.",
       "uploadingLabel": "Uploading",
@@ -173,17 +174,6 @@
       "color": "Color"
     },
 
-    "placementOptions": {
-      "arm": "Arm",
-      "leg": "Leg",
-      "back": "Back",
-      "chest": "Chest",
-      "ribs": "Ribs",
-      "neck": "Neck",
-      "hand": "Hand",
-      "foot": "Foot"
-    },
-
     "errors": {
       "clientNameRequired": "Please enter your name",
       "clientNameTooShort": "Name must be at least 2 characters",
@@ -191,7 +181,8 @@
       "ideaDescriptionRequired": "Please describe your idea",
       "ideaDescriptionTooShort": "Please write at least 20 characters",
       "ideaDescriptionTooLong": "Description must be 1000 characters or less",
-      "placementRequired": "Please select a placement",
+      "placementRequired": "Please enter a placement",
+      "placementTooLong": "Placement must be 100 characters or less",
       "sizeRequired": "Please select a size",
       "colorRequired": "Please select a color style",
       "budgetTooLong": "Budget must be 50 characters or less",

@@ -467,6 +467,41 @@ Completed in Stage 3:
 
 ## Log Entries (reverse chronological)
 
+### 2026-07-18 — IMPL: Stage 6 Task 09 — placement Select → required free-text (done)
+
+`STAGE_6_TASK_09_placement_freetext.md` → `done`. Field 2 (Placement) converted from a Select over
+8 fixed body-area options to a **required free-text input** (owner decision 2026-07-17): visitor
+types the intended area, guided by the hint "Where on your body do you want it?". `PLACEMENT_OPTIONS`
+/`PlacementOption` deleted from `features/request/config`; schema rule replaced with
+`z.string({ required_error }).trim().min(1).max(100)` (same shape as `clientName`/`ideaDescription`);
+`placement_too_long` validation key + `errors.placementTooLong` copy added. In the form, Placement
+moved from Project Details to become the first field of the Reference Uploads section, directly above
+the placement-photo upload card (owner grouping decision — both describe the same body area), with
+`FIELD_ORDER` re-synced to the new DOM order. i18n: placeholder reworded, `placementHint` added,
+`placementOptions` label map removed, `placementRequired` reworded. **No migration** (column already
+free `TEXT`); admin viewer already rendered placement verbatim via its `t.has()` `placementLabels`
+fallback, now documented as a legacy map (`PROJECT_STRUCTURE.md`).
+
+**Verification:** `pnpm qg` green (363 tests, +1 from a new isolated-placement-failure form test).
+**Live-run in a real browser** (owner-required, since placement's DOM position moved below
+size/color): confirmed DOM order, that an empty/whitespace-only Placement blocks submit with the
+inline "Please enter a placement" and receives focus, and that scroll-to-first-invalid still picks
+the correct earlier field (size) when several are empty — i.e. the `FIELD_ORDER` reorder didn't
+break focus precedence.
+
+**Doc reconciliation (surfaced by Codex cross-review, 5 rounds to consensus —
+`reviews/done/REVIEW_2026-07-17_stage6_placement_freetext.md`):** the free-text change had been
+recorded in the FS but left several authoritative docs still describing the old Select contract.
+Fixed under owner decision: **PRD D4** amended ("required Placement **select**" → "**field**";
+PRD §9 makes the PRD win on conflict, so the FS could not stand alone); **FS §4.2 field table**
+reassigned Placement's Block to Reference Uploads + a dated block/heading amendment; section heading
+copy → "Reference images & placement" (owner-approved); FS §183 owner-configurable list de-listed
+"placement options"; `PROJECT_STRUCTURE.md` label-ownership note rewritten. Task Allowed Write
+Surface expanded retroactively to name `config/index.ts` and `STAGE_6_PRODUCT_DEFINITION.md` (both
+edited but originally undeclared). One deferred item filed to **PROJECT_BACKLOG.md**: `required_error`
+is unreachable when a required string field is entirely absent from FormData (`FormData.get()`
+returns `null`, not `undefined`) — a pre-existing cross-field pattern, not introduced here.
+
 ### 2026-07-17 — IMPL: Stage 6 Item 3 — request form rebuild complete (Items 3 + 9)
 
 `STAGE_6_TASK_03_request_form_rebuild.md` → `done`. Built and reviewed in four checkpointed blocks
