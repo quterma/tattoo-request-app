@@ -1054,6 +1054,30 @@ landing is done by META or the next appropriate session, which owns those write 
    does not write the journal — META does. Surfaced by round 2; not a Scout candidate. This is a
    note, per AI_ENGINEERING_SCOUT.md — Relationship to META (the Scout may note; META owns it).
 
+6. **External validation of the existing process + one linked note** (added 2026-07-17, from an
+   owner-supplied transcript: Matt Pocock's public "AI coding workflow" skills repo, ~162k stars).
+   → **Folds into the item-5 journal note for META; not a new candidate, no separate work item.**
+   The transcript is *not new practice to adopt* — it is independent confirmation that this project's
+   three load-bearing rules were already arrived at, and in a stronger form:
+   - "one unbroken context window, watch the ~140k smart zone, clear between tickets" — we already
+     have this as *disposable sessions + docs-as-interface* (state is durable, not context-held), a
+     stronger form than manual clearing;
+   - "spec → tickets, each ticket = one context window" — this is our task-file convention
+     (`AI_TASK_PROTOCOL.md`: one file = one task = one IMPL session; checkpointed large blocks);
+   - "review in fresh-context sub-agents because an author over-praises its own code" — verbatim our
+     mandatory independent Codex cross-review gate.
+   **The one idea it sharpens** (does not settle): user-invoked **skills as an on-demand load
+   mechanism** — Pocock reports 38 installed skills costing ~660 tokens because they load on `/call`
+   rather than sitting always-read. That bears directly on item 5 (our 617-line `AI_TASK_PROTOCOL.md`
+   is read in full by *every* session). Findings 2 already proposed a skills layer and the **Scout
+   rejected it** — reason still standing: it adds a third instruction format (beside `CLAUDE.md` /
+   `AGENTS.md`) while `META_TASK_01_framework_consolidation.md` (`draft`) is open on *deleting*
+   duplication. The transcript shows the *benefit* (660 vs. 617) but does not remove the *cost*.
+   → **For META: weigh on-demand loading of the always-read protocol *together with* the item-5
+   stage-log weight and META_TASK_01 — one context-weight question, not three — never as a standalone
+   new format.** Source: owner transcript, 2026-07-17; connects round 2 (context tax) + Findings 1
+   (skills layer, rejected).
+
 ### Landing checklist (for META / the next session — not for the Scout)
 
 The Scout's write rights stop at this thread. The following are **not yet done** and are the
@@ -1062,10 +1086,12 @@ reason this Outcome is a proposal, not a completed filing:
 - [ ] `draft` task file for item 1 (browser-probe pilot on one Stage-6 block).
 - [ ] PROJECT_BACKLOG.md entry for item 3 (retrospective ablation), pointing at
       `research/done/RESEARCH_2026-07-16_agentic-engineering-practices-scan.md`.
-- [ ] `open` journal entry in AI_FRAMEWORK_IDEAS.md for item 5 (stage-log weight), for META.
+- [ ] `open` journal entry in AI_FRAMEWORK_IDEAS.md for item 5 (stage-log weight) **plus the item-6
+      link** (on-demand loading / skills, weighed together with META_TASK_01 — one context-weight
+      question), for META.
 - [ ] On close, move this thread to `docs/project/research/done/`.
 
-Items 2 and 4 need no work item (rejected / note only). No `.request.md`/`.answer.md` buffers were
+Items 2 and 4 need no work item (rejected / note only). Item 6 folds into item 5 (no separate item). No `.request.md`/`.answer.md` buffers were
 created this thread (no external-AI round was earned), so none need deleting.
 
 ### Scout session close
