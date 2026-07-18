@@ -82,6 +82,17 @@ token weight is a live cost. `open` entries are never compacted. Keep new entrie
   or (b) a rule that co-authored durable docs collapse into one commit with a composite message, or
   (c) a sequencing rule that keeps two live sessions out of the same doc region. CLAUDE.md (Workflow —
   shared-index/staging), AI_TASK_PROTOCOL.md (Cross-Session Rules).
+  **Recurrence (2026-07-18):** a THIRD instance — Item 8's (Codex) `en.json` split was swept into
+  Item 4's (IMPL) commit `94ef19b` while both ran live. Content-safe, documented, no rewrite (owner
+  call), but the pattern is now `df70cae` → `da6861f` → `94ef19b`. The owner explicitly asked whether
+  **per-session git branches / worktrees** should be adopted so sessions never share a working tree
+  or index. STRAT's assessment (recorded for META, not decided): branches trade index-collisions for
+  **doc merge-conflicts** (STRAT/IMPL both write PROJECT_* docs), so they are not a clean win at this
+  project's tiny concurrency (usually 1 STRAT + 1 IMPL + occasional Codex) — sequencing is currently
+  cheaper. But three misattributions in one stage is a real signal. META should weigh: at what
+  concurrency does worktree isolation (the harness has an EnterWorktree tool) beat sequencing, and
+  is there a doc-merge discipline that makes branches viable. **Priority: MINOR / not urgent** — every
+  instance so far was content-safe and caught; revisit if an instance ever loses or corrupts content.
 - 2026-07-17 — **The stage board goes stale the moment an IMPL task finishes, and no rule closes the
   gap.** Task 03 closed (`done`, moved to `tasks/done/`, STAGE_LOG entry, Items 3/9 → done+LIVE in
   STAGE_6_IMPLEMENTATION_PLAN.md), but `STAGE_6_STRAT_BRIEF.md` — the *single* file a fresh STRAT
