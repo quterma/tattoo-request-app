@@ -1,5 +1,4 @@
 import { useTranslations } from "next-intl"
-import { Link } from "@/shared/i18n"
 import { CtaRequestButton, Page, Section, Stack } from "@/shared/ui"
 
 export default function ProcessPage() {
@@ -79,12 +78,6 @@ export default function ProcessPage() {
       <Section className="py-3 sm:py-3 text-center">
         <Stack gap="gap-5" className="items-center">
           <CtaRequestButton />
-          <Link
-            href="/aftercare"
-            className="text-sm text-muted-foreground underline transition-colors hover:text-foreground"
-          >
-            {t("aftercareLink")}
-          </Link>
         </Stack>
       </Section>
     </Page>

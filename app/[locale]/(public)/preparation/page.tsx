@@ -1,8 +1,8 @@
 import { useTranslations } from "next-intl"
 import { Page, Section, Stack } from "@/shared/ui"
 
-export default function AftercarePage() {
-  const t = useTranslations("aftercare")
+export default function PreparationPage() {
+  const t = useTranslations("preparation")
 
   const bullets = (key: string) =>
     t(key)
@@ -25,17 +25,17 @@ export default function AftercarePage() {
 
       <Section className="py-2 sm:py-3">
         <Stack gap="gap-1.5">
-          <h2 className="mb-1">{t("aftercareInstructions")}</h2>
+          <h2 className="mb-1">{t("beforeAppointment")}</h2>
           <ul className="list-disc ps-5">
-            {bullets("aftercareInstructionsItems")}
+            {bullets("beforeAppointmentItems")}
           </ul>
         </Stack>
       </Section>
 
       <Section className="py-2 sm:py-3">
         <Stack gap="gap-1.5">
-          <h2 className="mb-1">{t("healingTouchUps")}</h2>
-          <ul className="list-disc ps-5">{bullets("healingTouchUpsItems")}</ul>
+          <h2 className="mb-1">{t("tattooDay")}</h2>
+          <ul className="list-disc ps-5">{bullets("tattooDayItems")}</ul>
         </Stack>
       </Section>
     </Page>

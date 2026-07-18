@@ -31,7 +31,7 @@ FS (PRD §9 wins) — a stale PRD D4 line surfaced only at review.
 | 5 — Home rebuild | code-unblocked, no task file. Good Fit + Price-teaser copy is owner-authored (same material as Item 6). |
 | 6 — Process content | code-unblocked, **content-blocked** on owner copy (pricing, FAQ, Good Fit) |
 | 7 — Location polish | code-unblocked, **asset-blocked** on studio photos |
-| 8 — Preparation/Aftercare split | `ready`, **running in Codex now** (`Executor: codex`; launched 2026-07-18) |
+| 8 — Preparation/Aftercare split | **done** (implemented Codex, Claude-reviewed 2026-07-18, `pnpm qg` green; awaiting owner commit of the page-level source) |
 | 9 — Reference-code format | **done + LIVE** (folded into Item 3) |
 | 10 — Abuse mitigation | not started, **PRE-LAUNCH BLOCKER** (`/api/upload` durable quota — new paid dependency; mechanism is an open owner decision) |
 | 11 — 404/error boundary · 12 — favicon/OG/SEO | not started; small, independent |

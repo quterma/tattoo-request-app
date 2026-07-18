@@ -37,6 +37,20 @@ require updating them first. See PROJECT_DECISIONS.md — Stage 6 Product Docume
 
 Current focus:
 
+- **Stage 6 Item 8 — Preparation/Aftercare split — implemented (Codex), independently reviewed
+  (Claude, 2026-07-18), `pnpm qg` green; ready for owner commit.**
+  `STAGE_6_TASK_08_preparation_aftercare_split.md` done: the combined `/aftercare` route was split
+  into two FS-compliant content pages — `/preparation` (intro + Before-Appointment + Tattoo-Day,
+  boundary "After the tattoo…" bullet kept verbatim) and `/aftercare` (intro + Aftercare-Instructions
+  + Healing-&-Touch-Ups); both have no primary CTA (FS §2). Two locale-aware, visually-secondary
+  footer links (Preparation, Aftercare) added as fallback discovery; the Process→aftercare secondary
+  link and `process.aftercareLink` removed; nav unchanged (D9: Home/Process/Request/Location). i18n
+  `aftercare` namespace restructured into `preparation` + `aftercare`; all eight pre-existing content
+  strings preserved verbatim (verified value-by-value against the task baseline), no duplication, no
+  loss. **Process note:** the en.json portion of this task was inadvertently swept into commit
+  `94ef19b` (Task 04) under the shared-index hazard; the page-level source (aftercare/process/footer
+  rewrites + new `app/[locale]/(public)/preparation/page.tsx`) is the owner-approved working-tree
+  commit for Item 8. Task file moved to `tasks/done/`.
 - **✅ Item 1 is now LIVE — migration applied and verified end-to-end (2026-07-14, STRAT session).**
   The blocker above is cleared. Steps actually performed and confirmed against the linked remote
   database (not just reported):

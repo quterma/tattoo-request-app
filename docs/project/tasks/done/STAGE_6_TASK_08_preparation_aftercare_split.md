@@ -2,7 +2,7 @@
 
 ## Status
 
-`ready` · created 2026-07-14 · done: <date · PROJECT_STAGE_LOG.md entry pointer>
+`done` · created 2026-07-14 · done: 2026-07-18 · see PROJECT_STAGE_LOG.md Current focus → "Stage 6 Item 8 — Preparation/Aftercare split"
 
 ## Execution
 
@@ -163,8 +163,74 @@ to `docs/project/tasks/done/`; propose the commit for owner approval.
 
 ## Execution Report (filled by the executor)
 
-<what changed; gate results; unresolved items; out-of-scope findings>
+Executed by Codex on 2026-07-18.
+
+### Changes
+
+- Added the locale-aware `/preparation` route with the repo-supplied intro followed by the
+  existing Before Your Appointment and Tattoo Day sections.
+- Reworked `/aftercare` to contain only its repo-supplied intro, Aftercare Instructions, and
+  Healing & Touch-Ups.
+- Split the existing `aftercare` messages into `preparation` and `aftercare` namespaces. All
+  eight pre-existing section heading/item values were compared against the task baseline and
+  have exact string equality; the boundary "After the tattoo…" bullet remains in
+  `preparation.tattooDayItems`.
+- Added locale-aware Preparation and Aftercare links to the global footer using the shared
+  i18n `Link`.
+- Removed the Process secondary link to `/aftercare`, its unused import, and
+  `process.aftercareLink`. The Process CTA remains unchanged.
+- No tests were added, per `PROJECT_TESTING_STRATEGY.md` exclusions for static content pages and
+  simple presentational components.
+
+### Verification
+
+- `pnpm lint` — PASS (0 errors; 1 pre-existing `@next/next/no-img-element` warning in
+  `src/features/admin/__tests__/RequestImageViewer.test.tsx`).
+- `pnpm typecheck` — PASS.
+- `pnpm test` — PASS (28 test files, 363 tests).
+- `en.json` parsed successfully; targeted checks confirmed no cross-page section-key overlap,
+  no remaining `process.aftercareLink`, and the unchanged four-item primary nav.
+- During execution, HEAD advanced from `8738333` to `75e2aae` via a docs-only commit. A
+  `git diff --name-status` check confirmed that commit did not touch this task file or any
+  Allowed Write Surface path.
+
+### Unresolved / out-of-scope findings
+
+None.
+
+### Completion obligations
+
+None introduced: no migrations, environment variables, external configuration, or real-boundary
+acceptance criteria were added by this change.
 
 ## Claude Review Verdict (delegated tasks only)
 
-<Claude's independent verdict after reviewing the diff and re-running `pnpm qg`>
+Reviewed by Claude on 2026-07-18 — independent pass over the full diff (tracked + untracked) plus a
+full `pnpm qg`.
+
+**Verdict: APPROVED.** The implementation satisfies every acceptance criterion.
+
+- `/preparation` (new, untracked `page.tsx`) and `/aftercare` (rewritten) are two distinct routes,
+  each rendering intro + its two sections in the specified order, each with no primary CTA. Both
+  routes appear in the production build output.
+- All eight pre-existing content strings preserved **verbatim** — verified value-by-value against the
+  task baseline (`2217cfd`): 4 → `preparation`, 4 → `aftercare`, no duplication, no loss. The boundary
+  "After the tattoo…" bullet stays in `preparation.tattooDayItems`. Intro copy matches the two
+  owner-supplied lines exactly. Titles changed as specified.
+- Footer: two locale-aware `Link`s from `@/shared/i18n`, muted `text-xs`, unobtrusive row; Instagram
+  stays a raw external `<a>`. Nav (`app-nav.tsx`) clean and unchanged — Home/Process/Request/Location
+  (D9). Process `aftercareLink` block + unused import removed; `process.aftercareLink` gone from
+  `en.json`; CTA retained.
+- All i18n keys referenced by both pages resolve; no stray keys.
+- `pnpm qg`: **PASS** — lint 0 errors (1 pre-existing `no-img-element` warning, unrelated), typecheck
+  OK, 375 tests pass, build OK.
+
+**Process finding (not a code defect):** the en.json portion of this task was already committed,
+swept into commit `94ef19b` (Task 04) — the shared-index hazard CLAUDE.md documents (`df70cae`
+precedent). Working tree and HEAD are self-consistent and green. Owner decision (2026-07-18): accept
+the misattribution; commit the remaining page-level source as-is under an Item 8 message. No history
+rewrite. Recorded in PROJECT_STAGE_LOG.md.
+
+**Task-file note:** the Reporting section directed the reviewer to update
+`STAGE_6_IMPLEMENTATION_PLAN.md` — no such file exists; the live Stage 6 board is
+`STAGE_6_STRAT_BRIEF.md`, where Item 8 was set `done`.
