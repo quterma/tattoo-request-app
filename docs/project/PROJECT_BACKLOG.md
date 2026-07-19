@@ -101,16 +101,13 @@ latter case restoring the two links is a one-line change and needs no test.
 
 - Replace split("\n") in i18n with string arrays
 
-- **Public error & 404 UX (Stage 5D finding, deferred to Stage 6, 2026-07-09):** the root
-  `app/not-found.tsx` shows a bare unlocalized "404" with no navigation link home, and the public
-  routes have no error boundary — no root `global-error.tsx` exists and `error.tsx` files exist
-  only under admin requests, so an unhandled public-page render error falls through to Next.js's
-  default screen. Deferred as Stage 6 visual/product polish (localized 404 with navigation, minimal
-  public error boundary / `global-error.tsx`), deliberately not implemented in the Stage 5D fix
-  passes. See PROJECT_STAGE_LOG.md, 2026-07-09 Stage 5D Fix Pass 2 entry. (2026-07-12: remains a
-  Stage 6 item — STAGE_6_FUNCTIONAL_SPECIFICATION.md does not define error/404 pages, so this is
-  tracked in PROJECT_IMPLEMENTATION_PLAN.md, Stage 6, "In Stage 6 but outside the FS's
-  public-website scope".)
+- ~~**Public error & 404 UX**~~ — **resolved 2026-07-19**, Stage 6 Item 11
+  (`STAGE_6_TASK_11_public_error_404.md`). Root `app/not-found.tsx` now localized (via `en.json`
+  directly — single locale, no locale-tier file needed, see PROJECT_DECISIONS.md — "Public 404 /
+  error boundary (Item 11)") with a Home link; `app/[locale]/(public)/error.tsx` added as the
+  public error boundary, inheriting the `(public)` layout's shell automatically (retry via
+  `unstable_retry()` + Home). No `global-error.tsx` (owner-accepted deviation, negligible risk).
+  See PROJECT_STAGE_LOG.md, 2026-07-19 entry.
 
 - Admin image viewer (`RequestImageViewer`, YARL Zoom) — physical mobile-device verification
   deferred from Stage 4B.5.1, carried into Stage 6 / pre-release manual QA (does not block Stage

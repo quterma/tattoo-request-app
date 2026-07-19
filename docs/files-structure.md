@@ -62,8 +62,11 @@ tattoo-request-app/
 │   │   │           ├── page.tsx
 │   │   │           └── ResetPasswordForm.tsx
 │   │   └── (public)/
+│   │       ├── error.tsx
 │   │       ├── layout.tsx
 │   │       ├── page.tsx
+│   │       ├── __tests__/
+│   │       │   └── error.test.tsx
 │   │       ├── aftercare/
 │   │       │   └── page.tsx
 │   │       ├── location/
@@ -154,7 +157,8 @@ tattoo-request-app/
 │       │       ├── REVIEW_2026-07-17_stage6_contact_model.md
 │       │       ├── REVIEW_2026-07-17_stage6_placement_freetext.md
 │       │       ├── REVIEW_2026-07-18_stage6_success_page.md
-│       │       └── REVIEW_2026-07-19_location-map-embed.md
+│       │       ├── REVIEW_2026-07-19_location-map-embed.md
+│       │       └── REVIEW_2026-07-19_stage6-item11-public-404-error.md
 │       └── tasks/
 │           ├── META_TASK_01_framework_consolidation.md
 │           ├── STAGE_6_STRAT_BRIEF.md
@@ -168,7 +172,8 @@ tattoo-request-app/
 │               ├── STAGE_6_TASK_04_success_page.md
 │               ├── STAGE_6_TASK_07_location_map_embed.md
 │               ├── STAGE_6_TASK_08_preparation_aftercare_split.md
-│               └── STAGE_6_TASK_09_placement_freetext.md
+│               ├── STAGE_6_TASK_09_placement_freetext.md
+│               └── STAGE_6_TASK_11_public_error_404.md
 ├── scripts/
 │   └── update-structure.mjs
 ├── src/

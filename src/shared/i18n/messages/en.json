@@ -343,5 +343,16 @@
     "preparation": "Preparation",
     "aftercare": "Aftercare",
     "copyright": "\u00a9 {year} All rights reserved"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "The page you're looking for doesn't exist or has moved.",
+    "backHome": "Back to home"
+  },
+  "error": {
+    "title": "Something went wrong",
+    "body": "An unexpected error occurred. Please try again.",
+    "retry": "Try again",
+    "backHome": "Back to home"
   }
 }

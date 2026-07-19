@@ -37,6 +37,35 @@ require updating them first. See PROJECT_DECISIONS.md — Stage 6 Product Docume
 
 Current focus:
 
+- **Stage 6 Item 11 — public 404 + error boundary — done (2026-07-19).**
+  `tasks/done/STAGE_6_TASK_11_public_error_404.md`: the root `app/not-found.tsx` (previously bare/unlocalized,
+  no link home) now renders localized copy from `en.json`'s new `notFound` namespace with a Home
+  link — localized directly at root, not via a locale-tier file (see below); a new public error
+  boundary at `app/[locale]/(public)/error.tsx` (new `error` namespace) renders a localized
+  "something went wrong" page with an `unstable_retry()` retry button + Home link, inheriting the
+  public `AppNav`/`PublicFooter` shell from `(public)/layout.tsx` automatically (no manual wrap).
+  **In-plan finding that revised the task's own recommended approach:** live dev-server testing
+  disproved the two-tier 404 design (Option A) — Next.js only renders a nested `not-found.tsx` for
+  an explicit in-tree `notFound()` call (as the admin `[id]/not-found.tsx` does), never for a
+  genuinely unmatched URL, which always falls back to the root file regardless of any
+  `app/[locale]/not-found.tsx`. Confirmed against multiple unmatched paths. **Codex cross-review**
+  (`reviews/done/REVIEW_2026-07-19_stage6-item11-public-404-error.md`, 2 rounds, consensus) caught
+  three findings: (1) *should-fix* — `error.tsx` placed at the bare `[locale]` level catches admin
+  errors too and wrongly rendered the public shell on the private surface — moved to
+  `app/[locale]/(public)/error.tsx` so only `(public)/layout.tsx`'s tree is covered; (2)
+  *should-fix* — plain `reset()` only clears boundary state and replays the same failed render
+  without re-fetching — switched to `unstable_retry()`, the actual "try again" primitive in the
+  installed Next.js 16 contract; (3) *nit* — narrowed an overstated middleware-coverage claim in
+  PROJECT_DECISIONS.md. Round 2 caught one further *should-fix*: three reporting docs
+  (PROJECT_BACKLOG.md, STAGE_6_IMPLEMENTATION_PLAN.md, the task file's CO-1) still described the
+  superseded first draft after the code fix — reconciled to match the shipped shape. Full rationale
+  recorded in PROJECT_DECISIONS.md — "Public 404 / error boundary (Item 11)". `pnpm qg` green (377
+  tests, incl. 2 rewritten for the error boundary's retry→`unstable_retry()` wiring); CO-1
+  live-verified in dev both before and after the review fixes (localized 404 on
+  `/en/nonexistent-page` and a nested unmatched path; forced-throw test on the Home page confirmed
+  the moved error boundary renders with shell, retry, and Home link, admin route unaffected, then
+  reverted cleanly — `git diff --stat` confirmed no residual diff); CO-2 confirmed, no new
+  dependency/env var/migration. Owner-approved commit; task file moved to `tasks/done/`.
 - **Stage 6 Item 7 (map half) — done, 2026-07-19.** `STAGE_6_TASK_07_location_map_embed.md`:
   the Location page's empty map placeholder (`app/[locale]/(public)/location/page.tsx`) replaced
   with a real Google Maps iframe embed (keyless `maps.google.com/maps?q=...&output=embed`, owner

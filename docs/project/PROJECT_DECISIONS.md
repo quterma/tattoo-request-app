@@ -2110,6 +2110,64 @@ which was frozen pending this decision and now proceeds against it.
 
 ---
 
+## Public 404 / error boundary (Item 11) — decided 2026-07-19, revised in-plan from the task's own recommendation
+
+`STAGE_6_TASK_11_public_error_404.md` posed a micro-decision: localize the 404 via a two-tier
+design — a bare root `app/not-found.tsx` (unlocalized, rare) plus a proper localized
+`app/[locale]/not-found.tsx` using the public `AppNav`/`PublicFooter` shell (Option A, the task's
+own recommendation). **Live dev-server testing during planning disproved the premise**: Next.js
+App Router only renders a nested `not-found.tsx` when a page *inside* that segment tree explicitly
+calls `notFound()` (confirmed against the admin precedent — `[id]/not-found.tsx` fires from an
+explicit `notFound()` in `[id]/page.tsx`). For a genuinely unmatched URL — the real visitor-mistyped-
+a-path case, with no matching page anywhere — Next cannot mount the `[locale]` segment tree at all
+and always falls back to the **root** `app/not-found.tsx`. Verified against multiple unmatched
+paths, including nested ones (`/en/nonexistent-page`, `/en/request/typo`). A
+`app/[locale]/not-found.tsx` would therefore be unreachable dead code for the primary case (nothing
+under `[locale]` calls `notFound()` outside the admin subtree, which already has its own).
+
+**Decision: localize the ROOT `app/not-found.tsx` directly, no locale-tier file.** This project has
+exactly one locale (`en` — `routing.ts`: `locales: [defaultLocale]`, `localePrefix: "always"`), and
+`proxy.ts` middleware redirects any non-prefixed **matched public route** to `/en/...` before a
+request can reach `not-found.tsx` — so there is no real "which locale" ambiguity for those routes.
+(Narrower than "any non-prefixed path": the middleware matcher excludes `api`, `auth`, framework
+paths, and any path containing a dot — e.g. `/unknown.txt` reaches the root fallback without ever
+becoming `/en/unknown.txt`. Doesn't change the decision — Stage 6 has exactly one locale regardless
+of path shape, and the Home link itself, `/`, is matched and redirects correctly — but the durable
+claim is scoped to matched public routes, not literally "any" path. Codex cross-review,
+`REVIEW_2026-07-19_stage6-item11-public-404-error.md`, Finding 3.) The root not-found imports
+`messages.notFound` from `en.json` directly (module scope, no `useTranslations`/
+`NextIntlClientProvider` needed — nothing to switch between with one locale) and renders the
+strings as plain values. It still cannot use the public `AppNav`/`PublicFooter` shell (those are
+client components depending on `next-intl`'s hooks, structurally unavailable outside the `[locale]`
+provider tree) — copy is correctly localized, but the page stays shell-less. This is a known,
+documented gap, not an oversight: revisit only if the project ever adds a second locale (at which
+point real locale detection from the pathname would become necessary too).
+
+The public error boundary does NOT have the not-found problem — an `error.tsx` fires correctly for
+unhandled render errors because it wraps a segment tree that already mounted successfully before
+throwing. **Revised during Codex cross-review**
+(`reviews/done/REVIEW_2026-07-19_stage6-item11-public-404-error.md`, Findings 1–2): the first draft
+placed it at `app/[locale]/error.tsx` and wrapped it manually with `AppNav`/`PublicFooter` (the
+same non-inheritance behavior applies to `error.tsx` at that level as to `not-found.tsx`). Codex
+caught that a `[locale]`-level boundary is locale-**wide**, not public-only — it also catches
+errors from the admin login/reset pages and the protected admin layout, wrongly rendering the
+public shell on the private surface. **Fixed:** moved to `app/[locale]/(public)/error.tsx`, which
+Next places inside `(public)/layout.tsx`'s own tree — the shell is inherited automatically, no
+manual wrap, and the admin tree is unaffected (its own dedicated `error.tsx` files under
+`(admin)/admin/(protected)/requests/` still govern there, closer in the tree). Codex also caught
+that the retry button called plain `reset()`, which in the installed Next.js 16 contract only
+clears local boundary state and re-renders — it does not re-fetch route data, so it can silently
+replay the identical failed Server Component payload. Fixed to call `unstable_retry()` instead,
+which calls `router.refresh()` before resetting — the actual "try again" primitive per Next's
+`error.js` file-convention docs for this version.
+No root `global-error.tsx` was added — the root layout has no logic beyond
+`NextIntlClientProvider`/fonts, so an error escaping to root is near-zero-probability; a second
+boundary for that case was judged over-engineering for this pass (task allowed either call).
+
+**Implementation:** `STAGE_6_TASK_11_public_error_404.md` (Stage 6 Item 11).
+
+---
+
 # Rule for Future Changes
 
 All architectural, product, or behavioral decisions MUST be recorded in this document.

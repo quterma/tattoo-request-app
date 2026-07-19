@@ -2,7 +2,30 @@
 
 ## Status
 
-`ready` · created 2026-07-19 · done: <date · PROJECT_STAGE_LOG.md entry pointer>
+`done` · created 2026-07-19 · implemented 2026-07-19, `pnpm qg` green, independent Codex
+cross-review reached consensus 2026-07-19 (2 rounds — `reviews/done/
+REVIEW_2026-07-19_stage6-item11-public-404-error.md`) · owner-approved commit ·
+done: 2026-07-19 · PROJECT_STAGE_LOG.md, 2026-07-19 entry
+
+## Deviations from the task file (resolved in-plan, 2026-07-19)
+
+The task recommended Option A (two-tier: bare root `not-found.tsx` + localized
+`app/[locale]/not-found.tsx` using the public shell). **Live dev-server testing during planning
+disproved this design**: Next.js only renders a nested `not-found.tsx` for an explicit in-tree
+`notFound()` call (confirmed via the admin `[id]/not-found.tsx` precedent); a genuinely unmatched
+URL always falls back to the root file regardless of any `[locale]`-level `not-found.tsx`, making
+that file unreachable dead code. Revised, with owner confirmation via AskUserQuestion: **localize
+the root `app/not-found.tsx` directly** (safe because the project has exactly one locale and
+middleware normalizes matched public routes before `not-found.tsx` is ever reached — narrower than
+"any path", see PROJECT_DECISIONS.md), no locale-tier file. Full rationale in
+PROJECT_DECISIONS.md — "Public 404 / error boundary (Item 11)". The error boundary was unaffected
+in principle but **moved during Codex cross-review** (Finding 1,
+`reviews/done/REVIEW_2026-07-19_stage6-item11-public-404-error.md`): a `[locale]`-level `error.tsx`
+catches admin errors too and wrongly rendered the public shell there, so it now lives at
+`app/[locale]/(public)/error.tsx` (inherits `(public)/layout.tsx`'s shell automatically, no manual
+wrap) and retries via `unstable_retry()` (Finding 2 — `reset()` alone does not re-fetch route data
+in the installed Next.js 16 contract). No `global-error.tsx` added, as the task allowed either call
+(root layout has negligible error risk).
 
 ## Execution
 
@@ -16,6 +39,8 @@
   `app/[locale]/error.tsx` **or** `app/global-error.tsx` (new — the public error boundary),
   `src/shared/i18n/messages/en.json` (404/error copy), any small shared UI the pages reuse
   (`@/shared/ui` — read-only import, don't modify), the tests for the above, PROJECT_* reporting docs.
+  **As-built (post cross-review):** `app/[locale]/(public)/error.tsx`, not `app/[locale]/error.tsx`
+  — see Deviations.
 - May touch dependencies / migrations / generated files / shared docs: **no**.
 
 ## How to run (session settings)
@@ -75,6 +100,9 @@ Next.js's default white screen.
    a retry (`reset()`) and a link Home. Copy in `en.json` (`error.title`, `error.body`, `error.retry`,
    `error.backHome`). Decide in-plan whether a root `global-error.tsx` is also needed (it catches
    errors in the root layout itself — a belt-and-braces addition; small, worth it, but state the call).
+   **As-built (post cross-review, see Deviations):** `app/[locale]/(public)/error.tsx`, using
+   `unstable_retry()` rather than `reset()` — this original spec is kept as historical intent, not
+   the shipped shape.
 3. Reuse the existing `@/shared/ui` primitives and the public shell so both pages look like the site,
    not like a system page. No new shared components.
 
@@ -90,8 +118,17 @@ Next.js's default white screen.
 ```text
 - CO-1 — Live: navigating to a non-existent in-locale URL shows the localized 404 with a working
   Home link; a thrown render error in a public page shows the error boundary with working retry +
-  Home (force one in dev to verify). Disposition: executor fills with what was observed.
-- CO-2 — No new dependency, env var, or migration. Disposition: expected None; confirm.
+  Home (force one in dev to verify). Disposition: VERIFIED (re-verified after Codex cross-review
+  Findings 1–2 were applied). Navigated to `/en/nonexistent-page` and a nested unmatched path
+  `/en/request/typo` in dev — both render the root `app/not-found.tsx` with localized copy ("Page
+  not found" / body / "Back to home") and a working Home link (no shell, by design — see
+  Deviations). Forced a throw in `app/[locale]/(public)/page.tsx` (temporary, reverted immediately
+  after) — `app/[locale]/(public)/error.tsx` rendered with the public AppNav/PublicFooter shell
+  (inherited automatically from `(public)/layout.tsx`, no manual wrap), localized "Something went
+  wrong" copy, a working `unstable_retry()`-wired retry button, and a Home link; also confirmed
+  `/en/admin/login` still returns 200 unaffected (the moved boundary no longer covers the admin
+  subtree). `git diff --stat` showed no residual diff on the Home page file after revert.
+- CO-2 — No new dependency, env var, or migration. Disposition: CONFIRMED — none added.
 ```
 
 ## Review Granularity
