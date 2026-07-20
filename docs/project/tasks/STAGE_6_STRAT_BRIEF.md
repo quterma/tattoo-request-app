@@ -78,9 +78,16 @@ Everything code-only is now cut and `ready` (7 map, 11, 12). What remains for a 
 2. **Turn owner content into Items 6 → 5.** When the artist returns copy (per the content brief),
    cut Item 6 (Process rewrite), which also unblocks Item 5 (Home). This is the stage's long pole and
    is entirely owner-gated, not code-gated.
-3. **Pre-deploy swaps to track** (assets, not tasks): real studio photos (Item 7 photo half), real
-   favicon + OG image + final metadata copy (Item 12), and the `en.json` placeholders
-   `__intro_TODO` / `INSTAGRAM_HANDLE`.
+3. **Pre-deploy swaps to track** (assets, not tasks): real studio photos (Item 7 photo half); real
+   favicon + OG image + final metadata copy + real **branded custom domain** + `robots`
+   noindex→index flip (Item 12, mechanism shipped 2026-07-20 — all flagged in-code with the
+   grep-able marker `__meta_TODO`, so `grep -rn __meta_TODO app/ src/` lists every swap point;
+   `metadataBase` reads `VERCEL_PROJECT_PRODUCTION_URL` to resolve to the `*.vercel.app` origin —
+   **conditional on the project's "Enable access to System Environment Variables" checkbox being ON**
+   (Vercel dashboard setting, not verifiable from the repo; tracked as Item 12 CO-5, a pre-deploy
+   live check — until confirmed, a deployed page could still advertise a localhost OG image); the
+   real branded domain remains a swap); and the `en.json` placeholders `__intro_TODO` /
+   `INSTAGRAM_HANDLE`.
 
 After 5/6 land and 7/10/11/12 are done, and the pre-deploy swaps are in: **Item 13** (FS §6
 acceptance sweep + manual mobile QA) closes the stage.

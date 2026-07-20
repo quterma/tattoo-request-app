@@ -1,7 +1,11 @@
 {
   "app": {
-    "title": "Tattoo Request App",
-    "description": "MVP scaffold"
+    "__meta_TODO": "INTERIM metadata copy — studio name is still the 'Studio Name' placeholder (see home.title/footer.studio). Owner-supplied final title/description/OG copy is a pre-deploy swap (STAGE_6_STRAT_BRIEF.md — Pre-deploy swaps to track). Replace before launch.",
+    "title": "Studio Name",
+    "titleTemplate": "%s · Studio Name",
+    "description": "Custom tattoos in Tel Aviv. Submit a structured request with your idea, references, and placement — I reply within 48 hours.",
+    "ogTitle": "Studio Name — Custom Tattoos in Tel Aviv",
+    "ogDescription": "Custom tattoos in Tel Aviv. Submit a structured request with your idea, references, and placement."
   },
   "nav": {
     "home": "Home",

@@ -26,10 +26,12 @@ tattoo-request-app/
 ├── app/
 │   ├── favicon.ico
 │   ├── globals.css
+│   ├── icon.svg
 │   ├── layout.tsx
 │   ├── not-found.tsx
 │   ├── [locale]/
 │   │   ├── layout.tsx
+│   │   ├── opengraph-image.tsx
 │   │   ├── (admin)/
 │   │   │   └── admin/
 │   │   │       ├── (protected)/
@@ -158,11 +160,11 @@ tattoo-request-app/
 │       │       ├── REVIEW_2026-07-17_stage6_placement_freetext.md
 │       │       ├── REVIEW_2026-07-18_stage6_success_page.md
 │       │       ├── REVIEW_2026-07-19_location-map-embed.md
-│       │       └── REVIEW_2026-07-19_stage6-item11-public-404-error.md
+│       │       ├── REVIEW_2026-07-19_stage6-item11-public-404-error.md
+│       │       └── REVIEW_2026-07-20_stage6-item12-favicon-og-seo.md
 │       └── tasks/
 │           ├── META_TASK_01_framework_consolidation.md
 │           ├── STAGE_6_STRAT_BRIEF.md
-│           ├── STAGE_6_TASK_11_public_error_404.md
 │           ├── STAGE_6_TASK_12_favicon_og_seo.md
 │           ├── TOOLING_TASK_01_project_status_command.md
 │           └── done/

@@ -37,6 +37,49 @@ require updating them first. See PROJECT_DECISIONS.md — Stage 6 Product Docume
 
 Current focus:
 
+- **Stage 6 Item 12 — favicon / OG / basic SEO metadata (mechanism) — implemented, Codex
+  cross-review reached consensus (4 rounds, `reviews/done/`), `pnpm qg` green; mechanism committable,
+  task stays `in progress` until CO-5 (Vercel checkbox + live OG-origin check) — awaiting owner commit approval
+  (2026-07-20).**
+  `STAGE_6_TASK_12_favicon_og_seo.md`: replaced the Next scaffold metadata ("Tattoo Request App" /
+  "MVP scaffold") with a real `generateMetadata` in `app/[locale]/layout.tsx` reading interim copy
+  from `en.json`'s `app` namespace — `title` (+ `%s · Studio Name` template), `description`,
+  `openGraph` (title/description/siteName/type/locale + image), `metadataBase`, and
+  `robots: { index: false, follow: false }` (noindex-until-public-launch, owner-confirmed). OG image
+  is a dynamic `app/[locale]/opengraph-image.tsx` via built-in `next/og` `ImageResponse` (no new
+  dependency), colocated under `[locale]` so it merges into that segment's `openGraph` block (a
+  root-level placement did not — verified live). Favicon is a placeholder `app/icon.svg` (Next file
+  convention); stock `app/favicon.ico` removed. **Split like Item 7:** the *mechanism* ships now;
+  the real studio name/copy, favicon, OG image, real **branded custom domain**, and the `robots`
+  index-flip are owner-supplied pre-deploy swaps — all flagged in-code with the grep-able marker
+  `__meta_TODO` (`grep -rn __meta_TODO app/ src/`) and recorded in STAGE_6_STRAT_BRIEF.md.
+  **Codex Review 1 (2 should-fix, both applied):** (1) `metadataBase` was a hardcoded
+  `https://example.com` that serves no OG image, and the "site not deployed" rationale was stale
+  (the app IS deployed for controlled verification, PROJECT_DECISIONS.md §C) — changed to read
+  Vercel's injected `VERCEL_PROJECT_PRODUCTION_URL` system var (stable production origin, still no
+  user-declared env var so CO-3 holds) with a localhost fallback; wording corrected to "deployed,
+  not publicly launched". **Review 2 (1 should-fix, applied):** the Vercel origin only resolves if
+  the project's "Enable access to System Environment Variables" checkbox is ON — a dashboard setting
+  not verifiable from the repo, so the claim that OG images "work on the verification deployment" was
+  reframed as conditional and turned into a checkable pre-deploy CO (**CO-5**) rather than asserted;
+  the task stays out of `done` until that live check passes. (2) `app/favicon.ico`'s deletion
+  had been left staged before owner approval (`git rm` auto-stages) — unstaged, working-tree
+  deletion preserved. **Review 3 (1 should-fix + 1 nit, applied):** a fail-loud `console.warn` added
+  in the Review 2 round was ineffective — it keyed on `process.env.VERCEL`, but that var sits behind
+  the *same* system-env toggle as `VERCEL_PROJECT_PRODUCTION_URL`, so with the checkbox OFF both are
+  absent together and the target failure takes the no-warning branch. Owner decision: **remove the
+  guard, rely on CO-5** (a `NODE_ENV` signal would work but warn on every local prod build); the nit
+  (stale "Next: file Response 1" text) is this reconciliation. `pnpm qg` green (377 tests, no new
+  dep); CO-1 live-verified (`/en` `<head>` shows all tags; `/en/opengraph-image` 200 image/png;
+  `/icon.svg` 200; production build has no `metadataBase` warning); CO-3 confirmed; CO-4 =
+  noindex-until-public-launch; **CO-5 open** (pre-deploy Vercel-checkbox + live OG-origin check). No
+  metadata unit test (declarative; per PROJECT_TESTING_STRATEGY.md — verified manually via CO-1).
+  **Review 4 (1 should-fix, applied):** the task's Reporting instruction still said "set `done` after
+  consensus", contradicting CO-5 — reconciled so the mechanism is committable but the task stays
+  `in progress` until CO-5 is verified live. **Consensus reached** (4 rounds, no disputed items,
+  `reviews/done/REVIEW_2026-07-20_stage6-item12-favicon-og-seo.md`). Next: propose commit for owner
+  approval; CO-5 remains an owner pre-deploy action and gates only the eventual `done`/`tasks/done/`
+  move, not the commit.
 - **Stage 6 Item 11 — public 404 + error boundary — done (2026-07-19).**
   `tasks/done/STAGE_6_TASK_11_public_error_404.md`: the root `app/not-found.tsx` (previously bare/unlocalized,
   no link home) now renders localized copy from `en.json`'s new `notFound` namespace with a Home

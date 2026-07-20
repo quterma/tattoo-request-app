@@ -2,7 +2,52 @@
 
 ## Status
 
-`ready` · created 2026-07-19 · done: <date · PROJECT_STAGE_LOG.md entry pointer>
+`in progress` · created 2026-07-19 · implemented 2026-07-20, `pnpm qg` green, CO-1..CO-4 verified ·
+awaiting independent Codex cross-review to consensus and owner commit approval ·
+done: <date · PROJECT_STAGE_LOG.md entry pointer>
+
+## Deviations from the task file (2026-07-20)
+
+The task's Scope listed a couple of "OR" choices left to implementation; the calls made:
+
+1. **OG image → dynamic `app/[locale]/opengraph-image.tsx` via `next/og` `ImageResponse`**, not a
+   static `app/opengraph-image.png`. `next/og` is built into Next (no new dependency — CO-3 holds),
+   and a code-generated placeholder is grep-flaggable (`__meta_TODO`) and needs no binary asset. The
+   real image (a studio/featured photo) remains the pre-deploy swap — either replace this file with a
+   static PNG or edit the generator. **Placed under `[locale]/`, not `app/` root**, because the
+   `openGraph` block lives in `[locale]/layout.tsx`'s `generateMetadata`; a root-level
+   `opengraph-image` did NOT merge into that block (verified live — `og:image` was absent until the
+   file was colocated under `[locale]`, after which the full `og:image` + dimensions + `twitter:image`
+   render and `metadataBase` resolves it to an absolute URL, clearing Next's build-time
+   `metadataBase` warning).
+2. **Favicon → `app/icon.svg`** (Next file convention, takes precedence, simplest interim placeholder
+   — a studio-initial mark). The stock `app/favicon.ico` was removed so the placeholder is
+   authoritative. Real studio mark is the pre-deploy swap.
+3. **No metadata unit test.** `generateMetadata` needs the next-intl request context; mocking it is
+   heavier than the value, and CO-1 (live `<head>` inspection) already proves the shape. Consistent
+   with how Items 7/11 were verified. Per PROJECT_TESTING_STRATEGY.md (metadata is declarative /
+   framework behavior — "verify manually").
+4. **`metadataBase` → `VERCEL_PROJECT_PRODUCTION_URL` (revised in Codex cross-review, Review 1
+   Finding 1).** The first draft hardcoded `https://example.com`, which is syntactically absolute
+   but serves no image — a social crawler following the `og:image` gets nothing, and the app IS in
+   fact deployed for controlled verification (PROJECT_DECISIONS.md §C), making the original "site not
+   deployed" rationale stale. Fixed to read Vercel's injected `VERCEL_PROJECT_PRODUCTION_URL` system
+   variable (stable production domain, documented by Vercel for OG-image URLs; Vercel-provided, not a
+   user-declared env var, so CO-3 still holds) with a `http://localhost:3000` fallback for local dev.
+   The `__meta_TODO` now flags the real *branded custom domain* swap; the noindex comment's framing
+   corrected to "deployed for controlled verification, not publicly launched".
+   **Caveat (Review 2 → 3 Finding 1):** `VERCEL_PROJECT_PRODUCTION_URL` is only populated at runtime
+   if the Vercel project's **"Enable access to System Environment Variables"** checkbox is ON — a
+   dashboard setting that cannot be verified from the repo. If it is OFF, a deployed page would
+   silently advertise the `http://localhost:3000` fallback origin and the OG image would be
+   unreachable. This is therefore NOT claimed as working on the verification deployment; it is
+   tracked as **CO-5** (a checkable pre-deploy obligation) and the task does not go `done` until
+   CO-5 is verified live. **No in-code guard** is added: a first attempt warned on
+   `process.env.VERCEL && !VERCEL_PROJECT_PRODUCTION_URL`, but Review 3 correctly showed that is
+   ineffective — `VERCEL` sits behind the *same* system-variable toggle, so with the checkbox OFF
+   both vars are absent together and the target failure takes the no-warning fallback branch. A
+   `NODE_ENV`-based signal would work but warn on every local prod build too; owner decision
+   2026-07-20: **remove the guard, rely on CO-5** (out-of-band pre-deploy verification).
 
 ## Execution
 
@@ -92,12 +137,44 @@ favicon, using Next's built-in Metadata API and file-based icon conventions (no 
 
 ```text
 - CO-1 — Live: the browser tab shows the real (or clearly-interim-flagged) title + a real favicon;
-  a shared-link preview (or the rendered <head>) shows correct OG tags. Disposition: executor fills.
+  a shared-link preview (or the rendered <head>) shows correct OG tags. Disposition: VERIFIED (dev
+  server, `/en`). Rendered <head> shows `<title>Studio Name</title>`, `<meta name="description">`,
+  `<meta name="robots" content="noindex, nofollow">`, `<link rel="icon" ... type="image/svg+xml">`,
+  and the full OG set — `og:title`, `og:description`, `og:site_name`, `og:type=website`,
+  `og:locale=en_US`, `og:image` (+ `:type`/`:width=1200`/`:height=630`/`:alt`) and `twitter:card`/
+  `:title`/`:description`/`:image`. `/en/opengraph-image` returns 200 image/png; `/icon.svg` returns
+  200 image/svg+xml. Production build emits no `metadataBase` warning (OG URL absolute).
 - CO-2 — Any interim copy / placeholder favicon / placeholder OG image is flagged (a grep-able
   marker) so it is caught before deploy, and the pre-deploy swaps are recorded as owner asset items
-  in the plan/brief. Disposition: executor lists what is interim vs final.
-- CO-3 — No new dependency, env var, or migration. Disposition: expected None; confirm.
-- CO-4 — Indexability decision recorded (index now vs noindex-until-launch). Disposition: state the call.
+  in the plan/brief. Disposition: DONE. Marker `__meta_TODO` present at all six interim points —
+  `grep -rn __meta_TODO app/ src/` lists them (en.json `app.__meta_TODO`; `[locale]/layout.tsx`
+  domain + noindex; `[locale]/opengraph-image.tsx`; `app/icon.svg`). Interim: studio name in
+  title/OG (still the `"Studio Name"` placeholder), description, OG image, favicon, the real branded
+  custom domain for `metadataBase` (current origin comes from `VERCEL_PROJECT_PRODUCTION_URL` when
+  Vercel's system-var access is enabled — see CO-5), and the `robots` noindex→index flip at launch.
+  Final = owner assets/copy + real custom domain + index-on. Recorded in
+  STAGE_6_STRAT_BRIEF.md — "Pre-deploy swaps to track".
+- CO-3 — No new dependency, env var, or migration. Disposition: CONFIRMED — `next/og` is built into
+  Next (no `package.json`/lockfile change); no migration. `metadataBase` reads Vercel's injected
+  `VERCEL_PROJECT_PRODUCTION_URL` system variable (Vercel-provided, not a user-declared env var; no
+  `.env.example`/config entry added), with a localhost fallback for local dev.
+- CO-4 — Indexability decision recorded (index now vs noindex-until-launch). Disposition:
+  **noindex-until-public-launch** — `robots: { index: false, follow: false }` in `generateMetadata`,
+  flagged `__meta_TODO` for the launch flip. The app IS deployed for controlled verification
+  (PROJECT_DECISIONS.md §C — deployed, not publicly launched), but Home/Process (Items 5/6) content
+  is placeholder, so it must not be indexed yet. Owner-confirmed via AskUserQuestion.
+- CO-5 (added Review 2 Finding 1) — **`metadataBase` origin on the real deployment.** The
+  `VERCEL_PROJECT_PRODUCTION_URL` mechanism only yields a public HTTPS OG origin if the Vercel
+  project's **"Enable access to System Environment Variables"** checkbox is ON; otherwise a deployed
+  page falls back to `http://localhost:3000` and the OG image is unreachable. This is a Vercel
+  dashboard setting, not verifiable from the repo. Disposition: **OPEN pre-deploy obligation** —
+  before public launch (and ideally at the next verification deploy of this tree), confirm the
+  checkbox is enabled AND that the deployed `/en` renders an `og:image` on a public `https://`
+  origin whose image route returns 200. Until then the task ships the code but this boundary is NOT
+  claimed as verified. Owner action item; recorded here + in STAGE_6_STRAT_BRIEF.md pre-deploy swaps.
+  **No in-code guard** — a runtime signal cannot reliably distinguish the disabled-checkbox state
+  (`VERCEL` and `VERCEL_PROJECT_PRODUCTION_URL` share the same toggle; Review 3), so this is an
+  out-of-band pre-deploy check only (owner decision 2026-07-20: remove the guard, rely on CO-5).
 ```
 
 ## Review Granularity
@@ -126,4 +203,11 @@ favicon, using Next's built-in Metadata API and file-based icon conventions (no 
 
 - Update PROJECT_STAGE_LOG.md; STAGE_6_IMPLEMENTATION_PLAN.md Item 12 row; record any pre-deploy
   swaps (final copy, real favicon, real OG image) in the STRAT brief so they aren't lost. Reconcile
-  CO. Set `done` (for the mechanism), move to `tasks/done/`, propose the commit after consensus.
+  CO. Propose the commit after consensus.
+- **Lifecycle correction (Review 4 Finding 1):** the original instruction here — "set `done` for the
+  mechanism, move to `tasks/done/` after consensus" — contradicts CO-5 and is superseded. After
+  review consensus the mechanism may be **committed**, but the task **stays `in progress` at its
+  current path** (not `tasks/done/`) because CO-5 (the Vercel system-var checkbox + live public
+  OG-origin check) is an open completion obligation. Only verified CO-5 evidence permits the `done`
+  transition and the move to `tasks/done/`. A green `pnpm qg` certifies the tree, not the deployed
+  system (AI_TASK_PROTOCOL.md — Completion Obligations).

@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { Geist } from "next/font/google"
 import { NextIntlClientProvider, hasLocale } from "next-intl"
-import { getMessages } from "next-intl/server"
+import { getMessages, getTranslations } from "next-intl/server"
 import { notFound } from "next/navigation"
 import { routing } from "@/shared/i18n"
 import "../globals.css"
@@ -11,9 +11,46 @@ const geist = Geist({
   subsets: ["latin"],
 })
 
-export const metadata: Metadata = {
-  title: "Tattoo Request App",
-  description: "MVP scaffold for tattoo request management",
+// `metadataBase` makes OG/asset paths (incl. the generated opengraph-image) absolute so social
+// crawlers can fetch them. On Vercel we read the injected system variable
+// VERCEL_PROJECT_PRODUCTION_URL (stable production domain, identical across preview + production
+// deployments — Vercel documents this exact var for OG-image URLs); it is Vercel-provided, not a
+// user-declared env var, so no new env config is added. Locally it falls back to localhost.
+// INTERIM __meta_TODO: the real branded custom domain is the pre-deploy swap
+// (STAGE_6_STRAT_BRIEF.md — Pre-deploy swaps to track).
+//
+// NOTE: VERCEL_PROJECT_PRODUCTION_URL is only populated when the Vercel project's "Enable access to
+// System Environment Variables" checkbox is ON (a dashboard setting). If it is OFF the fallback
+// origin below is used and OG/asset URLs are unreachable — there is no in-code signal that reliably
+// distinguishes that state at runtime (VERCEL, VERCEL_ENV, etc. sit behind the same toggle), so this
+// is verified out-of-band as a pre-deploy obligation, task STAGE_6_TASK_12 CO-5, not guarded here.
+const SITE_URL = process.env.VERCEL_PROJECT_PRODUCTION_URL
+  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  : "http://localhost:3000"
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations({ locale: routing.defaultLocale, namespace: "app" })
+
+  return {
+    metadataBase: new URL(SITE_URL),
+    title: {
+      default: t("title"),
+      template: t("titleTemplate"),
+    },
+    description: t("description"),
+    openGraph: {
+      title: t("ogTitle"),
+      description: t("ogDescription"),
+      siteName: t("title"),
+      type: "website",
+      locale: "en_US",
+    },
+    // INTERIM __meta_TODO: noindex until public launch. The app IS deployed for controlled
+    // verification (PROJECT_DECISIONS.md §C — deployed, not publicly launched), but Home/Process
+    // (Items 5/6) content is still placeholder, so it must not be indexed yet. Flip to index:true
+    // at public launch — see PROJECT_DECISIONS.md / STRAT brief.
+    robots: { index: false, follow: false },
+  }
 }
 
 export default async function LocaleLayout({
