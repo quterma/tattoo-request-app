@@ -24,7 +24,6 @@ tattoo-request-app/
 ├── .husky/
 │   └── pre-commit
 ├── app/
-│   ├── favicon.ico
 │   ├── globals.css
 │   ├── icon.svg
 │   ├── layout.tsx
@@ -175,7 +174,8 @@ tattoo-request-app/
 │               ├── STAGE_6_TASK_07_location_map_embed.md
 │               ├── STAGE_6_TASK_08_preparation_aftercare_split.md
 │               ├── STAGE_6_TASK_09_placement_freetext.md
-│               └── STAGE_6_TASK_11_public_error_404.md
+│               ├── STAGE_6_TASK_11_public_error_404.md
+│               └── STAGE_6_TASK_12_favicon_og_seo.md
 ├── scripts/
 │   └── update-structure.mjs
 ├── src/

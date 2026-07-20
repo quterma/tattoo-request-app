@@ -37,9 +37,11 @@ require updating them first. See PROJECT_DECISIONS.md — Stage 6 Product Docume
 
 Current focus:
 
-- **Stage 6 Item 12 — favicon / OG / basic SEO metadata (mechanism) — implemented, Codex
-  cross-review reached consensus (4 rounds, `reviews/done/`), `pnpm qg` green; mechanism committable,
-  task stays `in progress` until CO-5 (Vercel checkbox + live OG-origin check) — awaiting owner commit approval
+- **Stage 6 Item 12 — favicon / OG / basic SEO metadata (mechanism) — done (2026-07-20), committed
+  `a37e7eb`.** Codex cross-review consensus (4 rounds, `reviews/done/`), `pnpm qg` green. CO-5 (Vercel
+  system-env checkbox + live OG-origin check) was **moved out of scope to an owner pre-deploy debt**
+  (STAGE_6_STRAT_BRIEF.md → "Owner pre-deploy actions"), so it does not gate this task's `done`; task
+  moved to `tasks/done/`.
   (2026-07-20).**
   `STAGE_6_TASK_12_favicon_og_seo.md`: replaced the Next scaffold metadata ("Tattoo Request App" /
   "MVP scaffold") with a real `generateMetadata` in `app/[locale]/layout.tsx` reading interim copy
@@ -72,14 +74,14 @@ Current focus:
   (stale "Next: file Response 1" text) is this reconciliation. `pnpm qg` green (377 tests, no new
   dep); CO-1 live-verified (`/en` `<head>` shows all tags; `/en/opengraph-image` 200 image/png;
   `/icon.svg` 200; production build has no `metadataBase` warning); CO-3 confirmed; CO-4 =
-  noindex-until-public-launch; **CO-5 open** (pre-deploy Vercel-checkbox + live OG-origin check). No
-  metadata unit test (declarative; per PROJECT_TESTING_STRATEGY.md — verified manually via CO-1).
-  **Review 4 (1 should-fix, applied):** the task's Reporting instruction still said "set `done` after
-  consensus", contradicting CO-5 — reconciled so the mechanism is committable but the task stays
-  `in progress` until CO-5 is verified live. **Consensus reached** (4 rounds, no disputed items,
-  `reviews/done/REVIEW_2026-07-20_stage6-item12-favicon-og-seo.md`). Next: propose commit for owner
-  approval; CO-5 remains an owner pre-deploy action and gates only the eventual `done`/`tasks/done/`
-  move, not the commit.
+  noindex-until-public-launch. No metadata unit test (declarative; per PROJECT_TESTING_STRATEGY.md —
+  verified manually via CO-1). **Review 4 (1 should-fix, applied):** the task's Reporting instruction
+  still said "set `done` after consensus", contradicting the then-in-scope CO-5 — reconciled.
+  **Consensus reached** (4 rounds, no disputed items,
+  `reviews/done/REVIEW_2026-07-20_stage6-item12-favicon-og-seo.md`). **CO-5 then moved out of the
+  task's scope** to an owner pre-deploy debt (owner decision 2026-07-20 — deploy-time verification is
+  the owner's, not IMPL work; carried in STAGE_6_STRAT_BRIEF.md → "Owner pre-deploy actions"), which
+  unblocked the `done` transition. Committed `a37e7eb`; task moved to `tasks/done/`.
 - **Stage 6 Item 11 — public 404 + error boundary — done (2026-07-19).**
   `tasks/done/STAGE_6_TASK_11_public_error_404.md`: the root `app/not-found.tsx` (previously bare/unlocalized,
   no link home) now renders localized copy from `en.json`'s new `notFound` namespace with a Home

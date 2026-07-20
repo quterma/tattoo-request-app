@@ -2,9 +2,17 @@
 
 ## Status
 
-`in progress` · created 2026-07-19 · implemented 2026-07-20, `pnpm qg` green, CO-1..CO-4 verified ·
-awaiting independent Codex cross-review to consensus and owner commit approval ·
-done: <date · PROJECT_STAGE_LOG.md entry pointer>
+`done` (mechanism) · created 2026-07-19 · implemented 2026-07-20, `pnpm qg` green, CO-1..CO-4
+verified · Codex cross-review consensus 2026-07-20 (4 rounds — `reviews/done/
+REVIEW_2026-07-20_stage6-item12-favicon-og-seo.md`) · committed `a37e7eb` ·
+done: 2026-07-20 · PROJECT_STAGE_LOG.md, 2026-07-20 entry
+
+**CO-5 is NOT part of this task's `done` gate — it was moved out of scope to the owner** (owner
+decision 2026-07-20): the Vercel system-env-checkbox + live public-OG-origin check is a pre-deploy
+action the owner performs, tracked as an owner debt in `STAGE_6_STRAT_BRIEF.md` → "Owner pre-deploy
+actions". A STRAT session verifies it before the Item 13 acceptance sweep. The *mechanism* this task
+owns is complete, reviewed, and committed; the deploy-time verification is not IMPL work, so the task
+does not stay open for it.
 
 ## Deviations from the task file (2026-07-20)
 
@@ -167,14 +175,16 @@ favicon, using Next's built-in Metadata API and file-based icon conventions (no 
   `VERCEL_PROJECT_PRODUCTION_URL` mechanism only yields a public HTTPS OG origin if the Vercel
   project's **"Enable access to System Environment Variables"** checkbox is ON; otherwise a deployed
   page falls back to `http://localhost:3000` and the OG image is unreachable. This is a Vercel
-  dashboard setting, not verifiable from the repo. Disposition: **OPEN pre-deploy obligation** —
-  before public launch (and ideally at the next verification deploy of this tree), confirm the
-  checkbox is enabled AND that the deployed `/en` renders an `og:image` on a public `https://`
-  origin whose image route returns 200. Until then the task ships the code but this boundary is NOT
-  claimed as verified. Owner action item; recorded here + in STAGE_6_STRAT_BRIEF.md pre-deploy swaps.
-  **No in-code guard** — a runtime signal cannot reliably distinguish the disabled-checkbox state
-  (`VERCEL` and `VERCEL_PROJECT_PRODUCTION_URL` share the same toggle; Review 3), so this is an
-  out-of-band pre-deploy check only (owner decision 2026-07-20: remove the guard, rely on CO-5).
+  dashboard setting, not verifiable from the repo. Disposition: **MOVED OUT OF SCOPE to the owner**
+  (owner decision 2026-07-20). Before public launch (and ideally at the next verification deploy),
+  the owner confirms the checkbox is enabled AND that the deployed `/en` renders an `og:image` on a
+  public `https://` origin whose image route returns 200. This is a deploy-time action the owner
+  performs, not IMPL work, so it does NOT gate this task's `done` — it is carried as an **owner debt
+  in STAGE_6_STRAT_BRIEF.md → "Owner pre-deploy actions"**, verified by a STRAT session before the
+  Item 13 acceptance sweep. **No in-code guard** — a runtime signal cannot reliably distinguish the
+  disabled-checkbox state (`VERCEL` and `VERCEL_PROJECT_PRODUCTION_URL` share the same toggle;
+  Review 3), so this is an out-of-band pre-deploy check only (owner decision 2026-07-20: remove the
+  guard, rely on the owner debt).
 ```
 
 ## Review Granularity
@@ -204,10 +214,12 @@ favicon, using Next's built-in Metadata API and file-based icon conventions (no 
 - Update PROJECT_STAGE_LOG.md; STAGE_6_IMPLEMENTATION_PLAN.md Item 12 row; record any pre-deploy
   swaps (final copy, real favicon, real OG image) in the STRAT brief so they aren't lost. Reconcile
   CO. Propose the commit after consensus.
-- **Lifecycle correction (Review 4 Finding 1):** the original instruction here — "set `done` for the
-  mechanism, move to `tasks/done/` after consensus" — contradicts CO-5 and is superseded. After
-  review consensus the mechanism may be **committed**, but the task **stays `in progress` at its
-  current path** (not `tasks/done/`) because CO-5 (the Vercel system-var checkbox + live public
-  OG-origin check) is an open completion obligation. Only verified CO-5 evidence permits the `done`
-  transition and the move to `tasks/done/`. A green `pnpm qg` certifies the tree, not the deployed
-  system (AI_TASK_PROTOCOL.md — Completion Obligations).
+- **Lifecycle (Review 4 Finding 1 → owner scope decision 2026-07-20):** Review 4 correctly flagged
+  that "set `done` after consensus" contradicted an in-scope CO-5. Resolved by the owner **moving
+  CO-5 out of the task's scope** into an owner pre-deploy debt (STAGE_6_STRAT_BRIEF.md → "Owner
+  pre-deploy actions"). With CO-5 no longer an IMPL completion obligation, the mechanism is done,
+  reviewed, and committed (`a37e7eb`), so the task goes `done` and moves to `tasks/done/`. The
+  deploy-time verification is not lost — it is a checkable owner debt a STRAT session confirms before
+  Item 13. (A green `pnpm qg` certifies the tree, not the deployed system —
+  AI_TASK_PROTOCOL.md — Completion Obligations; here the obligation is satisfied by *a pointer to a
+  work item created now*, the STRAT debt, per that same rule.)

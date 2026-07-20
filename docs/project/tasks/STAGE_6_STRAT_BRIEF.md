@@ -89,6 +89,22 @@ Everything code-only is now cut and `ready` (7 map, 11, 12). What remains for a 
    real branded domain remains a swap); and the `en.json` placeholders `__intro_TODO` /
    `INSTAGRAM_HANDLE`.
 
+### Owner pre-deploy actions (debts carried by the owner, not IMPL work)
+
+These are checkable actions the owner performs at/around deploy time; they are OUT of the IMPL
+tasks' scope (moved here so no task hangs `in progress` waiting on a dashboard/asset action). A
+STRAT session verifies these before the Item 13 acceptance sweep:
+
+- [ ] **Item 12 CO-5 — Vercel system-env + live OG origin.** Turn ON the Vercel project's "Enable
+  access to System Environment Variables" checkbox, then confirm the deployed `/en` renders an
+  `og:image` on a public `https://` origin whose image route returns 200. Until done, a deployed
+  page may advertise a `localhost` OG origin (unreachable to crawlers). Source:
+  `reviews/done/REVIEW_2026-07-20_stage6-item12-favicon-og-seo.md` (Reviews 2–4); mechanism committed
+  `a37e7eb`. Then flip `robots` `index:false`→`true` at public launch.
+- [ ] **Item 12 / Items 5–7 asset + copy swaps** — see the "Pre-deploy swaps to track" list above
+  (real studio name/copy, favicon, OG image, branded custom domain; studio photos; `en.json`
+  `__intro_TODO` / `INSTAGRAM_HANDLE`). `grep -rn __meta_TODO app/ src/` lists the Item 12 points.
+
 After 5/6 land and 7/10/11/12 are done, and the pre-deploy swaps are in: **Item 13** (FS §6
 acceptance sweep + manual mobile QA) closes the stage.
 
