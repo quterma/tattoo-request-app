@@ -130,6 +130,11 @@ export function RequestForm() {
   const router = useRouter()
 
   const draft = useRequestDraft()
+  // Honeypot (FS §4.5): a hidden, un-registered field a human never fills. Read from the DOM
+  // via a ref at submit time (the form builds its FormData manually from RHF values, so an
+  // un-registered input would otherwise never be sent). A bot auto-filling the visible-to-DOM
+  // field trips the server check. Kept out of RHF/zod so it never affects validation.
+  const honeypotRef = useRef<HTMLInputElement>(null)
   const [status, setStatus] = useState<SubmitStatus>("idle")
   const [uploadHandlesError, setUploadHandlesError] = useState<string | null>(null)
   // Consecutive technical (network/server) failures — drives the A.4 Instagram fallback.
@@ -231,6 +236,10 @@ export function RequestForm() {
       formData.append(f.contactValue, data.contactValue)
 
       if (data.budget) formData.append(f.budget, data.budget)
+
+      // Honeypot: send whatever the hidden field holds (empty for a real visitor). A bot that
+      // auto-filled it sends a non-empty value the server rejects as spam.
+      formData.append(f.website, honeypotRef.current?.value ?? "")
 
       for (const slot of getSnapshot().slots) {
         if (slot.status === "uploaded" && slot.handle) {
@@ -357,6 +366,19 @@ export function RequestForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit, onInvalid)} noValidate className="flex flex-col gap-8">
+      {/* Honeypot (FS §4.5): off-screen, not display:none (some bots skip hidden fields),
+          aria-hidden + tabIndex=-1 + autoComplete=off so assistive tech and real keyboard users
+          never reach it. Not registered with RHF; read via honeypotRef at submit. */}
+      <input
+        ref={honeypotRef}
+        type="text"
+        name={REQUEST_FIELDS.website}
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        defaultValue=""
+        style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px", opacity: 0 }}
+      />
       {/* Introduction (FS §4.1) — placeholder copy pending owner authoring (see en.json __intro_TODO). */}
       <p className="text-sm text-muted-foreground">{t("introduction")}</p>
 

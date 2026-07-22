@@ -23,6 +23,7 @@ export const VALIDATION_KEYS = {
   UPLOAD_TOO_MANY: "upload_too_many",
   UPLOAD_EXPIRED: "upload_expired",
   UPLOAD_INVALID: "upload_invalid",
+  UPLOAD_RATE_LIMITED: "upload_rate_limited",
 } as const
 
 export type ValidationKey = (typeof VALIDATION_KEYS)[keyof typeof VALIDATION_KEYS]

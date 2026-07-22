@@ -29,7 +29,11 @@ interface UploadOptions {
 }
 
 function keyForStatus(status: number): { errorKey: string; retryable: boolean } {
-  if (status === 429 || status >= 500) return { errorKey: K.UPLOAD_INVALID, retryable: true }
+  // 429 is the durable per-IP quota (a 24h window). Still retryable — the slot's Retry can
+  // re-upload later and the text request submits regardless — but its message must NOT promise
+  // an immediate retry will succeed, unlike the transient 5xx/network case (UPLOAD_INVALID).
+  if (status === 429) return { errorKey: K.UPLOAD_RATE_LIMITED, retryable: true }
+  if (status >= 500) return { errorKey: K.UPLOAD_INVALID, retryable: true }
   if (status === 400) return { errorKey: K.UPLOAD_TYPE_INVALID, retryable: false }
   return { errorKey: K.UPLOAD_INVALID, retryable: true }
 }

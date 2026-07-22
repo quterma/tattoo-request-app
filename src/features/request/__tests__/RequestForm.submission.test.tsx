@@ -122,6 +122,39 @@ describe("RequestForm – submission flow", () => {
     expect(capturedFormData!.get("contactMethod")).toBe("email")
     expect(capturedFormData!.get("contactValue")).toBe("user@example.com")
     expect(capturedFormData!.get("eligibility")).toBe("true")
+    // Honeypot is sent (empty for a real visitor who never sees or fills it).
+    expect(capturedFormData!.get("website")).toBe("")
+  })
+
+  it("renders the honeypot as a hidden, non-registered field a human never reaches", () => {
+    const { container } = render(<RequestForm />)
+    const honeypot = container.querySelector('input[name="website"]') as HTMLInputElement | null
+    expect(honeypot).not.toBeNull()
+    // Off-screen, aria-hidden, keyboard-unreachable — invisible to real visitors and AT.
+    expect(honeypot!.getAttribute("aria-hidden")).toBe("true")
+    expect(honeypot!.tabIndex).toBe(-1)
+    // Not registered with RHF: it carries no value the form validates.
+    expect(honeypot!.value).toBe("")
+  })
+
+  it("submits a filled honeypot value so the server can reject it as spam", async () => {
+    let capturedFormData: FormData | undefined
+    const mockFetch = vi.fn().mockImplementation((_url: string, options: RequestInit) => {
+      capturedFormData = options.body as FormData
+      return Promise.resolve({ json: () => Promise.resolve({ ok: true, referenceCode: "REQ-2026-0009" }) })
+    })
+    vi.stubGlobal("fetch", mockFetch)
+
+    const user = userEvent.setup({ delay: null })
+    const { container } = render(<RequestForm />)
+
+    // Simulate a bot populating the hidden field, then a normal fill + submit.
+    const honeypot = container.querySelector('input[name="website"]') as HTMLInputElement
+    fireEvent.change(honeypot, { target: { value: "http://spam.example" } })
+    await fillRequiredFields(user).fill()
+    await user.click(screen.getByRole("button", { name: /send request/i }))
+
+    expect(capturedFormData!.get("website")).toBe("http://spam.example")
   })
 
   it("does not submit when required fields are missing", async () => {

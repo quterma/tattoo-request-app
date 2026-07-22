@@ -20,4 +20,11 @@ export const config = {
     // is the handle TTL). See services/uploadToken.ts.
     tokenSecret: requireEnv("UPLOAD_TOKEN_SECRET"),
   },
+  upstash: {
+    // Durable per-IP upload quota store (Upstash Redis REST). Server-only; the
+    // durable, non-caller-resettable bound on POST /api/upload lives here — the
+    // in-memory limiter is only a best-effort burst shield. See bff/uploadQuota.ts.
+    redisUrl: requireEnv("UPSTASH_REDIS_REST_URL"),
+    redisToken: requireEnv("UPSTASH_REDIS_REST_TOKEN"),
+  },
 }

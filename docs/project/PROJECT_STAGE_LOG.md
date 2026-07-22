@@ -37,6 +37,26 @@ require updating them first. See PROJECT_DECISIONS.md — Stage 6 Product Docume
 
 Current focus:
 
+- **Stage 6 Item 10 — abuse mitigation — IMPLEMENTED + cross-reviewed, pending owner-approved commit (2026-07-22).**
+  Option B built per `tasks/STAGE_6_TASK_10_upload_abuse_mitigation.md`. Durable per-IP quota
+  `src/bff/uploadQuota.ts` (Upstash `@upstash/ratelimit`+`@upstash/redis`, `fixedWindow(60,"24 h")`,
+  keys prefixed by studio AND deployment env, `timeout: 0` plus an own 3s fail-closed deadline so a
+  hung store call also yields 503); wired FIRST in `app/api/upload/route.ts` (429+`Retry-After` on
+  breach; 503, no write, no in-memory fallback when the store is unavailable; structured
+  `console.warn` with category/source/reason on every 429/503). The in-memory `checkRateLimit` is
+  retained only as a documented best-effort burst shield behind it. 429 shows a rate-limit specific
+  message that does not promise an immediate retry (`upload_rate_limited`). Honeypot on
+  `/api/request`: hidden `website` field, read before parsing, benign real-shaped success (6-char
+  ambiguity-free code, no DB write), no dependency. CO-1 resolved in-plan: quota key
+  `x-vercel-forwarded-for` then `x-forwarded-for` then `x-real-ip` then `unknown` (IP-validated;
+  malformed source shares the `unknown` bucket, never a per-value key); Vercel overwrites XFF at the
+  edge (spoof live-verify = CO-2). CO-5 done: all stale "real ceiling"/ordering comments corrected.
+  Config `UPSTASH_REDIS_REST_URL`/`_TOKEN` via `requireEnv` + `.env.example`. `pnpm qg` green (399
+  tests). Cross-review: in-session Review Agent + independent Codex thread to consensus
+  (`reviews/done/REVIEW_2026-07-22_stage6-item10-upload-abuse-mitigation.md`) — Codex Review 1: 5
+  should-fix + 1 nit, all accepted and applied. Open COs (not code): CO-2 (cross-instance + spoof
+  live-verify), CO-3 (real Vercel env vars), CO-4 (owner-debt: Firewall/Log alert, WAF deny drill,
+  Upstash provisioning, spend safeguards). Pending: owner-approved commit.
 - **Stage 6 Item 10 — abuse mitigation — DECIDED + task cut (STRAT + Codex research, 2026-07-22).**
   The Codex research thread opened 2026-07-21 ran to consensus and **closed with an owner decision**
   (`research/done/RESEARCH_2026-07-21_stage6-item10-abuse-mitigation.md`). Outcome, all persisted:

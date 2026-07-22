@@ -138,9 +138,11 @@ tattoo-request-app/
 │       │       ├── RESEARCH_2026-07-14_deferred-actions-and-review-granularity.md
 │       │       ├── RESEARCH_2026-07-14_open-question-trigger-and-thread-visibility.md
 │       │       ├── RESEARCH_2026-07-15_external-framework-audit.md
-│       │       └── RESEARCH_2026-07-16_contact-model-validation-and-decomposition.md
+│       │       ├── RESEARCH_2026-07-16_contact-model-validation-and-decomposition.md
+│       │       └── RESEARCH_2026-07-21_stage6-item10-abuse-mitigation.md
 │       ├── reviews/
 │       │   ├── .gitkeep
+│       │   ├── REVIEW_2026-07-22_stage6-item10-upload-abuse-mitigation.md
 │       │   └── done/
 │       │       ├── .gitkeep
 │       │       ├── REVIEW_2026-07-13_codex-delegation-invocation.md
@@ -164,7 +166,7 @@ tattoo-request-app/
 │       └── tasks/
 │           ├── META_TASK_01_framework_consolidation.md
 │           ├── STAGE_6_STRAT_BRIEF.md
-│           ├── STAGE_6_TASK_12_favicon_og_seo.md
+│           ├── STAGE_6_TASK_10_upload_abuse_mitigation.md
 │           ├── TOOLING_TASK_01_project_status_command.md
 │           └── done/
 │               ├── STAGE_6_TASK_01_upload_flow_architecture.md
@@ -184,11 +186,13 @@ tattoo-request-app/
 │   │   ├── index.ts
 │   │   ├── rateLimit.ts
 │   │   ├── request.ts
+│   │   ├── uploadQuota.ts
 │   │   ├── validateFiles.ts
 │   │   └── __tests__/
 │   │       ├── adoptUploads.test.ts
 │   │       ├── rateLimit.test.ts
 │   │       ├── request.test.ts
+│   │       ├── uploadQuota.test.ts
 │   │       ├── validateFiles.test.ts
 │   │       └── validateRequestPayload.test.ts
 │   ├── config/
@@ -232,7 +236,9 @@ tattoo-request-app/
 │   │       ├── lib/
 │   │       │   ├── contact.ts
 │   │       │   ├── errors.ts
-│   │       │   └── upload.ts
+│   │       │   ├── upload.ts
+│   │       │   └── __tests__/
+│   │       │       └── errors.test.ts
 │   │       ├── store/
 │   │       │   ├── index.ts
 │   │       │   ├── requestDraft.ts

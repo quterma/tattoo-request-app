@@ -30,6 +30,7 @@ const MESSAGE_TO_I18N_KEY: Record<ValidationKey, string> = {
   upload_too_many: "errors.uploadTooMany",
   upload_expired: "errors.uploadExpired",
   upload_invalid: "errors.uploadInvalid",
+  upload_rate_limited: "errors.uploadRateLimited",
 }
 
 export function getFieldError(

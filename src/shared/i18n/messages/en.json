@@ -221,7 +221,8 @@
       "uploadTooLarge": "This image is over 4 MB. Please use a smaller one — a screenshot usually works.",
       "uploadTooMany": "Too many images. Please remove some and try again.",
       "uploadExpired": "Your images timed out while the form was open. Press Retry on each one, then send again — nothing else you typed was lost.",
-      "uploadInvalid": "Your images could not be attached. Press Retry on each one, then send again — nothing else you typed was lost."
+      "uploadInvalid": "Your images could not be attached. Press Retry on each one, then send again — nothing else you typed was lost.",
+      "uploadRateLimited": "Too many images from your connection right now, so these could not be attached. You can still send your request — everything else you typed was kept — and add images again later."
     }
   },
   "admin": {

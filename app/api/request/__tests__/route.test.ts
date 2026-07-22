@@ -77,15 +77,15 @@ const adoptedFiles = [
   },
 ]
 
-function makeRequest(): Request {
+function makeRequest(formData: FormData = new FormData()): Request {
   return {
     headers: new Headers(),
-    formData: vi.fn().mockResolvedValue(new FormData()),
+    formData: vi.fn().mockResolvedValue(formData),
   } as unknown as Request
 }
 
-async function callPost(): Promise<{ status: number; body: unknown }> {
-  const res = await POST(makeRequest())
+async function callPost(formData?: FormData): Promise<{ status: number; body: unknown }> {
+  const res = await POST(makeRequest(formData))
   const body = await res.json()
   return { status: res.status, body }
 }
@@ -268,6 +268,48 @@ describe("POST /api/request — race-condition fallback", () => {
     expect(status).toBe(500)
     expect(mockGetRequestByClientSubmissionId).toHaveBeenCalledTimes(1)
     expect(mockCleanupRequestFiles).not.toHaveBeenCalled()
+  })
+})
+
+// ── honeypot ────────────────────────────────────────────────────────────────
+
+describe("POST /api/request — honeypot", () => {
+  it("returns a benign, real-shaped success and never persists when the honeypot is filled", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {})
+    const fd = new FormData()
+    fd.append("website", "http://spam.example")
+
+    const { status, body } = await callPost(fd)
+
+    expect(status).toBe(200)
+    // Real-shaped 6-char code from the ambiguity-free alphabet (no I/O/0/1) — indistinguishable
+    // from a genuine reference code, so a bot gets no signal it was caught.
+    expect(body).toMatchObject({ ok: true })
+    const code = (body as { referenceCode: string }).referenceCode
+    expect(code).toMatch(/^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{6}$/)
+    // Nothing reaches parsing/adoption/DB — so the same clientSubmissionId can still submit later.
+    expect(mockParseRequestFormData).not.toHaveBeenCalled()
+    expect(mockAdoptUploadHandles).not.toHaveBeenCalled()
+    expect(mockCreateRequest).not.toHaveBeenCalled()
+    expect(warnSpy).toHaveBeenCalledWith("[route] honeypot filled: reason=honeypot")
+
+    warnSpy.mockRestore()
+  })
+
+  it("treats a whitespace-only honeypot value as empty (normal flow proceeds)", async () => {
+    const fd = new FormData()
+    fd.append("website", "   ")
+
+    const { status } = await callPost(fd)
+
+    expect(status).toBe(200)
+    expect(mockCreateRequest).toHaveBeenCalled()
+  })
+
+  it("proceeds normally when the honeypot field is absent/empty", async () => {
+    const { status } = await callPost()
+    expect(status).toBe(200)
+    expect(mockCreateRequest).toHaveBeenCalled()
   })
 })
 

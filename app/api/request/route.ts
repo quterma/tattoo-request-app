@@ -7,7 +7,7 @@ import {
   parseRequestFormData,
   validateRequestPayload,
 } from "@/bff"
-import { API_ERROR_CODES } from "@/shared/api"
+import { API_ERROR_CODES, REQUEST_FIELDS } from "@/shared/api"
 import { normalizeContactValue } from "@/features/request/lib/contact"
 import { createRequest, getRequestByClientSubmissionId } from "@/services"
 import type { ContactMethodName } from "@/services"
@@ -20,10 +20,27 @@ function resolveStudioId(): string {
 // Postgres unique violation error code
 const PG_UNIQUE_VIOLATION = "23505"
 
-// Best-effort per-IP throttle. The real ceilings are the per-session object cap and
-// per-file limits on /api/upload; this only blunts naive submit floods.
+// Best-effort in-memory burst shield, NOT a security boundary — it is per-instance on
+// Vercel's multi-instance runtime, so it only blunts a naive submit burst. The durable
+// bound against upload abuse lives on /api/upload (bff/uploadQuota.ts); this route's own
+// spam defence is the honeypot below.
 const SUBMIT_RATE_LIMIT = 5
 const SUBMIT_RATE_WINDOW_MS = 10 * 60 * 1000
+
+// Honeypot success code: same shape as a real reference_code — 6 chars from the
+// ambiguity-free alphabet (no I/O/0/1), matching the DB generator in
+// supabase/migrations/20260716184220_stage6_contact_model.sql. A spam submit gets a
+// normal-looking success with a code of this exact shape, so a bot cannot distinguish it
+// from a real one by inspecting the response. It is never written to the DB.
+const REFERENCE_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+
+function synthReferenceCode(): string {
+  let code = ""
+  for (let i = 0; i < 6; i++) {
+    code += REFERENCE_CODE_ALPHABET[Math.floor(Math.random() * REFERENCE_CODE_ALPHABET.length)]
+  }
+  return code
+}
 
 export async function POST(req: Request) {
   try {
@@ -40,6 +57,19 @@ export async function POST(req: Request) {
     }
 
     const formData = await req.formData()
+
+    // Honeypot (FS §4.5): a human never fills the hidden `website` field. A non-empty value
+    // is spam — return a normal-looking success with a real-shaped reference code but persist
+    // NOTHING, so the bot gets no signal it was caught. Read directly here (before parsing):
+    // the field is deliberately absent from the validated payload/schema. Because nothing is
+    // written, the same clientSubmissionId can still submit legitimately later. Structured
+    // console.warn so the trip is visible in Vercel logs.
+    const honeypot = formData.get(REQUEST_FIELDS.website)
+    if (typeof honeypot === "string" && honeypot.trim() !== "") {
+      console.warn("[route] honeypot filled: reason=honeypot")
+      return NextResponse.json({ ok: true, referenceCode: synthReferenceCode() })
+    }
+
     const payload = parseRequestFormData(formData)
 
     const validation = validateRequestPayload(payload)

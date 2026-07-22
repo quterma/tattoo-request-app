@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import {
   MAX_FILE_SIZE_BYTES,
   checkRateLimit,
+  checkUploadQuota,
   clientIpFromHeaders,
   validateSingleFile,
 } from "@/bff"
@@ -21,17 +22,18 @@ import { config } from "@/config"
 
 const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
-// Best-effort per-IP throttle. Honest about what this is NOT: the limiter is in-memory and
-// Vercel is multi-instance, so a distributed caller gets some multiple of this. It blunts a
-// naive script; it does not bound a determined one. See PROJECT_DECISIONS.md — Stage 6
-// Upload-Flow Architecture, §1 (abuse model) for the accepted residual risk.
+// Best-effort in-memory burst shield, NOT the security boundary. The limiter is in-memory
+// and Vercel is multi-instance, so a distributed caller gets some multiple of this — it
+// blunts a naive burst in front of the durable quota, nothing more. The cross-instance,
+// non-caller-resettable bound is checkUploadQuota (bff/uploadQuota.ts); this runs after it.
 const UPLOAD_RATE_LIMIT = 20
 const UPLOAD_RATE_WINDOW_MS = 10 * 60 * 1000
 
 // Bounds the objects one clientSubmissionId can accumulate (9 allowed + slack for retries
 // that leave a timed-out-but-written object). NOTE: clientSubmissionId is caller-chosen, so
-// an automated caller can simply mint a fresh UUID per upload and never approach this cap —
-// it bounds an honest session, not a hostile one, and is NOT a defence against bucket-filling.
+// an automated caller can mint a fresh UUID per upload and never approach this cap — it bounds
+// an honest session, not a hostile one. The durable per-IP quota (checkUploadQuota) is what
+// bounds a hostile caller across instances; this cap is not that defence.
 const MAX_OBJECTS_PER_SUBMISSION = 12
 
 // Reject an oversized body before buffering it. Kept under Vercel's 4.5 MB platform limit:
@@ -56,14 +58,46 @@ function serverError(): NextResponse {
   )
 }
 
+// Fail-closed response when the durable quota store is unreachable: a retryable 503 with
+// NO storage write. The image is marked failed on the client (retryable — see lib/upload.ts
+// keyForStatus), the text request still submits (FS §4.5). We do NOT fall back to the
+// in-memory limiter here — that would reopen the cross-instance hole this control closes.
+function serviceUnavailable(): NextResponse {
+  return NextResponse.json(
+    { ok: false, error: { code: API_ERROR_CODES.SERVER_ERROR } },
+    { status: 503 },
+  )
+}
+
 export async function POST(req: Request) {
   try {
+    // Durable per-IP quota FIRST — before formData(), before the in-memory shield. This is the
+    // cross-instance, non-caller-resettable bound (bff/uploadQuota.ts). Structured console.warn
+    // on every 429/503 so an upload spike is visible in Vercel logs (the active dashboard
+    // Firewall/Log alert is owner-debt). The warn contract is category + source + reason; never
+    // the storage path or handle. category is a fixed literal (the body is not read here).
+    const sourceKey = clientIpFromHeaders(req.headers)
+    const quota = await checkUploadQuota(sourceKey)
+    if (quota.kind === "quota") {
+      console.warn(`[upload] quota exceeded: category=upload source=${sourceKey} reason=quota`)
+      return NextResponse.json(
+        { ok: false, error: { code: API_ERROR_CODES.RATE_LIMITED } },
+        { status: 429, headers: { "Retry-After": String(quota.retryAfterSeconds) } },
+      )
+    }
+    if (quota.kind === "unavailable") {
+      console.warn(`[upload] quota store unavailable: category=upload source=${sourceKey} reason=unavailable`)
+      return serviceUnavailable()
+    }
+
+    // In-memory burst shield — best-effort only, runs after the durable quota admitted.
     const rate = checkRateLimit(
-      `upload:${clientIpFromHeaders(req.headers)}`,
+      `upload:${sourceKey}`,
       UPLOAD_RATE_LIMIT,
       UPLOAD_RATE_WINDOW_MS,
     )
     if (!rate.allowed) {
+      console.warn(`[upload] burst-shield limited: category=upload source=${sourceKey} reason=burst`)
       return NextResponse.json(
         { ok: false, error: { code: API_ERROR_CODES.RATE_LIMITED } },
         { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } },
@@ -98,7 +132,9 @@ export async function POST(req: Request) {
 
     const studioId = config.app.deploymentStudioId
 
-    // Hard cap per session — the real defence against bucket-filling replay.
+    // Hard cap per HONEST session (clientSubmissionId is caller-chosen, so a bot mints a fresh
+    // one and never approaches this — the durable per-IP quota above is what bounds a hostile
+    // caller; this only bounds an honest session's accidental replay/retry accumulation).
     const existingCount = await countObjectsForSubmission(studioId, clientSubmissionId)
     if (existingCount >= MAX_OBJECTS_PER_SUBMISSION) {
       return validationError(UPLOAD_FIELDS.file)

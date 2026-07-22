@@ -19,6 +19,10 @@ export const REQUEST_FIELDS = {
   contactValue: "contactValue",
   eligibility: "eligibility",
   uploadHandles: "uploadHandles",
+  // Honeypot (FS §4.5): a plausible field name automated form-fillers populate but a human
+  // never sees or focuses. A non-empty value on the server marks the submit as spam. Read
+  // directly from FormData in the route — deliberately NOT part of the validated payload/schema.
+  website: "website",
 } as const
 
 export type RequestField = (typeof REQUEST_FIELDS)[keyof typeof REQUEST_FIELDS]
