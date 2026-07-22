@@ -282,14 +282,29 @@ magic-byte check), and the bucket is private with no public read path. So the ex
 growth and cost, not data exposure.
 
 **Accepted for now** because the site is not publicly launched and takes ~5–20 real requests/week.
-**Must be closed before public launch** with one non-caller-resettable control:
-- durable rate limiting (Upstash Redis / Vercel KV) — a new paid external dependency, the reason it
-  was not done in Item 1;
-- or a server-issued upload capability carrying a durable quota;
-- or platform-level protection (e.g. Vercel WAF/bot filtering).
+**Must be closed before public launch** with a non-caller-resettable durable control.
 
 PROJECT_DECISIONS.md — "Stage 6 Upload-Flow Architecture" §1 records the same, and explicitly
 withdraws the earlier false claim that the session cap was "the real ceiling".
+
+**RESOLVED direction 2026-07-22 (STRAT + Codex research — Item 10 decided, task cut).** The owner
+reframed Item 10 as a **layer** (durable limit + alert/diagnostics + kill-switch + spend safeguards),
+ran a Codex research thread, and decided the mechanism:
+
+- **Option B — a durable per-IP fixed-window Upstash quota** (60 admitted uploads / IP / 24h,
+  fail-closed `503`, `429`+`Retry-After` on breach) replacing the per-instance in-memory limiter on
+  `/api/upload`. A structured `console.warn` on every 429/503 (in-code) plus a dashboard Firewall/Log
+  alert (owner-debt) is how the owner learns it fired.
+- **Option C (global circuit-breaker)** — the only thing that bounds a *distributed* caller — is
+  **deferred behind explicit triggers** (distributed spike, cost threshold, response-window loss,
+  marketing reach, or SaaS). B is the first layer of C, not a throwaway.
+- The old **"if Pro → Vercel KV, else → Upstash" fork is dead**: Vercel KV no longer exists (migrated
+  to Upstash, Dec 2024); Pro is a terms-only decision, not a limiter dependency.
+
+Task cut: `docs/project/tasks/STAGE_6_TASK_10_upload_abuse_mitigation.md` (`status: ready`). Research:
+`research/done/RESEARCH_2026-07-21_stage6-item10-abuse-mitigation.md`. Full decision:
+PROJECT_DECISIONS.md — "Stage 6 Item 10 — abuse mitigation". Still a pre-launch blocker until the task
+is implemented + its owner-debt done.
 
 ---
 

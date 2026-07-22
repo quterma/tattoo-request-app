@@ -37,6 +37,24 @@ require updating them first. See PROJECT_DECISIONS.md — Stage 6 Product Docume
 
 Current focus:
 
+- **Stage 6 Item 10 — abuse mitigation — DECIDED + task cut (STRAT + Codex research, 2026-07-22).**
+  The Codex research thread opened 2026-07-21 ran to consensus and **closed with an owner decision**
+  (`research/done/RESEARCH_2026-07-21_stage6-item10-abuse-mitigation.md`). Outcome, all persisted:
+  (1) **Item 10 `/api/upload` control = Option B** — a durable per-IP fixed-window Upstash quota
+  (**60/IP/24h**, named server constant), **fail-closed** (`503`, no write, no in-memory fallback;
+  `429`+`Retry-After` on breach), replacing the per-instance limiter. Structured `console.warn` on
+  every 429/503 (in-code) + a dashboard Firewall/Log alert (owner-debt) = how the owner learns it
+  fired; a synthetic admin request row was explicitly **rejected** (same growth it prevents).
+  (2) **Option C (global circuit-breaker)** — the only bound against a *distributed* caller —
+  **deferred behind triggers** (research Findings 2 §6); B is C's first layer, not a throwaway.
+  (3) **The "KV vs Upstash forks on Pro" premise is dead** — the research established Vercel KV no
+  longer exists (migrated to Upstash, Dec 2024); Pro is terms-only, not a limiter gate. Stale claims
+  corrected across the five docs. (4) **Task cut:**
+  `tasks/STAGE_6_TASK_10_upload_abuse_mitigation.md` (`ready`) with the B shape + honeypot + the
+  must-fix `x-forwarded-for` trust check + owner-debt COs. Full record: PROJECT_DECISIONS.md — "Stage
+  6 Item 10 — abuse mitigation". Every Stage 6 item is now done or cut. Docs-only session, no code.
+  (Supersedes the 2026-07-21 reframing entry, which deferred the mechanism to research; that research
+  is what returned the decision above.)
 - **Stage 6 Item 12 — favicon / OG / basic SEO metadata (mechanism) — done (2026-07-20), committed
   `a37e7eb`.** Codex cross-review consensus (4 rounds, `reviews/done/`), `pnpm qg` green. CO-5 (Vercel
   system-env checkbox + live OG-origin check) was **moved out of scope to an owner pre-deploy debt**

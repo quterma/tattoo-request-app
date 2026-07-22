@@ -54,7 +54,7 @@ file may contradict these without first escalating a PRD/FS/blueprint change.
 | 7 | Location polish — **split by owner decision 2026-07-18/19**: (a) **map embed** = `STAGE_6_TASK_07_location_map_embed.md` (**done**); (b) **studio photos** stay as the shipped placeholder squares, a **pre-deploy swap** (real photos a few days out). Address is real (Herzl 100), provider is fixed (Google Maps iframe). | Item 2 | **map half: done** (2026-07-19, `docs/project/tasks/done/STAGE_6_TASK_07_location_map_embed.md`; Codex cross-review consensus, keyless-endpoint risk owner-accepted as-is); **photo half: deferred to pre-deploy swap** (asset, not code) | PROJECT_DECISIONS.md — Location page |
 | 8 | Preparation / Aftercare split (two routes from the current combined `aftercare` page; drop policies links; **footer discovery links added**; no cross-link) | Item 2 | **done** (`5714233`, Codex-built + Claude-reviewed to consensus 2026-07-18; `pnpm qg` green, 375 tests; task in `tasks/done/`). **Note:** its `en.json` split was swept into Item 4's commit `94ef19b` by the shared-index hazard (df70cae-style misattribution) — content intact, documented in the stage log + task verdict, no history rewrite (owner call). | PROJECT_DECISIONS.md — Preparation/Aftercare in-product discovery |
 | 9 | Reference-code format (6-char uppercase alphanumeric, excludes O/0/I/1) | Item 3 (generated at submit) | **done + LIVE** (2026-07-17; folded into Item 3 — Block R `5de9329`, migration `20260715124427` applied; live codes verified 6-char, no O/0/I/1) | FS §4.6; PROJECT_DECISIONS.md — Stage 6 note under Reference Code Decision |
-| 10 | Abuse mitigation, **both endpoints** (honeypot on submit; **a non-caller-resettable control on `/api/upload` — now a pre-launch blocker**, see below) | Item 1 (shares the endpoints) | not started — **scope grew after the Item 1 Codex review** | FS §4.5; PROJECT_BACKLOG.md — "Unbounded automated storage growth"; PROJECT_DECISIONS.md — Stage 6 Upload-Flow Architecture §1 |
+| 10 | Abuse mitigation, **both endpoints** (honeypot on submit — free; **`/api/upload` durable control — pre-launch blocker**. Reframed as a LAYER, mechanism decided 2026-07-22: **Option B — durable per-IP Upstash quota** (60/IP/24h, fail-closed), C (global breaker) deferred behind triggers) | Item 1 (shares the endpoints) | **task cut, `ready`** (`STAGE_6_TASK_10_upload_abuse_mitigation.md`) — not yet implemented | FS §4.5; PROJECT_DECISIONS.md — "Stage 6 Item 10 — abuse mitigation"; `research/done/RESEARCH_2026-07-21_stage6-item10-abuse-mitigation.md` |
 | 11 | Public error/404 UX polish (localized 404, public error boundary) | — | **done** (2026-07-19, `tasks/done/STAGE_6_TASK_11_public_error_404.md`) — root 404 localized directly (single-locale project, no locale-tier file — the task's own two-tier recommendation was disproved live and revised in-plan); `app/[locale]/(public)/error.tsx` added, inherits the public shell, retries via `unstable_retry()`; Codex cross-review reached consensus in 2 rounds | PROJECT_BACKLOG.md; PROJECT_DECISIONS.md — "Public 404 / error boundary (Item 11)" |
 | 12 | Favicon / OG / basic SEO | — | **done** (2026-07-20, `a37e7eb`, `tasks/done/STAGE_6_TASK_12_favicon_og_seo.md`; Codex consensus 4 rounds) — `generateMetadata` in `[locale]/layout.tsx` (title+template, description, openGraph, `robots: noindex` until launch, `metadataBase` via `VERCEL_PROJECT_PRODUCTION_URL`); `app/[locale]/opengraph-image.tsx` (dynamic `next/og`, no dep) + `app/icon.svg` placeholder; stock `favicon.ico` removed. All interim copy/assets flagged `__meta_TODO`. **Owner pre-deploy debt** (was CO-5): Vercel system-var checkbox + live OG-origin check — tracked in STAGE_6_STRAT_BRIEF.md, not IMPL scope | PROJECT_IMPLEMENTATION_PLAN.md — Stage 6 |
 | 13 | Final FS §6 acceptance sweep (all 13 criteria) + manual mobile QA | Items 1–10, 14 | not started | FS §6 |
@@ -138,9 +138,14 @@ into Item 3's scope; see `STAGE_6_TASK_03_request_form_rebuild.md`.)
    fresh UUID per upload and never hits the per-session object cap, and the in-memory per-IP limiter
    is per-instance on Vercel. Objects are still size-capped and must be real images, and the bucket
    is private — so the exposure is storage cost, not data. Closing it needs one non-caller-resettable
-   control (durable rate limiting via Upstash/Vercel KV — a new paid dependency; a server-issued
-   upload capability with a durable quota; or platform-level protection). **Folded into Item 10**,
-   whose scope grew accordingly. Full record: PROJECT_BACKLOG.md.
+   control. **Folded into Item 10**, whose scope grew accordingly. **Reframed as a layer + mechanism
+   decided 2026-07-22** (STRAT + Codex research): **Option B — a durable per-IP Upstash quota**
+   (60/IP/24h, fail-closed), replacing the per-instance limiter; the global circuit-breaker (C, the
+   only bound against a *distributed* caller) is deferred behind triggers; B is C's first layer, not a
+   throwaway. The old "KV vs Upstash forks on Pro" framing is **dead** — Vercel KV no longer exists,
+   Pro is terms-only. Task cut: `STAGE_6_TASK_10_upload_abuse_mitigation.md` (`ready`). Full record:
+   PROJECT_DECISIONS.md — "Stage 6 Item 10 — abuse mitigation";
+   `research/done/RESEARCH_2026-07-21_stage6-item10-abuse-mitigation.md`.
 3. **Item 3 inherits one UI nit:** the submit CTA is currently *disabled* while an upload is in
    flight, whereas PROJECT_DECISIONS.md describes accepting the click and showing a "Sending…" wait
    state. Behavior is correct (a *failed* upload never blocks submit, per FS §4.5) — the wording and
@@ -163,8 +168,9 @@ into Item 3's scope; see `STAGE_6_TASK_03_request_form_rebuild.md`.)
   decision, not an asset to produce.
 - **Item 9 is folded into Item 3** (owner decision 2026-07-14 — same submit endpoint). **Item 10 is
   NOT folded in:** after the Item 1 Codex review it grew from a small honeypot/rate-limit item into a
-  pre-launch blocker (the `/api/upload` durable-quota gap needs a non-caller-resettable control — a
-  new paid dependency). It stays a separate item and must not be pulled into Item 3.
+  pre-launch blocker, was reframed as a layer, and its mechanism was **decided 2026-07-22** (Option B —
+  durable per-IP Upstash quota; C deferred). It stays a separate item and must not be pulled into
+  Item 3. **Task cut** — `STAGE_6_TASK_10_upload_abuse_mitigation.md` (`ready`).
 - Items 11/12 are low-risk, can slot in anywhere there's idle capacity; they don't block or get
   blocked by anything else. **They are the only items cuttable right now without owner content** —
   everything else waits on Item 3 (→ Item 4) or on owner-supplied copy/photos (5/6/7).

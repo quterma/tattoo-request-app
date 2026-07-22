@@ -124,6 +124,17 @@ Supabase Auth/Storage/Realtime are project-wide, not schema-scoped. Pending, not
 stable staging URL mechanism, exact Supabase/Vercel plan capabilities and pricing, a written
 migration promotion checklist, and staging seed-data approach.
 
+> **Note — Stage 6 Item 10 is independent of the Pro decision (corrected 2026-07-22).** An earlier
+> version of this note claimed the Vercel Pro decision "resolved a fork" in Item 10's abuse control
+> (`if Pro → Vercel KV, else → Upstash`). **That was wrong on the facts** and is withdrawn: the Item 10
+> research established that **Vercel KV no longer exists** (migrated to Upstash, Dec 2024) and Pro
+> **neither bundles nor gates** the limiter. Item 10 was decided independently as **Option B — a
+> durable per-IP Upstash quota** (PROJECT_DECISIONS.md — "Stage 6 Item 10 — abuse mitigation" §2;
+> research `research/done/RESEARCH_2026-07-21_stage6-item10-abuse-mitigation.md`). **Pro is still
+> likely needed** — but only for the Hobby commercial-use restriction (terms), which is genuinely part
+> of the plan/pricing decision above; it is not a limiter dependency. Marketplace-vs-native Upstash is
+> a provisioning detail, not a Pro question.
+
 ## Production Environment Setup
 
 Before public launch:
@@ -157,14 +168,16 @@ selection-time upload (`POST /api/upload`, public and unauthenticated). See PROJ
 - Uploaded files are bound to their session by an **encrypted, server-minted handle** (AES-256-GCM);
   final submit adopts only handles minted for the submitting `clientSubmissionId`, so one visitor
   cannot attach another's upload. Storage paths never reach the client.
-- ❌ **OPEN — PRE-LAUNCH BLOCKER: automated storage growth is unbounded.** The per-session object cap
-  is caller-resettable (`clientSubmissionId` is chosen by the client — a bot mints a fresh UUID per
-  upload) and the per-IP rate limiter is in-memory, therefore per-instance on Vercel. Objects are
-  still size-capped and must be real images, and the bucket is private with no public read path — so
-  the exposure is storage cost, not data exposure. **Must be closed before public launch** with one
-  non-caller-resettable control (durable rate limiting via Upstash/Vercel KV, a server-issued upload
-  capability with a durable quota, or platform-level bot protection). Tracked in PROJECT_BACKLOG.md;
-  folded into Stage 6 Item 10.
+- 🔜 **OPEN — PRE-LAUNCH BLOCKER: automated storage growth is unbounded. Mechanism decided 2026-07-22,
+  task cut, not yet implemented.** The per-session object cap is caller-resettable (`clientSubmissionId`
+  is chosen by the client — a bot mints a fresh UUID per upload) and the per-IP rate limiter is
+  in-memory, therefore per-instance on Vercel. Objects are still size-capped and must be real images,
+  and the bucket is private with no public read path — so the exposure is storage cost, not data
+  exposure. **Decision (Item 10): Option B — a durable per-IP Upstash quota** (60/IP/24h, fail-closed),
+  with a global circuit-breaker (Option C) deferred behind triggers. See PROJECT_DECISIONS.md —
+  "Stage 6 Item 10 — abuse mitigation" and `tasks/STAGE_6_TASK_10_upload_abuse_mitigation.md`
+  (`status: ready`). Closed for launch only when that task is implemented + its owner-debt (alert
+  drill, WAF deny drill, provisioning, spend safeguards) is done.
 - ⚠️ **No cleanup job for orphaned Storage objects** (uploads never submitted). Pre-existing,
   post-launch/operational — but selection-time upload structurally increases their volume. Tracked
   in PROJECT_BACKLOG.md.

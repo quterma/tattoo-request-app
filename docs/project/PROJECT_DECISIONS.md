@@ -2168,6 +2168,114 @@ boundary for that case was judged over-engineering for this pass (task allowed e
 
 ---
 
+# Stage 6 Item 10 — abuse mitigation: layer reframing + Option B decision — 2026-07-21 / decided 2026-07-22
+
+Records the reframing (2026-07-21) **and** the owner's mechanism decision (2026-07-22, §2 below). A
+STRAT session (`STRAT: Stage 6 — Item 10 abuse mitigation`) was expected to lay out the durable-quota
+options for `/api/upload` and get the owner's pick. The owner **redirected**: do not finalize the
+mechanism yet — Item 10 is wider than "which counter," and it earns an independent, repo-aware
+research pass before a decision (security-sensitive: public unauthenticated write surface;
+money-sensitive: a new paid dependency + spend risk). That research ran and closed:
+`docs/project/research/done/RESEARCH_2026-07-21_stage6-item10-abuse-mitigation.md`.
+
+**The hole (unchanged, still open — see "Stage 6 Upload-Flow Architecture" §1 and §6, and
+PROJECT_BACKLOG.md — "Unbounded automated storage growth"):** `/api/upload` is public and
+unauthenticated; `clientSubmissionId` is caller-chosen so a bot dodges the per-session object cap,
+and the shipped `src/bff/rateLimit.ts` is in-memory / per-instance on Vercel — neither bounds a
+hostile caller. Objects stay 4 MB-capped, real-image-only, private bucket, so exposure is **storage
+growth / cost, not data**. Pre-launch blocker.
+
+## 1. Item 10 is a **layer**, not one counter
+
+A passive limit is insufficient — a counter stops threshold-crossing but does not diagnose or halt an
+attack, and does not cap money if the threshold is set weakly. Item 10 is assessed as four controls,
+each to be sorted (from the research findings) into **required pre-launch / genuinely Stage-6 code
+scope / operational owner-debt** (the Item 12 CO-5 pattern — a checkable owner action tracked as a
+debt, not IMPL work):
+
+- **durable rate-limit** — the non-caller-resettable counter (mechanism in §2);
+- **alert / diagnostics** — so the owner learns of an upload spike (there is **none** today);
+- **kill-switch** — a fast way to disable/throttle `/api/upload` under active abuse;
+- **spend cap** — a hard money ceiling at Supabase / Vercel so cost is physically bounded even if a
+  control fails or a threshold is mis-set.
+
+Not silently collapsing Item 10 to one counter — that would repeat the Item 1 "10 MB limit" mistake
+(a limit advertised that the platform could not honor). The **submit honeypot** half (`/api/request`,
+FS §4.5 — invisible, no CAPTCHA) is unaffected by all of this: free, no dependency, no open question.
+
+## 2. Mechanism decision (owner, 2026-07-22): **Option B — durable per-IP quota; global breaker (C) deferred**
+
+The research corrected a premise this entry was built on: **"Vercel KV vs Upstash" is not a real fork**
+— Vercel KV was migrated to Upstash (Dec 2024) and no longer exists as a distinct product; new
+projects install Upstash Redis via the Vercel Marketplace. The old `if Pro → KV, else → Upstash`
+framing (and its "KV bundled with Pro" / "WAF & bot are Pro/Enterprise-gated" claims) is **dead**.
+**Vercel Pro is a separate terms-only decision** (Hobby forbids commercial use) owned by
+`PROJECT_PRODUCTION_READINESS.md` — it does **not** gate or bundle the limiter. (Findings 1 §4.)
+
+The owner chose, on the research recommendation:
+
+- **Option B — a durable per-IP fixed-window quota** (Upstash-backed application limiter), replacing
+  the per-instance `src/bff/rateLimit.ts` counter on `/api/upload`. This fixes the cross-instance
+  hole for a single-source/naive attacker.
+- **Threshold = 60 admitted uploads / IP / 24h**, a named server constant (not an env var) with
+  rationale + tests; retunable later without a migration. (5–20 real requests *per week* → huge
+  headroom.)
+- **Fail-closed:** if the durable store is unavailable, `/api/upload` returns a retryable `503` and
+  does **not** write; images become temporarily unavailable but the text request still submits
+  (FS §4.5). **No** fallback to the in-memory limiter. Return `429` + `Retry-After` only for an actual
+  quota breach.
+- **Marketplace vs native Upstash** is a provisioning detail (billing/ownership), **not** a code-shape
+  or Pro decision — settled at implementation; the unverified Marketplace hard-budget fact is not
+  needed for B.
+
+**Accepted residual (owner-conscious):** B bounds one *source*, not the *number* of sources — a
+distributed/rotating-IP caller multiplies the allowance without an aggregate ceiling. This is
+proportionate now: unlaunched, private bucket, low volume, worst case = storage cost not data, and a
+credible one-day operational response (alert + WAF deny drill + panel spend safeguards). B is **not**
+a claim of a physical aggregate bound.
+
+**Option C — global circuit-breaker** (a second limiter keyed `upload:global` that truly bounds
+admitted objects across all sources) is **deferred behind explicit triggers**, not scheduled to a
+stage. C is *additive* to B (every B primitive is reused; C adds one global counter) — so choosing B
+now is incremental, not a throwaway patch. Re-open C at the earliest of (Findings 2 §6): a verified
+distributed/multi-source spike or repeated cross-source limit hits; storage/limiter/cost crossing an
+owner-chosen operating threshold; the owner no longer able to guarantee the alert-to-deny response
+window; public marketing materially expanding reach; or multi-studio/SaaS work. C's own blocker — the
+unverified Upstash/Supabase physical hard-cap facts — is deferred with it.
+
+The **submit honeypot** half (`/api/request`, FS §4.5 — invisible, no CAPTCHA) is part of the same
+Item 10 task: free, no dependency.
+
+## 3. Implementation — task cut 2026-07-22
+
+Cut as `docs/project/tasks/STAGE_6_TASK_10_upload_abuse_mitigation.md` (`status: ready`), carrying the
+B shape above + honeypot, and these completion obligations (a green `pnpm qg` does not certify them):
+
+- **Must-fix — `x-forwarded-for` trust** (`src/bff/rateLimit.ts` currently trusts the first hop): the
+  repo cannot prove Vercel sanitizes it. The task must establish the correct Vercel-controlled client
+  IP from current docs and live-test spoofing, or use an edge-owned source key — else a bot mints a
+  fresh IP header like it mints a fresh UUID and B is defeated. Missing/invalid source → one shared
+  `unknown` bucket, not silently no-limit.
+- **Fix the three stale in-code comments** (`src/bff/rateLimit.ts:7-10`, `app/api/request/route.ts:23-24`,
+  `app/api/upload/route.ts:101`) that still call the session cap the "real ceiling" / "gated on
+  observed abuse" — so the withdrawn claim is not reintroduced from source.
+- **Observability — how the owner/developer learns the limiter fired (owner ask, 2026-07-22):** every
+  `429` (quota breach) and `503` (limiter unavailable) on `/api/upload` emits a **structured
+  `console.warn`** — source key, category, reason — visible in Vercel logs. This is **in the B code
+  diff**, no new dependency, no new layer. The active notification (email/webhook on a spike) is a
+  **Vercel Firewall / Log alert configured in the dashboard** (owner-debt, deploy-time) — the tested
+  trigger *is* the alert drill. This covers both false positives (a real visitor behind a shared IP
+  hit the cap) and real abuse. **Rejected: a synthetic "abuse" request row into the admin list** (the
+  owner floated it as a cheap reuse-the-old-layer hack): writing a DB row on each trip is the same
+  storage/row growth the control exists to stop, adds a new public DB write path, and pollutes real
+  requests — the anti-pattern outweighs the convenience.
+- **Owner-debt (CO-5 pattern, deploy-time, not IMPL):** the Firewall/Log alert above + its tested
+  trigger; a WAF method+path deny drill on `POST /api/upload` (the real kill-switch — dashboard, no
+  redeploy); Upstash provisioning; Vercel/Supabase spend safeguards. Tracked as task completion
+  obligations pointing at owner pre-deploy actions (STRAT brief).
+
+---
+
 # Rule for Future Changes
 
 All architectural, product, or behavioral decisions MUST be recorded in this document.
