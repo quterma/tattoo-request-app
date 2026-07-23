@@ -137,3 +137,4 @@ The shared git index / shared PROJECT_* docs have caused commit misattributions 
 files. **Do not run two sessions writing the same file at once — sequence them.**
 
 Re-verify every assumption in this brief against the repo before acting on it.
+

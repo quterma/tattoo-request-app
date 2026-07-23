@@ -155,6 +155,10 @@ project's Source of Truth defines one>
   criterion needing manual/real-boundary verification; a deferred review finding). Every entry gets
   completion evidence or a pointer to a work item created *now*. The task may not go `done`
   otherwise (AI_TASK_PROTOCOL.md — Completion Obligations).
+- Do **not** edit `STAGE_<stage>_STRAT_BRIEF.md` — it is STRAT-only. Closing this task makes the
+  brief lag, and that is fine: the next STRAT session reconciles it against canonical task status
+  (AI_TASK_PROTOCOL.md — The brief goes stale). A mid-flight product/spec question still stops and
+  goes to the owner (Deviations), not into the brief.
 - Set Status to `done` (date + stage-log pointer, no commit hash); move this file to
   `docs/project/tasks/done/`; propose the commit for owner approval — for a code block, only
   after the cross-review thread reached consensus (Workflow step 7).

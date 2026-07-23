@@ -57,6 +57,33 @@ and in the linked review/research threads (`docs/project/reviews/done/`, `docs/p
 Compacted because the journal is read into every session (Pre-task Sync + META kickoff) and its
 token weight is a live cost. `open` entries are never compacted. Keep new entries at this density.
 
+- 2026-07-17 — **Context weight is ONE question, currently split across three items — do not solve
+  them separately.** Handed to META by the AIENG Scout (`research/done/RESEARCH_2026-07-16_agentic-
+  engineering-practices-scan.md`, Outcome items 5+6; owner approved). Measured: `PROJECT_STAGE_LOG.md`
+  is **71% of the mandatory per-session read** (3,942 lines), or 79% of the extended bundle together
+  with `PROJECT_DECISIONS.md`; `AI_TASK_PROTOCOL.md` (617 lines) is read in full by every session. By
+  `AI_WORKFLOW_MASTER.md` this is a candidate **fix-now** ("a bloated always-read file is a live
+  cost, not an aesthetic one"). The three strands that must be judged together: **(a)** the stage
+  log's size (see the entry below, which is the same problem seen from a session's side); **(b)**
+  `META_TASK_01_framework_consolidation.md` (`draft`) — deleting duplication across framework docs;
+  **(c)** on-demand loading of the always-read protocol, sharpened by an owner-supplied transcript
+  (Matt Pocock's public skills repo): 38 skills cost ~660 tokens *because they load on invocation*
+  rather than sitting always-read. Note the transcript's main value was **validation, not novelty** —
+  it independently arrived at three rules this project already has in stronger form (disposable
+  sessions + docs-as-interface ≥ "clear context between tickets"; one task file = one context window;
+  fresh-context review because an author over-praises its own code). **The open question is only the
+  loading mechanism**, and it is genuinely two-sided: the benefit is real (660 tokens vs. a 617-line
+  always-read file), but the Scout rejected a skills layer for a still-standing reason — it adds a
+  *third* instruction format beside `CLAUDE.md`/`AGENTS.md` exactly while META_TASK_01 is open on
+  *removing* duplication. — **SPLIT 2026-07-17** after a design review
+  (`reviews/done/REVIEW_2026-07-17_impl-brief-channel.md`, round 2, finding 3): bundling all three
+  was wrong — it would have frozen a small, independently-fixable defect behind a large deferred
+  task. `META_TASK_01` explicitly cannot absorb a rule-meaning change (its goal is meaning-preserving
+  deletion), so the stage-log fix could not have ridden along anyway. **This entry now covers (b)+(c)
+  only** — framework-doc deduplication and the on-demand/skills loading question, which do interact
+  and must still be judged together. Strand (a) stands alone in the entry below. — open: META to
+  judge (b)+(c) together, and **never** to adopt an on-demand/skills format as a standalone novelty.
+  Model-tier routing is **closed** on evidence from the same Scout thread (Findings 2 / Response 2).
 - 2026-07-17 — `PROJECT_STAGE_LOG.md` has grown past the point where a session can read it whole
   (~3,940 lines / >256 KB; the Read tool refuses it, and two sessions in a row — a STRAT and the
   Item 14 IMPL — fell back to reading only the tail). It is a Pre-task Sync doc read at the start of
@@ -66,7 +93,16 @@ token weight is a live cost. `open` entries are never compacted. Keep new entrie
   and is ~16× larger. Options for META: a documented "read the tail + grep for specifics" rule (like
   the PROJECT_DECISIONS.md targeted-read rule already filed), and/or splitting closed stages
   (0–5) into an archive file the way PROJECT_IMPLEMENTATION_PLAN.md's history was flagged. Not
-  urgent (sessions cope), but recurring. — open: META to decide compaction/archive/targeted-read.
+  urgent (sessions cope), but recurring. — open: **stands alone as of 2026-07-17** (split out of the
+  bundled context-weight entry above, per `reviews/done/REVIEW_2026-07-17_impl-brief-channel.md`
+  round 2, finding 3 — it does not depend on META_TASK_01 or on the skills question and must not
+  wait for them). Re-measured 2026-07-17: **4,158 lines**, of which `## Log Entries` history is
+  ~3,533 and the current-state section only ~624 — i.e. ~85% of the file is closed history that
+  `.claude/CLAUDE.md` nonetheless tells every session to re-read. **Named minimum fix, ready to
+  apply:** change Pre-task Sync to read the `## Current Stage` section and to search `## Log Entries`
+  only when a task needs historical detail. One rule edit, no archive file, no new format, no owner
+  round-trip. Deliberately not applied in the 2026-07-17 commit because it changes what *every*
+  session loads and deserves its own scoped pass rather than riding along with an unrelated reversal.
 - 2026-07-15 — A STRAT session and an IMPL session, both live for Task 03, **co-authored the same
   durable docs** (`PROJECT_DECISIONS.md`: STRAT wrote "Stage 6 Contact Model", IMPL added a
   staging-waiver exception; `STAGE_6_TASK_03_*.md`: STRAT unblocked Block C + removed placement-Other,
@@ -108,7 +144,35 @@ token weight is a live cost. `open` entries are never compacted. Keep new entrie
   land"; they landed) has nothing that flips it to `ready`, since promotion is STRAT's call. — open:
   META — does the brief get an IMPL-appendable section, a generated board (`pnpm project:status`,
   `TOOLING_TASK_01`), or an explicit "IMPL states the delta, STRAT reconciles" duty? Second sighting
-  in three days. AI_TASK_PROTOCOL.md (STRAT Next-Session Brief), CLAUDE.md.
+  in three days. AI_TASK_PROTOCOL.md (STRAT Next-Session Brief), CLAUDE.md. — resolved 2026-07-17,
+  **together with the 2026-07-15 escalation entry below** (they are one problem from two ends —
+  the brief is STRAT-owned but IMPL is what invalidates it): AI_TASK_PROTOCOL.md — new
+  "`## Notes from other sessions` — the IMPL↔brief channel" + the section's registration in the
+  brief's contents list + the STRAT kickoff (read it first, fold it in, empty it) +
+  STAGE_TASK_TEMPLATE.md — Reporting (append the completion delta) + the live
+  `STAGE_6_STRAT_BRIEF.md` (section added, empty). **The IMPL-appendable section won**, in a
+  deliberately narrow form: append-only, dated bullets, pointers not prose, two admissible kinds
+  (completion delta / a question for STRAT), no decisions and no status the task file already owns,
+  and STRAT empties it on rewrite. Rejected alternatives: letting IMPL rewrite the brief (recreates
+  the clobber risk the single-writer rule exists to prevent); a separate hand-off file (adds a
+  document and a second thing to remember to read); waiting for `pnpm project:status`
+  (`TOOLING_TASK_01` is still `draft`, and a generated board would not carry an escalation
+  *question* anyway); leaving it to the owner (that is the manual carrying being removed). Not
+  fixed by this and still true: a `draft` task whose precondition has since been met still needs a
+  STRAT session to promote it — the note now makes that visible, but promotion remains STRAT's call
+  by design. — **REOPENED 2026-07-17**: the mailbox fix was **withdrawn** after an independent
+  design review (`reviews/done/REVIEW_2026-07-17_impl-brief-channel.md`, round 2, finding 1). Do not
+  rebuild it. Why it failed: in the cases that matter it still spent the owner's attention (while a
+  STRAT session is live the note must be routed to that session by hand; a blocking question stops
+  and tells the owner anyway), and its two admissible payloads did not cover the case present in the
+  very tree that introduced it — a non-STRAT session creating a new `draft` task, which left the
+  brief saying "Nothing in `draft`" while a draft existed. Replaced by a **reader-side rule** (no
+  second writer, no sequencing rule): a STRAT session reconciles the brief's `Next topic` against
+  canonical task `Status` and the stage's open task files before acting — AI_TASK_PROTOCOL.md ("The
+  brief goes stale") + the STRAT kickoff. That covers the `draft` case too, because it derives state
+  instead of relying on someone to report it. — open only in the weak sense that the brief still
+  lags between STRAT sessions **by design**; no further mechanism is wanted unless a real handoff is
+  actually lost.
 - 2026-07-17 — **An IMPL session cannot see its own context budget, and guessed it wrong in the
   direction that costs work.** Near the end of Task 03 the session told the owner it had "~10%"
   left and recommended handing the remaining live-migration + CO-1 verification to a fresh session;
@@ -138,8 +202,21 @@ token weight is a live cost. `open` entries are never compacted. Keep new entrie
   between-STRAT baton but has no defined channel for an **IMPL→STRAT escalation while a STRAT
   session is already open**. Owner routed this instance straight to the open STRAT session by hand
   (copy-paste of the plan's contact question) and had IMPL record its request somewhere other than
-  the brief. — open: META to design the IMPL→STRAT escalation channel (where does a mid-flight
-  product question land so it neither overwrites the brief nor forces a new STRAT when one is live?).
+  the brief. — resolved 2026-07-17, jointly with the 2026-07-17 stale-board entry above (same root,
+  opposite ends): AI_TASK_PROTOCOL.md — "`## Notes from other sessions` — the IMPL↔brief channel".
+  A mid-flight question is recorded there as a pointer (question + where the detail lives), which
+  neither overwrites the brief nor spawns a second STRAT stream. Note the deliberate limit: the note
+  is the **durable record**, not a handoff that lets the session continue — if the question blocks
+  IMPL now, it still stops and tells the owner, exactly as the existing STOP-and-escalate rule
+  requires. When a STRAT session is already live, routing the question to it directly (as the owner
+  did by hand this instance) remains correct and is now backed by a written record instead of a
+  copy-paste. — **CORRECTED 2026-07-17**: the mailbox was withdrawn (see the reopened entry above
+  and `reviews/done/REVIEW_2026-07-17_impl-brief-channel.md`, round 2). The resolution for *this*
+  entry is simply that **no new channel was needed**: a mid-flight product/spec question already
+  stops and goes to the owner (Deviations — STOP-and-escalate), and when a STRAT session is live the
+  owner routes it there directly, which is what happened in the triggering case. Non-blocking
+  findings go to the task report / PROJECT_BACKLOG.md as before. Resolved on that basis — the
+  original instinct to build a channel was the error.
   STAGE_TASK_TEMPLATE.md, CLAUDE.md (Task Files & Session Types).
 - 2026-07-12 — Accumulative per-stage task files rejected (executor context bloat, parallel-write
   conflicts); one file per task + `tasks/done/` chosen. — resolved: AI_TASK_PROTOCOL.md (Task

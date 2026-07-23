@@ -1083,13 +1083,33 @@ landing is done by META or the next appropriate session, which owns those write 
 The Scout's write rights stop at this thread. The following are **not yet done** and are the
 reason this Outcome is a proposal, not a completed filing:
 
-- [ ] `draft` task file for item 1 (browser-probe pilot on one Stage-6 block).
-- [ ] PROJECT_BACKLOG.md entry for item 3 (retrospective ablation), pointing at
-      `research/done/RESEARCH_2026-07-16_agentic-engineering-practices-scan.md`.
-- [ ] `open` journal entry in AI_FRAMEWORK_IDEAS.md for item 5 (stage-log weight) **plus the item-6
+- [x] `draft` task file for item 1 (browser-probe pilot on one Stage-6 block) — **created, then
+      withdrawn the same day.** `STAGE_6_TASK_15` was written by META, then deleted after an
+      independent design review (`reviews/done/REVIEW_2026-07-17_impl-brief-channel.md`, round 2,
+      finding 2). Reason, recorded so the Scout's recommendation is not simply re-adopted:
+      `PROJECT_TESTING_STRATEGY.md` already excludes visual/layout work from automated tests and
+      *requires* manual browser checks, and Item 13 already is "Final FS §6 acceptance sweep +
+      manual mobile QA" — so a browser pass finding a layout defect is the existing
+      manual-verification layer working, **not** evidence that the gates missed something. The
+      pilot would have measured an already-answered question, on a sample of one, and the repo has
+      no browser driver while the task forbade adding one. The useful residue was carried into
+      `STAGE_6_IMPLEMENTATION_PLAN.md` Item 13: name the browser capability when that task is cut.
+      The Scout did not weigh the testing strategy against its own candidate; the owner may
+      reinstate the pilot, but META recommends against.
+- [x] PROJECT_BACKLOG.md entry for item 3 (retrospective ablation), pointing at this thread.
+      → "Ablation of harness rules — post-MVP retrospective" (META, 2026-07-17), with the
+      reproduce-the-original-failure test as the method, sequenced after META_TASK_01.
+- [x] `open` journal entry in AI_FRAMEWORK_IDEAS.md for item 5 (stage-log weight) **plus the item-6
       link** (on-demand loading / skills, weighed together with META_TASK_01 — one context-weight
       question), for META.
-- [ ] On close, move this thread to `docs/project/research/done/`.
+      → Filed 2026-07-17 as a single entry: "Context weight is ONE question, currently split across
+      three items — do not solve them separately". META will take (a) stage-log size + (b)
+      META_TASK_01 + (c) on-demand loading as one pass.
+- [x] On close, move this thread to `docs/project/research/done/`. (META, 2026-07-17.)
+
+**Landing complete — 2026-07-17, by META.** All four items filed; items 2 and 4 correctly need no
+work item. Nothing from this thread edited `docs/framework/*`: the Scout's boundary held, and the
+framework consequences (if any) are now META's under its own bar.
 
 Items 2 and 4 need no work item (rejected / note only). Item 6 folds into item 5 (no separate item). No `.request.md`/`.answer.md` buffers were
 created this thread (no external-AI round was earned), so none need deleting.

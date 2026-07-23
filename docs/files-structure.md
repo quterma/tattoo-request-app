@@ -138,11 +138,11 @@ tattoo-request-app/
 │       │       ├── RESEARCH_2026-07-14_deferred-actions-and-review-granularity.md
 │       │       ├── RESEARCH_2026-07-14_open-question-trigger-and-thread-visibility.md
 │       │       ├── RESEARCH_2026-07-15_external-framework-audit.md
+│       │       ├── RESEARCH_2026-07-16_agentic-engineering-practices-scan.md
 │       │       ├── RESEARCH_2026-07-16_contact-model-validation-and-decomposition.md
 │       │       └── RESEARCH_2026-07-21_stage6-item10-abuse-mitigation.md
 │       ├── reviews/
 │       │   ├── .gitkeep
-│       │   ├── REVIEW_2026-07-22_stage6-item10-upload-abuse-mitigation.md
 │       │   └── done/
 │       │       ├── .gitkeep
 │       │       ├── REVIEW_2026-07-13_codex-delegation-invocation.md
@@ -157,16 +157,19 @@ tattoo-request-app/
 │       │       ├── REVIEW_2026-07-15_stage6_noncontact_contract.md
 │       │       ├── REVIEW_2026-07-15_stage6_reference_code.md
 │       │       ├── REVIEW_2026-07-16_stage6_form_ui.md
+│       │       ├── REVIEW_2026-07-17_impl-brief-channel.md
 │       │       ├── REVIEW_2026-07-17_stage6_contact_model.md
 │       │       ├── REVIEW_2026-07-17_stage6_placement_freetext.md
 │       │       ├── REVIEW_2026-07-18_stage6_success_page.md
 │       │       ├── REVIEW_2026-07-19_location-map-embed.md
 │       │       ├── REVIEW_2026-07-19_stage6-item11-public-404-error.md
-│       │       └── REVIEW_2026-07-20_stage6-item12-favicon-og-seo.md
+│       │       ├── REVIEW_2026-07-20_stage6-item12-favicon-og-seo.md
+│       │       ├── REVIEW_2026-07-22_stage6-item10-postconsensus-amend.md
+│       │       ├── REVIEW_2026-07-22_stage6-item10-upload-abuse-mitigation.md
+│       │       └── REVIEW_2026-07-23_stage6-item10-co2-live-verification.md
 │       └── tasks/
 │           ├── META_TASK_01_framework_consolidation.md
 │           ├── STAGE_6_STRAT_BRIEF.md
-│           ├── STAGE_6_TASK_10_upload_abuse_mitigation.md
 │           ├── TOOLING_TASK_01_project_status_command.md
 │           └── done/
 │               ├── STAGE_6_TASK_01_upload_flow_architecture.md
@@ -176,6 +179,7 @@ tattoo-request-app/
 │               ├── STAGE_6_TASK_07_location_map_embed.md
 │               ├── STAGE_6_TASK_08_preparation_aftercare_split.md
 │               ├── STAGE_6_TASK_09_placement_freetext.md
+│               ├── STAGE_6_TASK_10_upload_abuse_mitigation.md
 │               ├── STAGE_6_TASK_11_public_error_404.md
 │               └── STAGE_6_TASK_12_favicon_og_seo.md
 ├── scripts/

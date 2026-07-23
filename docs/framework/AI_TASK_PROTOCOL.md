@@ -34,7 +34,11 @@ Start every new strategic session with:
 > Run the Pre-task Sync (CLAUDE.md) and read the current stage's Source of Truth
 > (for Stage 6: STAGE_6_PRODUCT_DEFINITION.md and STAGE_6_FUNCTIONAL_SPECIFICATION.md).
 > Read `docs/project/tasks/STAGE_<stage>_STRAT_BRIEF.md` — it is the topic and the session's
-> pickup point. If the brief does not exist and this is the stage's first STRAT session, stop
+> pickup point. **Before acting on its `Next topic`, reconcile the brief against canonical state**:
+> the `Status` field of the task files it names, and the stage's open task files in
+> `docs/project/tasks/`. The brief lags whenever an IMPL session closes or cuts a task, so treat it
+> as a pointer, not as truth.
+> If the brief does not exist and this is the stage's first STRAT session, stop
 > and ask the owner what the first strategic topic is — do not invent one.
 > Expected outcome: \<task files for a stage / a decision on a question / a plan\>.
 > Existing code is strategic context too: before presenting options or solutions on any
@@ -68,7 +72,8 @@ session's handoff and the next session's topic; the owner writes no ad-hoc summa
   brief's commit immediately after writing it, and it must be committed (with owner approval —
   commits are never made without it, CLAUDE.md) before the next STRAT session starts.
 - Written and updated only by that stage's STRAT sessions (no conflict with Cross-Session
-  Rules: one active STRAT session per stage).
+  Rules: one active STRAT session per stage). Other sessions never write it — they reconcile
+  against canonical task state instead (see below).
 - Contents — pointers, not prose (no duplication per DOCUMENTATION_SYSTEM_RULES.md):
   1. **Session summary** — one line
   2. **Decided** — pointers to the PROJECT_DECISIONS.md / PROJECT_STAGE_LOG.md entries this
@@ -84,6 +89,29 @@ session's handoff and the next session's topic; the owner writes no ad-hoc summa
 - When the stage's strategic work is genuinely finished (project end or an explicit owner
   stop), move the brief to `docs/project/tasks/done/` (same never-delete convention as task
   files).
+
+## The brief goes stale — reconcile it, do not build a channel into it
+
+The brief is written by STRAT but **invalidated by IMPL**: the moment a task closes or a new one is
+cut, the brief's "Next: run Item N" may be wrong, and only a STRAT session may correct it.
+
+**The rule is on the reader, not on a second writer:** before acting on the brief's `Next topic`,
+reconcile it against the canonical sources — the task files' own `Status` fields and the stage's
+open task files (`docs/project/tasks/`). Task status is canonical (Session Duties); the brief is a
+pointer that can lag. A fresh STRAT session can therefore derive current state itself, with no
+owner round-trip and no second writer.
+
+An IMPL→brief "mailbox" section was designed, reviewed and **withdrawn** (2026-07-17,
+`reviews/done/REVIEW_2026-07-17_impl-brief-channel.md`, round 2). Recorded so it is not rebuilt:
+its common path still spent the owner's attention (while a STRAT session is live the note had to be
+routed to that session by hand, and a blocking question must stop and tell the owner anyway), and
+its admissible payloads did not even cover the case present in the tree that introduced it (a
+non-STRAT session creating a new `draft` task). A mandatory second writer plus a sequencing rule
+did not earn that.
+
+Escalation is unchanged and needs no channel: a mid-flight product/spec question **stops and goes
+to the owner** (Deviations — the STOP-and-escalate rule); non-blocking findings go to the task
+report and PROJECT_BACKLOG.md (Cross-Session Rules).
 
 ## Mid-session persistence
 

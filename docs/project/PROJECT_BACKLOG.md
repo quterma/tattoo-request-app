@@ -414,3 +414,28 @@ lines (STAGE_LOG alone: 3,639, of which 3,312 are the append-only journal).
 - Stage Log entry style: future entries should be milestone pointers (outcome + task/review link +
   unresolved blocker), not file-by-file release notes with pasted gate transcripts — git, task
   files, and review threads already hold that evidence.
+
+---
+
+## Ablation of harness rules — post-MVP retrospective (filed 2026-07-17)
+
+Source: `docs/project/research/done/RESEARCH_2026-07-16_agentic-engineering-practices-scan.md`
+(Outcome item 3, `later`; owner decision 2026-07-17).
+
+At the post-MVP retrospective — or at a model-generation change, whichever comes first — test
+whether the scaffolding this framework accumulated still pays for itself. Candidates to ablate:
+the blanket independent-review rule, the checkpoint size threshold (16 files / 500 churn — recorded
+as a *trial* number calibrated on a single positive case), fresh-session guidance, and duplicated
+preflight reads.
+
+**Method that keeps this honest:** retire a rule only if the failure that originally motivated it
+**no longer reproduces**. Each rule's motivating incident is recorded in AI_FRAMEWORK_IDEAS.md, so
+the test is concrete rather than a matter of taste — "this feels like overhead now" is not
+evidence. Rules whose failure still reproduces stay, however old they are.
+
+Overlaps `docs/project/tasks/META_TASK_01_framework_consolidation.md` (`draft`) — that task deletes
+*duplication*; this item questions whether individual *rules* are still earning their keep. Do them
+in the same retrospective pass, in that order (delete duplication first, then ablate what remains).
+
+No action until one of the two triggers above actually occurs (a model-generation change may
+arrive before MVP — that counts).
