@@ -37,6 +37,24 @@ require updating them first. See PROJECT_DECISIONS.md — Stage 6 Product Docume
 
 Current focus:
 
+- **Stage 6 Item 10 — abuse mitigation — DONE: committed + LIVE-VERIFIED on production (2026-07-23).**
+  Commits `d5e8ae3` (implementation) + `9da4433` (amend review). **CO-1/CO-2/CO-3/CO-5 closed; CO-4
+  deferred to pre-release as owner-debt** (alert + WAF drill + spend safeguards, bundled with the
+  Vercel Pro decision — both are Pro-gated; owner decision 2026-07-23). Environment provisioned:
+  Upstash Redis (Free, **Frankfurt**, eviction OFF), `UPSTASH_REDIS_REST_*` in Vercel **Production**,
+  Function Region → **fra1** (Supabase `eu-north-1`); the old learn-project Neon DB + integration
+  removed. **Live evidence** (`reviews/done/REVIEW_2026-07-23_stage6-item10-co2-live-verification.md`,
+  consensus after 2 accepted should-fix): happy path OK; garbage token → **503 with no Storage write**,
+  text request still submits; breach → **429** with a 24h `Retry-After` (39235→37964 s) and the
+  `category=upload … reason=quota` log; the 429 **survived a redeploy made while already blocked**
+  (counter in Redis, not memory); a different real egress (cellular) **uploaded fine** while the first
+  source stayed blocked; forged `x-forwarded-for` ×3 and `x-vercel-forwarded-for` all stayed in the
+  **same** bucket (CO-1 boundary proven live). Codex also corrected my false causal claim that the
+  in-memory burst shield "tripped first" — it cannot emit a ~10.9 h `Retry-After` (its window is 10
+  min); the window simply already held ~41 admitted checks, so the batch's #20 was ~the 61st.
+  **Follow-ups filed (not blockers):** 503 upload copy should say the request can still be sent
+  without images (the 429 copy already does); pre-release cleanup of unused `KV_*`/`REDIS_URL` and a
+  decision on `UPSTASH_*`/`UPLOAD_TOKEN_SECRET` in Preview.
 - **Stage 6 Item 10 — abuse mitigation — IMPLEMENTED + cross-reviewed, pending owner-approved commit (2026-07-22).**
   Option B built per `tasks/STAGE_6_TASK_10_upload_abuse_mitigation.md`. Durable per-IP quota
   `src/bff/uploadQuota.ts` (Upstash `@upstash/ratelimit`+`@upstash/redis`, `fixedWindow(60,"24 h")`,

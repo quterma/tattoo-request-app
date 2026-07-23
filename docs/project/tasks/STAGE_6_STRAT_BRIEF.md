@@ -99,7 +99,26 @@ session verifies these before the Item 13 acceptance sweep:
 
 - [ ] **Vercel Pro decision** — the staging/production plan question in PROJECT_PRODUCTION_READINESS.md
   (likely needed for Hobby's commercial-use restriction). **No longer an Item 10 gate** (that fork was
-  based on the now-dead Vercel KV premise).
+  based on the now-dead Vercel KV premise). **Owner decision 2026-07-23: bundle it with the Item 10
+  CO-4 items below and settle them together at pre-release** — Vercel alerts and WAF are Pro-gated, so
+  doing them before the Pro call means building throwaway workarounds.
+- [ ] **Item 10 CO-4 — abuse-control operational debt** (do together, right after the Pro decision;
+  source: `tasks/STAGE_6_TASK_10_upload_abuse_mitigation.md`, live-verified 2026-07-23):
+  - [ ] **Alert** on the `/api/upload` observability signal — the code already emits
+    `[upload] quota exceeded: category=upload source=… reason=quota` and the matching
+    `reason=unavailable` on 503. Configure a Vercel Firewall/Log alert with a **real recipient** and
+    **trigger it once** to prove delivery. (Deliberately NOT done pre-Pro: the only free substitute is
+    an external uptime monitor, which sees total outage but not a 429 spike — the actual abuse signal —
+    and would consume the quota itself.)
+  - [ ] **WAF deny drill** — method+path Deny on `POST /api/upload` via the dashboard (the real
+    kill-switch: no redeploy needed). Perform once so it is known to work under pressure.
+  - [ ] **Spend safeguards** — Vercel and Supabase spending caps/notifications configured. This is the
+    physical money bound; Option B limits one source, not the number of sources.
+  - [ ] **Env cleanup** — remove the unused Marketplace-created `KV_*` / `REDIS_URL` vars (confirm a
+    deploy still boots), and decide whether `UPSTASH_REDIS_REST_*` + `UPLOAD_TOKEN_SECRET` belong in
+    **Preview** (currently Production-only → any preview deploy 500s on `/api/upload`).
+  - Already done (2026-07-23): Upstash provisioning (Free, Frankfurt, eviction off), env vars in
+    Production, Vercel Function Region → `fra1`.
 - [ ] **Item 12 CO-5 — Vercel system-env + live OG origin.** Turn ON the Vercel project's "Enable
   access to System Environment Variables" checkbox, then confirm the deployed `/en` renders an
   `og:image` on a public `https://` origin returning 200. Then flip `robots` `index:false`→`true` at

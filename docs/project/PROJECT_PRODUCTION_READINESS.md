@@ -168,16 +168,22 @@ selection-time upload (`POST /api/upload`, public and unauthenticated). See PROJ
 - Uploaded files are bound to their session by an **encrypted, server-minted handle** (AES-256-GCM);
   final submit adopts only handles minted for the submitting `clientSubmissionId`, so one visitor
   cannot attach another's upload. Storage paths never reach the client.
-- 🔜 **OPEN — PRE-LAUNCH BLOCKER: automated storage growth is unbounded. Mechanism decided 2026-07-22,
-  task cut, not yet implemented.** The per-session object cap is caller-resettable (`clientSubmissionId`
-  is chosen by the client — a bot mints a fresh UUID per upload) and the per-IP rate limiter is
-  in-memory, therefore per-instance on Vercel. Objects are still size-capped and must be real images,
-  and the bucket is private with no public read path — so the exposure is storage cost, not data
-  exposure. **Decision (Item 10): Option B — a durable per-IP Upstash quota** (60/IP/24h, fail-closed),
-  with a global circuit-breaker (Option C) deferred behind triggers. See PROJECT_DECISIONS.md —
-  "Stage 6 Item 10 — abuse mitigation" and `tasks/STAGE_6_TASK_10_upload_abuse_mitigation.md`
-  (`status: ready`). Closed for launch only when that task is implemented + its owner-debt (alert
-  drill, WAF deny drill, provisioning, spend safeguards) is done.
+- 🟡 **PARTLY CLOSED — automated storage growth: the code control is IMPLEMENTED and LIVE-VERIFIED
+  (2026-07-22/23); the operational debt (CO-4) is still open.** The old hole (caller-resettable
+  per-session cap + in-memory, per-instance rate limiter) is closed by **Option B — a durable per-IP
+  Upstash quota**, 60/IP/24h, fail-closed: commits `d5e8ae3`, `9da4433`;
+  `tasks/STAGE_6_TASK_10_upload_abuse_mitigation.md` (`status: done`).
+  **Verified against production 2026-07-23** (`reviews/done/REVIEW_2026-07-23_stage6-item10-co2-live-verification.md`):
+  429 with a 24h `Retry-After` on breach; a limiter-down condition returns **503 with no Storage
+  write**; the counter survives a redeploy (durable, not per-instance); an independent real IP is
+  unaffected; forged `x-forwarded-for` / `x-vercel-forwarded-for` cannot mint a fresh bucket.
+  **Still required before launch (CO-4, owner actions — see STAGE_6_STRAT_BRIEF.md → "Owner pre-deploy
+  actions"):** the alert on the 429/503 signal with a tested recipient, the WAF deny drill on
+  POST /api/upload, and Vercel + Supabase spend safeguards — all bundled with the **Vercel Pro
+  decision** below, since alerts and WAF are Pro-gated (owner decision 2026-07-23).
+  **Residual by design:** Option B bounds one source, not the number of sources; a distributed caller
+  is not bounded (Option C — global circuit-breaker — deferred behind triggers in PROJECT_DECISIONS.md).
+  Exposure remains storage cost, not data: bucket private, 4 MB cap, real-images-only.
 - ⚠️ **No cleanup job for orphaned Storage objects** (uploads never submitted). Pre-existing,
   post-launch/operational — but selection-time upload structurally increases their volume. Tracked
   in PROJECT_BACKLOG.md.
