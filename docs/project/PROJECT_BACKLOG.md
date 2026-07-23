@@ -301,10 +301,34 @@ ran a Codex research thread, and decided the mechanism:
 - The old **"if Pro → Vercel KV, else → Upstash" fork is dead**: Vercel KV no longer exists (migrated
   to Upstash, Dec 2024); Pro is a terms-only decision, not a limiter dependency.
 
-Task cut: `docs/project/tasks/STAGE_6_TASK_10_upload_abuse_mitigation.md` (`status: ready`). Research:
-`research/done/RESEARCH_2026-07-21_stage6-item10-abuse-mitigation.md`. Full decision:
-PROJECT_DECISIONS.md — "Stage 6 Item 10 — abuse mitigation". Still a pre-launch blocker until the task
-is implemented + its owner-debt done.
+**Implemented 2026-07-22, live-verified 2026-07-23** (`d5e8ae3`; task in
+`tasks/done/STAGE_6_TASK_10_upload_abuse_mitigation.md`; research
+`research/done/RESEARCH_2026-07-21_stage6-item10-abuse-mitigation.md`; full decision
+PROJECT_DECISIONS.md — "Stage 6 Item 10 — abuse mitigation"). CO-1/2/3/5 discharged with live
+evidence (forged IP headers mint no fresh bucket; 429 with a 24h window survived a redeploy; an
+independent egress was unaffected; a limiter-down condition returned 503 with no Storage write).
+**The launch blocker is NOT fully closed:** CO-4 — the Firewall/Log alert, the WAF deny drill, and
+the Vercel/Supabase spend safeguards — is **open owner pre-release debt** (deferred 2026-07-23: all
+three need Vercel Pro, which is a pre-launch decision anyway). Tracked in STAGE_6_STRAT_BRIEF.md →
+"Owner pre-deploy actions" and PROJECT_PRODUCTION_READINESS.md.
+
+---
+
+## Upload 503 (limiter-unavailable) copy is not actionable (Stage 6 Item 10 follow-up, 2026-07-23)
+
+Raised by the owner while running Item 10's CO-2 live verification; filed here so it is not lost when
+the task closes. **Not a blocker** — the fail-closed path works correctly, only its wording is weak.
+
+When the durable limiter is unavailable, `/api/upload` returns a fail-closed `503` and the UI shows
+`upload_invalid`: *"Your images could not be attached. Press Retry on each one, then send again —
+nothing else you typed was lost."* It reads as a hard error and **omits the one thing that matters:
+the request can be submitted without images** (FS §4.5 — a failed upload never blocks submission).
+The 429 path got a clearer message in Item 10 (`upload_rate_limited`); the 503/transient path did not.
+
+Rare, but when it fires it hits **every visitor at once** (the store is down for everyone). Needs a
+copy change checked against FS §4.5 — and against the PRD if the wording is normative — hence a small
+task, not a hotfix. Scope: one i18n key (both locales) plus whichever branch of
+`src/features/request/lib/upload.ts` maps 5xx.
 
 ---
 

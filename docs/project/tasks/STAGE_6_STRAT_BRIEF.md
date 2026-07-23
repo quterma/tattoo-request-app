@@ -14,13 +14,13 @@ AI agents and the developer, at the start of the next STRAT: Stage 6 session.
 
 ## Session summary
 
-This session took the **Item 10** topic, ran a Codex research thread to consensus, and **closed it
-with an owner decision**: Item 10's `/api/upload` control = **Option B (durable per-IP Upstash quota,
-60/IP/24h, fail-closed)**, with the global circuit-breaker (C) deferred behind triggers. The research
-killed the old "KV vs Upstash forks on Pro" premise (Vercel KV no longer exists). **Item 10's task
-file is now cut** (`STAGE_6_TASK_10_upload_abuse_mitigation.md`, `ready`) — so every Stage 6 item is
-either done or cut. The stage's dominant blocker is now **owner content** (Process/Home copy per the
-content brief) — entirely owner-gated, not code-gated.
+Item 10 was decided (Codex research → owner pick: **Option B**, durable per-IP Upstash quota,
+60/IP/24h, fail-closed), **implemented and LIVE-VERIFIED on production 2026-07-23** (`d5e8ae3`,
+3 cross-reviews to consensus; task in `tasks/done/`). The research killed the old "KV vs Upstash forks
+on Pro" premise (Vercel KV no longer exists). **All Stage 6 code work is now done** — every item is
+shipped except **5 and 6, which are pure content**, and **13** (the stage-closing acceptance sweep,
+which cannot start before 5/6). The stage's only remaining blocker is **owner content + owner
+pre-release debts** — entirely owner-gated, not code-gated.
 
 ## State of the board — verify before trusting this
 
@@ -35,7 +35,7 @@ content brief) — entirely owner-gated, not code-gated.
 | 7 — Location | **map half: done** (owner launched IMPL 2026-07-19 — verify it landed/committed); **photo half: pre-deploy swap** (placeholders stay). |
 | 8 — Preparation/Aftercare split | **done** (`5714233`). |
 | 9 — Reference-code format | **done + LIVE** (folded into Item 3) |
-| 10 — Abuse mitigation | **decided + task cut this session** (`STAGE_6_TASK_10_upload_abuse_mitigation.md`, `ready`). Option B (durable per-IP Upstash quota, fail-closed) + honeypot. Pre-launch blocker until implemented. C (global breaker) deferred behind triggers. |
+| 10 — Abuse mitigation | **done + LIVE** (`d5e8ae3`, live-verified 2026-07-23, 3 cross-reviews to consensus; task in `tasks/done/`). Option B durable per-IP Upstash quota (60/IP/24h, fail-closed) + honeypot. **CO-4 (alert + WAF drill + spend caps) = owner pre-release debt** — launch blocker not fully closed until done. C (global breaker) deferred behind triggers. |
 | 11 — 404/error boundary | **done** (`e213268`) — verify. |
 | 12 — favicon/OG/SEO | **done** (`a37e7eb`, mechanism) — owner asset swaps + CO-5 remain (see debts). |
 | 13 — FS §6 acceptance sweep | not started; stage-closing gate. |
@@ -44,7 +44,7 @@ content brief) — entirely owner-gated, not code-gated.
 (Some rows above advanced since the prior brief — Items 7/11/12 show recent commits in the log.
 **Re-verify each against `git log` / the board before acting.**)
 
-## Decided (this session — 2026-07-22)
+## Decided (2026-07-22, shipped 2026-07-23)
 
 - **Item 10 `/api/upload` = Option B** — a durable per-IP fixed-window Upstash quota (**60/IP/24h**,
   named server constant), **fail-closed** (`503` on limiter-down, no write; `429`+`Retry-After` on
@@ -57,8 +57,11 @@ content brief) — entirely owner-gated, not code-gated.
 - **The "KV vs Upstash forks on Pro" premise is dead** — Vercel KV no longer exists (migrated to
   Upstash, Dec 2024); Pro is a **terms-only** decision (Hobby commercial restriction), not a limiter
   dependency. Stale claims corrected across the five docs.
-- **Task cut:** `STAGE_6_TASK_10_upload_abuse_mitigation.md` (`ready`), with the must-fix
-  `x-forwarded-for` trust check + owner-debt obligations baked in.
+- **Shipped 2026-07-23** — `d5e8ae3`, task now in `tasks/done/`. CO-1/2/3/5 discharged with live
+  evidence (forged IP headers mint no fresh bucket; 429 with a 24h window survived a redeploy; an
+  independent egress unaffected; limiter-down → 503 with no Storage write). **CO-4 (alert + WAF drill
+  + spend caps) deferred to pre-release owner-debt** — all three are Pro-gated, bundled with the Pro
+  decision.
 
 ## Open
 
@@ -70,8 +73,9 @@ content brief) — entirely owner-gated, not code-gated.
 
 ## Task files
 
-- Items 1/2/3/4/7/8/9/11/12/14 in `tasks/done/` (verify 7/11/12 moved after their commits).
-- **Item 10 cut this session** — `STAGE_6_TASK_10_upload_abuse_mitigation.md` (`ready`, un-implemented).
+- Items 1/2/3/4/7/8/9/**10**/11/12/14 all in `tasks/done/` — **no open Stage 6 task file remains**.
+- Items 5, 6 and 13 never had task files: 5/6 are content-blocked (cut them when copy arrives), 13 is
+  the stage-closing sweep.
 - Nothing in `draft`.
 - Non-Stage-6, unrelated: `META_TASK_01_framework_consolidation.md`, `TOOLING_TASK_01_project_status_command.md`.
 
@@ -81,13 +85,11 @@ content brief) — entirely owner-gated, not code-gated.
 
 ## Next topic
 
-1. **Implement Item 10** — `STAGE_6_TASK_10_upload_abuse_mitigation.md` is `ready` and cuttable to an
-   IMPL session any time (claude or codex). It adds an Upstash dependency + env vars, so it is the one
-   remaining code item that touches infra; its owner-debt (alert drill, WAF deny drill, provisioning,
-   spend safeguards) is deploy-time, tracked as task completion obligations.
-2. **Turn owner content into Items 6 → 5.** When the artist returns copy (per the content brief), cut
+**All Stage 6 code is shipped.** Nothing here is code-blocked — what remains is owner-gated:
+
+1. **Turn owner content into Items 6 → 5.** When the artist returns copy (per the content brief), cut
    Item 6 (Process rewrite), which also unblocks Item 5 (Home). The stage's long pole; owner-gated.
-3. **Pre-deploy swaps to track** (assets, not tasks): real studio photos (Item 7 photo half); real
+2. **Pre-deploy swaps to track** (assets, not tasks): real studio photos (Item 7 photo half); real
    favicon + OG image + final metadata copy + branded custom domain + `robots` noindex→index flip
    (Item 12, marker `__meta_TODO` — `grep -rn __meta_TODO app/ src/`); `en.json` `__intro_TODO` /
    `INSTAGRAM_HANDLE`.
