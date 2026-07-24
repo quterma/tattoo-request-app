@@ -2,10 +2,16 @@
 
 ## Status
 
-`in progress — cross-review at consensus, pending commit` · created 2026-07-23 · copy approved by
-the owner 2026-07-23 (v3, after 3 rounds) · implemented 2026-07-24 · independent Codex cross-review
-reached consensus 2026-07-24 (4 rounds — `reviews/done/REVIEW_2026-07-24_stage6-item6-process-content.md`)
-· evidence base: `research/done/RESEARCH_2026-07-23_stage6-public-copy-positioning.md`
+`done` · created 2026-07-23 · copy approved by the owner 2026-07-23 (v3, after 3 rounds) ·
+implemented 2026-07-24 · independent Codex cross-review reached consensus 2026-07-24 (4 rounds —
+`reviews/done/REVIEW_2026-07-24_stage6-item6-process-content.md`) · committed `5eb7855` ·
+owner-verified the Preparation/Aftercare links live 2026-07-24 · evidence base:
+`research/done/RESEARCH_2026-07-23_stage6-public-copy-positioning.md`
+
+**CO-3 (owner + artist copy review) stays open by design** — it is deliberately deferred to the
+artist's own pass over the live site, not a gate on this task's code (owner decision 2026-07-24:
+"про текст — потом тоже проверим все с Мастером, не блокер"). **CO-2's visual half** (mobile-viewport
+truncation) folds into the visual pass — the copy itself was verified live.
 
 ## Execution
 
