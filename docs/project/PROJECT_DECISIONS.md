@@ -2276,6 +2276,95 @@ B shape above + honeypot, and these completion obligations (a green `pnpm qg` do
 
 ---
 
+# Stage 6 public copy — approved content, age policy, and discovery reversal — 2026-07-23
+
+Closes the stage's content blocker. Evidence base:
+`research/done/RESEARCH_2026-07-23_stage6-public-copy-positioning.md` (Codex thread with an external
+leg, which re-verified the external answer against primary sources and discarded its errors). The
+owner supplied the facts, then approved the full copy over three review rounds. The **verbatim
+approved text** lives in `tasks/STAGE_6_TASK_06_process_content.md` and
+`tasks/STAGE_6_TASK_05_home_rebuild.md` — those task files are the copy's source of truth; this entry
+records the *decisions* behind it.
+
+## 1. Age policy — 18+ only, as studio policy
+
+The site says: **18 or older to book through this site**; at 16–17 tattooing is possible only with a
+parent's written consent and presence, arranged via Instagram DM. Stated as **the artist's policy,
+not a claim about Israeli law** — the research found the Ministry of Health guidance (16–18 with
+consent + presence) and the accessible Business Licensing Law text (under-16 with written consent)
+**conflict**, and neither can be responsibly asserted.
+
+This **fixes a live contradiction**: the shipped Process copy advertised "16–17 with parental consent"
+while the product accepts 18+ only (`AGE_THRESHOLD = 18`, FS field 11, the eligibility checkbox) — it
+was inviting visitors the form then blocks. **No product change**: the form stays 18+, minors get a
+human channel. Accepting 16–17 for real (Option B in the research) would need local legal
+confirmation plus PRD D6 / FS / form-flow amendments, and was not pursued.
+
+## 2. Experience claim corrected — a factual error in shipped copy
+
+The shipped `home.aboutLine1` reads "20+ years in painting, calligraphy, and tattoo art". **This is
+false.** 20+ years applies to **painting only**; tattooing is roughly 6 years. Approved copy claims
+painting experience only ("20+ years of painting behind every design") and **states no year-count for
+tattooing or calligraphy anywhere**. The old line is deleted, not reworded. Do not reintroduce a
+tattooing year-count without the owner.
+
+## 3. Copy direction (from the research, owner-approved)
+
+- **Hero:** "Original tattoos inspired by Japanese painting and contemporary art — Tel Aviv."
+- **Good Fit:** specialization + respectful redirect (PRD D7) — exclusions (fine line, lettering,
+  very small work, exact copies) are stated as a *practice boundary*, never as a judgment of the
+  visitor. Phrasings like "serious clients only" / "human printer" / "full creative freedom required"
+  are explicitly rejected.
+- **Pricing:** ₪1,000/h with a ₪2,000 minimum, published on Home as a teaser and canonically on
+  Process (PRD D8). Placement and complexity change the **time**, not the rate — the old separate
+  cover-up rate and the ribs/neck/knee surcharge language are **removed** (cover-ups themselves stay,
+  priced by time).
+- **Design & Sketch:** collaboration-first framing. Sketch arrives the **day before**; small
+  refinements happen at the appointment; a complete redo is new work (first deposit pays for the
+  first version, a new deposit opens the new sketch). Closes with "Trust your artist! 🖤". The
+  policy-first/adversarial framing ("rejection", "treated as", "required") was rejected as the
+  variant most likely to lose good clients, as was any anti-idea-theft reasoning.
+- **Ordering:** on Process, **Booking & Deposit precedes Design & Sketch** — the deposit is what
+  starts the sketch, so explaining it second confused the sequence.
+- **Owner facts now published:** one ₪1,000 deposit carries across a multi-session project to the
+  final sitting (**no second deposit**); free in-person consultations with no deposit; payment by
+  cash, Bit or bank transfer; sessions in Hebrew, English or Russian; no-show forfeits the deposit;
+  one free reschedule moves it.
+- **Home Featured Work ships with 4 images** (the FS §3.1 minimum) — visitors arrive from Instagram
+  where the portfolio already lives, so the block confirms "right artist" rather than acting as a
+  gallery.
+- **Mini Process is 5 steps** (FS §3.1 allows 4–5) with an explicitly skippable consultation step —
+  a pre-tattoo meeting happens in fewer than half of projects, so presenting it as mandatory
+  misdescribed the flow.
+
+## 4. Preparation/Aftercare discovery moves from the footer to the Process FAQ
+
+**Reverses part of the 2026-07-14 decision** ("Preparation/Aftercare in-product discovery"), which
+had added two global-footer links and amended PRD §5 / FS §2 to match. Owner decision 2026-07-23: the
+footer should carry Instagram + studio identity only; discovery belongs on Process, inside the FAQ
+answer "How do I prepare — and what about healing?".
+
+This satisfies the July concern that motivated the footer choice (a fit-deciding Process reader is
+not served by an aftercare link): the links now sit at the *end* of Process, in a section that reader
+can skip, rather than as a bare inline link. The **artist-sent direct URL remains the primary path**,
+unchanged in both decisions, and these pages remain **out of primary navigation** (PRD D9).
+
+Requires amending **PRD §5 and FS §2 together** (PRD §9 change control) — implemented by
+`tasks/STAGE_6_TASK_15_prep_aftercare_discovery.md`, which is **ordered after Item 6**: removing the
+footer links before the Process FAQ ships would leave these pages with zero in-product discovery.
+
+## 5. Placeholder assets — owner-accepted risk
+
+The studio is under renovation, so real photos are weeks out. Stage 6 ships **quality placeholders**
+(favicon drawn as SVG — generative models fail at 16×16; owner-generated studio interiors, 4 Featured
+Work images, and an OG image) so the site can be judged as a whole. **Owner-accepted risk:**
+generated tattoo-like artwork must never reach public launch, where it would present non-existent
+work as the artist's. Mitigation is a grep-able `__asset_TODO` marker on every placeholder plus an
+Item 13 acceptance-sweep gate that fails while any marker remains — not avoidance.
+`tasks/STAGE_6_TASK_16_placeholder_assets.md`.
+
+---
+
 # Rule for Future Changes
 
 All architectural, product, or behavioral decisions MUST be recorded in this document.

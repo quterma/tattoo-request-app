@@ -37,6 +37,27 @@ require updating them first. See PROJECT_DECISIONS.md — Stage 6 Product Docume
 
 Current focus:
 
+- **Stage 6 content blocker CLEARED — all public copy approved; Items 6/5/15 cut, 16 drafted
+  (STRAT, 2026-07-23).** A Codex copy-research thread ran with an external leg and closed
+  (`research/done/RESEARCH_2026-07-23_stage6-public-copy-positioning.md`); notably Codex re-checked
+  the external answer against primary sources and **discarded its errors** (it had wrongly reported
+  "no public pricing" for four sites that plainly publish rates). The owner supplied the facts and
+  approved the full copy over three rounds. Decisions recorded in PROJECT_DECISIONS.md — "Stage 6
+  public copy — approved content, age policy, and discovery reversal": **(1) age → 18+ only** as
+  studio policy (not a legal claim — Ministry guidance and statute conflict), fixing a live
+  contradiction where copy advertised 16–17 while the form accepts 18+ only; **(2) a factual
+  correction** — "20+ years in painting, calligraphy, and tattoo art" is false (20+ is painting only,
+  ~6 years tattooing), the old `aboutLine1` is deleted and no tattooing year-count is stated
+  anywhere; **(3) copy direction** — collaboration-first sketch policy ending "Trust your artist! 🖤",
+  Booking & Deposit before Design & Sketch, cover-up surcharge removed, 4 Featured Work images,
+  5-step Mini Process with a skippable consultation; **(4) Preparation/Aftercare discovery moves
+  from the global footer to the Process FAQ**, reversing part of the 2026-07-14 decision and
+  requiring a PRD §5 + FS §2 amendment; **(5) placeholder assets** with an owner-accepted risk gated
+  by a `__asset_TODO` marker + Item 13 sweep. Tasks cut: `STAGE_6_TASK_06_process_content.md`,
+  `STAGE_6_TASK_05_home_rebuild.md`, `STAGE_6_TASK_15_prep_aftercare_discovery.md` (all `ready`),
+  `STAGE_6_TASK_16_placeholder_assets.md` (`draft`). **Execution order 6 → 5 → 15 is load-bearing**
+  (5's teasers link into 6's sections; 15 removes the footer links 6's FAQ replaces). Docs-only
+  session, no code.
 - **Stage 6 Item 10 — abuse mitigation — DONE: committed + LIVE-VERIFIED on production (2026-07-23).**
   Commits `d5e8ae3` (implementation) + `9da4433` (amend review). **CO-1/CO-2/CO-3/CO-5 closed; CO-4
   deferred to pre-release as owner-debt** (alert + WAF drill + spend safeguards, bundled with the
