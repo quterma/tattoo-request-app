@@ -37,6 +37,55 @@ require updating them first. See PROJECT_DECISIONS.md — Stage 6 Product Docume
 
 Current focus:
 
+- **Stage 6 Item 6 — Process page content rewrite — implemented, cross-review at consensus,
+  pending commit (IMPL, 2026-07-24).** `tasks/STAGE_6_TASK_06_process_content.md`: replaced the shipped
+  `/process` copy with the owner-approved text (Overview, Good Fit, Pricing, Booking & Deposit,
+  Design & Sketch, Touch-ups, Age, Languages, Payment, FAQ) — `tipping` section deleted, Booking &
+  Deposit deliberately ordered before Design & Sketch. Age copy still states 16–17 is possible with
+  a parent's written consent and presence — the fix is at the **booking-channel boundary**, not a
+  removal of that policy: the web form itself stays 18+-only (`AGE_THRESHOLD = 18`) and now
+  explicitly routes 16–17 to Instagram DM instead of advertising a form path the form then blocks.
+  (Codex review caught the Stage Log first draft overstating this as "18+-only, 16–17 statement
+  removed" — corrected here.) FAQ's last item now
+  links `/preparation` and `/aftercare` in-page (`t.rich` + `Link`, same pattern as
+  `home.step2Text`'s embedded `process` link) — the new discovery path those pages get ahead of
+  TASK_15 removing the footer links. `request.introduction` replaced, `__intro_TODO` key deleted
+  (plus a stale reference to it in a `RequestForm.tsx` comment). `INSTAGRAM_HANDLE` in
+  `src/features/request/config/form.ts` set to the real handle. Site metadata (`app.title`,
+  `app.description`, `app.ogTitle`/`ogDescription`, `opengraph-image.tsx`) and the global
+  `footer.studio` string swapped from the "Studio Name" placeholder to "Masha Karda" — **the
+  owner extended the write surface to `footer.studio` during plan review**, reasoning the footer is
+  global and would otherwise contradict the now-final site-wide metadata identity (`app.title`/
+  `app.siteName`/OG) on every page; Item 5 (Home) does not own the shared footer so it would not
+  have picked this up. (Not an H1 claim: the Process H1 is "Process & Pricing", and Home's H1 stays
+  "Studio Name" until Item 5 runs — see the Round 2 note below.) `ogTitle`/`ogDescription` are fixed values
+  per owner instruction, not derived from `title`/`description` — deriving would mean authoring
+  copy, and all copy in this task is owner-approved only. `pnpm qg` green. **CO-2 partially
+  evidenced:** no headless-browser tool (`chromium-cli`/Playwright) was available in this
+  environment, so the live check was `curl` against the dev server, not a rendered mobile-viewport
+  screenshot — confirmed 200 OK, approved copy present, no `tipping`/`__intro_TODO` leakage, both
+  FAQ links resolve, CTA and corrected metadata render; visual truncation on a real mobile viewport
+  was **not** confirmed and is flagged back to the owner.
+  **Codex cross-review reached consensus 2026-07-24, 4 rounds**
+  (`reviews/done/REVIEW_2026-07-24_stage6-item6-process-content.md`). **Round 1** — 4 should-fix + 1
+  nit, all accepted: (1) added stable `#good-fit`/`#pricing` fragment IDs to `process/page.tsx` —
+  Item 5's teaser links need them and Item 5's write surface excludes the Process page, so without
+  this Item 5 could not satisfy its own scope; (2) `openGraph.siteName` was reusing the long SEO
+  `app.title` string instead of the approved short "Masha Karda" — added a distinct `app.siteName`
+  key; (3) the process-page test suite added in this session was removed — it tested static
+  copy/links, which PROJECT_TESTING_STRATEGY.md assigns to manual verification, not an automated
+  suite; (4) this entry's first draft overstated the age-copy fix as "18+-only, 16–17 statement
+  removed" — corrected above (booking-channel fix, not a policy removal). **Round 2** — 2 more
+  should-fix, both about durable-doc wording, not code: a premature "Consensus reached" /
+  `reviews/done/` claim while the thread was still active (this entry described that error honestly
+  at the time and has now been rewritten to reflect the real, closed state); and the footer-swap
+  rationale overstating it as "every page's H1 now reads Masha Karda" — corrected to the actual
+  claim: site-wide **metadata** identity, not H1 text; the Process H1 is `Process & Pricing`, Home's
+  H1 stays `Studio Name` until Item 5 runs. **Round 3** — Codex caught that the same H1/metadata
+  correction had been applied to PROJECT_DECISIONS.md and the task file but missed in this very
+  entry, leaving it internally contradictory — fixed. **Round 4** — no further findings, consensus.
+  Final gate state at consensus: `pnpm qg` green, 399 tests, 32 files. Not yet committed — pending
+  owner approval of the working-tree diff.
 - **Stage 6 content blocker CLEARED — all public copy approved; Items 6/5/15 cut, 16 drafted
   (STRAT, 2026-07-23).** A Codex copy-research thread ran with an external leg and closed
   (`research/done/RESEARCH_2026-07-23_stage6-public-copy-positioning.md`); notably Codex re-checked

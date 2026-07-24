@@ -1,11 +1,12 @@
 {
   "app": {
-    "__meta_TODO": "INTERIM metadata copy — studio name is still the 'Studio Name' placeholder (see home.title/footer.studio). Owner-supplied final title/description/OG copy is a pre-deploy swap (STAGE_6_STRAT_BRIEF.md — Pre-deploy swaps to track). Replace before launch.",
-    "title": "Studio Name",
-    "titleTemplate": "%s · Studio Name",
-    "description": "Custom tattoos in Tel Aviv. Submit a structured request with your idea, references, and placement — I reply within 48 hours.",
-    "ogTitle": "Studio Name — Custom Tattoos in Tel Aviv",
-    "ogDescription": "Custom tattoos in Tel Aviv. Submit a structured request with your idea, references, and placement."
+    "__meta_TODO": "INTERIM metadata copy — domain, OG image, favicon, and the robots index flip are still pre-deploy owner swaps (STAGE_6_STRAT_BRIEF.md — Pre-deploy swaps to track). Title/description/site name are final (Stage 6 Item 6).",
+    "title": "Masha Karda — Original Tattoos in Tel Aviv",
+    "titleTemplate": "%s · Masha Karda",
+    "siteName": "Masha Karda",
+    "description": "Original, medium-to-large tattoos inspired by Japanese painting and calligraphy. Every design drawn from scratch — send a request and get an answer within 48 hours.",
+    "ogTitle": "Masha Karda — Original Tattoos in Tel Aviv",
+    "ogDescription": "Original, medium-to-large tattoos inspired by Japanese painting and calligraphy. Every design drawn from scratch — send a request and get an answer within 48 hours."
   },
   "nav": {
     "home": "Home",
@@ -28,21 +29,55 @@
     "studioPhotos": "Studio photos"
   },
   "process": {
-    "title": "Pricing & Policies",
-    "fees": "Hourly Rate",
-    "feesText": "₪1,000 per hour (Minimum ₪2,000)\nCover-ups are ₪1,100 per hour (Minimum ₪2,200)\nThe final price depends on size and placement. Some areas such as ribs, neck or knee may require an additional fee depending on complexity.",
-    "tipping": "Tipping",
-    "tippingText": "Tipping is always up to you. It is never expected, but always appreciated. Please do not feel obligated to tip 20%. That is absolutely not required.",
-    "deposits": "Deposits & Rescheduling",
-    "depositsText": "To secure your date, a ₪1,000 deposit is required. The deposit holds your appointment and goes toward the final cost of your tattoo. It is not an extra fee. The deposit is <b>non-refundable</b> for <b>any reason</b>. You are allowed <b>one free reschedule</b>. If you reschedule more than once, the original deposit is kept and a new deposit is required to book a new date.",
-    "designPolicy": "Designs & Drawings",
-    "designPolicyText": "I begin working on your design 1 to 3 days before your appointment. I do not send drawings over email or social media. If I need clarification, I will contact you. If you feel unsure about not seeing the sketch in advance, we can arrange a short meeting or video call to review it together. Minor changes can always be discussed. If the entire concept changes after booking, I may decline the new idea, cancel the appointment, and keep the deposit. If a full re-draw is required, it will be charged at my hourly rate and the appointment will need to be rescheduled.",
-    "touchUps": "Need a Touch-Up?",
-    "touchUpsText": "You are always welcome to schedule a touch-up if needed Touch-ups are free within 3 months after your tattoo. After 3 months, touch-ups are charged at the regular hourly rate depending on what is required.",
-    "agePolicy": "Age Requirement",
-    "agePolicyText": "Clients must be 18 or older. For clients aged 16 and 17 parental consent may be required.",
+    "title": "Process & Pricing",
+    "overviewText": "Everything that usually takes a long DM thread — how I work, what it costs, and whether we're a match. If it reads right, send a request; I answer within 48 hours.",
+    "goodFit": "Good Fit",
+    "goodFitText": "I make original, medium-to-large tattoos in a painterly style rooted in Japanese and Chinese art and calligraphy, with a contemporary edge. Your references set the direction — the design itself is always mine, created for you and no one else.\n\nIf you're looking for fine line, lettering, a very small tattoo, or an exact copy of an existing piece, an artist who specializes in that will be a better match — and I'll say so up front.",
+    "pricing": "Pricing",
+    "pricingText": "₪1,000 per hour, with a ₪2,000 minimum. Placement and complexity don't change the rate — they change how much time the work takes, and time is what you pay for.",
+    "booking": "Booking & Deposit",
+    "bookingText": "Want to talk it through first? Consultations are free, in person, no deposit needed.\n\nWhen we agree to go ahead, we book your session and take a ₪1,000 deposit — this locks in the date and starts the sketch. It isn't an extra charge: the full amount counts toward your tattoo. The deposit is <b>non-refundable</b>; one date change is free, and it moves with you. After a no-show or a second change, booking again takes a fresh one.\n\n<b>Bigger projects:</b> work over several sessions is paid session by session — and no second deposit: the one you've already paid moves with the project and counts toward the final sitting.",
+    "design": "Design & Sketch",
+    "designText": "Your sketch is built on what we've agreed — idea, references, placement — interpreted in my style. It reaches you the day before the session, and small refinements happen at the appointment itself.\n\nThe sketch itself costs nothing extra. But a complete redo is new work: the deposit pays for the first version, and starting over takes a new one. Trust your artist! 🖤",
+    "touchUps": "Touch-ups",
+    "touchUpsText": "Free within 3 months of your session. Later than that, they're priced by time, like any other work.",
+    "age": "Age",
+    "ageText": "You must be 18 or older to book through this site. At 16–17, tattooing is possible only with a parent's written consent and presence — message me on Instagram and we'll arrange it properly.",
+    "languages": "Languages",
+    "languagesText": "Sessions run in Hebrew, English, or Russian — whichever is comfortable.",
+    "payment": "Payment",
+    "paymentText": "The deposit is the only advance payment; the rest is due after each session — cash, Bit, or bank transfer.",
     "faq": "FAQ",
-    "faqText": "Is the sketch free?\nYes. The sketch is free. A ₪1,000 deposit is required to secure your date and begin working on your design. This amount goes toward the final tattoo cost. It is not an additional payment.\n\nWhat does the deposit cover?\nThe deposit secures your appointment and allows me to begin preparing your custom design. It is subtracted from the final amount on the day of your tattoo.\n\nWhat happens if I change my idea?\nSmall adjustments are fine. If the concept changes entirely after booking, I may cancel the appointment and keep the deposit. A new project requires a new deposit.\n\nHow is the final price calculated?\nPricing is based on actual working time and complexity. The final amount is calculated after the session is completed.\n\nDo you do cover-ups?\nYes. Cover-ups are ₪1,100 per hour with a minimum of ₪2,200."
+    "faqItems": [
+      {
+        "q": "Is the sketch free?",
+        "a": "Yes, the sketch is included when you book. Only a complete concept change needs a new deposit (see Design & Sketch above)."
+      },
+      {
+        "q": "What if I change my idea?",
+        "a": "Small adjustments are part of the process. A completely new direction means a new sketch and a new deposit."
+      },
+      {
+        "q": "Do you do cover-ups?",
+        "a": "Yes. A cover-up is priced like any other piece — by the time it needs. Include a photo of the existing tattoo in your request."
+      },
+      {
+        "q": "Can a large tattoo be split into sessions?",
+        "a": "Yes, that's normal for big work. You pay per session; the deposit stays with the project until the final sitting."
+      },
+      {
+        "q": "Does it hurt?",
+        "a": "Depends on placement and how long we work — some spots are easy, some less so. Breaks are always fine, and we'll pace the session together."
+      },
+      {
+        "q": "I only have a rough idea — is that enough?",
+        "a": "Yes. A feeling, a theme, a few references — that's plenty. Turning it into a design is my job."
+      },
+      {
+        "q": "How do I prepare — and what about healing?",
+        "a": "Each has its own short guide: <prep>Preparation</prep> for before the session, <aftercare>Aftercare</aftercare> for after."
+      }
+    ]
   },
   "preparation": {
     "title": "Before Your Appointment",
@@ -81,8 +116,7 @@
   "request": {
     "title": "Request a Tattoo",
 
-    "__intro_TODO": "Owner-authored copy pending (FS §4.1 — not in Appendix A). Placeholder below; replace in the Stage 6 content/visual pass.",
-    "introduction": "This form replaces a long back-and-forth in my DMs — tell me about your idea in one place and I'll have everything I need to reply. I answer every request within 48 hours.",
+    "introduction": "This form replaces a long back-and-forth in my DMs and keeps everything about your idea in one place. You don't need to have every detail figured out — share what you know, and I'll reply within 48 hours.",
 
     "clientNameLabel": "Your name",
     "clientNamePlaceholder": "How should I call you?",
@@ -342,7 +376,7 @@
     }
   },
   "footer": {
-    "studio": "Studio Name",
+    "studio": "Masha Karda",
     "address": "Herzl 100, Tel Aviv, Israel",
     "instagramUrl": "https://www.instagram.com/mashakarda_tattoo/",
     "preparation": "Preparation",

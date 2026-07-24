@@ -35,10 +35,9 @@ export const AGE_THRESHOLD = 18
 /**
  * Instagram handle for the last-resort failure fallback (FS §4.5 / Appendix A.4), shown only
  * after ≥2 consecutive failed submits. Owner-configurable; isomorphic (rendered client-side).
- * PLACEHOLDER — owner must set the real handle in the Stage 6 content pass. Rendered without
- * a leading "@" (the copy adds it).
+ * Rendered without a leading "@" (the copy adds it).
  */
-export const INSTAGRAM_HANDLE = "your_studio"
+export const INSTAGRAM_HANDLE = "mashakarda_tattoo"
 
 /**
  * The five contact methods (FS §4.2 field 9, amended 2026-07-15 — PROJECT_DECISIONS.md

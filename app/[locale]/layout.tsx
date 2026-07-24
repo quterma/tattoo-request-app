@@ -41,13 +41,13 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: t("ogTitle"),
       description: t("ogDescription"),
-      siteName: t("title"),
+      siteName: t("siteName"),
       type: "website",
       locale: "en_US",
     },
     // INTERIM __meta_TODO: noindex until public launch. The app IS deployed for controlled
-    // verification (PROJECT_DECISIONS.md §C — deployed, not publicly launched), but Home/Process
-    // (Items 5/6) content is still placeholder, so it must not be indexed yet. Flip to index:true
+    // verification (PROJECT_DECISIONS.md §C — deployed, not publicly launched), but Home
+    // (Item 5) content is still placeholder, so it must not be indexed yet. Flip to index:true
     // at public launch — see PROJECT_DECISIONS.md / STRAT brief.
     robots: { index: false, follow: false },
   }

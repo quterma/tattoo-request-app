@@ -379,7 +379,7 @@ export function RequestForm() {
         defaultValue=""
         style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px", opacity: 0 }}
       />
-      {/* Introduction (FS §4.1) — placeholder copy pending owner authoring (see en.json __intro_TODO). */}
+      {/* Introduction (FS §4.1) */}
       <p className="text-sm text-muted-foreground">{t("introduction")}</p>
 
       {/* Idea block */}

@@ -2,8 +2,10 @@
 
 ## Status
 
-`ready` · created 2026-07-23 · copy approved by the owner 2026-07-23 (v3, after 3 rounds) ·
-evidence base: `research/done/RESEARCH_2026-07-23_stage6-public-copy-positioning.md`
+`in progress — cross-review at consensus, pending commit` · created 2026-07-23 · copy approved by
+the owner 2026-07-23 (v3, after 3 rounds) · implemented 2026-07-24 · independent Codex cross-review
+reached consensus 2026-07-24 (4 rounds — `reviews/done/REVIEW_2026-07-24_stage6-item6-process-content.md`)
+· evidence base: `research/done/RESEARCH_2026-07-23_stage6-public-copy-positioning.md`
 
 ## Execution
 
@@ -12,10 +14,11 @@ evidence base: `research/done/RESEARCH_2026-07-23_stage6-public-copy-positioning
 - Baseline: the commit that introduces this task file.
 - Reviewer: `claude` + independent Codex cross-review to consensus (touches source).
 - Allowed Write Surface: `src/shared/i18n/messages/en.json` (`process`, `request.introduction`,
-  `app` metadata namespaces), `app/[locale]/(public)/process/page.tsx` (section structure to match
-  the new content), `src/features/request/config/form.ts` (`INSTAGRAM_HANDLE`),
-  `app/[locale]/layout.tsx` + `app/[locale]/opengraph-image.tsx` (only the `__meta_TODO` copy
-  strings), tests for the above, PROJECT_* reporting docs.
+  `app` metadata namespaces, **and the `footer.studio` string** — see Scope 8),
+  `app/[locale]/(public)/process/page.tsx` (section structure to match the new content),
+  `src/features/request/config/form.ts` (`INSTAGRAM_HANDLE`), `app/[locale]/layout.tsx` +
+  `app/[locale]/opengraph-image.tsx` (only the `__meta_TODO` copy strings), tests for the above,
+  PROJECT_* reporting docs.
 - May touch dependencies / migrations: **no**.
 
 ## Context
@@ -137,6 +140,29 @@ Plus the existing primary CTA at the end of the page (Item 2's shared component)
 7. **Age copy corrects a live contradiction:** the old copy advertised "16–17 with parental consent"
    while the form accepts 18+ only (`AGE_THRESHOLD = 18`). The new copy keeps the form as-is and
    routes minors to Instagram DM. Do **not** change the form's eligibility logic.
+8. **`footer.studio`: `"Studio Name"` → `"Masha Karda"`** (added 2026-07-23 during plan review). The
+   footer is a **global** component on every public page, so leaving it at the old placeholder while
+   the site **metadata** (title/OG/site name) already says "Masha Karda" would ship a site whose
+   footer contradicts its own metadata identity — and that mismatch would keep surviving past Item 5,
+   since Home's own H1 (`home.title`) stays "Studio Name" until Item 5 runs and is not this task's to
+   change. (Corrected 2026-07-24 — Codex Review 2 caught an earlier overstatement here that the H1
+   itself already read "Masha Karda" on every page; the Process H1 is "Process & Pricing", not the
+   studio name, and Home's H1 is still the placeholder.) It is not Item 5's to fix — Item 5 owns Home,
+   not the shared footer, so without this it would fall through every task. One string in `en.json`;
+   do not touch `public-footer.tsx`.
+9. **`ogTitle` / `ogDescription` are fixed values, not derived:** `ogTitle` =
+   `"Masha Karda — Original Tattoos in Tel Aviv"`, `ogDescription` = the approved description above.
+   Deriving them would mean authoring copy, and all copy in this task is owner-approved only.
+10. **Added during cross-review (`reviews/done/REVIEW_2026-07-24_stage6-item6-process-content.md`,
+    Round 1 Findings 1–2, accepted):**
+    - Stable fragment IDs `#good-fit`/`#pricing` on the Good Fit / Pricing sections in
+      `process/page.tsx` — Item 5's Good Fit/Price teasers deep-link into these sections and Item
+      5's Allowed Write Surface excludes the Process page, so without this Item 5 cannot satisfy
+      its own Scope §4.
+    - `app.siteName` (`"Masha Karda"`) added as a distinct key and used for `openGraph.siteName`
+      in `app/[locale]/layout.tsx` — it was incorrectly reusing `app.title` (the long SEO title),
+      which is a different approved string than the "Studio/site name" value in this task's
+      Metadata section above.
 
 ## Out of Scope
 
@@ -150,9 +176,19 @@ Plus the existing primary CTA at the end of the page (Item 2's shared component)
 ```text
 - CO-1 — No orphaned i18n keys: every key removed from `process` (incl. `tipping`, `__intro_TODO`)
   has no remaining reference in the tree, and every new key is rendered. Verify by grep + a passing
-  build. Disposition: OPEN.
+  build. Disposition: DONE — grep swept `app/` and `src/` for the deleted keys (incl. a stale
+  `__intro_TODO` code comment in `RequestForm.tsx`, fixed), `pnpm qg` (lint/typecheck/test/build)
+  green, 2026-07-24. Re-verified green after the cross-review fix round (Scope §10) —
+  399 tests (the process-page test suite added in-session was removed per Codex Review 1 finding 3,
+  PROJECT_TESTING_STRATEGY.md — static content is manual-verification territory, not automated).
 - CO-2 — Live read-through of /en/process and /en/request on a mobile viewport: no truncation, the
-  Preparation/Aftercare FAQ links resolve, the CTA renders. Disposition: OPEN.
+  Preparation/Aftercare FAQ links resolve, the CTA renders. Disposition: PARTIAL — dev server
+  started, both routes fetched and verified (200 OK, approved copy present, `tipping`/`__intro_TODO`
+  absent from visible content, `/en/preparation` and `/en/aftercare` FAQ links resolve, CTA and
+  corrected metadata title/description render), 2026-07-24. No headless-browser tool was available
+  in this environment (no `chromium-cli`/Playwright), so this was a `curl`-against-dev-server HTML
+  check, not a rendered-viewport screenshot — mobile-viewport truncation was not visually confirmed.
+  Owner should do a quick visual pass on a phone before/at CO-3.
 - CO-3 — Owner + artist review of the shipped page (they will re-read the live copy; this task ships
   the approved text, it does not pre-empt their final wording pass). Disposition: OPEN — owner.
 ```

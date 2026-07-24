@@ -2363,6 +2363,25 @@ work as the artist's. Mitigation is a grep-able `__asset_TODO` marker on every p
 Item 13 acceptance-sweep gate that fails while any marker remains — not avoidance.
 `tasks/STAGE_6_TASK_16_placeholder_assets.md`.
 
+## 6. Studio name "Masha Karda" — `footer.studio` added to Item 6's write surface
+
+Decided during Item 6 plan review, 2026-07-23/24, before implementation. The approved metadata copy
+(§3 above) fixes the site/studio name as **"Masha Karda"** in `app.title`/`app.siteName`/`ogTitle`/OG
+image. The Process **H1 itself** is "Process & Pricing", not the studio name — the studio name lives
+in metadata (`<title>`, `og:site_name`) and now the footer, not in the Process page's own heading.
+`STAGE_6_TASK_06_process_content.md`'s Allowed Write Surface originally did not include
+`footer.studio` — that string was left as the "Studio Name" placeholder for Item 5 (Home) to pick up.
+**Owner correction:** the footer is a global component rendered on every public page (`PublicFooter`,
+via the shared public layout), not something Item 5 (which owns Home only) would ever touch — leaving
+it out would ship every page with its site-wide metadata identity reading "Masha Karda" while the
+footer still read "Studio Name". (Home's own H1, `home.title`, is unaffected by this decision and
+stays "Studio Name" until Item 5 runs — this section fixes the footer/metadata identity only, not
+every page's heading.) Item 6's write surface was extended to include the single `footer.studio`
+string in `en.json` (component file `public-footer.tsx` untouched). `ogTitle`/`ogDescription` were
+also fixed to the same owner-approved title/description strings rather than derived in code, keeping
+all shipped copy owner-approved-only. (Corrected 2026-07-24 — Codex Review 2 caught this section
+originally overstating the H1 claim; see the cross-review thread.)
+
 ---
 
 # Rule for Future Changes

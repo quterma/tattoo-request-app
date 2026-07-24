@@ -132,7 +132,6 @@ tattoo-request-app/
 │       ├── STAGE_6_PRODUCT_DEFINITION.md
 │       ├── research/
 │       │   ├── .gitkeep
-│       │   ├── RESEARCH_2026-07-16_agentic-engineering-practices-scan.md
 │       │   └── done/
 │       │       ├── .gitkeep
 │       │       ├── RESEARCH_2026-07-14_deferred-actions-and-review-granularity.md
@@ -140,7 +139,8 @@ tattoo-request-app/
 │       │       ├── RESEARCH_2026-07-15_external-framework-audit.md
 │       │       ├── RESEARCH_2026-07-16_agentic-engineering-practices-scan.md
 │       │       ├── RESEARCH_2026-07-16_contact-model-validation-and-decomposition.md
-│       │       └── RESEARCH_2026-07-21_stage6-item10-abuse-mitigation.md
+│       │       ├── RESEARCH_2026-07-21_stage6-item10-abuse-mitigation.md
+│       │       └── RESEARCH_2026-07-23_stage6-public-copy-positioning.md
 │       ├── reviews/
 │       │   ├── .gitkeep
 │       │   └── done/
@@ -166,10 +166,16 @@ tattoo-request-app/
 │       │       ├── REVIEW_2026-07-20_stage6-item12-favicon-og-seo.md
 │       │       ├── REVIEW_2026-07-22_stage6-item10-postconsensus-amend.md
 │       │       ├── REVIEW_2026-07-22_stage6-item10-upload-abuse-mitigation.md
-│       │       └── REVIEW_2026-07-23_stage6-item10-co2-live-verification.md
+│       │       ├── REVIEW_2026-07-23_stage6-item10-co2-live-verification.md
+│       │       └── REVIEW_2026-07-24_stage6-item6-process-content.md
 │       └── tasks/
 │           ├── META_TASK_01_framework_consolidation.md
 │           ├── STAGE_6_STRAT_BRIEF.md
+│           ├── STAGE_6_TASK_05_home_rebuild.md
+│           ├── STAGE_6_TASK_06_process_content.md
+│           ├── STAGE_6_TASK_15_prep_aftercare_discovery.md
+│           ├── STAGE_6_TASK_16_placeholder_assets.md
+│           ├── STAGE_6_TASK_17_studio_config_extraction.md
 │           ├── TOOLING_TASK_01_project_status_command.md
 │           └── done/
 │               ├── STAGE_6_TASK_01_upload_flow_architecture.md
