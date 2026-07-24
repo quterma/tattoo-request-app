@@ -31,7 +31,7 @@ more: what remains is **execution** (6 → 5 → 15, then 16) plus **owner pre-r
 | 2 — Site-wide shell | **done** (`e833398`) |
 | 3 — Request form rebuild | **done + LIVE** (2026-07-17) |
 | 4 — Success page | **done** (`94ef19b`, 2026-07-18) |
-| 5 — Home rebuild | **task ready** (`STAGE_6_TASK_05_home_rebuild.md`). Copy approved 2026-07-23. **Run after Item 6** (teasers deep-link into its sections). Featured Work = 4 placeholders. |
+| 5 — Home rebuild | **done** (`a4cbf31`, 2026-07-24; Codex consensus in 9 rounds; task in `tasks/done/`). Blueprint block order, 5-step Mini Process, 4 `__asset_TODO` placeholders, teasers deep-link to `/process#good-fit` + `#pricing`. False "20+ years tattooing" claim deleted. **CO-2 (mobile viewport) → backlog/visual pass.** |
 | 6 — Process content | **done** (`5eb7855`, 2026-07-24; Codex cross-review consensus in 4 rounds; task in `tasks/done/`). Shipped the approved copy verbatim + form intro + `footer.studio`/`INSTAGRAM_HANDLE`/metadata swaps. Owner verified the Prep/Aftercare links live. **CO-3 (artist's copy pass) open by design; CO-2's mobile-viewport half folds into the visual pass.** |
 | 7 — Location | **map half: done** (owner launched IMPL 2026-07-19 — verify it landed/committed); **photo half: pre-deploy swap** (placeholders stay). |
 | 8 — Preparation/Aftercare split | **done** (`5714233`). |
@@ -116,11 +116,10 @@ more: what remains is **execution** (6 → 5 → 15, then 16) plus **owner pre-r
 
 **Everything is cut. This is now an execution queue — launch IMPL sessions in this order:**
 
-1. **Item 6 is done** (`5eb7855`). **Next: Item 5 → Item 15**, in that order (both `ready`). Item 5's
-   teasers deep-link into Item 6's now-shipped Process sections; Item 15 removes the footer links
-   that Item 6's FAQ already replaced (so its ordering precondition is satisfied — the replacement
-   discovery path is live). Item 5 carries its copy **verbatim and approved**: the executor
-   implements it, it does not re-word it.
+1. **Items 6 and 5 are both done** (`5eb7855`, `a4cbf31`) — all approved copy has shipped.
+   **Next: Item 15** (`ready`) — removes the two footer links that Item 6's FAQ already replaced, so
+   its ordering precondition is satisfied (the replacement discovery path is live). It **amends
+   PRD §5 + FS §2 together** — a doc change, not just code.
 2. **Then Item 17 (studio config) and Item 16 (assets) — both BEFORE the visual pass.** 17 is
    `ready` and mechanical; 16 is `draft` and needs the owner to generate images. Doing 17 first
    means the visual work reads every studio value from one place instead of chasing duplicates.

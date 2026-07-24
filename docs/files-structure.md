@@ -172,7 +172,6 @@ tattoo-request-app/
 │       └── tasks/
 │           ├── META_TASK_01_framework_consolidation.md
 │           ├── STAGE_6_STRAT_BRIEF.md
-│           ├── STAGE_6_TASK_05_home_rebuild.md
 │           ├── STAGE_6_TASK_15_prep_aftercare_discovery.md
 │           ├── STAGE_6_TASK_16_placeholder_assets.md
 │           ├── STAGE_6_TASK_17_studio_config_extraction.md
@@ -182,6 +181,7 @@ tattoo-request-app/
 │               ├── STAGE_6_TASK_02_site_wide_shell.md
 │               ├── STAGE_6_TASK_03_request_form_rebuild.md
 │               ├── STAGE_6_TASK_04_success_page.md
+│               ├── STAGE_6_TASK_05_home_rebuild.md
 │               ├── STAGE_6_TASK_06_process_content.md
 │               ├── STAGE_6_TASK_07_location_map_embed.md
 │               ├── STAGE_6_TASK_08_preparation_aftercare_split.md

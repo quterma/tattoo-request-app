@@ -408,3 +408,25 @@ token weight is a live cost. `open` entries are never compacted. Keep new entrie
   cross-review thread immediately after a green in-session pipeline, no confirmation step* even more
   explicitly than the current wording, or whether this was simply a one-off miss with no doc gap to
   fix.
+- 2026-07-24 — Stage 6 Item 5 (Home rebuild) took **9 cross-review rounds** to reach consensus, on a
+  change that was ultimately ~2 source files (`page.tsx`, `en.json` — under 130 changed lines
+  combined) plus doc/reporting overhead. Rounds 1, 2, 6, 7, 8 found real, legitimate issues (a
+  rendering bug, an invented lifecycle status, unreconciled completion obligations, a non-canonical
+  CO-2 pointer, an evidence-attribution nit) — the review pipeline did its job there. **Rounds 3–5
+  were the actual waste**: the same single finding (`docs/files-structure.md` sitting outside the
+  task's declared Allowed Write Surface) got re-litigated three times because the executing session
+  kept substituting *explanation* for *authorization* — "here's why this hunk is mine/attributable"
+  instead of either reverting it immediately or escalating to the owner immediately. Codex had to
+  restate the same underlying rule three times before it landed as a clean sentence ("authorization
+  attaches to the path, not to whose hunk it is") in round 5. Separately, the session twice
+  mis-inserted its own `## Response N` section before the `## Review N` it was replying to in the
+  thread file, requiring a same-turn self-correction to fix append order — a mechanical error, not a
+  reasoning one, but it added noise to an already-long thread. — open: is there a framework-level fix
+  here, or is this a one-off reasoning failure? Candidates worth META's judgment: (a) a documented
+  rule-of-thumb for the executor — "if a generated/mandatory file sits outside the declared surface,
+  the first move is revert-or-escalate, not explain-and-keep" — since this session found the right
+  answer only after being told the same thing three times; (b) whether `AI_CROSS_REVIEW.md`'s Turn
+  Structure should say explicitly that a new `## Response N` is always appended after the *matching*
+  `## Review N`, to make the ordering mistake harder to make. Not proposing either fix directly (AIENG
+  scope note: this session is an IMPL session, not AIENG/META, and does not edit framework docs
+  itself) — filed for a META session to decide.

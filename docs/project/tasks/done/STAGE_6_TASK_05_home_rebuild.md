@@ -2,10 +2,14 @@
 
 ## Status
 
-`in progress` · created 2026-07-23 · copy approved by the owner 2026-07-23 (v3) · code implemented
+`done` · created 2026-07-23 · copy approved by the owner 2026-07-23 (v3) · code implemented
 2026-07-24 · **Codex cross-review reached consensus after 9 rounds**
-(`reviews/done/REVIEW_2026-07-24_stage6-item5-home-rebuild.md`) · not yet committed, pending owner
-approval · evidence base: `research/done/RESEARCH_2026-07-23_stage6-public-copy-positioning.md`
+(`reviews/done/REVIEW_2026-07-24_stage6-item5-home-rebuild.md`) · **committed `a4cbf31`** ·
+evidence base: `research/done/RESEARCH_2026-07-23_stage6-public-copy-positioning.md`
+
+**CO-2 (mobile-viewport read-through) stays open by design** — no headless browser was available;
+routed to PROJECT_BACKLOG.md ("Home mobile-viewport read-through — CO-2 gap") and discharged in the
+visual pass / Item 13, alongside Item 6's identical gap. It does not gate this task's code.
 **Sequence:** run **after** Item 6 (`STAGE_6_TASK_06_process_content.md`) — Home's teasers link into
 Process sections and its metadata/`INSTAGRAM_HANDLE` swaps land there.
 
