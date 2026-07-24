@@ -130,6 +130,12 @@ more: what remains is **execution** (6 → 5 → 15, then 16) plus **owner pre-r
    favicon + OG image + final metadata copy + branded custom domain + `robots` noindex→index flip
    (Item 12, marker `__meta_TODO` — `grep -rn __meta_TODO app/ src/`); `en.json` `__intro_TODO` /
    `INSTAGRAM_HANDLE`.
+   - **Home Featured Work — 4 placeholder images** (Item 5, marker `__asset_TODO` —
+     `grep -rn __asset_TODO app/ src/` returns exactly **4** matches in
+     `app/[locale]/(public)/page.tsx`). Real curated work is an owner swap; Item 13's sweep must fail
+     while any remain. *(Filed here by the STRAT session, 2026-07-24 — Item 5's CO-3 originally asked
+     its IMPL session to write this entry, which the template forbids: the brief is STRAT-only. CO-3
+     was rewritten to cover the in-code marker only.)*
 
 ### Owner pre-deploy actions (debts carried by the owner, not IMPL work)
 

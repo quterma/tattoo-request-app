@@ -1480,7 +1480,10 @@ rationale addition). Nothing required a PRD/FS escalation.
   copy is not disposable duplicate content, so the outcome is the fold path, not deletion: the
   standalone About block is removed as a structure, and its unique trust content (tenure,
   custom-from-scratch promise) must be folded into Hero and/or the Good Fit teaser when Home is
-  built. Final wording remains owner-authored.
+  built. Final wording remains owner-authored. **Implemented (Item 5, 2026-07-24, task still
+  `in progress` pending cross-review consensus):** tenure folded into the Hero tagline ("20+ years
+  of painting behind every design…", painting-only, the tattooing year-count claim deleted);
+  `aboutLine1`/`aboutLine2` removed from `en.json`.
 - **Instagram link retained** as a secondary contextual link inside the Hero block (not a content
   block, not competing with the primary CTA) — consistent with PRD D1 (Instagram as the primary
   acquisition channel).

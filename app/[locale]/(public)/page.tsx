@@ -8,6 +8,8 @@ import {
   Stack,
 } from "@/shared/ui"
 
+const STEP_KEYS = [1, 2, 3, 4, 5] as const
+
 export default function Home() {
   const t = useTranslations("home")
   const footer = useTranslations("footer")
@@ -20,25 +22,17 @@ export default function Home() {
 
         <Container className="relative z-10 py-16 text-center">
           <h1 className="mb-3 text-4xl font-bold tracking-tight text-white sm:text-5xl">
-            {t("title")}
+            {t("heroName")}
           </h1>
-          <p className="mx-auto mb-8 max-w-md text-lg text-white/80">
-            {t("tagline")}
+          <p className="mx-auto mb-3 max-w-md text-lg text-white/80">
+            {t("heroSpecialization")}
+          </p>
+          <p className="mx-auto mb-8 max-w-md text-sm text-white/70">
+            {t("heroTagline")}
           </p>
 
           <div className="flex flex-col items-center gap-4">
-            <Link
-              href="/request"
-              className="inline-block rounded-lg bg-white px-8 py-3 text-sm font-semibold text-black transition-opacity hover:opacity-90"
-            >
-              {t("requestButton")}
-            </Link>
-            <Link
-              href="/process"
-              className="text-sm text-white/70 underline underline-offset-4 transition-colors hover:text-white"
-            >
-              {t("processLink")}
-            </Link>
+            <CtaRequestButton />
           </div>
 
           <a
@@ -56,9 +50,15 @@ export default function Home() {
 
       <Container>
         <Section className="py-4 sm:py-6">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <h2 className="mb-3">{t("featuredWorkTitle")}</h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {/* __asset_TODO: Featured Work placeholder 1 of 4 — see TASK_16 */}
             <div className="aspect-[4/5] rounded-lg bg-muted" />
+            {/* __asset_TODO: Featured Work placeholder 2 of 4 — see TASK_16 */}
             <div className="aspect-[4/5] rounded-lg bg-muted" />
+            {/* __asset_TODO: Featured Work placeholder 3 of 4 — see TASK_16 */}
+            <div className="aspect-[4/5] rounded-lg bg-muted" />
+            {/* __asset_TODO: Featured Work placeholder 4 of 4 — see TASK_16 */}
             <div className="aspect-[4/5] rounded-lg bg-muted" />
           </div>
           <a
@@ -73,46 +73,47 @@ export default function Home() {
         </Section>
 
         <Section className="py-4 sm:py-6">
+          <Stack gap="gap-2">
+            <p className="mb-0 text-muted-foreground">{t("goodFitTeaserText")}</p>
+            <Link
+              href="/process#good-fit"
+              className="text-sm underline underline-offset-2 transition-colors hover:text-foreground"
+            >
+              {t("goodFitTeaserLink")}
+            </Link>
+          </Stack>
+        </Section>
+
+        <Section className="py-4 sm:py-6">
           <Stack gap="gap-6">
             <h2 className="mb-1">{t("howItWorksTitle")}</h2>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-              <div>
-                <p className="mb-1 font-semibold">1. {t("step1Title")}</p>
-                <p className="mb-0 text-sm text-muted-foreground">
-                  {t("step1Text")}
+              {STEP_KEYS.map((step) => (
+                <p key={step} className="mb-0 text-sm text-muted-foreground">
+                  <span className="font-semibold text-foreground">
+                    {step}. {t(`step${step}Title`)}
+                  </span>{" "}
+                  — {t(`step${step}Text`)}
                 </p>
-              </div>
-              <div>
-                <p className="mb-1 font-semibold">2. {t("step2Title")}</p>
-                <p className="mb-0 text-sm text-muted-foreground">
-                  {t.rich("step2Text", {
-                    process: (chunks) => (
-                      <Link
-                        href="/process"
-                        className="underline underline-offset-2 transition-colors hover:text-foreground"
-                      >
-                        {chunks}
-                      </Link>
-                    ),
-                  })}
-                </p>
-              </div>
-              <div>
-                <p className="mb-1 font-semibold">3. {t("step3Title")}</p>
-                <p className="mb-0 text-sm text-muted-foreground">
-                  {t("step3Text")}
-                </p>
-              </div>
-            </div>
-            <div className="text-center">
-              <CtaRequestButton />
+              ))}
             </div>
           </Stack>
         </Section>
 
+        <Section className="py-4 sm:py-6">
+          <Stack gap="gap-2">
+            <p className="mb-0 text-muted-foreground">{t("priceTeaserText")}</p>
+            <Link
+              href="/process#pricing"
+              className="text-sm underline underline-offset-2 transition-colors hover:text-foreground"
+            >
+              {t("priceTeaserLink")}
+            </Link>
+          </Stack>
+        </Section>
+
         <Section className="py-4 sm:py-6 text-center">
-          <p className="mb-1 text-muted-foreground">{t("aboutLine1")}</p>
-          <p className="mb-0 text-muted-foreground">{t("aboutLine2")}</p>
+          <CtaRequestButton />
         </Section>
       </Container>
     </main>

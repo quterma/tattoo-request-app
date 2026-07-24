@@ -332,6 +332,28 @@ task, not a hotfix. Scope: one i18n key (both locales) plus whichever branch of
 
 ---
 
+## Home mobile-viewport read-through — CO-2 gap (Stage 6 Item 5, 2026-07-24)
+
+Raised by Codex cross-review (round 7) of `STAGE_6_TASK_05_home_rebuild.md`. Filed here so the gap
+is not lost when Item 5 closes — the owner ruled the check should be deferred, not blocking, but a
+deferral needs a canonical work item, not just a note in the task file or a mention in
+`STAGE_6_STRAT_BRIEF.md` (a STRAT-brief line is not a work item per `AI_TASK_PROTOCOL.md`).
+
+Item 5's CO-2 requires a "live mobile read-through of /en" (block order, teaser links, no orphaned
+i18n keys, clean build). Everything except the actual rendered **mobile-viewport** check was
+evidenced some other way: block order and teaser-link targets via `curl` against a dev server; the
+i18n key cross-check by comparing `page.tsx`'s `t()` calls against `en.json`'s keys in both
+directions; the clean build via `pnpm qg`. No headless-browser tool (chromium-cli/Playwright) was
+available in the implementing session's environment — the same gap Item 6 recorded for its own CO-2.
+
+Scope when picked up: an actual rendered check of `/en` at a mobile viewport width (real browser or
+headless tool), confirming the block order and layout read correctly and nothing clips/overflows.
+Natural fit for Item 13 (FS §6 acceptance sweep) or the not-yet-cut visual pass mentioned in
+`STAGE_6_STRAT_BRIEF.md` — either covers Home along with the rest of the public site, so this is not
+worth a standalone task file.
+
+---
+
 ## Client-side image compression for uploads — needs research (Stage 6 Item 1, 2026-07-14)
 
 Per-file upload limit is **4 MB**, forced by Vercel's 4.5 MB Function request-body ceiling (see
