@@ -20,7 +20,7 @@ Not defined here: visual design, styling, component architecture, implementation
 
 ## 2. Navigation and CTAs
 
-Primary navigation, identical and persistent on all public pages: **Home, Process, Request, Location** (PRD D9). No secondary navigation hierarchy. Preparation and Aftercare are not in the primary navigation; they are reached by the artist-sent direct URL (primary path) and by two links in the global footer as in-product fallback discovery (PRD §5). The footer links do not make these pages part of the primary navigation and do not appear as a fifth/sixth nav item.
+Primary navigation, identical and persistent on all public pages: **Home, Process, Request, Location** (PRD D9). No secondary navigation hierarchy. Preparation and Aftercare are not in the primary navigation; they are reached by the artist-sent direct URL (primary path) and by links inside the Process page's FAQ as in-product fallback discovery (PRD §5). The FAQ links do not make these pages part of the primary navigation and do not appear as a fifth/sixth nav item.
 
 Every page has exactly one primary CTA. Secondary contextual links are allowed only when they help complete the current task and must never compete with it.
 

@@ -167,6 +167,7 @@ tattoo-request-app/
 │       │       ├── REVIEW_2026-07-22_stage6-item10-postconsensus-amend.md
 │       │       ├── REVIEW_2026-07-22_stage6-item10-upload-abuse-mitigation.md
 │       │       ├── REVIEW_2026-07-23_stage6-item10-co2-live-verification.md
+│       │       ├── REVIEW_2026-07-24_stage6-item15-prep-aftercare-discovery.md
 │       │       ├── REVIEW_2026-07-24_stage6-item5-home-rebuild.md
 │       │       └── REVIEW_2026-07-24_stage6-item6-process-content.md
 │       └── tasks/
@@ -188,7 +189,8 @@ tattoo-request-app/
 │               ├── STAGE_6_TASK_09_placement_freetext.md
 │               ├── STAGE_6_TASK_10_upload_abuse_mitigation.md
 │               ├── STAGE_6_TASK_11_public_error_404.md
-│               └── STAGE_6_TASK_12_favicon_og_seo.md
+│               ├── STAGE_6_TASK_12_favicon_og_seo.md
+│               └── STAGE_6_TASK_15_prep_aftercare_discovery.md
 ├── scripts/
 │   └── update-structure.mjs
 ├── src/

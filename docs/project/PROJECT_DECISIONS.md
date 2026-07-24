@@ -1697,6 +1697,9 @@ FS compliance, not a new blueprint invention.
   global-footer link (in-product fallback discovery). **(Superseded 2026-07-14 — this entry
   originally read "by direct URL only … no in-product discovery is an accepted risk"; see
   "Preparation/Aftercare in-product discovery" above, which reversed that and amended PRD §5/FS §2.)**
+  **(Superseded again 2026-07-23 — the fallback is no longer a global-footer link; it is the Process
+  FAQ. See the "Amendment — 2026-07-23" note under "Preparation/Aftercare in-product discovery"
+  below.)**
 - **No primary CTA** (FS §2 table: none for content pages Preparation/Aftercare).
 - **The shipped page's "back to policies" links (top and bottom) are removed:** the policies page
   is superseded in Stage 6 (nav item becomes Process), and FS §2 allows secondary links only when
@@ -1722,7 +1725,9 @@ Mirror of Preparation (same split, same rules).
 - Nav bar present / absent from nav item set; no primary CTA; "back to policies" links removed;
   no cross-link to Preparation — same rationale as the Preparation section above, applied
   symmetrically. Discovery: artist-sent direct URL plus a global-footer link, same as Preparation
-  (superseded 2026-07-14 — see "Preparation/Aftercare in-product discovery" above).
+  (superseded 2026-07-14 — see "Preparation/Aftercare in-product discovery" above; **superseded
+  again 2026-07-23 — the fallback is now the Process FAQ, not a global-footer link, same as
+  Preparation**).
 - **Content boundary for "Healing & touch-ups" recorded explicitly:** this section covers healing
   expectations and when a touch-up is appropriate — nothing else. Any touch-up booking terms or
   pricing belong exclusively to Process (Booking Policy): FS §3.7 forbids pricing/booking content
@@ -1763,6 +1768,21 @@ first-class product decision, not a blueprint tweak, precisely because it moved 
   rule). The `process.aftercareLink` i18n key is removed with it.
 - **New footer i18n keys:** `footer.preparation`, `footer.aftercare` (labels owner-adjustable
   without changing meaning, per FS Appendix A convention). Routes: `/preparation`, `/aftercare`.
+  **(Superseded 2026-07-23 — see amendment below; these keys are removed.)**
+
+**Amendment — 2026-07-23 (footer clause superseded, direct URL primacy unchanged).** The footer-links
+half of the Q1 decision above is reversed: the two links move from the global footer to the Process
+page's FAQ (the "How do I prepare — and what about healing?" answer, shipped by Item 6, `5eb7855`).
+Reasoning: the footer should carry Instagram + studio identity only; the FAQ is a place a
+fit-deciding Process reader can skip, which satisfies this entry's original "does not surface the
+pages to a first-time visitor deciding fit" concern better than a bare footer link did. The
+artist-sent direct URL remains the *primary* path, unchanged. `footer.preparation`/`footer.aftercare`
+i18n keys and the footer's two links are removed; PRD §5 and FS §2 are amended to match (PRD §9
+change control). Everything else in this entry (why not nav, why not a page CTA, `process.aftercareLink`
+removal) is unaffected. Full record: PROJECT_DECISIONS.md §"4. Preparation/Aftercare discovery moves
+from the footer to the Process FAQ" (under "Stage 6 public copy — approved content, age policy, and
+discovery reversal — 2026-07-23"); implemented by
+`tasks/STAGE_6_TASK_15_prep_aftercare_discovery.md`.
 
 **Q2 (boundary bullet) — decided 2026-07-14:** the last bullet of the shipped `tattooDayItems`
 ("After the tattoo, we'll take photos, then I'll apply aftercare protection and explain next

@@ -37,6 +37,41 @@ require updating them first. See PROJECT_DECISIONS.md — Stage 6 Product Docume
 
 Current focus:
 
+- **Stage 6 Item 15 — Preparation/Aftercare discovery moves from the footer to the Process FAQ —
+  implemented, cross-review at consensus, pending commit (IMPL, 2026-07-24).**
+  `tasks/done/STAGE_6_TASK_15_prep_aftercare_discovery.md`: reverses the footer half of the
+  2026-07-14 "Preparation/Aftercare in-product discovery" decision — the two footer links
+  (`public-footer.tsx`, `footer.preparation`/`footer.aftercare` in `en.json`) are removed; discovery
+  now happens via the Process FAQ's "How do I prepare — and what about healing?" answer, already
+  shipped by Item 6 (`5eb7855`). The artist-sent direct URL stays primary in both the old and new
+  decision — only the in-product fallback moved. **A spec-first change:** PRD §5 and FS §2 amended
+  together (PRD §9 change control) to name the Process FAQ instead of the footer as the fallback
+  path, both retaining the artist-sent-URL-primary and not-primary-navigation guarantees.
+  `PROJECT_DECISIONS.md`'s original 2026-07-14 entry is kept intact (never-rewrite-history
+  convention) with a dated "Amendment — 2026-07-23" appended directly under it, plus a second,
+  non-destructive "superseded again 2026-07-23" annotation added to the separate Preparation and
+  Aftercare batch-2 decision entries so neither still reads as if the footer path is current.
+  CO-1 (discovery never zero) is backed by an actual `pnpm build && pnpm start` + `curl` check of
+  the rendered `/en/process` HTML (both `/preparation`/`/aftercare` hrefs present in the FAQ, footer
+  confirmed to contain only studio name/address/Instagram/copyright) — not source inspection alone.
+  Independent Codex cross-review ran **4 rounds to consensus**, all 8 findings accepted, no
+  disputes: Round 1 caught the task `Status` not moved to `in progress`, CO-1's evidence being
+  source-only rather than live-verified, two stale decision-entry annotations, and an overstated
+  grep-scope claim. Round 2 caught that the mandatory `pnpm qg` had dirtied `docs/files-structure.md`
+  and that live-check commands had left unclaimed `allow` entries in `.claude/settings.json`, both
+  outside the task's Allowed Write Surface — plus a directional nit ("above" vs "below") in the new
+  Preparation annotation. Round 3 caught that Round 2's fix (a plain revert of
+  `docs/files-structure.md`) mischaracterized the Item 5 precedent it cited: Item 5's actual
+  resolution extended the write surface and completed the gate, not left it undone. Extending a
+  task's declared write surface is an owner call, not the executor's — the owner was asked directly
+  and approved extending it to `docs/files-structure.md` (same precedent as
+  `STAGE_6_TASK_02_site_wide_shell.md`); the full `pnpm qg` was then run and green, with the file's
+  diff confirmed as exactly one line (this task's own review-thread entry). Round 4: no new
+  findings. Final `pnpm qg` green in full: structure, lint (0 errors, 1 pre-existing unrelated
+  `<img>` warning), typecheck, 399/399 tests, build. All three completion obligations CLOSED with
+  reproducible evidence. Review thread at
+  `reviews/done/REVIEW_2026-07-24_stage6-item15-prep-aftercare-discovery.md`. Task file moved to
+  `tasks/done/`. Not yet committed — pending owner approval.
 - **Stage 6 Item 5 — Home rebuild — implemented, cross-review at consensus, pending commit
   (IMPL, 2026-07-24).** `tasks/STAGE_6_TASK_05_home_rebuild.md`: rebuilt
   `app/[locale]/(public)/page.tsx` and the `home` namespace in `en.json` to FS §3.1's block list and

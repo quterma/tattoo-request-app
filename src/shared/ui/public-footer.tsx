@@ -1,7 +1,6 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { Link } from "@/shared/i18n"
 import { Container } from "./container"
 import { InstagramIcon } from "./icons"
 
@@ -23,20 +22,6 @@ export function PublicFooter() {
             >
               <InstagramIcon className="size-4" />
             </a>
-          </div>
-          <div className="flex items-center gap-3 text-xs">
-            <Link
-              href="/preparation"
-              className="transition-colors hover:text-foreground"
-            >
-              {t("preparation")}
-            </Link>
-            <Link
-              href="/aftercare"
-              className="transition-colors hover:text-foreground"
-            >
-              {t("aftercare")}
-            </Link>
           </div>
           <p className="mb-0 mt-3 text-xs">
             {t("copyright", { year: new Date().getFullYear() })}
