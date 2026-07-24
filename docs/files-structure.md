@@ -173,7 +173,6 @@ tattoo-request-app/
 │       └── tasks/
 │           ├── META_TASK_01_framework_consolidation.md
 │           ├── STAGE_6_STRAT_BRIEF.md
-│           ├── STAGE_6_TASK_15_prep_aftercare_discovery.md
 │           ├── STAGE_6_TASK_16_placeholder_assets.md
 │           ├── STAGE_6_TASK_17_studio_config_extraction.md
 │           ├── TOOLING_TASK_01_project_status_command.md
