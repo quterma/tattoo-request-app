@@ -839,6 +839,19 @@ Completed in Stage 3:
 
 ## Log Entries (reverse chronological)
 
+### 2026-07-25 — META: Pre-task Sync stage-log read rule + cross-review round cap
+
+Open-observations review (verdicts persisted in AI_FRAMEWORK_IDEAS.md — Workflow Observations).
+Two fixes cleared the fix-now bar, owner-approved: (1) `.claude/CLAUDE.md` Pre-task Sync now reads
+only this file's `## Current Stage` section and searches `## Log Entries` on demand — the file
+(4,393 lines, ~80% closed history) no longer fits a whole-file Read, so the old rule prescribed
+the impossible; (2) `AI_CROSS_REVIEW.md` Turn Structure caps the review loop at **3 rounds** —
+round 4 opens only by owner decision (re-arming past round 6), bounding owner-attention spend
+after the 9- and 8-round threads (Items 5/17). One observation closed with no doc change
+(confirmation-asking before the mandatory cross-review — one-off miss, rule already explicit);
+the remaining open observations were reviewed and deliberately left `open` as defer-class
+(AI_WORKFLOW_MASTER.md — What to fix now vs. defer) with dated verdict notes in the journal.
+
 ### 2026-07-18 — IMPL: Stage 6 Task 04 — Success page (done)
 
 `STAGE_6_TASK_04_success_page.md` → `done` (→ `tasks/done/`). `/success` shipped as a real gated

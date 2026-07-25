@@ -103,6 +103,10 @@ token weight is a live cost. `open` entries are never compacted. Keep new entrie
   only when a task needs historical detail. One rule edit, no archive file, no new format, no owner
   round-trip. Deliberately not applied in the 2026-07-17 commit because it changes what *every*
   session loads and deserves its own scoped pass rather than riding along with an unrelated reversal.
+  — resolved 2026-07-25 (META): the named minimum fix applied verbatim — CLAUDE.md Pre-task Sync now
+  reads only `## Current Stage` and searches `## Log Entries` on demand (re-verified at fix time:
+  4,393 lines, ~80% closed history, Read refuses the whole file). Archive split remains defer-class:
+  large but no longer in the way.
 - 2026-07-15 — A STRAT session and an IMPL session, both live for Task 03, **co-authored the same
   durable docs** (`PROJECT_DECISIONS.md`: STRAT wrote "Stage 6 Contact Model", IMPL added a
   staging-waiver exception; `STAGE_6_TASK_03_*.md`: STRAT unblocked Block C + removed placement-Other,
@@ -407,7 +411,9 @@ token weight is a live cost. `open` entries are never compacted. Keep new entrie
   META to judge whether the kickoff prompt / IMPL session template should say *always open the
   cross-review thread immediately after a green in-session pipeline, no confirmation step* even more
   explicitly than the current wording, or whether this was simply a one-off miss with no doc gap to
-  fix.
+  fix. — resolved 2026-07-25 (META): no doc change — the rule is already explicit ("opens the thread
+  itself… does not wait to be told"); a one-off execution miss, and adding emphasis to an already
+  unambiguous rule is accretion with no evidence it changes behavior. Reopen on a second sighting.
 - 2026-07-24 — Stage 6 Item 5 (Home rebuild) took **9 cross-review rounds** to reach consensus, on a
   change that was ultimately ~2 source files (`page.tsx`, `en.json` — under 130 changed lines
   combined) plus doc/reporting overhead. Rounds 1, 2, 6, 7, 8 found real, legitimate issues (a
@@ -429,7 +435,12 @@ token weight is a live cost. `open` entries are never compacted. Keep new entrie
   Structure should say explicitly that a new `## Response N` is always appended after the *matching*
   `## Review N`, to make the ordering mistake harder to make. Not proposing either fix directly (AIENG
   scope note: this session is an IMPL session, not AIENG/META, and does not edit framework docs
-  itself) — filed for a META session to decide.
+  itself) — filed for a META session to decide. — 2026-07-25 META review: **defer** — single
+  occurrence of the explain-instead-of-revert mode, and the governing rule (Allowed Write Surface is
+  explicit; authorization attaches to the path) already exists and was enforced by the thread; the
+  new 3-round cap (AI_CROSS_REVIEW.md, Turn Structure step 4) now bounds any repeat of the
+  re-litigation loop. Candidates (a)/(b) stay parked unless a second sighting. Stays `open` for the
+  post-MVP retrospective.
 - 2026-07-24 — **Recurring pattern: IMPL sessions keep planning to write into `STAGE_6_STRAT_BRIEF.md`,
   which is STRAT-only and outside every task's write surface.** Observed **three times** now across
   Stage 6, each caught at plan-review or cross-review, never reaching a commit — but the repetition
@@ -450,9 +461,21 @@ token weight is a live cost. `open` entries are never compacted. Keep new entrie
   time, not review time); (c) whether the "Pre-deploy swaps to track" list should physically move out
   of the brief into PROJECT_PRODUCTION_READINESS.md so the gravitational pull points at the right file
   to begin with. Filed by the STRAT session coordinating Stage 6; not fixing framework docs here.
+  — 2026-07-25 META review: **defer (a)/(b)** — the structural fix (c) is already in flight as
+  canonical work, not rules: Item 17 created PROJECT_PRODUCTION_READINESS.md "Pre-Deploy Content
+  Swaps" and a PROJECT_BACKLOG.md entry covering the leftovers (Item 16 + the brief's stale section,
+  STRAT follow-up). New rules are warranted only if the pull recurs after that lands. Stays `open`
+  until the follow-up closes.
 - 2026-07-25 — Review round counts climbing on refactor-shaped IMPL tasks (Item 5: 9, Item 17: 8+);
   owner flagged it as a velocity problem and asked about an MCP-wrapped Codex with a bounded/capped
   auto-loop. Root cause shifted mid-thread from write-surface/settings.json hygiene (rounds 1-3) to
   self-inflicted reporting-doc inconsistency (each round's fix desyncing the next). `open` — for
   META; full detail in
   `docs/project/reviews/done/REVIEW_2026-07-25_stage6-item17-studio-config-extraction.md`.
+  — resolved 2026-07-25 (META): **(b) adopted** — AI_CROSS_REVIEW.md Turn Structure step 4 caps the
+  loop at 3 rounds; round 4 opens only by owner decision, and the cap re-arms if continued.
+  **(a) rejected for now** — an MCP auto-loop is infrastructure that addresses neither measured
+  cause (surface hygiene, reporting-doc drift) and removes the owner checkpoint the cap adds;
+  revisit post-MVP if manual cadence itself becomes the bottleneck. **(c) deferred** — the
+  stable-wording practice found in Item 17 round 5 (reporting prose that doesn't go stale between
+  rounds) covers the measured cause; codify only on recurrence.

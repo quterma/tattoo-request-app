@@ -20,7 +20,8 @@ If something is unclear or missing:
 
 Before any task except clarifying questions:
 
-- Re-read docs/project/PROJECT_STAGE_LOG.md
+- Re-read docs/project/PROJECT_STAGE_LOG.md — the `## Current Stage` section only (the file is
+  too large to read whole); search `## Log Entries` only when the task needs historical detail
 - Re-read docs/project/PROJECT_CONTEXT.md
 - Re-read docs/project/PROJECT_ARCHITECTURE.md
 - Re-read docs/project/PROJECT_DECISIONS.md (if needed)

@@ -124,7 +124,13 @@ by eye, which is exactly the fragility this section removes.)
 3. `## Response <N>` — Claude Code: verdict per finding (accept / reject / needs-owner) with
    one-line rationale; a short Russian summary for the owner at the end of the section.
    Disputed items go to the owner. Set Status `awaiting-review` (next round) or `consensus`.
-4. Repeat 2–3 until consensus.
+4. Repeat 2–3 until consensus — **capped at 3 rounds**: if round 3 ends without consensus,
+   Claude Code does not open round 4 by default. It stops and hands the owner the dispute state
+   (one line per unresolved finding: what it is, each side's position); the owner decides —
+   continue the loop, rule on the items directly, or close. If the owner continues, the cap
+   re-arms (escalate again after round 6). The cap bounds owner-attention spend on runaway
+   loops, not the review's depth (owner decision 2026-07-25; measured 9- and 8-round threads
+   with the waste concentrated past round 3 — AI_FRAMEWORK_IDEAS.md, 2026-07-25).
 5. `## Consensus` — final list: accepted findings and where each was filed (fix commit, task
    file, PROJECT_BACKLOG.md), rejected findings with rationale.
 
