@@ -839,6 +839,29 @@ Completed in Stage 3:
 
 ## Log Entries (reverse chronological)
 
+### 2026-07-25 — TOOLING: `pnpm project:status` (done, delegated to Codex)
+
+`TOOLING_TASK_01_project_status_command.md` → `done` (→ `tasks/done/`). A dependency-free,
+read-only Node script (`scripts/project-status.mjs`, one `package.json` entry) that derives the
+process board from the canonical files on disk: tasks with `Status`/`Executor`/`Reviewer`/`Blocks`,
+active review and research threads, a git overlay marking uncommitted artifacts, honest
+`not represented by structured data` placeholders, and the integrity checks that are the point of
+it — malformed/duplicated status, illegal status-vs-location, the one-active-review invariant, an
+orphaned queue, missing `awaiting-external` transport buffers, a forbidden literal
+`Baseline commit:` hash, and completion obligations with no evidence or no resolvable work item.
+Writes nothing; exit 0 when work is merely open, 1 on malformed or contradictory metadata.
+
+**Executed by Codex** (first delegation since Task 08), reviewed by Claude per the delegated-task
+route — execution report and review verdict in the task file, no separate cross-review thread.
+Claude's review found and fixed one should-fix (`STAGE_6_STRAT_BRIEF.md` sits in `tasks/` by
+protocol but is not a task; parsing it made exit `1` unconditional) and re-ran the mandatory full
+`pnpm qg`: green, 33 test files / 407 tests.
+
+**Its first real run paid for the tool immediately:** nine unresolved completion obligations behind
+six closed tasks (03/05/06/07/10/12) plus one `done` task never moved out of `tasks/`
+(`STAGE_6_TASK_17`, moved). The obligations are filed as a PROJECT_BACKLOG.md entry for owner
+routing; each was verified against the source document rather than trusted from the output.
+
 ### 2026-07-25 — META: Pre-task Sync stage-log read rule + cross-review round cap
 
 Open-observations review (verdicts persisted in AI_FRAMEWORK_IDEAS.md — Workflow Observations).

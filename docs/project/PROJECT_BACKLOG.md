@@ -524,3 +524,36 @@ in the same retrospective pass, in that order (delete duplication first, then ab
 
 No action until one of the two triggers above actually occurs (a model-generation change may
 arrive before MVP — that counts).
+
+---
+
+## Unresolved completion obligations behind six closed tasks (filed 2026-07-25)
+
+Source: the first real run of `pnpm project:status`
+(`docs/project/tasks/done/TOOLING_TASK_01_project_status_command.md`, `Requested by:` that task's
+Claude review pass). Verified against the source documents, not taken from the tool's output.
+
+Nine obligations across six `done` tasks lack either completion evidence or a resolvable work item,
+which is exactly what AI_TASK_PROTOCOL.md — Completion Obligations forbids at close:
+
+- **Task 03** CO-3 — "expected `None`; confirm at close"; the confirmation was never recorded.
+- **Task 05** CO-2 — tracked in `PROJECT_BACKLOG.md` with no anchor, so the pointer resolves to
+  nothing checkable.
+- **Task 06** CO-2 (`PARTIAL` — mobile-viewport truncation never visually confirmed) and CO-3
+  (`OPEN — owner`: the owner/artist copy pass).
+- **Task 07** CO-3 and **Task 10** CO-4 — track work in `STAGE_6_STRAT_BRIEF.md`, which the
+  protocol explicitly rejects as a work item (a brief is overwritten each STRAT session).
+- **Task 12** CO-5 — the Vercel "System Environment Variables" checkbox, carried as owner debt in
+  the same brief; it gates a public `og:image` origin at launch.
+
+Also fixed in passing at filing time: `STAGE_6_TASK_17` was `done` but still sat in `tasks/`
+(moved to `tasks/done/`).
+
+**Why this is one entry, not six tasks:** the underlying work is heterogeneous (an owner copy pass,
+a deploy-time dashboard check, a mobile visual pass, two re-pointings), and the routing decision —
+which of these become tasks, which are owner actions, which are already satisfied and just need
+their evidence written down — is the owner's. Note that four of the nine are pre-launch items
+already tracked in PROJECT_PRODUCTION_READINESS.md in substance; what is missing is the canonical
+pointer from the closing task, not necessarily the work.
+
+Run `pnpm project:status` to see the live list; it exits non-zero while any of these stand.

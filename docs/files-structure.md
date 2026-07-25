@@ -176,7 +176,6 @@ tattoo-request-app/
 │           ├── META_TASK_01_framework_consolidation.md
 │           ├── STAGE_6_STRAT_BRIEF.md
 │           ├── STAGE_6_TASK_16_placeholder_assets.md
-│           ├── STAGE_6_TASK_17_studio_config_extraction.md
 │           ├── TOOLING_TASK_01_project_status_command.md
 │           └── done/
 │               ├── STAGE_6_TASK_01_upload_flow_architecture.md
@@ -191,9 +190,14 @@ tattoo-request-app/
 │               ├── STAGE_6_TASK_10_upload_abuse_mitigation.md
 │               ├── STAGE_6_TASK_11_public_error_404.md
 │               ├── STAGE_6_TASK_12_favicon_og_seo.md
-│               └── STAGE_6_TASK_15_prep_aftercare_discovery.md
+│               ├── STAGE_6_TASK_15_prep_aftercare_discovery.md
+│               ├── STAGE_6_TASK_17_studio_config_extraction.md
+│               └── TOOLING_TASK_01_project_status_command.md
 ├── scripts/
-│   └── update-structure.mjs
+│   ├── project-status.mjs
+│   ├── update-structure.mjs
+│   └── __tests__/
+│       └── project-status.test.ts
 ├── src/
 │   ├── bff/
 │   │   ├── adoptUploads.ts

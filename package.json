@@ -18,6 +18,7 @@
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
     "structure": "node scripts/update-structure.mjs",
+    "project:status": "node scripts/project-status.mjs",
     "qg": "pnpm structure && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "prepare": "husky"
   },
