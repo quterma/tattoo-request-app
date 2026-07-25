@@ -5,7 +5,8 @@ does not appear in STAGE_6_IMPLEMENTATION_PLAN.md and blocks nothing there.)
 
 ## Status
 
-`draft` · created 2026-07-14 · done: <date · PROJECT_STAGE_LOG.md entry pointer>
+`ready` · created 2026-07-14 · promoted `ready` 2026-07-25 (owner decision, delegation to Codex)
+· done: <date · PROJECT_STAGE_LOG.md entry pointer>
 
 Source: `docs/project/research/done/RESEARCH_2026-07-14_open-question-trigger-and-thread-visibility.md`
 (Q2 — owner decision 2026-07-14: build the command).
@@ -21,16 +22,20 @@ Source: `docs/project/research/done/RESEARCH_2026-07-14_open-question-trigger-an
 - Allowed Write Surface (nothing outside it):
   - `scripts/project-status.mjs` (new)
   - `package.json` (add exactly one script entry: `project:status`)
-  - `scripts/__tests__/project-status.test.ts` (new — or the co-located pattern the repo already
-    uses for script tests, if one exists; verify before choosing)
+  - `scripts/__tests__/project-status.test.ts` (new. Resolved 2026-07-25: no script-test pattern
+    exists in the repo yet; use this path — vitest's include glob
+    `**/__tests__/**/*.{test,spec}.{ts,tsx}` picks it up with **no** config change.
+    `vitest.config.ts` is outside the surface and must not be touched.)
 - May touch dependencies / migrations / generated files / shared docs: **no**. The script must be
   dependency-free (Node 20 built-ins only — the repo already does this in
   `scripts/update-structure.mjs`; read it first and follow its conventions).
 
 ## How to run (session settings)
 
-- Model: Sonnet (well-scoped, mechanical)
-- Start mode: Plan mode
+- Executor session: fresh Codex session; owner kickoff
+  `Execute docs/project/tasks/TOOLING_TASK_01_project_status_command.md` (this IS the delegation
+  authorization per AI_TASK_PROTOCOL.md). Codex still presents a plan and waits for approval.
+- Reviewer session: Claude, standard tier is enough (review + full `pnpm qg`).
 - See docs/framework/AI_TASK_PROTOCOL.md — Session Settings Guidance
 
 ## Context (read before any work)
@@ -112,7 +117,14 @@ nothing** — stdout is the whole product.
 3. Present a plan (incl. the exact output shape) and wait for explicit approval. The plan must
    carry a **"Deviations from the task file"** section (or "no deviations").
 4. Implement within Scope only.
-5. Run the Review Pipeline (`pnpm qg`), then open the mandatory independent cross-review thread.
+5. Gate loop (Codex owns it): run `pnpm lint` / `pnpm typecheck` / `pnpm test` — the non-mutating
+   gates only; never `pnpm qg`, `pnpm structure`, or `pnpm build` (they write files). Iterate to a
+   clean pass, or stop and report exactly which check failed and why.
+6. Write the execution report into this file (Reporting below), set Status
+   `awaiting-claude-review`. **No separate cross-review thread** — for a routine delegated task
+   the report and Claude's review verdict live here (AI_TASK_PROTOCOL.md — Delegating IMPL Tasks
+   to Codex). Claude then reviews the diff as an unfamiliar patch, runs the full `pnpm qg` itself,
+   and owns docs / `done` / commit proposal.
 
 ## Acceptance Criteria
 
@@ -125,6 +137,12 @@ nothing** — stdout is the whole product.
 - It fails loudly on unparseable metadata rather than silently omitting the artifact.
 - Categories with no structured representation print the honest placeholder, not a guess.
 - `pnpm qg` passes.
+
+## Completion obligations
+
+None expected (read-only script, no migrations/secrets/external systems). Reconcile against the
+four objective sources before close per AI_TASK_PROTOCOL.md — Completion Obligations; write an
+explicit `None` or list entries at close.
 
 ## Reporting
 
