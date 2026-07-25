@@ -1,6 +1,6 @@
 import "server-only"
 import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto"
-import { config } from "@/config"
+import { config } from "@/config/env"
 import { UPLOAD_CATEGORIES } from "./storage"
 import type { FileType } from "./storage"
 

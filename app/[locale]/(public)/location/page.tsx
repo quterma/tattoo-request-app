@@ -1,7 +1,8 @@
 import { useTranslations } from "next-intl"
+import { studio } from "@/config"
 import { CtaRequestButton, Page, Section, Stack } from "@/shared/ui"
 
-const addressQuery = encodeURIComponent("Herzl 100, Tel Aviv, Israel")
+const addressQuery = encodeURIComponent(studio.address)
 
 const MAP_LINKS = [
   {
@@ -22,7 +23,7 @@ export default function LocationPage() {
       </Section>
 
       <Section className="py-2 sm:py-3">
-        <p className="text-muted-foreground">{t("address")}</p>
+        <p className="text-muted-foreground">{studio.address}</p>
 
         <div className="mt-3 grid grid-cols-3 gap-2 sm:gap-3">
           {MAP_LINKS.map(({ labelKey, href }) => (

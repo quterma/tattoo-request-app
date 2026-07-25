@@ -6,12 +6,12 @@ import { useTranslations } from "next-intl"
 import { useForm, useWatch } from "react-hook-form"
 import type { FieldErrors } from "react-hook-form"
 import { API_ERROR_CODES, REQUEST_FIELDS } from "@/shared/api"
+import { studio } from "@/config"
 import { useRouter } from "@/shared/i18n"
 import { getFieldError, getValidationKeyMessage } from "../lib/errors"
 import {
   AGE_THRESHOLD,
   COLOR_OPTIONS,
-  INSTAGRAM_HANDLE,
   MAX_FILES_PER_FIELD,
   OFFERED_CONTACT_METHODS,
   SIZE_OPTIONS,
@@ -521,7 +521,7 @@ export function RequestForm() {
       {status === "error" && (
         <p role="alert" className="text-sm text-destructive">
           {failedAttempts >= FALLBACK_AFTER_ATTEMPTS
-            ? t("errorInstagramFallback", { handle: INSTAGRAM_HANDLE })
+            ? t("errorInstagramFallback", { handle: studio.instagramHandle })
             : t("errorDetailsPreserved")}
         </p>
       )}

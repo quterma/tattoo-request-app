@@ -430,3 +430,29 @@ token weight is a live cost. `open` entries are never compacted. Keep new entrie
   `## Review N`, to make the ordering mistake harder to make. Not proposing either fix directly (AIENG
   scope note: this session is an IMPL session, not AIENG/META, and does not edit framework docs
   itself) — filed for a META session to decide.
+- 2026-07-24 — **Recurring pattern: IMPL sessions keep planning to write into `STAGE_6_STRAT_BRIEF.md`,
+  which is STRAT-only and outside every task's write surface.** Observed **three times** now across
+  Stage 6, each caught at plan-review or cross-review, never reaching a commit — but the repetition
+  is the signal: (1) Item 5 CO-3 was *written* to require the executor to add the Featured Work
+  `__asset_TODO` entry to the brief (a drafting error in the task file — the STRAT session that cut it
+  put an impossible obligation on the executor); Codex flagged it, the executor correctly reverted its
+  attempted brief edit. (2) Item 17's plan proposed documenting the consolidated placeholder-marker
+  grep in the brief's "Pre-deploy swaps to track" section; caught at plan review and redirected to
+  `PROJECT_PRODUCTION_READINESS.md` (durable, in-surface). Both times the *pull* was the same: work
+  that feels like "pre-deploy / cross-task tracking" reads as belonging in the brief, because that is
+  where such lists currently live. The brief is the wrong home for anything durable — it is
+  overwritten each STRAT session (a pointer, not a record) *and* STRAT-only. — open: candidates for a
+  META session: (a) an explicit rule in `STAGE_TASK_TEMPLATE.md` / the IMPL kickoff convention —
+  "cross-task/pre-deploy tracking that must survive belongs in a durable PROJECT_* doc
+  (PROJECT_PRODUCTION_READINESS.md for pre-launch swaps); the STRAT brief only ever *points* at it,
+  and only a STRAT session writes the pointer"; (b) a check when a STRAT session *cuts* a task —
+  "no CO may require the executor to edit the STRAT brief" (would have caught Item 5's CO-3 at cut
+  time, not review time); (c) whether the "Pre-deploy swaps to track" list should physically move out
+  of the brief into PROJECT_PRODUCTION_READINESS.md so the gravitational pull points at the right file
+  to begin with. Filed by the STRAT session coordinating Stage 6; not fixing framework docs here.
+- 2026-07-25 — Review round counts climbing on refactor-shaped IMPL tasks (Item 5: 9, Item 17: 8+);
+  owner flagged it as a velocity problem and asked about an MCP-wrapped Codex with a bounded/capped
+  auto-loop. Root cause shifted mid-thread from write-surface/settings.json hygiene (rounds 1-3) to
+  self-inflicted reporting-doc inconsistency (each round's fix desyncing the next). `open` — for
+  META; full detail in
+  `docs/project/reviews/done/REVIEW_2026-07-25_stage6-item17-studio-config-extraction.md`.

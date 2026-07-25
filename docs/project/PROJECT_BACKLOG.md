@@ -332,6 +332,69 @@ task, not a hotfix. Scope: one i18n key (both locales) plus whichever branch of
 
 ---
 
+## Re-review Item 17 before release — cross-review loop exited without consensus (Stage 6 Item 17, 2026-07-25)
+
+**For STRAT.** Item 17's Codex cross-review ran **9 rounds** and was ended by owner decision, not
+by a clean round. Rounds 1–3 found real defects (a CO-1 gap: two bare studio-name literals still
+outside the config; write-surface and `.claude/settings.json` hygiene) — all fixed. **Rounds 4–9
+produced no production-code finding whatsoever**: every one was a reporting-document inconsistency,
+most of them self-inflicted (each round's own prose fix desynchronizing a count or a claim that the
+next round then caught). The loop had stopped converging on code quality and was blocking delivery.
+
+Owner decision: commit the work, exit the loop, and **re-review before release** rather than keep
+paying round-trips for documentation churn. Risk is bounded and explicitly accepted:
+
+- The production refactor itself was independently verified clean by Codex in each of the last six
+  rounds ("no production-code finding remains" stated verbatim in Rounds 7, 8, and 9).
+- `pnpm qg` green throughout; CO-3 (byte-identical rendered output) live-verified after Reviews 1–5.
+- The only findings ever left unfixed at exit: none — Round 9's single finding was applied before
+  the close.
+
+Scope when picked up: a fresh cross-review pass over Item 17's committed diff, ideally **after**
+the META decisions on review-loop mechanics land (`AI_FRAMEWORK_IDEAS.md`, 2026-07-25 entry —
+round caps, possible MCP-wrapped Codex auto-loop), so the re-review does not reproduce the same
+churn. Natural fit: the pre-release verification pass alongside Item 13's acceptance sweep.
+
+Source thread: `docs/project/reviews/done/REVIEW_2026-07-25_stage6-item17-studio-config-extraction.md`,
+requested by `IMPL: Stage 6 item 17 — studio config extraction`.
+
+---
+
+## Placeholder-marker convention: Item 16 and STRAT brief still teach the superseded grep (Stage 6 Item 17, 2026-07-25)
+
+Raised by Codex cross-review (round 3/4) of `STAGE_6_TASK_17_studio_config_extraction.md`. Filed
+here so the gap is not lost when Item 17 closes — Item 17's CO-2 consolidated three separate
+placeholder markers (`__meta_TODO`, `__intro_TODO`, `__asset_TODO`) into one combined grep,
+documented in `PROJECT_PRODUCTION_READINESS.md`'s new "Pre-Deploy Content Swaps" section, and
+repointed every in-code/data marker comment at it. Item 17 could not fix two remaining documents
+that still teach the superseded convention, because both are outside an IMPL session's write
+authority:
+
+- `docs/project/tasks/STAGE_6_TASK_16_placeholder_assets.md` (`draft`) still instructs its future
+  executor to run the separate `__asset_TODO` grep and write the result into
+  `STAGE_6_STRAT_BRIEF.md`'s "Pre-deploy swaps to track" (§3, "Marker + tracking").
+- `docs/project/tasks/STAGE_6_STRAT_BRIEF.md` itself still documents separate `__meta_TODO`/
+  `__asset_TODO` grep commands and references the now-removed `INSTAGRAM_HANDLE` (Item 17 deleted
+  it from `src/features/request/config/form.ts`).
+
+Until a STRAT session amends both, the repository still carries a live, executable path back to
+the conflicting convention — Item 16's own CO-1 would close against the wrong reference if run
+as currently written. Item 17's CO-2 disposition is recorded as
+closed-for-its-own-code / open-pending-this-follow-up (see the task file).
+
+Source thread: `docs/project/reviews/done/REVIEW_2026-07-25_stage6-item17-studio-config-extraction.md`
+(Round 3), requested by `IMPL: Stage 6 item 17 — studio config extraction`.
+
+Scope when picked up: amend `STAGE_6_TASK_16_placeholder_assets.md` §3 to point at
+`PROJECT_PRODUCTION_READINESS.md`'s combined grep instead of the STRAT brief; replace or update
+the brief's "Pre-deploy swaps to track" section (either fix its stale content or reduce it to a
+pointer at the readiness doc, per the STRAT session's own preference recorded in
+`AI_FRAMEWORK_IDEAS.md`'s 2026-07-24 entry on the same brief-vs-durable-doc tension). Natural fit
+for the STRAT session that next touches Item 16 (before it leaves `draft`) — not worth a
+standalone task file on its own.
+
+---
+
 ## Home mobile-viewport read-through — CO-2 gap (Stage 6 Item 5, 2026-07-24)
 
 Raised by Codex cross-review (round 7) of `STAGE_6_TASK_05_home_rebuild.md`. Filed here so the gap

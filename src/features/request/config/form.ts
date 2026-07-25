@@ -27,17 +27,12 @@ export type UploadCategory = (typeof UPLOAD_CATEGORIES)[number]
 
 /**
  * Age-eligibility threshold (FS §4.2 field 11 / PRD D6). Owner-configurable; the form
- * renders it into the eligibility copy. Lives in this isomorphic feature config — NOT
- * `src/config` (which is `server-only` and cannot reach the client that renders the form).
+ * renders it into the eligibility copy. Lives in this isomorphic feature config, not
+ * `src/config` — it's request-feature behavior, not studio-identity data (see
+ * PROJECT_DECISIONS.md — Stage 6 Contact Model, the same distinction drawn for
+ * `OFFERED_CONTACT_METHODS`).
  */
 export const AGE_THRESHOLD = 18
-
-/**
- * Instagram handle for the last-resort failure fallback (FS §4.5 / Appendix A.4), shown only
- * after ≥2 consecutive failed submits. Owner-configurable; isomorphic (rendered client-side).
- * Rendered without a leading "@" (the copy adds it).
- */
-export const INSTAGRAM_HANDLE = "mashakarda_tattoo"
 
 /**
  * The five contact methods (FS §4.2 field 9, amended 2026-07-15 — PROJECT_DECISIONS.md

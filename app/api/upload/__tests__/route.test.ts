@@ -30,7 +30,7 @@ vi.mock("@/services", () => ({
   mintUploadHandle: mockMintUploadHandle,
 }))
 
-vi.mock("@/config", () => ({
+vi.mock("@/config/env", () => ({
   config: { app: { deploymentStudioId: "2617c7d8-23bb-4269-ab2e-fd104c3d12b8" } },
 }))
 

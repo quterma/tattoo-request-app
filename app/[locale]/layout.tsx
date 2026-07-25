@@ -3,6 +3,7 @@ import { Geist } from "next/font/google"
 import { NextIntlClientProvider, hasLocale } from "next-intl"
 import { getMessages, getTranslations } from "next-intl/server"
 import { notFound } from "next/navigation"
+import { studio } from "@/config"
 import { routing } from "@/shared/i18n"
 import "../globals.css"
 
@@ -17,7 +18,7 @@ const geist = Geist({
 // deployments — Vercel documents this exact var for OG-image URLs); it is Vercel-provided, not a
 // user-declared env var, so no new env config is added. Locally it falls back to localhost.
 // INTERIM __meta_TODO: the real branded custom domain is the pre-deploy swap
-// (STAGE_6_STRAT_BRIEF.md — Pre-deploy swaps to track).
+// (PROJECT_PRODUCTION_READINESS.md — Pre-Deploy Content Swaps).
 //
 // NOTE: VERCEL_PROJECT_PRODUCTION_URL is only populated when the Vercel project's "Enable access to
 // System Environment Variables" checkbox is ON (a dashboard setting). If it is OFF the fallback
@@ -41,14 +42,14 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: t("ogTitle"),
       description: t("ogDescription"),
-      siteName: t("siteName"),
+      siteName: studio.name,
       type: "website",
       locale: "en_US",
     },
     // INTERIM __meta_TODO: noindex until public launch. The app IS deployed for controlled
     // verification (PROJECT_DECISIONS.md §C — deployed, not publicly launched), but Home
     // (Item 5) content is still placeholder, so it must not be indexed yet. Flip to index:true
-    // at public launch — see PROJECT_DECISIONS.md / STRAT brief.
+    // at public launch — see PROJECT_DECISIONS.md / PROJECT_PRODUCTION_READINESS.md.
     robots: { index: false, follow: false },
   }
 }

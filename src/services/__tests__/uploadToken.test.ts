@@ -7,7 +7,7 @@ const { TEST_SECRET } = vi.hoisted(() => ({
   TEST_SECRET: Buffer.alloc(32, 7).toString("base64"),
 }))
 
-vi.mock("@/config", () => ({
+vi.mock("@/config/env", () => ({
   config: {
     upload: { tokenSecret: TEST_SECRET },
     supabase: { url: "https://example.supabase.co", secretKey: "test-secret-key" },

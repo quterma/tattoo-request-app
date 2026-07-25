@@ -13,7 +13,7 @@ import {
 } from "@/services"
 import type { FileType } from "@/services"
 import { API_ERROR_CODES, UPLOAD_FIELDS } from "@/shared/api"
-import { config } from "@/config"
+import { config } from "@/config/env"
 
 // Selection-time single-file upload. Public and unauthenticated: a file is stored
 // before the request row exists, and the caller gets back an opaque encrypted handle

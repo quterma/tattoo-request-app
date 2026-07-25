@@ -1,9 +1,8 @@
 {
   "app": {
-    "__meta_TODO": "INTERIM metadata copy — domain, OG image, favicon, and the robots index flip are still pre-deploy owner swaps (STAGE_6_STRAT_BRIEF.md — Pre-deploy swaps to track). Title/description/site name are final (Stage 6 Item 6).",
+    "__meta_TODO": "INTERIM metadata copy — domain, OG image, favicon, and the robots index flip are still pre-deploy owner swaps (PROJECT_PRODUCTION_READINESS.md — Pre-Deploy Content Swaps). Title/description/site name are final (Stage 6 Item 6).",
     "title": "Masha Karda — Original Tattoos in Tel Aviv",
     "titleTemplate": "%s · Masha Karda",
-    "siteName": "Masha Karda",
     "description": "Original, medium-to-large tattoos inspired by Japanese painting and calligraphy. Every design drawn from scratch — send a request and get an answer within 48 hours.",
     "ogTitle": "Masha Karda — Original Tattoos in Tel Aviv",
     "ogDescription": "Original, medium-to-large tattoos inspired by Japanese painting and calligraphy. Every design drawn from scratch — send a request and get an answer within 48 hours."
@@ -19,7 +18,6 @@
   },
   "location": {
     "title": "Location",
-    "address": "Herzl 100, Tel Aviv, Israel",
     "googleMaps": "Google Maps",
     "appleMaps": "Apple Maps",
     "waze": "Waze Maps",
@@ -96,11 +94,9 @@
     "healingTouchUpsItems": "Healing time varies: small tattoos may take ~2 weeks, larger pieces longer\nIf you notice unusual redness, heat, swelling, or persistent bleeding, contact a doctor\nTouch-ups are free within 3 months after your tattoo\nAfter 3 months, touch-ups are charged depending on what's needed"
   },
   "home": {
-    "heroName": "Masha Karda",
     "heroSpecialization": "Original tattoos inspired by Japanese painting and contemporary art — Tel Aviv",
     "heroTagline": "20+ years of painting behind every design. Each piece is drawn from scratch — made once, for you.",
     "instagramLabel": "Follow me on Instagram",
-    "instagramHandle": "@mashakarda_tattoo",
     "featuredWorkTitle": "Featured Work",
     "seeMoreOnInstagram": "See more on Instagram",
     "goodFitTeaserText": "For people who want an original, medium-to-large tattoo shaped by my art and vision.",
@@ -382,9 +378,6 @@
     }
   },
   "footer": {
-    "studio": "Masha Karda",
-    "address": "Herzl 100, Tel Aviv, Israel",
-    "instagramUrl": "https://www.instagram.com/mashakarda_tattoo/",
     "copyright": "\u00a9 {year} All rights reserved"
   },
   "notFound": {

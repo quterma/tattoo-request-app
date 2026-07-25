@@ -19,7 +19,7 @@ const { mockLimit, mockFixedWindow, RatelimitCtor, RedisCtor } = vi.hoisted(() =
 
 vi.mock("@upstash/ratelimit", () => ({ Ratelimit: RatelimitCtor }))
 vi.mock("@upstash/redis", () => ({ Redis: RedisCtor }))
-vi.mock("@/config", () => ({
+vi.mock("@/config/env", () => ({
   config: {
     app: { deploymentStudioId: "studio-xyz" },
     upstash: { redisUrl: "https://redis.example", redisToken: "tok" },

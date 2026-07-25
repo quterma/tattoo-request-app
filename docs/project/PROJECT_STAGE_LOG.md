@@ -37,6 +37,47 @@ require updating them first. See PROJECT_DECISIONS.md — Stage 6 Product Docume
 
 Current focus:
 
+- **Stage 6 Item 17 — Studio config extraction — implemented, 8 Codex cross-review rounds
+  processed, `pnpm qg` green, awaiting Codex follow-up/consensus (IMPL, 2026-07-25).**
+  `tasks/STAGE_6_TASK_17_studio_config_extraction.md` (`in progress`): created
+  `src/config/studio.ts` (`name`, `instagramHandle`, `instagramUrl`, `address`) as the single
+  non-translated source of studio identity, repointed every consumer (`RequestForm.tsx`'s
+  Instagram fallback, `public-footer.tsx`, Home's hero/Featured-Work Instagram links and hero
+  name/handle, `location/page.tsx`'s map query and address display, `app/[locale]/layout.tsx`'s
+  `openGraph.siteName`, `opengraph-image.tsx`'s alt/body text) at it, and removed the duplicated
+  values from `en.json` (`footer.studio`/`address`/`instagramUrl`, `home.heroName`/
+  `instagramHandle`, `location.address`, `app.siteName`) and from
+  `features/request/config/form.ts` (`INSTAGRAM_HANDLE`). Sentences that merely contain the studio
+  name (`app.title`/`titleTemplate`/`ogTitle`) correctly stayed in i18n.
+  **Build-time discovery:** `src/config/index.ts` was server-only (`import "server-only"`,
+  Supabase/Upstash secrets); barreling the new client-safe `studio` through the same file broke
+  every client component that imported it (confirmed by an actual failing `pnpm build`). Fixed by
+  splitting into `src/config/env.ts` (kept `server-only`) and `src/config/studio.ts` (no
+  `server-only`), `config/index.ts` now barreling only `studio`. The 5 existing `config` consumers
+  switched to `@/config/env` directly — a deep import, added to `eslint.config.mjs`'s
+  `import/no-internal-modules` allowlist under the same precedent as `services/supabaseAuth`.
+  `PROJECT_STRUCTURE.md` and `PROJECT_PRODUCTION_READINESS.md` updated (new "Pre-Deploy Content
+  Swaps" section holds the combined `__meta_TODO`/`__intro_TODO`/`__asset_TODO` grep — not the
+  STRAT brief, which is STRAT-only). `location.address` also folded into `studio.address` as a
+  second duplicate not originally itemized.
+  **Codex cross-review, 9 rounds, all findings accepted — full history in the review thread**
+  (`reviews/done/REVIEW_2026-07-25_stage6-item17-studio-config-extraction.md`). Not repeating the
+  round-by-round narrative here — every prior edit to this paragraph reproducing that narrative
+  introduced a fresh count/cadence mismatch the next round caught (Rounds 5–9), which is itself
+  the point. Substance: Rounds 1 (5 findings) and 2 (3) fixed a real CO-1 gap (two bare
+  studio-name literals) and settings.json/write-surface hygiene; Round 3 (3+1) changed CO-2 to
+  closed-for-own-code/open-pending-STRAT-follow-up and filed the STRAT-side gap in
+  `PROJECT_BACKLOG.md`; **Rounds 4–9 produced no production-code finding at all** — every one was
+  reporting-doc consistency. `pnpm qg` green throughout; CO-3 re-verified live after Reviews 1–5
+  (see the task file's CO-3 evidence for the exact repetitions).
+  **Thread closed by owner decision (2026-07-25), not by a clean round.** Round 9's single
+  remaining finding (a stale review-thread path in the workflow journal) was applied; the owner
+  then ended the loop rather than spend another round confirming it, on the explicit grounds that
+  Rounds 4–9 were self-inflicted reporting churn with zero code impact and the cycle was blocking
+  delivery. Residual risk accepted and bounded: the production refactor was independently verified
+  clean by Codex in every one of the last six rounds. **A follow-up review before release is
+  planned** — see the STRAT note in `PROJECT_BACKLOG.md` and the META entry in
+  `AI_FRAMEWORK_IDEAS.md`.
 - **Stage 6 Item 15 — Preparation/Aftercare discovery moves from the footer to the Process FAQ —
   implemented, cross-review at consensus, pending commit (IMPL, 2026-07-24).**
   `tasks/done/STAGE_6_TASK_15_prep_aftercare_discovery.md`: reverses the footer half of the

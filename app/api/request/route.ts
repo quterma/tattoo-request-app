@@ -11,7 +11,7 @@ import { API_ERROR_CODES, REQUEST_FIELDS } from "@/shared/api"
 import { normalizeContactValue } from "@/features/request/lib/contact"
 import { createRequest, getRequestByClientSubmissionId } from "@/services"
 import type { ContactMethodName } from "@/services"
-import { config } from "@/config"
+import { config } from "@/config/env"
 
 function resolveStudioId(): string {
   return config.app.deploymentStudioId

@@ -50,6 +50,10 @@ const eslintConfig = defineConfig([
             "**/services/supabaseAuth",
             "**/services/auth",
             "**/services/authLog",
+            // Server-only secrets module, kept out of `@/config`'s barrel so importing the
+            // barrel's studio.ts (client-safe) never drags `server-only` into a client bundle —
+            // same reason services/supabaseAuth is separate from services/index.ts.
+            "**/config/env",
             "@testing-library/jest-dom/*",
             "@vitejs/plugin-react",
             "vitest/*",

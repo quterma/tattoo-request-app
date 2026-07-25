@@ -40,7 +40,7 @@ vi.mock("@/services", () => ({
   cleanupRequestFiles: mockCleanupRequestFiles,
 }))
 
-vi.mock("@/config", () => ({
+vi.mock("@/config/env", () => ({
   config: {
     app: { deploymentStudioId: "a1b2c3d4-0000-4000-8000-000000000001" },
   },

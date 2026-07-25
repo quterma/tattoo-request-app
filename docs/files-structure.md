@@ -169,7 +169,8 @@ tattoo-request-app/
 │       │       ├── REVIEW_2026-07-23_stage6-item10-co2-live-verification.md
 │       │       ├── REVIEW_2026-07-24_stage6-item15-prep-aftercare-discovery.md
 │       │       ├── REVIEW_2026-07-24_stage6-item5-home-rebuild.md
-│       │       └── REVIEW_2026-07-24_stage6-item6-process-content.md
+│       │       ├── REVIEW_2026-07-24_stage6-item6-process-content.md
+│       │       └── REVIEW_2026-07-25_stage6-item17-studio-config-extraction.md
 │       └── tasks/
 │           ├── META_TASK_01_framework_consolidation.md
 │           ├── STAGE_6_STRAT_BRIEF.md
@@ -208,7 +209,9 @@ tattoo-request-app/
 │   │       ├── validateFiles.test.ts
 │   │       └── validateRequestPayload.test.ts
 │   ├── config/
-│   │   └── index.ts
+│   │   ├── env.ts
+│   │   ├── index.ts
+│   │   └── studio.ts
 │   ├── features/
 │   │   ├── index.ts
 │   │   ├── admin/

@@ -279,7 +279,7 @@ Stage 4B (reduced scope) — see PROJECT_DECISIONS.md, Stage 4B Admin Dashboard 
 - config/ — `REQUEST_STATUS_OPTIONS` (Stage 4B.6: a **local literal tuple**, typed against
   `RequestStatus`, not re-exported from `@/services` as it was before Stage 4B.6). This changed
   because `@/services`' runtime exports transitively import the live Supabase client
-  (`services/supabase.ts` → `@/config`), which throws without real env vars — safe for Server
+  (`services/supabase.ts` → `@/config/env`), which throws without real env vars — safe for Server
   Components/Actions to import, but not for a Client Component (`RequestStatusForm`) or its tests.
   The DB source of truth (`REQUEST_STATUS_OPTIONS` in `services/db.ts`) is unchanged; this is a
   UI-safe mirror of its values, duplicated the same way `admin.placementLabels`/`sizeLabels`/
@@ -455,11 +455,21 @@ Current modules:
 - constants
 - feature flags (if needed)
 
-Current modules:
+Current modules (split across two files, added Stage 6 Item 17 — see below for why):
+
+#### config/env.ts
+
+- `config` — typed config object; reads `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, and `DEPLOYMENT_STUDIO_ID` from env; throws at load time if any required var is missing. `SUPABASE_PUBLISHABLE_KEY` is deliberately not part of `config` — its only consumer (`services/supabaseAuth.ts`) reads it from env directly to stay importable from middleware (the dead `config.supabase.publishableKey` field was removed in Stage 5D Fix Pass 2)
+- Carries `import "server-only"`. Imported directly as `@/config/env` (allowlisted deep import, `eslint.config.mjs`) — not through `config/index.ts` — because any client component that reaches a file re-exported from `config/index.ts` pulls the whole module graph into its bundle; if `config` were re-exported from the same barrel as `studio` (below), `server-only` would poison every client component that imports `studio`. Same reasoning as `services/supabaseAuth.ts` being kept out of `services/index.ts`.
+
+#### config/studio.ts
+
+- `studio` — non-translated per-studio identity: `name`, `instagramHandle`, `instagramUrl`, `address`. Server- and client-safe (no `server-only`) — consumed by both RSC pages (`location/page.tsx`, Home) and a client component (`public-footer.tsx`, `RequestForm.tsx`'s Instagram fallback copy).
+- Deliberately **not** secrets/env-derived — plain hardcoded constants, single-studio MVP. Distinguished from i18n: `studio.ts` holds values that do not get translated but do change per studio (name, address, handle, URLs); `en.json` holds actual sentences. See PROJECT_DECISIONS.md — Stage 6 Item 17 studio config extraction.
 
 #### config/index.ts
 
-- `config` — typed config object; reads `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, and `DEPLOYMENT_STUDIO_ID` from env; throws at load time if any required var is missing. `SUPABASE_PUBLISHABLE_KEY` is deliberately not part of `config` — its only consumer (`services/supabaseAuth.ts`) reads it from env directly to stay importable from middleware (the dead `config.supabase.publishableKey` field was removed in Stage 5D Fix Pass 2)
+- Barrel; re-exports only `studio` (client-safe). Does **not** re-export `config` — see `config/env.ts` above for why.
 
 ---
 

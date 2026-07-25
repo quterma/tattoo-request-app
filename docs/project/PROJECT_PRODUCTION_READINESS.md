@@ -352,6 +352,29 @@ Finding something during an audit does not authorize refactoring it. Each fix re
 
 ---
 
+# Pre-Deploy Content Swaps
+
+Placeholder content markers left in the codebase during Stage 6, each flagging a pending pre-deploy
+owner swap. Three independent markers exist for different categories of placeholder; find every
+pending swap in one step with the combined grep:
+
+```
+grep -rn "__meta_TODO\|__intro_TODO\|__asset_TODO" app/ src/ public/
+```
+
+- `__meta_TODO` — interim metadata (site domain, OG image, favicon, `robots` noindex→index flip).
+  Title/description/site name are final (Stage 6 Item 6) and do not carry this marker.
+- `__intro_TODO` — placeholder request-form introduction copy. (Discharged — no matches remain as
+  of Stage 6 Item 6; kept here in case a future placeholder reuses the convention.)
+- `__asset_TODO` — placeholder visual assets (currently: 4 Home Featured Work images, Item 5/16).
+
+The Item 13 stage-closing acceptance sweep must fail while any of the three markers remain.
+Renaming the three markers into one shared prefix was considered and rejected (Stage 6 Item 17) —
+they are embedded across many done tasks/reviews and the combined grep already gives one-step
+discovery without that churn.
+
+---
+
 # AI Review (Optional)
 
 Before major releases or significant feature additions:

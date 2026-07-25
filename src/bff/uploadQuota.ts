@@ -1,7 +1,7 @@
 import "server-only"
 import { Ratelimit } from "@upstash/ratelimit"
 import { Redis } from "@upstash/redis"
-import { config } from "@/config"
+import { config } from "@/config/env"
 
 /**
  * Durable, non-caller-resettable per-IP quota for POST /api/upload.

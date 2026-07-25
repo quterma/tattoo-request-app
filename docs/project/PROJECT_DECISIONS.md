@@ -2040,10 +2040,13 @@ implementation). Recorded as a first-class product decision.
 - **Offered method set is per-studio configurable.** The list of methods the select offers is a
   **per-studio configuration**, not hard-coded. For Stage 6 it lives in **code config, in the
   request feature** (`src/features/request/config` — the isomorphic feature config alongside
-  `AGE_THRESHOLD` and the option arrays, NOT `src/config` which is server-only and cannot reach the
-  client that renders the select). A studio can therefore offer a subset (e.g. no Telegram) without
-  a code change to the form itself, only to the config. **No admin UI** for this in Stage 6 — an
-  admin-managed method set is a post-release backlog item (PROJECT_BACKLOG.md).
+  `AGE_THRESHOLD` and the option arrays) because it is request-feature behavior, not studio-identity
+  data — not because `src/config` is server-only (that framing was corrected 2026-07-25, Stage 6
+  Item 17: `src/config/env.ts` is server-only; `src/config`'s barrel now also exports the
+  client-safe `studio` module — see "Stage 6 Item 17" below). A studio can therefore offer a subset
+  (e.g. no Telegram) without a code change to the form itself, only to the config. **No admin UI**
+  for this in Stage 6 — an admin-managed method set is a post-release backlog item
+  (PROJECT_BACKLOG.md).
 - **Storage — five dedicated nullable columns.** The `requests` table gains five columns
   (`email`, `phone`, `whatsapp`, `instagram`, `telegram`), replacing the shipped three
   (`email` / `phone` / `contact_other`). Since exactly one method is chosen per request, **four of
@@ -2404,6 +2407,39 @@ string in `en.json` (component file `public-footer.tsx` untouched). `ogTitle`/`o
 also fixed to the same owner-approved title/description strings rather than derived in code, keeping
 all shipped copy owner-approved-only. (Corrected 2026-07-24 — Codex Review 2 caught this section
 originally overstating the H1 claim; see the cross-review thread.)
+
+---
+
+# Stage 6 Item 17 — studio config extraction: `src/config` split into `env.ts` / `studio.ts` — 2026-07-25
+
+Implementation-discovered constraint, not anticipated in the task file. `src/config/index.ts` was a
+single server-only module (`import "server-only"`; Supabase/Upstash secrets), consumed only by
+services/BFF. The task required a new **client-safe** `studio` export (name, Instagram
+handle/URL, address) in the same `src/config` location, because `public-footer.tsx`
+(`"use client"`) and `RequestForm.tsx`'s Instagram-fallback copy both need it. Barreling both
+exports from one `index.ts` broke the build: Turbopack treats a file as server-only once it is
+reachable from a client bundle graph at all, regardless of which named export is actually used —
+confirmed by a real failing `pnpm build` (`'server-only' cannot be imported from a Client Component
+module`), not a theoretical concern.
+
+**Resolution:** split into two sibling files under `src/config/`:
+- `env.ts` — keeps `import "server-only"` and the `config` export, unchanged behavior.
+- `studio.ts` — new, no `server-only`, plain exported constants (name, instagramHandle,
+  instagramUrl, address).
+- `index.ts` — barrel; re-exports **only** `studio` (the client-safe one).
+
+The 5 existing `config` consumers (`services/supabase.ts`, `services/uploadToken.ts`,
+`bff/uploadQuota.ts`, `app/api/request/route.ts`, `app/api/upload/route.ts`) now import `config`
+directly from `@/config/env` — a deep import. `eslint.config.mjs`'s `import/no-internal-modules`
+allowlist gained a `**/config/env` entry to permit it, under the same precedent as the existing
+`**/services/supabaseAuth` entry: a module that needs its own bundling/reachability boundary,
+separate from its layer's barrel, is a documented exception category in this codebase, not a new
+one. `PROJECT_STRUCTURE.md`'s `config/` section documents both files and the reasoning.
+
+`location.address` (`en.json`) was also folded into `studio.address` during implementation — a
+second duplicate of the same value the task file didn't originally itemize (it named `footer`,
+`home`, and `form.ts`'s copies explicitly; `location.address` was caught by the CO-1 grep sweep and
+confirmed a real duplicate, owner-approved during plan review).
 
 ---
 

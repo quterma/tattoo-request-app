@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl"
+import { studio } from "@/config"
 import { Link } from "@/shared/i18n"
 import {
   Container,
@@ -12,7 +13,6 @@ const STEP_KEYS = [1, 2, 3, 4, 5] as const
 
 export default function Home() {
   const t = useTranslations("home")
-  const footer = useTranslations("footer")
 
   return (
     <main className="min-h-screen">
@@ -22,7 +22,7 @@ export default function Home() {
 
         <Container className="relative z-10 py-16 text-center">
           <h1 className="mb-3 text-4xl font-bold tracking-tight text-white sm:text-5xl">
-            {t("heroName")}
+            {studio.name}
           </h1>
           <p className="mx-auto mb-3 max-w-md text-lg text-white/80">
             {t("heroSpecialization")}
@@ -36,14 +36,14 @@ export default function Home() {
           </div>
 
           <a
-            href={footer("instagramUrl")}
+            href={studio.instagramUrl}
             target="_blank"
             rel="noopener noreferrer"
             aria-label={t("instagramLabel")}
             className="mt-8 inline-flex items-center gap-2 text-sm text-white/60 transition-colors hover:text-white"
           >
             <InstagramIcon className="size-5" />
-            <span>{t("instagramHandle")}</span>
+            <span>@{studio.instagramHandle}</span>
           </a>
         </Container>
       </section>
@@ -62,7 +62,7 @@ export default function Home() {
             <div className="aspect-[4/5] rounded-lg bg-muted" />
           </div>
           <a
-            href={footer("instagramUrl")}
+            href={studio.instagramUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="mt-4 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
