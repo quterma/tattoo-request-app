@@ -463,6 +463,14 @@ was **28 execution-affecting files / 1,763 lines of churn**, while every other c
 exactly one positive case; it must be recalibrated after a few firings or near-misses, and a META
 session that sees it misfiring should say so rather than defend it.
 
+Recalibrated 2026-07-25 against the full Stage 6 corpus (16 source-changing reviewed blocks —
+`research/done/RESEARCH_2026-07-25_review-round-economics.md`): **kept at 16/500**, with its
+purpose sharpened by the data. The trigger marks late-design-risk blocks (every block it selected
+carried real first-round findings); it does **not** predict review-round count — the longest
+review loops came from small-surface blocks whose cost was reporting/process drift, which
+checkpointing cannot fix. Counting note: the historical Item 1 figure (28 / 1,763) predates the
+rule's gate-config inclusion; under the current counting rule it is 30 / 1,769.
+
 ### Who decides
 
 - **STRAT, at task-cutting time** — owns the task's boundary, dependency order, and whether an

@@ -140,7 +140,8 @@ tattoo-request-app/
 │       │       ├── RESEARCH_2026-07-16_agentic-engineering-practices-scan.md
 │       │       ├── RESEARCH_2026-07-16_contact-model-validation-and-decomposition.md
 │       │       ├── RESEARCH_2026-07-21_stage6-item10-abuse-mitigation.md
-│       │       └── RESEARCH_2026-07-23_stage6-public-copy-positioning.md
+│       │       ├── RESEARCH_2026-07-23_stage6-public-copy-positioning.md
+│       │       └── RESEARCH_2026-07-25_review-round-economics.md
 │       ├── reviews/
 │       │   ├── .gitkeep
 │       │   └── done/

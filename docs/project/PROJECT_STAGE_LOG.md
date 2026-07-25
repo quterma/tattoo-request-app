@@ -852,6 +852,15 @@ after the 9- and 8-round threads (Items 5/17). One observation closed with no do
 the remaining open observations were reviewed and deliberately left `open` as defer-class
 (AI_WORKFLOW_MASTER.md — What to fix now vs. defer) with dated verdict notes in the journal.
 
+Same-day follow-up: the review-round economics research thread
+(`research/done/RESEARCH_2026-07-25_review-round-economics.md`, researcher Codex) measured all 24
+formal review threads (57 rounds, 133 graded findings). Owner-accepted outcomes: the 3-round cap
+is corpus-validated (no executable-code fix past round 3 anywhere in the corpus); the size trigger
+stays at 16/500, reframed as a design-risk marker that does not predict round count; its
+historical counting figure reconciled (28/1,763 → 30/1,769 under the current rule) in
+AI_TASK_PROTOCOL.md; one one-off process miss (Item 17 closed without the mandated size-trigger
+justification) recorded and closed in the journal.
+
 ### 2026-07-18 — IMPL: Stage 6 Task 04 — Success page (done)
 
 `STAGE_6_TASK_04_success_page.md` → `done` (→ `tasks/done/`). `/success` shipped as a real gated

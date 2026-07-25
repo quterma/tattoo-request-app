@@ -478,4 +478,12 @@ token weight is a live cost. `open` entries are never compacted. Keep new entrie
   cause (surface hygiene, reporting-doc drift) and removes the owner checkpoint the cap adds;
   revisit post-MVP if manual cadence itself becomes the bottleneck. **(c) deferred** — the
   stable-wording practice found in Item 17 round 5 (reporting prose that doesn't go stale between
-  rounds) covers the measured cause; codify only on recurrence.
+  rounds) covers the measured cause; codify only on recurrence. Corpus-validated 2026-07-25: across
+  all 24 formal threads no executable-code fix appeared after round 3, and the re-arm at 6 caught
+  only reporting tails (`research/done/RESEARCH_2026-07-25_review-round-economics.md`).
+- 2026-07-25 — Item 17 crossed the size trigger on files (20 execution-affecting / 150 churn) but
+  closed without the mandated end-of-task "why no legitimate seam existed" record
+  (AI_TASK_PROTOCOL.md — The size trigger, "Before the final review"). Found by the review-round
+  economics research thread, not by any session or review pass. — resolved 2026-07-25 (META):
+  one-off execution miss, no doc change — the justification would have been one sentence
+  (single-contract refactor, tiny churn); reopen on recurrence.
