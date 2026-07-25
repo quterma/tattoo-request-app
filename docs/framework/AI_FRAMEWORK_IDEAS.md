@@ -487,3 +487,42 @@ token weight is a live cost. `open` entries are never compacted. Keep new entrie
   economics research thread, not by any session or review pass. — resolved 2026-07-25 (META):
   one-off execution miss, no doc change — the justification would have been one sentence
   (single-contract refactor, tiny churn); reopen on recurrence.
+- 2026-07-25 — **Accretion re-measured 10 days after the "fix now vs. defer" bar was adopted**
+  (`research/done/RESEARCH_2026-07-25_framework-accretion-remeasure.md`; repeatable method recorded
+  there). Process:product commits 3.44:1 → 1.35:1; framework share of runtime 69.5% → 57.7%. **Both
+  improvements are the denominator, not restraint** — had the framework frozen, the share would be
+  57.4%, so its growth slightly worsened it; the ratio fell because Stage 6 started shipping product
+  (runtime +21.2%). **The trap to avoid next time: the framework's net +21 lines conceals +240
+  operational lines against −219 of journal compaction** — measure operational lines and rule blocks
+  separately, never the total. On the path the bar actually governs it held (8 of 12 observations
+  produced no mechanism, 3:1 filed-to-fix), but 22 of 35 new rule blocks are the AIENG Scout role,
+  which entered by owner decision rather than through an observation. — resolved 2026-07-25 (owner):
+  **keep the bar unchanged, no rule change.** The Scout is not a bar failure — the bar constrains a
+  META session's own initiative, not an owner decision, so there is no desync; and sharpening it
+  would be the accretion cycle just measured. Evidence pointer added to PROJECT_BACKLOG.md —
+  "Ablation of harness rules".
+- 2026-07-25 — **A META session drifted into IMPL work and committed source code; the rule that
+  should have stopped it names only STRAT.** After delegating `TOOLING_TASK_01` to Codex, the META
+  session performed the delegated-task review itself, **wrote two source fixes and a test into
+  `scripts/project-status.mjs` / its test file**, ran the gate loop, closed the task, updated
+  PROJECT_STAGE_LOG.md and committed the result (`a915260`). It was then one step from editing six
+  closed Stage 6 product task files to route their completion obligations — stopped by a direct
+  owner question ("ты же META-сессия, почему ты лезешь в скоуп разработки?"), not by any check.
+  **The doc gap is real, not an excuse:** AI_TASK_PROTOCOL.md — Post-Review Fix Loop forbids exactly
+  this ("a strategic session that picks up an IMPL session's leftover review — processing findings,
+  editing code, running gates — is doing IMPL work in a strategic session; it erases the separation
+  of duties"), but it names **STRAT only**, and the delegated-task route says merely "a Claude Code
+  session" without a type. Nothing in force says who may review a delegated task when the
+  delegating session is META. The drift was gradual — framework docs → process tooling → tooling
+  source → product records — which is why no single step felt like a boundary crossing.
+  Not remediated by revert: the committed tool is green, independently reviewed, and its first run
+  found seven unresolved completion obligations; destroying working code for a process breach would
+  cost more than it fixes. **The session that erred deliberately did not legislate a fix in the same
+  turn** — writing a rule around one's own stumble, immediately, is how this framework accretes.
+  — open: META (a fresh one) to judge — (a) generalize the Post-Review Fix Loop prohibition from
+  "STRAT" to "any non-IMPL session type", (b) name the reviewer's session type explicitly in
+  Delegating IMPL Tasks to Codex, or (c) conclude this was a one-off execution failure with no doc
+  change, given that the owner caught it in one turn. Note the honest counter-argument to (a)/(b):
+  the same bar this session applied all day would ask whether a rule is needed at all when the
+  existing rule's *reasoning* already covers the case and only its *subject* is too narrow —
+  a one-word generalization is a synchronization fix, a new clause is accretion.

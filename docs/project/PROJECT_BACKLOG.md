@@ -525,6 +525,14 @@ in the same retrospective pass, in that order (delete duplication first, then ab
 No action until one of the two triggers above actually occurs (a model-generation change may
 arrive before MVP — that counts).
 
+**Evidence available (added 2026-07-25):** `research/done/RESEARCH_2026-07-25_framework-accretion-remeasure.md`
+re-measured accretion against the 2026-07-15 baseline with a repeatable method — commit ratio,
+framework/runtime share, added lines decomposed by function, and an enforceable-rule-block count per
+operational file. Two of the ablation candidates above now have direct data: the fix-now/defer bar
+(kept unchanged on that evidence, 2026-07-25) and the 16/500 size trigger (recalibrated and kept —
+`research/done/RESEARCH_2026-07-25_review-round-economics.md`). Re-run both methods at the
+retrospective rather than re-deriving new ones, so the comparison stays honest.
+
 ---
 
 ## Unresolved completion obligations behind six closed tasks (filed 2026-07-25)
@@ -533,8 +541,10 @@ Source: the first real run of `pnpm project:status`
 (`docs/project/tasks/done/TOOLING_TASK_01_project_status_command.md`, `Requested by:` that task's
 Claude review pass). Verified against the source documents, not taken from the tool's output.
 
-Nine obligations across six `done` tasks lack either completion evidence or a resolvable work item,
-which is exactly what AI_TASK_PROTOCOL.md — Completion Obligations forbids at close:
+**Seven** obligations across six `done` tasks lack either completion evidence or a resolvable work
+item, which is exactly what AI_TASK_PROTOCOL.md — Completion Obligations forbids at close. (The
+command prints nine error lines: two of the seven emit both a `TARGET_*` and an `UNRESOLVED` line —
+a known cosmetic duplication recorded in the tool's task file.)
 
 - **Task 03** CO-3 — "expected `None`; confirm at close"; the confirmation was never recorded.
 - **Task 05** CO-2 — tracked in `PROJECT_BACKLOG.md` with no anchor, so the pointer resolves to

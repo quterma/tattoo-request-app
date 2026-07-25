@@ -141,6 +141,7 @@ tattoo-request-app/
 │       │       ├── RESEARCH_2026-07-16_contact-model-validation-and-decomposition.md
 │       │       ├── RESEARCH_2026-07-21_stage6-item10-abuse-mitigation.md
 │       │       ├── RESEARCH_2026-07-23_stage6-public-copy-positioning.md
+│       │       ├── RESEARCH_2026-07-25_framework-accretion-remeasure.md
 │       │       └── RESEARCH_2026-07-25_review-round-economics.md
 │       ├── reviews/
 │       │   ├── .gitkeep
@@ -176,7 +177,6 @@ tattoo-request-app/
 │           ├── META_TASK_01_framework_consolidation.md
 │           ├── STAGE_6_STRAT_BRIEF.md
 │           ├── STAGE_6_TASK_16_placeholder_assets.md
-│           ├── TOOLING_TASK_01_project_status_command.md
 │           └── done/
 │               ├── STAGE_6_TASK_01_upload_flow_architecture.md
 │               ├── STAGE_6_TASK_02_site_wide_shell.md

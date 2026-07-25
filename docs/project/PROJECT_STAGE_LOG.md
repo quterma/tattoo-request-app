@@ -884,6 +884,16 @@ historical counting figure reconciled (28/1,763 → 30/1,769 under the current r
 AI_TASK_PROTOCOL.md; one one-off process miss (Item 17 closed without the mandated size-trigger
 justification) recorded and closed in the journal.
 
+Second follow-up: accretion re-measured against the 2026-07-15 external audit
+(`research/done/RESEARCH_2026-07-25_framework-accretion-remeasure.md`, researcher Codex).
+Process:product commits fell 3.44:1 → 1.35:1 and the framework's share of runtime source 69.5% →
+57.7%, but both improvements are the denominator — the framework grew (+240 operational lines,
++35 enforceable rule blocks) and would have produced a 57.4% share had it frozen. Owner decision:
+**keep the "fix now vs. defer" bar unchanged, no rule change** — it held on the path it governs
+(8 of 12 observations produced no mechanism), and sharpening it would be the accretion cycle being
+measured. Both re-measurement methods are recorded for reuse at the post-MVP ablation
+(PROJECT_BACKLOG.md — "Ablation of harness rules").
+
 ### 2026-07-18 — IMPL: Stage 6 Task 04 — Success page (done)
 
 `STAGE_6_TASK_04_success_page.md` → `done` (→ `tasks/done/`). `/success` shipped as a real gated
