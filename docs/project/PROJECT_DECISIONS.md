@@ -2389,6 +2389,25 @@ work as the artist's. Mitigation is a grep-able `__asset_TODO` marker on every p
 Item 13 acceptance-sweep gate that fails while any marker remains — not avoidance.
 `tasks/STAGE_6_TASK_16_placeholder_assets.md`.
 
+**Amendment — 2026-07-25 (mid-round, Item 16).** The favicon moves from "Claude draws it in SVG" to
+the same owner-generated-via-ChatGPT-prompt path as the other three categories — owner instruction,
+given directly in the Item 16 session, overriding the drawn-SVG rationale above. Risk accepted
+knowingly: a generated raster mark may not survive downscale to 16×16, which was the original reason
+generation was avoided for this one asset. **Unconditional, corrected 2026-07-25 (Review 3 finding
+2):** regardless of whether the generated result happens to hold up at 16×16, Claude always
+vectorizes/recreates it as `app/icon.svg` — never ships the raw raster PNG as the favicon. This is
+not a fallback for a failed downscale; it is the only delivery path, so the write-surface reasoning
+(only `app/icon.svg`, no raster path needed) holds regardless of generation quality. Item 16's own
+Scope §1 carries the full detail.
+
+**Round 2 — 2026-07-26.** The owner generated all four categories and handed them off; all nine
+images wired (4 Featured Work, 3 studio interior, 1 favicon vectorized into `app/icon.svg`, 1 OG at
+`app/[locale]/opengraph-image.jpg`), all carrying a discoverable `__asset_TODO` marker (the OG
+marker lives in `app/[locale]/layout.tsx`, since the binary JPEG itself can't carry a comment).
+`PROJECT_PRODUCTION_READINESS.md` updated. The launch-time risk this decision names is unchanged and
+still open — these are AI-generated placeholders, not real photography, and must not survive to
+public launch (Item 13).
+
 ## 6. Studio name "Masha Karda" — `footer.studio` added to Item 6's write surface
 
 Decided during Item 6 plan review, 2026-07-23/24, before implementation. The approved metadata copy

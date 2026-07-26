@@ -30,7 +30,8 @@ tattoo-request-app/
 │   ├── not-found.tsx
 │   ├── [locale]/
 │   │   ├── layout.tsx
-│   │   ├── opengraph-image.tsx
+│   │   ├── opengraph-image.alt.txt
+│   │   ├── opengraph-image.jpg
 │   │   ├── (admin)/
 │   │   │   └── admin/
 │   │   │       ├── (protected)/
@@ -172,11 +173,12 @@ tattoo-request-app/
 │       │       ├── REVIEW_2026-07-24_stage6-item15-prep-aftercare-discovery.md
 │       │       ├── REVIEW_2026-07-24_stage6-item5-home-rebuild.md
 │       │       ├── REVIEW_2026-07-24_stage6-item6-process-content.md
-│       │       └── REVIEW_2026-07-25_stage6-item17-studio-config-extraction.md
+│       │       ├── REVIEW_2026-07-25_stage6-item16-round1-favicon-pivot-location-slots.md
+│       │       ├── REVIEW_2026-07-25_stage6-item17-studio-config-extraction.md
+│       │       └── REVIEW_2026-07-26_stage6-item16-round2-image-wiring.md
 │       └── tasks/
 │           ├── META_TASK_01_framework_consolidation.md
 │           ├── STAGE_6_STRAT_BRIEF.md
-│           ├── STAGE_6_TASK_16_placeholder_assets.md
 │           └── done/
 │               ├── STAGE_6_TASK_01_upload_flow_architecture.md
 │               ├── STAGE_6_TASK_02_site_wide_shell.md
@@ -191,8 +193,18 @@ tattoo-request-app/
 │               ├── STAGE_6_TASK_11_public_error_404.md
 │               ├── STAGE_6_TASK_12_favicon_og_seo.md
 │               ├── STAGE_6_TASK_15_prep_aftercare_discovery.md
+│               ├── STAGE_6_TASK_16_placeholder_assets.md
 │               ├── STAGE_6_TASK_17_studio_config_extraction.md
 │               └── TOOLING_TASK_01_project_status_command.md
+├── public/
+│   └── images/
+│       ├── featured-1.jpg
+│       ├── featured-2.jpg
+│       ├── featured-3.jpg
+│       ├── featured-4.jpg
+│       ├── studio-1.jpg
+│       ├── studio-2.jpg
+│       └── studio-3.jpg
 ├── scripts/
 │   ├── project-status.mjs
 │   ├── update-structure.mjs

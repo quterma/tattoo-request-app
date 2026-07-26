@@ -1,6 +1,6 @@
 {
   "app": {
-    "__meta_TODO": "INTERIM metadata copy — domain, OG image, favicon, and the robots index flip are still pre-deploy owner swaps (PROJECT_PRODUCTION_READINESS.md — Pre-Deploy Content Swaps). Title/description/site name are final (Stage 6 Item 6).",
+    "__meta_TODO": "INTERIM metadata copy — domain and the robots index flip are still pre-deploy owner swaps (PROJECT_PRODUCTION_READINESS.md — Pre-Deploy Content Swaps). Favicon and OG image are resolved (Item 16 Round 2, tracked as generated placeholders instead). Title/description/site name are final (Stage 6 Item 6).",
     "title": "Masha Karda — Original Tattoos in Tel Aviv",
     "titleTemplate": "%s · Masha Karda",
     "description": "Original, medium-to-large tattoos inspired by Japanese painting and calligraphy. Every design drawn from scratch — send a request and get an answer within 48 hours.",
@@ -24,7 +24,10 @@
     "mapTitle": "Map to the studio",
     "howToFindUs": "How to find us",
     "howToFindUsText": "We are located on Herzl Street in the heart of Tel Aviv. The studio is easily accessible by public transport and there is street parking available nearby.",
-    "studioPhotos": "Studio photos"
+    "studioPhotos": "Studio photos",
+    "studioPhotoAlt1": "Tattoo station with equipment and shelving",
+    "studioPhotoAlt2": "Design desk with sketchbooks and art supplies",
+    "studioPhotoAlt3": "Studio entrance with a view into the tattoo room"
   },
   "process": {
     "title": "Process & Pricing",
@@ -98,6 +101,10 @@
     "heroTagline": "20+ years of painting behind every design. Each piece is drawn from scratch — made once, for you.",
     "instagramLabel": "Follow me on Instagram",
     "featuredWorkTitle": "Featured Work",
+    "featuredWorkAlt1": "Ink painting of a blossoming branch",
+    "featuredWorkAlt2": "Ink painting of a cresting wave",
+    "featuredWorkAlt3": "Calligraphic ink brush stroke",
+    "featuredWorkAlt4": "Ink painting of a crane",
     "seeMoreOnInstagram": "See more on Instagram",
     "goodFitTeaserText": "For people who want an original, medium-to-large tattoo shaped by my art and vision.",
     "goodFitTeaserLink": "See if we're a match →",
@@ -113,7 +120,7 @@
     "step5Title": "Tattoo day",
     "step5Text": "last small tweaks in person, and we bring the piece to life.",
     "priceTeaserText": "Tattooing is ₪1,000 per hour with a ₪2,000 minimum — placement and complexity decide how much time a piece needs.",
-    "priceTeaserLink": "Full pricing & process →"
+    "priceTeaserLink": "Full process & pricing →"
   },
   "request": {
     "title": "Request a Tattoo",

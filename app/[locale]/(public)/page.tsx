@@ -1,3 +1,4 @@
+import Image from "next/image"
 import { useTranslations } from "next-intl"
 import { studio } from "@/config"
 import { Link } from "@/shared/i18n"
@@ -52,14 +53,46 @@ export default function Home() {
         <Section className="py-4 sm:py-6">
           <h2 className="mb-3">{t("featuredWorkTitle")}</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {/* __asset_TODO: Featured Work placeholder 1 of 4 — see TASK_16 */}
-            <div className="aspect-[4/5] rounded-lg bg-muted" />
-            {/* __asset_TODO: Featured Work placeholder 2 of 4 — see TASK_16 */}
-            <div className="aspect-[4/5] rounded-lg bg-muted" />
-            {/* __asset_TODO: Featured Work placeholder 3 of 4 — see TASK_16 */}
-            <div className="aspect-[4/5] rounded-lg bg-muted" />
-            {/* __asset_TODO: Featured Work placeholder 4 of 4 — see TASK_16 */}
-            <div className="aspect-[4/5] rounded-lg bg-muted" />
+            {/* __asset_TODO: Featured Work placeholder 1 of 4, AI-generated — see TASK_16 */}
+            <div className="relative aspect-[4/5] overflow-hidden rounded-lg bg-muted">
+              <Image
+                src="/images/featured-1.jpg"
+                alt={t("featuredWorkAlt1")}
+                fill
+                sizes="(min-width: 640px) 25vw, 50vw"
+                className="object-cover"
+              />
+            </div>
+            {/* __asset_TODO: Featured Work placeholder 2 of 4, AI-generated — see TASK_16 */}
+            <div className="relative aspect-[4/5] overflow-hidden rounded-lg bg-muted">
+              <Image
+                src="/images/featured-2.jpg"
+                alt={t("featuredWorkAlt2")}
+                fill
+                sizes="(min-width: 640px) 25vw, 50vw"
+                className="object-cover"
+              />
+            </div>
+            {/* __asset_TODO: Featured Work placeholder 3 of 4, AI-generated — see TASK_16 */}
+            <div className="relative aspect-[4/5] overflow-hidden rounded-lg bg-muted">
+              <Image
+                src="/images/featured-3.jpg"
+                alt={t("featuredWorkAlt3")}
+                fill
+                sizes="(min-width: 640px) 25vw, 50vw"
+                className="object-cover"
+              />
+            </div>
+            {/* __asset_TODO: Featured Work placeholder 4 of 4, AI-generated — see TASK_16 */}
+            <div className="relative aspect-[4/5] overflow-hidden rounded-lg bg-muted">
+              <Image
+                src="/images/featured-4.jpg"
+                alt={t("featuredWorkAlt4")}
+                fill
+                sizes="(min-width: 640px) 25vw, 50vw"
+                className="object-cover"
+              />
+            </div>
           </div>
           <a
             href={studio.instagramUrl}

@@ -362,11 +362,23 @@ pending swap in one step with the combined grep:
 grep -rn "__meta_TODO\|__intro_TODO\|__asset_TODO" app/ src/ public/
 ```
 
-- `__meta_TODO` — interim metadata (site domain, OG image, favicon, `robots` noindex→index flip).
-  Title/description/site name are final (Stage 6 Item 6) and do not carry this marker.
+- `__meta_TODO` — interim metadata (site domain, `robots` noindex→index flip). Title/description/
+  site name are final (Stage 6 Item 6) and do not carry this marker. **Favicon and OG image resolved
+  out of this marker 2026-07-26 (Item 16 Round 2)** — both are now owner-generated placeholders
+  wired in, tracked under `__asset_TODO` below instead (the generated-content risk applies to them
+  now, not an "interim mechanism" gap).
 - `__intro_TODO` — placeholder request-form introduction copy. (Discharged — no matches remain as
   of Stage 6 Item 6; kept here in case a future placeholder reuses the convention.)
-- `__asset_TODO` — placeholder visual assets (currently: 4 Home Featured Work images, Item 5/16).
+- `__asset_TODO` — placeholder visual assets, all owner-generated in ChatGPT and wired 2026-07-26
+  (Item 16 Round 2): 4 Home Featured Work images (`public/images/featured-*.jpg`), 3 Location
+  studio-interior images (`public/images/studio-*.jpg`), the favicon (`app/icon.svg`, hand-
+  vectorized from the generated concept, marker in the SVG itself), and the OG image
+  (`app/[locale]/opengraph-image.jpg` — the marker lives in `app/[locale]/layout.tsx` instead, since
+  a binary JPEG can't carry a comment). Nine markers total —
+  `grep -rn __asset_TODO app/ src/ public/` lists all of them. **CO-2 gap (Item 16):** the favicon's
+  real-browser-tab render (light and dark tab chrome) has not been physically verified — no
+  headless-browser tool exists in this environment. Verify before public launch, alongside the
+  existing Item 4B mobile-device gap below.
 
 The Item 13 stage-closing acceptance sweep must fail while any of the three markers remain.
 Renaming the three markers into one shared prefix was considered and rejected (Stage 6 Item 17) —

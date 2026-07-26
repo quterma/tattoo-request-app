@@ -1,3 +1,4 @@
+import Image from "next/image"
 import { useTranslations } from "next-intl"
 import { studio } from "@/config"
 import { CtaRequestButton, Page, Section, Stack } from "@/shared/ui"
@@ -56,10 +57,37 @@ export default function LocationPage() {
 
       <Section className="py-2 sm:py-3">
         <h2 className="mb-1">{t("studioPhotos")}</h2>
-        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {Array.from({ length: 4 }, (_, i) => (
-            <div key={i} className="aspect-video rounded-md bg-muted" />
-          ))}
+        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {/* __asset_TODO: Studio interior placeholder 1 of 3, AI-generated — see TASK_16 */}
+          <div className="relative aspect-video overflow-hidden rounded-md bg-muted">
+            <Image
+              src="/images/studio-1.jpg"
+              alt={t("studioPhotoAlt1")}
+              fill
+              sizes="(min-width: 640px) 33vw, 100vw"
+              className="object-cover"
+            />
+          </div>
+          {/* __asset_TODO: Studio interior placeholder 2 of 3, AI-generated — see TASK_16 */}
+          <div className="relative aspect-video overflow-hidden rounded-md bg-muted">
+            <Image
+              src="/images/studio-2.jpg"
+              alt={t("studioPhotoAlt2")}
+              fill
+              sizes="(min-width: 640px) 33vw, 100vw"
+              className="object-cover"
+            />
+          </div>
+          {/* __asset_TODO: Studio interior placeholder 3 of 3, AI-generated — see TASK_16 */}
+          <div className="relative aspect-video overflow-hidden rounded-md bg-muted">
+            <Image
+              src="/images/studio-3.jpg"
+              alt={t("studioPhotoAlt3")}
+              fill
+              sizes="(min-width: 640px) 33vw, 100vw"
+              className="object-cover"
+            />
+          </div>
         </div>
       </Section>
 

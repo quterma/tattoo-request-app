@@ -567,3 +567,20 @@ already tracked in PROJECT_PRODUCTION_READINESS.md in substance; what is missing
 pointer from the closing task, not necessarily the work.
 
 Run `pnpm project:status` to see the live list; it exits non-zero while any of these stand.
+
+---
+
+## Desktop art direction for placeholder images — open question (Stage 6 Item 16, filed 2026-07-26)
+
+Item 16 wired 9 owner-generated placeholder images (favicon, 3 studio interior, 4 Featured Work, 1
+OG) as single mobile-first assets — the same source image is served at every breakpoint via
+`next/image` (`fill` + `sizes`), just resized/cropped by the container, not art-directed per
+breakpoint. Owner asked, during the Item 16 wiring session, whether desktop needs different or
+additional images (e.g. wider crops, different compositions for a landscape viewport) rather than
+the same mobile-first source scaled up.
+
+**Not decided here — out of IMPL scope.** This is a product/design call (does the current
+single-image-per-slot approach hold up on desktop, or does Stage 6's mobile-first posture need a
+documented exception for these specific blocks) for a STRAT session to pick up, using
+`STAGE_6_FUNCTIONAL_SPECIFICATION.md`'s existing mobile-first framing as the starting point. Applies
+equally once the images are swapped for real photography — the same question recurs either way.

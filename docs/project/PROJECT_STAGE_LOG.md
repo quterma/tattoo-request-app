@@ -37,6 +37,82 @@ require updating them first. See PROJECT_DECISIONS.md — Stage 6 Product Docume
 
 Current focus:
 
+- **Stage 6 Item 16 — Placeholder visual assets — done, all 9 owner-generated placeholders wired
+  (IMPL, 2026-07-25/26).** `tasks/done/STAGE_6_TASK_16_placeholder_assets.md`: this is an
+  owner-in-the-loop, multi-round task (real photography/artwork is weeks out). Round 1 ships **no
+  visual asset** — it delivers the ChatGPT prompt set the owner runs externally, plus one
+  independent code fix. **Mid-round pivot:** the task's original plan had Claude hand-draw 3 favicon
+  SVG options for the owner to pick from (rationale: generative models fail at 16×16); the owner
+  redirected mid-session to generate the favicon the same way as the other three categories — one
+  external prompt, owner-generated. Recorded as an amendment in `PROJECT_DECISIONS.md` §5 and in the
+  task file's Scope §1 (original rationale kept, not deleted, per the never-rewrite-history
+  convention). Risk accepted knowingly: a generated raster favicon may not survive downscale to
+  16×16. Unconditional (corrected 2026-07-25, Review 3): Claude always hand-vectorizes/recreates the
+  generated concept into `app/icon.svg` in a later round, regardless of whether the raw result
+  happens to hold up — never a fallback only for a failed downscale. **Prompt Set** (favicon, 3
+  studio-interior, 4 Featured Work, 1 OG — kept concise per owner
+  instruction: one short paragraph per asset covering subject/mood/palette together plus orientation
+  and size, not the longer structured multi-field brief the task originally specified) is recorded in
+  the task file's new `## Prompt Set` section and handed to the owner in chat. **Location page**
+  studio-photos grid changed from 4 unmarked `bg-muted` squares to 3, `grid-cols-1 sm:grid-cols-3`,
+  each carrying `__asset_TODO` (mirrors Item 5's Featured Work marker pattern exactly).
+  `PROJECT_PRODUCTION_READINESS.md`'s Pre-Deploy Content Swaps section updated to list the 3 new
+  Location markers. Completion obligations: CO-1 partially done (Location + Featured Work markers in
+  place and recorded; the favicon (`app/icon.svg`) and OG image (`opengraph-image.tsx`) both already
+  exist as interim placeholders and stay correctly `__meta_TODO`-tracked, unchanged this round — it's
+  the *replacement* generated assets that don't exist yet, not the files; the rule for when they
+  arrive is fixed now, not deferred — every Item 16 replacement, favicon and OG included, carries
+  `__asset_TODO` once wired, superseding `__meta_TODO` rather than resolving to no marker); CO-2 and
+  CO-3 unchanged, OPEN. Task `Status` stays `in progress`, not `done` — photographic/favicon assets
+  are wired in a later round once the owner drops the generated files in. **Cross-review closed by
+  owner decision, 2026-07-26** — 4 rounds, all findings accepted, no disputes; every round's findings
+  were about this task's own reporting docs, never the shipped code (`location/page.tsx`'s grid change
+  confirmed unchanged and correct at every pass). Two rounds needed an owner-approved mid-task
+  write-surface extension (`docs/files-structure.md`, then `en.json`'s `app.__meta_TODO` string).
+  Filed as an out-of-scope workflow finding in `AI_FRAMEWORK_IDEAS.md` (recurring pattern, 4th
+  sighting) per owner instruction. Thread moved to
+  `reviews/done/REVIEW_2026-07-25_stage6-item16-round1-favicon-pivot-location-slots.md`. `pnpm qg`
+  green throughout.
+  **Round 2 (2026-07-26):** the owner generated all four categories in ChatGPT and dropped 9 PNGs
+  into a local `temp/` folder (deleted after use, never committed). All verified against the Round 1
+  prompt spec before wiring (correct aspect ratio per category, no readable text/logos, no people,
+  consistent palette). Favicon hand-vectorized into `app/icon.svg` (a bold brush-stroke "M", owner
+  confirmed the vector draft before it was applied) — old `__meta_TODO` comment removed, resolved,
+  not a pending swap. Studio/Featured Work PNGs recompressed to JPEG (`System.Drawing`, no other
+  image tool available in this environment) and placed at `public/images/`, wired via `next/image`
+  in `location/page.tsx` / `page.tsx` (Home), replacing the `bg-muted` divs; `__asset_TODO` markers
+  kept. OG PNG resized/cropped to exactly 1200×630, re-encoded JPEG (~120 KB), replaces
+  `app/[locale]/opengraph-image.tsx` (deleted) with a static `opengraph-image.jpg`, same Next.js
+  file convention as `app/icon.svg` (Item 12 precedent). Live-verified via `pnpm build && pnpm
+  start` + `curl`: favicon serves `image/svg+xml`; OG meta tags show real `1200`×`630`; all 7
+  content images present and 200 in rendered HTML. CO-1 now DONE (all 9 `__asset_TODO`-marked,
+  recorded in `PROJECT_PRODUCTION_READINESS.md`); CO-2 partially done (SVG live-verified to serve,
+  but the real-browser-tab light/dark check remains an unclosed manual gap — no headless-browser
+  tool in this environment); CO-3 stays open by design, carried to Item 13. **Out-of-scope
+  micro-fix, owner-requested:** `home.priceTeaserLink` word order corrected to match the Process
+  page's actual title ("Process & Pricing"). **Filed, not decided:** whether desktop needs different
+  image treatment than these mobile-first placeholders — `PROJECT_BACKLOG.md`.
+  **Round 2 cross-review (`reviews/done/REVIEW_2026-07-26_stage6-item16-round2-image-wiring.md`),
+  consensus at round 3, 9 findings across 2 rounds, all accepted, none disputed:** Review 1 (7) — a
+  first pass had collapsed the 7 explicit per-image markers into 2 generic `.map()` comments —
+  reverted to explicit per-slot JSX with distinct `__asset_TODO` comments (7) plus new ones added
+  for the favicon (`app/icon.svg`) and OG (`app/[locale]/layout.tsx`, since the marker can't live in
+  a binary JPEG), 9 total, matching what CO-1 claims. The shared generic alt text per collection was
+  replaced with 7 distinct, content-accurate strings (the "Featured tattoo artwork" label was also
+  factually wrong — the images are ink illustrations, not tattoo photos). The deleted OG generator's
+  `alt` string was restored via Next's `opengraph-image.alt.txt` sidecar convention, live-verified.
+  `priority` was removed from both galleries (deprecated in this Next version in favor of `preload`,
+  and neither image is an evidenced LCP candidate). Review 2 (2) — the write-surface record hadn't
+  caught up with an owner approval already given (fixed); the claim that
+  `docs/files-structure.md` "self-corrects once staged" was incomplete — verified live that it only
+  stays correct if `pnpm structure` runs *after* staging and its output is *also* staged, not run
+  again against an unstaged tree; the exact commit-time sequence is now recorded in the task file.
+  Two further write-surface extensions owner-approved during this round: `app/[locale]/layout.tsx`
+  scoped comment, `app/[locale]/opengraph-image.alt.txt` (new file), `app/[locale]/opengraph-image.jpg`
+  itself. Task moved to `tasks/done/`, `Status` → `done`: CO-1 DONE; CO-2 mechanism live-verified,
+  the remaining real-browser-tab check tracked as a manual pre-launch item in
+  `PROJECT_PRODUCTION_READINESS.md` (same treatment as Item 12's CO-5 and the Item 4B mobile gap);
+  CO-3 OPEN BY DESIGN, carried permanently to Item 13. Pending commit.
 - **Stage 6 Item 17 — Studio config extraction — implemented, 8 Codex cross-review rounds
   processed, `pnpm qg` green, awaiting Codex follow-up/consensus (IMPL, 2026-07-25).**
   `tasks/STAGE_6_TASK_17_studio_config_extraction.md` (`in progress`): created

@@ -12,8 +12,9 @@ const geist = Geist({
   subsets: ["latin"],
 })
 
-// `metadataBase` makes OG/asset paths (incl. the generated opengraph-image) absolute so social
-// crawlers can fetch them. On Vercel we read the injected system variable
+// `metadataBase` makes OG/asset paths (incl. the static opengraph-image — __asset_TODO,
+// AI-generated, see TASK_16) absolute so social crawlers can fetch them. On Vercel we read the
+// injected system variable
 // VERCEL_PROJECT_PRODUCTION_URL (stable production domain, identical across preview + production
 // deployments — Vercel documents this exact var for OG-image URLs); it is Vercel-provided, not a
 // user-declared env var, so no new env config is added. Locally it falls back to localhost.
