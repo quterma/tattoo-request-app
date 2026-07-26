@@ -988,6 +988,58 @@ Completed in Stage 3:
 
 ## Log Entries (reverse chronological)
 
+### 2026-07-26 — Stage 6 Item 18 Block A: one token system, primitives carry the rhythm (awaiting cross-review)
+
+`STAGE_6_TASK_18_visual_consistency.md` Block A implemented — the token and primitive foundation
+Block B consumes. Stays `ready` (not `done`): Block B is outstanding, and scope item 5 is explicitly
+PARTIALLY DONE.
+
+**One colour system.** The shadcn/oklch set in `globals.css` survives; `tokens.css` is demoted to
+non-colour primitives (font stack, type scale, `--nav-height`) with every name moved out of Tailwind
+v4's reserved `--color-*` namespace. Usage decided it — ~248 utility consumers versus 5, all of the
+latter inside one `@layer base` block. Recorded in PROJECT_DECISIONS.md.
+
+**A wrong mechanism caught by the owner.** The plan asserted that `@theme inline` shadowed
+tokens.css's `--color-border: #e0e0e0` by source order. The owner refused source-order reasoning and
+required build evidence; the compiled bundle showed the **opposite** — the hex wins the cascade
+(byte 22665 vs 4206). It was inert regardless, because `.border-border` compiles to
+`border-color:var(--border)` and `var(--color-border)` appears zero times. The conclusion held for a
+different reason than argued. Had Tailwind emitted `var(--color-border)`, every border on the site
+would have shifted.
+
+**Deleted:** `--chart-1..5`, 8 `--sidebar-*` (both `:root` and `@theme`), `.text-small`,
+`.text-muted`, six `--color-*` tokens, `--font-size-small`. Bundle 27212 → 26295 bytes.
+
+**Primitives.** `Section`/`Page` gained a `density` variant; `Stack`'s `gap` went from `string` to a
+typed union. Defaults were set equal to today's rendered values, so **Block A moves no spacing at
+all** — the 6 bare `<Section>` sites (3 of them admin, outside every write surface) render exactly as
+before, and all movement is pushed into Block B where the screenshot gate runs.
+
+**The only two rendered changes**, both named in the approved plan (CO-3): body text
+`#1a1a1a → #0a0a0a`, and a responsive heading scale replacing a flat 2rem/1.5rem that was identical
+at 320px and 1280px — h1 28px / h2 20px below `40rem`, 36px / 24px at and above it. Link and focus
+stay `#2563eb` deliberately: `--ring` is 2.32:1 on white, below WCAG 2.2 SC 1.4.11, and the base rule
+is the site's only focus indicator.
+
+**Gates** PASS (33 files / 408 tests; 0 lint errors). **`pnpm shot`** — 24 captures, 6 routes × 4
+widths, `scrollWidth === viewport` everywhere; transitional state confirmed intact, not CO-1.
+**Review Agent** raised 4 findings: 2 accepted as false/misleading comments, 2 rejected with reasons.
+
+**Cross-review reached consensus in round 1** and caught a real accessibility defect that neither
+the screenshots nor the tests could see: the heading scale was first written as `clamp()` with a
+`vw` term, which **suppresses browser zoom** — at 200% the layout viewport halves in CSS pixels, so
+headings grew to only 182–190% instead of 200%, below WCAG 2.2 SC 1.4.4. The pre-task flat `2rem`
+had no such defect; the draft introduced it. Fixed by replacing the fluid curve with a breakpoint
+step at Tailwind's own `sm` (`@media (min-width: 40rem)`), which has no viewport term and therefore
+scales to exactly 200% — and which, as a bonus, makes `.text-display` reproduce the outgoing hero
+type exactly at every width. Values at all four captured widths are unchanged by the fix.
+
+**Carried forward:** flow-margin removal is Block B step 1, atomic with the 41 `mb-0`/`mb-1`
+counters. Two out-of-scope findings filed to PROJECT_BACKLOG.md — Geist is downloaded on every visit
+and never rendered (a real cost, needs `layout.tsx`, outside both blocks), and `app/not-found.tsx`'s
+inline styles, filed as **forced by construction rather than drift** so Stage 7 verifies the values
+instead of "fixing" them and breaking the Item 11 decision.
+
 ### 2026-07-25 — TOOLING: `pnpm project:status` (done, delegated to Codex)
 
 `TOOLING_TASK_01_project_status_command.md` → `done` (→ `tasks/done/`). A dependency-free,

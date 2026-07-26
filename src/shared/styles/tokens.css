@@ -1,22 +1,61 @@
-:root {
-  --color-bg: #ffffff;
-  --color-text-primary: #1a1a1a;
-  --color-text-secondary: #6b6b6b;
-  --color-border: #e0e0e0;
-  --color-link: #2563eb;
-  --color-focus: #2563eb;
+/* Layout and type primitives ONLY.
+   Colour is defined exclusively by the oklch set in app/globals.css (:root + @theme inline) and is
+   consumed through Tailwind utilities (text-foreground, border-border, ...).
 
-  --font-family-base:
+   Do NOT add --color-* names here. They sit in Tailwind v4's reserved --color-* namespace but are
+   declared in plain :root, so they generate no utility and nothing reads them: the compiled CSS
+   emits .border-border{border-color:var(--border)}, which reads --border directly. A --color-border
+   declared here is dead in both directions. See TASK_18 / PROJECT_DECISIONS.md. */
+:root {
+  --font-stack-base:
     system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji";
   --font-size-base: 1rem;
   --line-height-base: 1.5;
 
-  --font-size-h1: 2rem;
-  --font-size-h2: 1.5rem;
+  /* Responsive heading scale — consumed by @layer base in app/globals.css. Replaces a flat 2rem/
+     1.5rem that was identical at 320px and at 1280px, which is the defect TASK_18 scope item 3
+     names.
+
+     Deliberately a BREAKPOINT STEP (media query below), not a `clamp()` with a vw term.
+     A fluid `clamp(min, base + Nvw, max)` suppresses browser zoom: at 200% the layout viewport
+     halves in CSS pixels, so the vw term shrinks just as the user asks for bigger text. Measured
+     on the first draft of this scale — h1 reached only 182% of its unzoomed physical size, h2
+     187%, display 190%, all short of the 200% that WCAG 2.2 SC 1.4.4 requires. MDN's clamp()
+     accessibility guidance encodes the same constraint as `max >= 2 * min`, which here would
+     demand a 56px h1 — a redesign, and out of scope. A pure rem step has no viewport term, so it
+     scales to exactly 200%. Caught by Codex cross-review, Review 1 finding 1.
+
+     THIS IS A DELIBERATE, SITE-WIDE VISUAL CHANGE, named in the approved plan (CO-3 rows 2-4):
+       viewport      h1: was -> now      h2: was -> now
+       < 640px       32px -> 28px        24px -> 20px
+       >= 640px      32px -> 36px        24px -> 24px (unchanged)
+     Everything else in Block A holds the rendered result byte-identical; this and the body-text
+     colour are the only two exceptions.
+
+     h3/h4 stay fixed: neither element exists anywhere in the tree, so a responsive curve for them
+     would be unverifiable. The rules are kept as correct defaults for future content. */
+  --font-size-h1: 1.75rem;
+  --font-size-h2: 1.25rem;
   --font-size-h3: 1.25rem;
   --font-size-h4: 1.125rem;
-  --font-size-small: 0.875rem;
+
+  /* Hero-scale type, consumed by .text-display; applied to the Home hero in BLOCK B, replacing its
+     `text-4xl sm:text-5xl`. As a step on the same breakpoint, it reproduces that pair EXACTLY at
+     every width — 36px below 640px, 48px at and above it. (The earlier fluid draft was up to 2.4px
+     short between 640-768px; that caveat is gone.) */
+  --font-size-display: 2.25rem;
 
   --nav-height: 3.5rem;
+}
+
+/* The step, at Tailwind v4's `sm` breakpoint. Written as 40rem, not 640px, to match the units
+   Tailwind itself emits — a rem breakpoint moves with the user's base font size, so someone
+   browsing at a larger default gets the larger headings at the point their text needs them. */
+@media (min-width: 40rem) {
+  :root {
+    --font-size-h1: 2.25rem;
+    --font-size-h2: 1.5rem;
+    --font-size-display: 3rem;
+  }
 }

@@ -113,6 +113,29 @@ latter case restoring the two links is a one-line change and needs no test.
   `unstable_retry()` + Home). No `global-error.tsx` (owner-accepted deviation, negligible risk).
   See PROJECT_STAGE_LOG.md, 2026-07-19 entry.
 
+- **Geist is downloaded on every visit and never rendered (2026-07-26, from Stage 6 Item 18
+  Block A).** `app/[locale]/layout.tsx` loads `Geist` via `next/font/google` and sets its variable
+  on `<body>`; `app/globals.css` maps `--font-sans: var(--font-geist)`. But
+  `body { font-family: var(--font-stack-base) }` in `@layer base` wins, and **no TSX uses
+  `font-sans`** — so the webfont is fetched on every page load and never paints a single glyph.
+  **This is a measurable cost (an extra request + transferred bytes for every visitor), not a
+  question of taste** — whichever font Stage 7 chooses, paying for one that is not displayed is
+  wrong today. Item 18 could not fix it: adopting Geist is a font change (explicitly out of its
+  scope) and dropping the loader means editing `layout.tsx`, which is outside both of its blocks'
+  write surfaces. Stage 7 decides *which* font; the waste should be removed regardless of that
+  decision.
+
+- **`app/not-found.tsx` inline styles — verify values, do NOT "de-drift" (2026-07-26, from Stage 6
+  Item 18 Block A).** The file hardcodes `fontSize: "2rem"`, `#71717a`, `#18181b` as inline styles.
+  **This is forced, not drift.** As Next.js's root not-found it renders its own `<html>`/`<body>`
+  and lives outside the `[locale]` tree — i.e. outside the `layout.tsx` that is the only importer of
+  `globals.css` — so **it has no stylesheet by construction** and inline styles are the only
+  mechanism available. This is a consequence of the Item 11 design
+  (PROJECT_DECISIONS.md — "Public 404 / error boundary (Item 11)"), not a defect.
+  **Action for Stage 7 is to check that these three values have not diverged from the final
+  palette/type scale — not to remove the inline styles.** Reading this entry as "eliminate the
+  inline styles" would break the Item 11 decision.
+
 - Admin image viewer (`RequestImageViewer`, YARL Zoom) — physical mobile-device verification
   deferred from Stage 4B.5.1, carried into Stage 6 / pre-release manual QA (does not block Stage
   4B closure — see PROJECT_STAGE_LOG.md, 2026-07-04 closure entry, and

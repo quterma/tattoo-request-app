@@ -2566,6 +2566,75 @@ dependency now pays for itself twice within the same stage rather than being spe
 
 ---
 
+# Surviving token system — shadcn/oklch, with `tokens.css` demoted to non-colour — decided 2026-07-26
+
+## The question
+
+Stage 6 shipped two unreconciled token systems. `src/shared/styles/tokens.css` declared raw hex
+(`--color-bg`, `--color-text-primary`, `--color-text-secondary`, `--color-border`, `--color-link`,
+`--color-focus`) and drove the `@layer base` element styles. Independently, `app/globals.css`'s
+`:root` held the shadcn oklch set (`--foreground`, `--muted-foreground`, `--border`, …), which every
+component consumes through Tailwind utilities. Item 18 had to collapse them; which one survives was
+left to the executor to argue.
+
+## What the compiled CSS actually showed
+
+The planning session first asserted that `@theme inline`'s `--color-border: var(--border)` shadowed
+tokens.css's `#e0e0e0` by source order. **The owner rejected reasoning from source order and required
+evidence from the build.** That check overturned the mechanism:
+
+- In the compiled bundle, `--color-border: var(--border)` lands at byte 4206 (Tailwind hoists
+  `@theme`) and `--color-border: #e0e0e0` at byte 22665. Equal specificity, both in `:root` — so
+  **the hex actually won the cascade**, the opposite of the claim.
+- It made no difference, because the utility compiles to
+  `.border-border{border-color:var(--border)}` — it reads `--border`, never `--color-border`.
+  `var(--color-border)` appears **zero times** in the output. The dead thing was the variable
+  itself, in both declarations.
+
+The conclusion ("borders render oklch; the hex never reaches the page") held, but for a different
+reason than argued. Had Tailwind generated utilities via `var(--color-border)`, every border on the
+site would have been `#e0e0e0` and deleting the token would have shifted them all. **Verify token
+shadowing against build output, not against import order.**
+
+## The decision
+
+**The shadcn/oklch set in `globals.css` is the single source of truth for colour. `tokens.css`
+survives holding only non-colour primitives** (font stack, type scale, `--nav-height`), with every
+name moved out of Tailwind v4's reserved `--color-*` namespace.
+
+- **Usage asymmetry decided it.** The oklch set is consumed ~248 times through utilities; the
+  tokens.css colours were consumed 5 times, all inside one `@layer base` block. Converging the other
+  way meant rewriting 248 call sites, none of which are in Item 18's write surface.
+- **`--color-*` in plain `:root` is the actual bug.** Those names look like design tokens but are
+  invisible to the utility layer, and they generate junk utilities (`bg-bg`, `text-text-primary` —
+  zero uses). Removing them from that namespace is right regardless of which system wins.
+- **The file is kept, not deleted**, because `--nav-height` is consumed from `(public)/layout.tsx`
+  — a file outside Block A's write surface — so the name had to survive verbatim. Acceptance
+  Criterion 1 is satisfied by non-overlap, not by file count.
+
+## Two values deliberately NOT converged
+
+- **Link and focus stay `#2563eb`.** The shadcn palette is achromatic apart from `--destructive`,
+  so true convergence meant grey links and a grey focus ring. But `--ring` (`#a1a1a1`) is **2.32:1**
+  on white — below WCAG 2.2 SC 1.4.11's 3:1 for a focus indicator — while the blue is 5.17:1. No
+  `focus-visible:` class exists in any TSX, so the base rule is the site's **only** focus indicator.
+  Preservation wins; AC1 is met by naming (`--link`/`--focus`, one file), not palette membership.
+  Written as hex rather than oklch deliberately: the nearest readable oklch literal round-trips to
+  `#2663eb`, off by one in the red channel.
+- **`--primary`/`--secondary`/`--accent`/`--card`/`--popover` are retained at zero uses.** The
+  deletion mandate named `--chart-*`, `--sidebar-*`, `.text-small`, `.text-muted`; these five are
+  the shadcn contract that `components.json` re-adds on the next `shadcn add`.
+
+## Known limitation, not fixed here
+
+Geist is loaded via `next/font` and its variable is set on `<body>`, but `body { font-family:
+var(--font-stack-base) }` wins and no TSX uses `font-sans` — **the webfont is downloaded on every
+visit and never rendered**. That is wasted bandwidth and a wasted request, not a matter of taste.
+Fixing it requires either a font change (out of Item 18's scope) or an edit to
+`app/[locale]/layout.tsx` (outside both blocks' write surfaces). Filed for Stage 7.
+
+---
+
 # Rule for Future Changes
 
 All architectural, product, or behavioral decisions MUST be recorded in this document.

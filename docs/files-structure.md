@@ -146,6 +146,7 @@ tattoo-request-app/
 │       │       └── RESEARCH_2026-07-25_review-round-economics.md
 │       ├── reviews/
 │       │   ├── .gitkeep
+│       │   ├── REVIEW_2026-07-26_stage6-item18-blockA-tokens-primitives.md
 │       │   └── done/
 │       │       ├── .gitkeep
 │       │       ├── REVIEW_2026-07-13_codex-delegation-invocation.md
@@ -181,7 +182,6 @@ tattoo-request-app/
 │           ├── META_TASK_01_framework_consolidation.md
 │           ├── STAGE_6_STRAT_BRIEF.md
 │           ├── STAGE_6_TASK_18_visual_consistency.md
-│           ├── TOOLING_TASK_02_playwright_screenshots.md
 │           └── done/
 │               ├── STAGE_6_TASK_01_upload_flow_architecture.md
 │               ├── STAGE_6_TASK_02_site_wide_shell.md
@@ -198,7 +198,8 @@ tattoo-request-app/
 │               ├── STAGE_6_TASK_15_prep_aftercare_discovery.md
 │               ├── STAGE_6_TASK_16_placeholder_assets.md
 │               ├── STAGE_6_TASK_17_studio_config_extraction.md
-│               └── TOOLING_TASK_01_project_status_command.md
+│               ├── TOOLING_TASK_01_project_status_command.md
+│               └── TOOLING_TASK_02_playwright_screenshots.md
 ├── public/
 │   └── images/
 │       ├── featured-1.jpg

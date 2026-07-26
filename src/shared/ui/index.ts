@@ -6,3 +6,7 @@ export { Page } from "./page"
 export { PublicFooter } from "./public-footer"
 export { Section } from "./section"
 export { Stack } from "./stack"
+
+export type { PageDensity } from "./page"
+export type { SectionDensity } from "./section"
+export type { StackGap } from "./stack"

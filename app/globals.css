@@ -23,38 +23,28 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+
+  /* The site's only chromatic values besides --destructive. Kept blue deliberately: --ring
+     (oklch(0.708 0 0) = #a1a1a1) is 2.32:1 on white, below WCAG 2.2 SC 1.4.11's 3:1 for a focus
+     indicator, while this blue is 5.17:1. There is no `focus-visible:` class anywhere in the TSX,
+     so the base rule below is the site's ONLY focus indicator. See TASK_18 / PROJECT_DECISIONS.md.
+     Not exposed via @theme: no `text-link` utility is needed and none should be generated.
+     Written as hex, not oklch, deliberately: the goal is a byte-identical render, and the nearest
+     readable oklch literal round-trips to #2663eb — off by one in the red channel. Exactness beats
+     matching the neighbours' notation here. */
+  --link: #2563eb;
+  --focus: var(--link);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  /* NOTE: Geist is loaded in app/[locale]/layout.tsx and its variable is set on <body>, but
+     `body { font-family: var(--font-stack-base) }` below wins and no TSX uses `font-sans`, so the
+     webfont is downloaded and never rendered. Resolving that needs either a font change (out of
+     scope for TASK_18) or an edit to layout.tsx (outside this task's write surface). Filed for
+     Stage 7 — see PROJECT_BACKLOG.md. */
   --font-sans: var(--font-geist);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -91,9 +81,9 @@
   }
 
   body {
-    font-family: var(--font-family-base);
-    color: var(--color-text-primary);
-    background-color: var(--color-bg);
+    font-family: var(--font-stack-base);
+    color: var(--foreground);
+    background-color: var(--background);
   }
 
   h1 {
@@ -124,12 +114,20 @@
     margin: 0 0 0.5em;
   }
 
+  /* The h1–h4 margins above and the p margin below are REMOVED AT THE START OF BLOCK B, together
+     with the 41 mb-0/mb-1 counters at call sites that exist only to fight them. Spacing is carried
+     by Stack gap-* and the primitives' density variants — see TASK_18 scope item 5.
+     They are NOT removed here: Block A cannot edit the call sites, so removing them now collapses
+     the 5 bare <h1> page titles and the paragraphs that have no mb-* counter, on 5 of the 6 public
+     routes — pages this block is not allowed to repair.
+     This comment is a pointer for the reader, NOT the guarantee. The obligation lives in the
+     task file, where scope item 5 stays open until Block B performs the removal. */
   p {
     margin: 0 0 1em;
   }
 
   a {
-    color: var(--color-link);
+    color: var(--link);
     text-decoration: none;
   }
 
@@ -139,22 +137,21 @@
   }
 
   a:focus-visible {
-    outline: 2px solid var(--color-focus);
+    outline: 2px solid var(--focus);
     outline-offset: 2px;
     border-radius: 2px;
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-focus);
+    outline: 2px solid var(--focus);
     outline-offset: 2px;
   }
 
-  .text-small {
-    font-size: var(--font-size-small);
-    line-height: 1.4;
-  }
-
-  .text-muted {
-    color: var(--color-text-secondary);
+  /* Hero-scale type. Shipped here in Block A; APPLIED to the Home hero in Block B, which replaces
+     its `text-4xl sm:text-5xl`. Until then this class has no call site by design — it is a
+     supplier-in-A/consumer-in-B pair, not dead code. */
+  .text-display {
+    font-size: var(--font-size-display);
+    line-height: 1.1;
   }
 }
