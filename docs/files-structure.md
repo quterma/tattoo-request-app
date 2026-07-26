@@ -132,9 +132,6 @@ tattoo-request-app/
 │       ├── STAGE_6_PRODUCT_DEFINITION.md
 │       ├── research/
 │       │   ├── .gitkeep
-│       │   ├── RESEARCH_2026-07-26_vercel-og-image-invariant.answer.md
-│       │   ├── RESEARCH_2026-07-26_vercel-og-image-invariant.md
-│       │   ├── RESEARCH_2026-07-26_vercel-og-image-invariant.request.md
 │       │   └── done/
 │       │       ├── .gitkeep
 │       │       ├── RESEARCH_2026-07-14_deferred-actions-and-review-granularity.md
@@ -145,10 +142,12 @@ tattoo-request-app/
 │       │       ├── RESEARCH_2026-07-21_stage6-item10-abuse-mitigation.md
 │       │       ├── RESEARCH_2026-07-23_stage6-public-copy-positioning.md
 │       │       ├── RESEARCH_2026-07-25_framework-accretion-remeasure.md
-│       │       └── RESEARCH_2026-07-25_review-round-economics.md
+│       │       ├── RESEARCH_2026-07-25_review-round-economics.md
+│       │       ├── RESEARCH_2026-07-26_vercel-og-image-invariant.answer.md
+│       │       ├── RESEARCH_2026-07-26_vercel-og-image-invariant.md
+│       │       └── RESEARCH_2026-07-26_vercel-og-image-invariant.request.md
 │       ├── reviews/
 │       │   ├── .gitkeep
-│       │   ├── REVIEW_2026-07-26_og-image-build-fix.md
 │       │   └── done/
 │       │       ├── .gitkeep
 │       │       ├── REVIEW_2026-07-13_codex-delegation-invocation.md
@@ -178,6 +177,7 @@ tattoo-request-app/
 │       │       ├── REVIEW_2026-07-24_stage6-item6-process-content.md
 │       │       ├── REVIEW_2026-07-25_stage6-item16-round1-favicon-pivot-location-slots.md
 │       │       ├── REVIEW_2026-07-25_stage6-item17-studio-config-extraction.md
+│       │       ├── REVIEW_2026-07-26_og-image-build-fix.md
 │       │       ├── REVIEW_2026-07-26_stage6-item16-round2-image-wiring.md
 │       │       ├── REVIEW_2026-07-26_stage6-item18-blockA-tokens-primitives.md
 │       │       └── REVIEW_2026-07-26_tooling-task-02-playwright-screenshots.md

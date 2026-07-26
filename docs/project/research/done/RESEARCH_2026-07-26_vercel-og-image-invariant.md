@@ -1,4 +1,4 @@
-Status: `awaiting-owner` · findings processed, fix implemented and verified; deploy decision is the owner's
+Status: `closed` · outcome filed 2026-07-26; Vercel deploy verified
 Researcher: codex
 Requested by: IMPL: Stage 6 Item 18 — Block A / hero wiring (session that hit the failure)
 
@@ -375,3 +375,34 @@ Codex прав, и его версия проверена, а не принят�
 не найдено — и если когда-нибудь появится второй язык, эту схему придётся пересматривать.
 
 Status → `awaiting-owner`: остаётся ваше решение по деплою (пушить может только владелец).
+
+## Outcome
+
+**Closed 2026-07-26. The Vercel deployment succeeded** — this is the closure evidence Findings §1
+and cross-review finding 2 both named as missing, and which nothing in this repository could
+produce. The fix is now deploy-verified, not merely repo-verified.
+
+**Filed durably** (this thread is the investigation record, not the source of truth):
+
+- `PROJECT_DECISIONS.md` — "OG image lives at the app root with an explicit descriptor —
+  decided 2026-07-26": the decision, why the explicit descriptor is load-bearing rather than
+  belt-and-braces, and the constraint that this **routes around** a Next 16.2.10 defect instead of
+  repairing it.
+- `PROJECT_STAGE_LOG.md` — 2026-07-26 entry.
+- `PROJECT_PRODUCTION_READINESS.md` — the OG asset's new path, plus the new obligation that the
+  pre-deploy swap must update the explicit descriptor if the replacement is not 1200×630.
+- `scripts/check-metadata-routes.mjs` — the durable guard (Findings §5), in `pnpm qg`.
+- Cross-review of the implementation: `reviews/done/REVIEW_2026-07-26_og-image-build-fix.md`.
+
+**What remains true and must not be lost:**
+
+1. The exact internal point where the `locale` param is lost is **still unidentified** (Findings
+   §1.4). Nobody repaired the defect; the arrangement avoids it.
+2. **If a second locale is ever added**, one root-level OG image stops being correct and this
+   arrangement must be revisited — not extended.
+3. The same structural risk applies to every physical static metadata asset (`icon`, `apple-icon`,
+   `twitter-image`, `robots.txt`, `sitemap.xml`, `manifest.webmanifest`): keep them at the app root
+   unless a build **and** deploy proof exists (Findings §4).
+
+Both (2) and (3) are recorded in PROJECT_DECISIONS.md so they are discoverable without reopening
+this thread.

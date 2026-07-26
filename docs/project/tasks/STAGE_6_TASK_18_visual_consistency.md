@@ -3,8 +3,13 @@
 ## Status
 
 `in progress` · created 2026-07-26 · **Block A done 2026-07-26** (cross-review consensus at round 1;
-`reviews/done/REVIEW_2026-07-26_stage6-item18-blockA-tokens-primitives.md`) · **Block B open** ·
-done: <date · PROJECT_STAGE_LOG.md entry pointer>
+`reviews/done/REVIEW_2026-07-26_stage6-item18-blockA-tokens-primitives.md`) · **Block B open —
+scope item 9 (hero) already discharged out of order** · done: <date · PROJECT_STAGE_LOG.md pointer>
+
+**Block B's remaining work** (the hero was wired 2026-07-26 on the owner's call, ahead of the rest):
+scope items 5 (flow-margin removal + the 41 `mb-*` counters — **step 1**, and the reason item 5 is
+still open), 7 (call-site migration to the density variants), 8 (request-form UI), 10 (CO-1 sweep at
+four widths), 11 (oversized-file copy).
 
 Corrected 2026-07-26 by STRAT: the file was left at `ready` after Block A shipped. Status is the
 canonical source of task state (AI_TASK_PROTOCOL.md — Session Duties), so `ready` told
