@@ -179,6 +179,8 @@ tattoo-request-app/
 │       └── tasks/
 │           ├── META_TASK_01_framework_consolidation.md
 │           ├── STAGE_6_STRAT_BRIEF.md
+│           ├── STAGE_6_TASK_18_visual_consistency.md
+│           ├── TOOLING_TASK_02_playwright_screenshots.md
 │           └── done/
 │               ├── STAGE_6_TASK_01_upload_flow_architecture.md
 │               ├── STAGE_6_TASK_02_site_wide_shell.md

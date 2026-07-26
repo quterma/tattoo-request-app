@@ -352,6 +352,61 @@ Finding something during an audit does not authorize refactoring it. Each fix re
 
 ---
 
+# Owner Pre-Release Actions
+
+**Canonical home for every completion obligation that a closed task could not discharge itself.**
+Established 2026-07-26 by a STRAT session: five obligations across Items 6, 7, 10, 12 and 16 had
+been parked in `STAGE_6_STRAT_BRIEF.md`, which AI_TASK_PROTOCOL.md — Completion Obligations
+rejects as a work item because every strategic session overwrites that file. They now point here.
+`pnpm project:status` verifies the pointers resolve; it exited non-zero while they did not.
+
+These are **owner actions, not IMPL work** — no task file will close them. A STRAT session
+verifies them before the Item 13 acceptance sweep, and none of them gates any task's `done`.
+
+- [ ] **Vercel Pro decision** — see Production Environment Setup above. Owner decision 2026-07-23:
+  bundle it with the Item 10 items below and settle them together, since Vercel alerts and WAF are
+  Pro-gated and doing them first means building throwaway workarounds.
+- [ ] **Item 10 CO-4 — abuse-control operational debt** (do together, right after the Pro
+  decision). Source: `tasks/done/STAGE_6_TASK_10_upload_abuse_mitigation.md`, CO-4. The durable
+  quota itself is shipped and live-verified; what remains is how the owner *learns it fired* and
+  what stops the bill. **The PROJECT_PRODUCTION_READINESS launch blocker is not closed until this
+  is done.**
+  - [ ] Firewall/Log alert on the `/api/upload` signal, with a real recipient, **triggered once**
+    to prove delivery. The code already emits the structured `console.warn` it keys on.
+  - [ ] WAF method+path Deny drill on `POST /api/upload` — the real kill-switch, no redeploy
+    needed. Perform once so it is known to work under pressure.
+  - [ ] Vercel + Supabase spend caps/notifications. Option B bounds one source, not the number of
+    sources; this is the physical money bound.
+  - [ ] Env cleanup: remove the unused Marketplace-created `KV_*` / `REDIS_URL` vars (confirm a
+    deploy still boots), and decide whether `UPSTASH_REDIS_REST_*` + `UPLOAD_TOKEN_SECRET` belong
+    in **Preview** — they are Production-only today, so any preview deploy 500s on `/api/upload`.
+  - Already done 2026-07-23: Upstash provisioning (Free, Frankfurt, eviction off), Production env
+    vars, Function Region → `fra1`.
+- [ ] **Item 12 CO-5 — Vercel system-env + live OG origin.** Turn ON "Enable access to System
+  Environment Variables", then confirm the deployed `/en` renders an `og:image` on a public
+  `https://` origin returning 200. Without it `metadataBase` silently falls back to
+  `http://localhost:3000`. Source: `tasks/done/STAGE_6_TASK_12_favicon_og_seo.md`, CO-5.
+- [ ] **`robots` `noindex` → `index` flip at launch**, plus the branded custom domain. Same pass as
+  the item above; marker `__meta_TODO` (see Pre-Deploy Content Swaps below).
+- [ ] **Item 16 CO-3 — no generated artwork survives to launch.** The accepted risk behind every
+  placeholder: AI-generated "tattoo-like" images would present non-existent work as the artist's.
+  The mechanism is the marker sweep below, and **Item 13's acceptance sweep must fail while any
+  `__asset_TODO` remains**. Source: `tasks/done/STAGE_6_TASK_16_placeholder_assets.md`, CO-3.
+- [ ] **Item 7 CO-3 — real studio photos** replace the three `__asset_TODO` Location interiors.
+  Source: `tasks/done/STAGE_6_TASK_07_location_map_embed.md`, CO-3.
+- [ ] **Item 6 CO-3 — artist's own copy pass** over the shipped public text. The copy was research-
+  derived and owner-approved, not artist-authored; this is the artist re-reading it live. Source:
+  `tasks/done/STAGE_6_TASK_06_process_content.md`, CO-3.
+- [ ] **Physical-device verification** — the checks no tool in this repository can perform. Note
+  that `pnpm shot` (headless Chromium, added by `TOOLING_TASK_02`) covers rendered layout at named
+  viewport widths but is **not** a device: it does not verify touch targets, real iOS/Android tab
+  chrome, or gestures.
+  - [ ] Favicon in a real browser tab, light and dark chrome (Item 16 CO-2).
+  - [ ] Admin image viewer on physical iPhone Safari + Android Chrome — see "Deferred from Stage
+    4B" above. Also gates `controller.closeOnPullDown`.
+
+---
+
 # Pre-Deploy Content Swaps
 
 Placeholder content markers left in the codebase during Stage 6, each flagging a pending pre-deploy

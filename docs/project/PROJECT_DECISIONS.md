@@ -2462,6 +2462,110 @@ confirmed a real duplicate, owner-approved during plan review).
 
 ---
 
+# Stage 6 / Stage 7 boundary — consistency vs visual design — decided 2026-07-26
+
+## The question
+
+Stage 6's scope line authorized "design system refinement (typography, color, spacing consistency),
+accessibility and readability improvements — apply across both public and admin surfaces", and its
+exit criteria demanded "visual and interaction quality is consistently high across all surfaces"
+and "mobile experience is polished". A STRAT session preparing to cut the long-planned "visual
+pass" asked the owner how far it should go. The owner challenged the premise: Stage 6 was
+understood as structure, content and *temporary* images, with visual design belonging to a later
+stage.
+
+Verification against the documents found the owner's model was not what the documents said — and
+also that **no later stage existed**. `grep "Stage 7"` across `docs/` returned only a generic
+example inside a framework template; after Stage 6, PROJECT_IMPLEMENTATION_PLAN.md went straight to
+the Post-Launch Roadmap, which contains features (Telegram notifications, calendar, payments), not
+visual work. So the documents placed all visual design inside Stage 6, and the plan's own "visual
+pass" references (STAGE_6_IMPLEMENTATION_PLAN.md, Items 5/6/17) had been scheduling it there.
+
+## The decision (owner, 2026-07-26)
+
+**Split the work along a line the documents did not draw, and create Stage 7 to hold the second
+half.**
+
+- **Stage 6 keeps consistency only** — one design-token system, one type scale, one spacing rhythm
+  carried by the layout primitives, dead CSS removed, contrast/readability fixes, and no viewport
+  at which a page clips or overflows. All of it objectively checkable against a diff and rendered
+  captures. Executed as **Item 18** (`tasks/STAGE_6_TASK_18_visual_consistency.md`).
+- **Stage 7 — Visual Design** takes visual identity (palette, fonts, layout language), art
+  direction for real photography, admin-surface polish, and the physical-device checks. It runs
+  **before public launch** and **after** real photography exists.
+
+## Why the line falls there
+
+1. **The consistency half is debt Stage 6 itself created.** Items 2–16 shipped two unreconciled
+   token systems (`tokens.css` raw hex driving the `@layer base` element styles, versus the
+   shadcn/oklch `:root` set every component consumes through Tailwind utilities — two greys, two
+   borders, two link treatments), a `Section` default overridden at 30 of its 36 call sites, three
+   competing spacing mechanisms, and dead `--chart-*`/`--sidebar-*`/`.text-small`/`.text-muted`
+   declarations. Leaving that for a later stage means shipping Stage 6's own mess forward.
+2. **The design half has a missing input, not a missing decision.** Every image in the tree is an
+   AI-generated placeholder (Item 16, nine markers); real photography is weeks out by the owner's
+   own estimate. A palette and art direction chosen against placeholders would be redone once real
+   work lands. This is the same reasoning that made Item 7's studio photos a pre-deploy swap.
+3. **Stage 6's exit criteria as written were un-closeable.** "Visual quality is consistently high"
+   is a taste judgment with no verifiable form, and "mobile experience is polished" implied a
+   physical-device check no session in this repository can perform. Both moved to Stage 7 verbatim;
+   Stage 6's replacement criteria name checkable properties instead.
+
+## What this does NOT change
+
+- The PRD and FS are untouched. FS §1 already excluded visual design from its scope ("Not defined
+  here: visual design, styling, component architecture"), so no spec amendment was required —
+  this decision moves plan scope, not product behavior. PRD §9 Change Control does not fire.
+- FS §6's thirteen acceptance criteria remain Stage 6's closing gate (Item 13), unchanged.
+- Item 16's accepted risk stands: AI-generated "tattoo-like" artwork must not survive to public
+  launch. That is what places Stage 7 before launch rather than after it.
+
+---
+
+# Named browser capability for visual verification — decided 2026-07-26
+
+## The problem this closes
+
+Three consecutive tasks recorded a mobile-viewport completion obligation and **none could
+discharge it**: Item 5 CO-2 (Home mobile read-through), Item 6 CO-2 (mobile truncation), Item 16
+CO-2 (favicon in a real browser tab). Each closed with the same sentence — no headless-browser tool
+exists in this environment. `package.json` carries no Playwright, Puppeteer or Cypress, so no
+session in this repository can see a rendered page.
+
+This was not three coincidences but one missing capability, and it was already recognized:
+STAGE_6_IMPLEMENTATION_PLAN.md's Item 13 row requires that "when cutting this task, name the
+browser capability its executor will use … the 'manual browser check' is unexecutable until the
+tool is named".
+
+## The decision (owner, 2026-07-26)
+
+**Add `playwright` (the core package) as a devDependency**, with a standalone
+`scripts/screenshots.mjs` and a `pnpm shot` command that captures the public routes at 320 / 375 /
+768 / 1280. Executed as `tasks/TOOLING_TASK_02_playwright_screenshots.md`.
+
+Constraints that are part of the decision, not implementation detail:
+
+- **`pnpm qg` does not change.** No browser runs in `lint`, `typecheck`, `test`, `build`, or any
+  hook. The gates stay headless-free and fast.
+- **Core `playwright`, not `@playwright/test`.** The repository has exactly one test runner
+  (`vitest`); this capability is a browser driver for screenshots, and must not become a second
+  runner by accident.
+- **Not automated e2e.** Automated end-to-end coverage is a separate, already-filed pre-release
+  item (PROJECT_BACKLOG.md — "Automated E2E / Integration Tests"). Adding a browser driver does not
+  start it and must not be read as starting it.
+- **Not a substitute for a physical device.** Headless Chromium at a 375px viewport does not verify
+  touch targets, real iOS/Android tab chrome, or the Stage 4B.5.1 admin image-viewer gestures.
+  Those remain tracked in PROJECT_PRODUCTION_READINESS.md and move to Stage 7.
+
+## Why now rather than earlier or later
+
+The capability was declined implicitly for three tasks by deferring each check individually, which
+made the cost invisible: each deferral looked small, and the accumulated result was that Stage 6
+could not verify its own visual exit criteria at all. Item 18 and Item 13 both need it, so the
+dependency now pays for itself twice within the same stage rather than being speculative tooling.
+
+---
+
 # Rule for Future Changes
 
 All architectural, product, or behavioral decisions MUST be recorded in this document.

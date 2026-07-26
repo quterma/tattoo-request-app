@@ -89,6 +89,10 @@ latter case restoring the two links is a one-line change and needs no test.
   (Item 6-adjacent): shorten the copy and decide whether the "a screenshot usually works" hint stays
   (owner leans toward dropping it). The i18n key lives in `en.json`; do not change the *behavior*
   (the 4 MB rejection itself is FS §4.3 and is correct).
+  **ASSIGNED 2026-07-26 (STRAT):** the visual pass now exists as
+  `tasks/STAGE_6_TASK_18_visual_consistency.md` and carries this as scope item 11 — the single copy
+  change that task is permitted to make, pre-approved by this entry. The executor confirms the
+  final wording with the owner at plan time.
 
 ---
 
@@ -382,6 +386,18 @@ the conflicting convention — Item 16's own CO-1 would close against the wrong 
 as currently written. Item 17's CO-2 disposition is recorded as
 closed-for-its-own-code / open-pending-this-follow-up (see the task file).
 
+**RESOLVED 2026-07-26 (STRAT), both halves:**
+
+- *Item 16's half fixed itself correctly.* The task ran and closed with its CO-1 pointing at
+  `PROJECT_PRODUCTION_READINESS.md`, not at the brief — the risk this entry named did not
+  materialize. Its Scope §3 was amended during execution for exactly this reason.
+- *The brief's half is fixed now.* `STAGE_6_STRAT_BRIEF.md` was rewritten this session: its
+  "Pre-deploy swaps to track" section is reduced to a pointer at
+  `PROJECT_PRODUCTION_READINESS.md`'s combined grep, and the stale `INSTAGRAM_HANDLE` reference
+  (Item 17 deleted that constant) is gone. This follows the preference the earlier STRAT session
+  recorded in `AI_FRAMEWORK_IDEAS.md`'s 2026-07-24 entry on the brief-vs-durable-doc tension:
+  when a brief and a durable doc hold the same content, the brief becomes the pointer.
+
 Source thread: `docs/project/reviews/done/REVIEW_2026-07-25_stage6-item17-studio-config-extraction.md`
 (Round 3), requested by `IMPL: Stage 6 item 17 — studio config extraction`.
 
@@ -414,6 +430,14 @@ headless tool), confirming the block order and layout read correctly and nothing
 Natural fit for Item 13 (FS §6 acceptance sweep) or the not-yet-cut visual pass mentioned in
 `STAGE_6_STRAT_BRIEF.md` — either covers Home along with the rest of the public site, so this is not
 worth a standalone task file.
+
+**ASSIGNED 2026-07-26 (STRAT) — no longer unowned.** The visual pass is cut:
+`tasks/STAGE_6_TASK_18_visual_consistency.md`, whose **CO-1** requires all six public routes
+captured and checked at 320/375/768/1280 and the findings recorded. The missing capability that
+caused this gap in the first place is delivered by
+`tasks/TOOLING_TASK_02_playwright_screenshots.md` (`playwright` + `pnpm shot`). Item 6's identical
+CO-2 half is routed to the same place. This entry stays as the record of the gap; the work now
+lives on the task.
 
 ---
 
@@ -568,6 +592,28 @@ pointer from the closing task, not necessarily the work.
 
 Run `pnpm project:status` to see the live list; it exits non-zero while any of these stand.
 
+**RESOLVED 2026-07-26 (STRAT).** `pnpm project:status` now reports **0 errors** (4 warnings remain,
+all of them the tool's own "legacy task predates the Completion obligations section", which it
+classifies as not-an-error). Routing, per obligation:
+
+- **Task 03 CO-3** — confirmed `None` against the tree (`src/config/env.ts` + `.env.example`
+  declare the complete required set; nothing in it originates from Item 3). Evidence written into
+  the task file; no work item needed.
+- **Task 05 CO-2** and **Task 06 CO-2** — the two mobile-viewport halves → `tasks/
+  STAGE_6_TASK_18_visual_consistency.md`, whose CO-1 requires all six public routes captured and
+  checked at 320/375/768/1280. Their shared root cause — no browser existed here — is fixed by
+  `tasks/TOOLING_TASK_02_playwright_screenshots.md`. Task 05's original backlog pointer also gained
+  the anchor it was missing, so it resolves as well.
+- **Task 06 CO-3** (artist copy pass), **Task 07 CO-3** (real studio photos), **Task 10 CO-4**
+  (alert + WAF drill + spend caps), **Task 12 CO-5** (system-env + live OG), **Task 16 CO-3**
+  (no generated artwork at launch) → the new **Owner Pre-Release Actions** section of
+  PROJECT_PRODUCTION_READINESS.md. These are owner actions no task file can close; that section is
+  now their canonical home, and a STRAT session verifies them before the Item 13 sweep.
+
+The two that pointed at `STAGE_6_STRAT_BRIEF.md` (Tasks 07 and 10) were the sharpest case: a brief
+is overwritten by every strategic session, so the tracking pointer for the still-open launch
+blocker had a lifetime of one session. Kept as a record of why the rule exists.
+
 ---
 
 ## Desktop art direction for placeholder images — open question (Stage 6 Item 16, filed 2026-07-26)
@@ -584,3 +630,11 @@ single-image-per-slot approach hold up on desktop, or does Stage 6's mobile-firs
 documented exception for these specific blocks) for a STRAT session to pick up, using
 `STAGE_6_FUNCTIONAL_SPECIFICATION.md`'s existing mobile-first framing as the starting point. Applies
 equally once the images are swapped for real photography — the same question recurs either way.
+
+**ROUTED TO STAGE 7, 2026-07-26 (STRAT).** This is art direction, which the Stage 6 / Stage 7
+boundary decision places in Stage 7 (PROJECT_DECISIONS.md — "Stage 6 / Stage 7 boundary —
+consistency vs visual design"; stage scope in PROJECT_IMPLEMENTATION_PLAN.md — Stage 7). The entry
+notes the question "recurs either way" once real photography lands — that is precisely why it
+waits: Stage 7 runs *after* real photography exists, so it gets answered once, against the images
+that will actually ship, instead of twice. Stage 6's Item 18 is explicitly forbidden from touching
+it.

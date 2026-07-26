@@ -222,7 +222,14 @@ pointer to a work item that exists by close.
       chosen contact method persists + renders in the admin viewer.
 - CO-3 — No new required env var / secret expected
   - Required by: contract check. Item 1 introduced `UPLOAD_TOKEN_SECRET`; Item 3 introduces none.
-  - Disposition: expected `None`; confirm at close.
+  - Disposition: CONFIRMED NONE — verified 2026-07-26 by STRAT.
+    The original line deferred this to a confirmation at close that was never written down,
+    leaving the obligation formally unresolved. Confirmed against the tree rather than from
+    memory: `.env.example`
+    lists no variable introduced by this task, and `src/config/env.ts` (Item 17's extraction of the
+    server-only config) declares the complete required set — `UPLOAD_TOKEN_SECRET` came from Item 1
+    and the Upstash pair from Item 10, none from Item 3. No secret, no external configuration, no
+    deploy-time setting originates here.
 ```
 
 ## Review Granularity (mandatory — this task crosses the size trigger)

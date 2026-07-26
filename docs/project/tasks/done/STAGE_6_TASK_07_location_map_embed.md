@@ -97,8 +97,17 @@ studio address, satisfying FS §3.5's "map" must-contain item — leaving the re
   - Disposition: DONE — no CSP exists anywhere in the app (no `headers()` in next.config.ts, no
     `Content-Security-Policy` string in the repo); nothing to widen, no regression possible.
 - CO-3 — Studio-photo placeholders are a known pre-deploy swap, not part of this task.
-  - Disposition: tracked — real studio photos remain an owner asset item (STRAT brief / plan Item 7
-    note). This task does not close the photo half; it closes the map half.
+  - Disposition: tracked — real studio photos remain an owner asset item. This task does not close
+    the photo half; it closes the map half.
+  - **Re-routed 2026-07-26 by STRAT.** The original disposition pointed at this stage's
+    next-session handoff document, which AI_TASK_PROTOCOL.md — Completion Obligations explicitly
+    rejects as a work item: that file is overwritten by every strategic session, so an obligation
+    parked there survives only until the next one. The canonical home for a pre-deploy asset swap
+    is the readiness document, whose "Pre-Deploy Content Swaps" section now also carries the three
+    Location studio-interior placeholders Item 16 wired into this page (each marked
+    `__asset_TODO`), which are the direct successors of the bare placeholder squares this task left
+    behind. Item 13's sweep fails while any of them remain.
+  - tracked in: docs/project/PROJECT_PRODUCTION_READINESS.md
 - CO-4 — Codex cross-review flagged the keyless embed URL
   (`maps.google.com/maps?q=...&output=embed`) as undocumented by Google (only the paid, API-keyed
   Embed API is officially documented). Owner decision 2026-07-19: **accept the risk as-is**; the

@@ -179,9 +179,15 @@ favicon, using Next's built-in Metadata API and file-based icon conventions (no 
   (owner decision 2026-07-20). Before public launch (and ideally at the next verification deploy),
   the owner confirms the checkbox is enabled AND that the deployed `/en` renders an `og:image` on a
   public `https://` origin whose image route returns 200. This is a deploy-time action the owner
-  performs, not IMPL work, so it does NOT gate this task's `done` — it is carried as an **owner debt
-  in STAGE_6_STRAT_BRIEF.md → "Owner pre-deploy actions"**, verified by a STRAT session before the
-  Item 13 acceptance sweep. **No in-code guard** — a runtime signal cannot reliably distinguish the
+  performs, not IMPL work, so it does NOT gate this task's `done` — it is carried as an owner debt,
+  verified by a STRAT session before the Item 13 acceptance sweep.
+  **Re-routed 2026-07-26 by STRAT:** the original disposition carried this debt in the stage's
+  next-session handoff document, which AI_TASK_PROTOCOL.md — Completion Obligations rejects as a
+  work item (it is overwritten by every strategic session). Moved to the readiness document, which
+  already holds the launch checklist this belongs to — including the `robots` `noindex`→`index`
+  flip that must happen in the same pass.
+  tracked in: docs/project/PROJECT_PRODUCTION_READINESS.md
+  **No in-code guard** — a runtime signal cannot reliably distinguish the
   disabled-checkbox state (`VERCEL` and `VERCEL_PROJECT_PRODUCTION_URL` share the same toggle;
   Review 3), so this is an out-of-band pre-deploy check only (owner decision 2026-07-20: remove the
   guard, rely on the owner debt).

@@ -169,9 +169,19 @@ Plus the shared primary CTA at page end (Item 2 component).
   `page.tsx` has a matching `en.json` key and vice versa); `pnpm qg` build is clean. What is NOT
   yet evidenced: an actual rendered **mobile-viewport** read-through in a browser — no
   headless-browser tool (chromium-cli/Playwright) was available in this environment, same
-  limitation Item 6 recorded. **Routed to `PROJECT_BACKLOG.md`** — "Home mobile-viewport
-  read-through — CO-2 gap (Stage 6 Item 5, 2026-07-24)" — a natural fit for Item 13's FS §6
-  acceptance sweep or the visual pass, not worth its own task file.
+  limitation Item 6 recorded. **Routed to
+  `PROJECT_BACKLOG.md#home-mobile-viewport-read-through-co-2-gap-stage-6-item-5-2026-07-24`** —
+  a natural fit for Item 13's FS §6 acceptance sweep or the visual pass, not worth its own task
+  file. (Anchor added 2026-07-26 by STRAT: the original pointer named the file with no anchor, so
+  it resolved to nothing checkable — the precise defect PROJECT_BACKLOG.md's own
+  "Unresolved completion obligations" entry recorded against this task.)
+  **Re-routed 2026-07-26 by STRAT to an executable work item.** The backlog pointer above named a
+  document but no anchor, so it resolved to nothing checkable and left this obligation formally
+  unresolved. The visual pass it anticipated now exists as a cut task, and the capability the
+  original check lacked now has one too: `TOOLING_TASK_02` adds `playwright` + `pnpm shot`, and
+  Item 18's CO-1 requires all six public routes captured at 320/375/768/1280. Home is covered
+  there, so this is no longer a deferral with no owner.
+  tracked in: docs/project/tasks/STAGE_6_TASK_18_visual_consistency.md
 
 - CO-3 — Featured Work placeholders carry the `__asset_TODO` marker, discoverable via
   `grep -rn __asset_TODO app/ src/`.

@@ -154,8 +154,16 @@ visitors, no CAPTCHA (FS §4.5).
   Vercel alerts and WAF require **Pro**, which the owner will decide on anyway before launch (Hobby
   forbids commercial use); until the site is publicly announced the deployment is effectively a test
   deployment, so a throwaway external-monitor workaround was explicitly rejected (it cannot see a 429
-  spike, only total outage, and would itself consume quota). Tracked in `STAGE_6_STRAT_BRIEF.md` →
-  "Owner pre-deploy actions" and PROJECT_PRODUCTION_READINESS.md.
+  spike, only total outage, and would itself consume quota).
+  **Re-routed 2026-07-26 by STRAT.** The original disposition named this stage's next-session
+  handoff document as a tracking location, which AI_TASK_PROTOCOL.md — Completion Obligations
+  rejects: that file is overwritten by every strategic session, so an obligation parked there
+  survives only until the next one — and this is the item that keeps the PROJECT_PRODUCTION_READINESS
+  launch blocker open, the worst possible thing to lose. The readiness document was already named as
+  a second location and is now the only one; nothing about the deferral itself changes, and the
+  owner decision of 2026-07-23 (bundle (1), (2) and (4) with the Vercel Pro call, since all three
+  are Pro-gated) stands.
+  tracked in: docs/project/PROJECT_PRODUCTION_READINESS.md
 - CO-5 — Stale comments corrected so the withdrawn claim is not reintroduced from source.
   Disposition: **DONE.** All three named comments fixed, plus a fourth the first pass missed (the
   inline "real defence against bucket-filling replay" at the per-session count check) and the

@@ -877,12 +877,73 @@ Carried Stage 6 items not covered by the PRD/FS (tracked here and in PROJECT_BAC
   define error/404 pages
 - basics: favicon, Open Graph / social preview image, meta description/SEO tags (public site,
   not specified by the FS)
-- design system refinement (typography, color, spacing consistency), accessibility and
-  readability improvements — apply across both public and admin surfaces
+- design system **consistency** (one token system, one type scale, one spacing rhythm) and
+  accessibility/readability fixes on the **public** website — Stage 6 Item 18. **Narrowed
+  2026-07-26:** this line previously read "design system refinement (typography, color, spacing
+  consistency) … across both public and admin surfaces", which was broad enough to authorize a full
+  visual design pass. It no longer does — establishing a visual identity (palette, fonts, layout
+  language, art direction) and the admin surfaces both moved to **Stage 7** below. See
+  PROJECT_DECISIONS.md — "Stage 6 / Stage 7 boundary — consistency vs visual design (2026-07-26)".
 
 Exit Criteria:
 
 - every FS §6 acceptance criterion verifies true for the public website
+- the public website is internally **consistent**: one token system, no dead CSS, no ad-hoc
+  per-page spacing overrides, and no viewport at which a page clips or overflows
+- no regressions in core flows
+
+**Removed from Stage 6's exit criteria 2026-07-26** (moved to Stage 7): "visual and interaction
+quality is consistently high across all surfaces" and "mobile experience is polished". Both are
+retained verbatim as Stage 7 exit criteria. The reason is recorded in the decision above: as
+written they made Stage 6 un-closeable, because "consistently high visual quality" cannot be
+judged against a site whose every image is an AI placeholder and whose real photography is weeks
+out. Note "mobile experience is polished" also implied a physical-device check that no session in
+this repository can perform — it is tracked in PROJECT_PRODUCTION_READINESS.md and does not gate
+Stage 6.
+
+Result:
+
+- a complete, internally consistent public website that satisfies its functional specification
+
+---
+
+# Stage 7 — Visual Design
+
+Goal: give the product a deliberate visual identity, and polish the admin surfaces, against real
+content.
+
+Created 2026-07-26 by owner decision — see PROJECT_DECISIONS.md, "Stage 7 — Visual Design
+(created 2026-07-26)". Stage 7 did not previously exist; Stage 6 was the last stage before the
+Post-Launch Roadmap, and its scope had absorbed both consistency work and visual design. Splitting
+them lets Stage 6 close on objectively checkable criteria while the design work waits for the
+input it actually needs.
+
+Stage 7 begins only after Stage 6 closes (FS §6 acceptance sweep, Item 13) **and** the owner's
+real photography and curated portfolio work exist. Designing against the AI placeholders currently
+in the tree would have to be redone once real images land — that is the whole reason this stage is
+separate.
+
+Scope:
+
+- visual identity: colour palette, typography (the site currently ships the system font stack),
+  and the layout language across the public website
+- art direction for real photography and curated portfolio work, including whether desktop needs
+  different treatment from the mobile-first single-image-per-slot approach Item 16 shipped
+  (PROJECT_BACKLOG.md — "Desktop art direction for placeholder images")
+- admin interface polish, including mobile polish (spacing, touch targets, scroll behavior) and the
+  two-column card grid candidate noted 2026-07-03 — carried here from Stage 6
+- accessibility beyond the contrast/readability fixes Stage 6 Item 18 makes
+- physical mobile-device verification deferred from Stage 4B.5.1 (admin image viewer gestures) and
+  the favicon real-browser-tab check from Item 16 — the checks headless Chromium cannot perform.
+  See PROJECT_PRODUCTION_READINESS.md; some of these are also pre-launch items and may be
+  discharged before Stage 7 runs.
+
+Not in scope: product behavior, content, navigation or the request-flow field model — all of that
+is FS-governed and settled in Stage 6. A Stage 7 change that alters behavior needs a PRD/FS
+amendment first (PRD §9 Change Control), exactly as in Stage 6.
+
+Exit Criteria:
+
 - visual and interaction quality is consistently high across all surfaces
 - mobile experience is polished
 - no regressions in core flows
@@ -895,8 +956,13 @@ Result:
 
 # Post-Launch Roadmap
 
-These features are out of scope for the initial production release (Stages 0–6).
+These features are out of scope for the initial production release (Stages 0–7).
 Each item requires a dedicated planning and decision phase before implementation.
+
+(Updated 2026-07-26: Stage 7 — Visual Design was created above and sits **before** public launch,
+not after it. Item 16's own accepted risk requires it — AI-generated "tattoo-like" artwork must not
+survive to launch, so the stage that replaces the placeholders with real work is a pre-launch
+stage. The roadmap below is unchanged in content.)
 
 Immediately after release: a feedback / bugfix stabilization loop with the real artist user comes
 first, before any item below is scheduled. Items in this roadmap are candidates for what follows

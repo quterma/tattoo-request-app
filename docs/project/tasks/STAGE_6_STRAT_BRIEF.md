@@ -14,176 +14,102 @@ AI agents and the developer, at the start of the next STRAT: Stage 6 session.
 
 ## Session summary
 
-**All Stage 6 code is shipped except the visual assets.** The content long pole is fully cleared:
-copy research closed, and **Items 6, 5, 15, 17 all landed done** (`5eb7855`, `a4cbf31`, `da3000c`,
-`c7ba5e2`), on top of Item 10 (`d5e8ae3`, live-verified). The **only remaining actionable item is
-16** (placeholder visual assets — an owner-generation loop). After 16: the **visual pass** (no task
-cut yet — cut it once assets are in and it's visible what needs fixing; the mobile-viewport CO-2 tails
-of Items 5/6 fold in here), then **Item 13** (FS §6 acceptance sweep) closes the stage. Everything
-else outstanding is **owner pre-release debt** (Item 10 CO-4, Item 12 CO-5, Vercel Pro, domain,
-robots flip, real assets).
+**All 17 originally-planned Stage 6 items are done.** Item 16 shipped (`fad01c7`), which emptied the
+queue entirely. This session did four things: **created Stage 7** and moved visual design out of
+Stage 6, **cut Item 18** (visual consistency) and **`TOOLING_TASK_02`** (the browser capability
+three prior tasks lacked), and **re-routed seven completion obligations** so `pnpm project:status`
+reports **0 errors** instead of 10.
 
-**Context note (2026-07-25):** since the prior brief, a META session changed framework rules a
-coordinating session must know — a **3-round review cap**, the stage-log read rule (CLAUDE.md Pre-task
-Sync now reads only `## Current Stage`), and a new `pnpm project:status` read-only board. A fresh
-session should Pre-task Sync against these, not assume older rules.
+Remaining: `TOOLING_TASK_02` → **Item 18** → **Item 13** (cut it last; it closes the stage).
+
+## The one thing to know before planning anything here
+
+**Stage 6 no longer owns visual design.** The owner challenged the premise of a "visual pass" in
+Stage 6; verification found no Stage 7 existed and that Stage 6's scope line had absorbed both
+consistency work and visual design. Stage 6 now keeps **consistency only** — one token system, one
+rhythm, no dead CSS, no clipping viewport. Palette, fonts, layout language, art direction and admin
+polish are **Stage 7**, which runs before launch and after real photography exists.
+
+→ PROJECT_DECISIONS.md — "Stage 6 / Stage 7 boundary — consistency vs visual design (2026-07-26)"
+→ PROJECT_IMPLEMENTATION_PLAN.md — Stage 6 (narrowed), Stage 7 (new)
+
+If a proposed change reads to an observer as "design", it is Stage 7. File it, don't implement it.
 
 ## State of the board — verify before trusting this
 
-| Item | State |
-| --- | --- |
-| 1 — Upload-flow architecture | **done + LIVE** (`480c721`) |
-| 2 — Site-wide shell | **done** (`e833398`) |
-| 3 — Request form rebuild | **done + LIVE** (2026-07-17) |
-| 4 — Success page | **done** (`94ef19b`, 2026-07-18) |
-| 5 — Home rebuild | **done** (`a4cbf31`, 2026-07-24; Codex consensus in 9 rounds; task in `tasks/done/`). Blueprint block order, 5-step Mini Process, 4 `__asset_TODO` placeholders, teasers deep-link to `/process#good-fit` + `#pricing`. False "20+ years tattooing" claim deleted. **CO-2 (mobile viewport) → backlog/visual pass.** |
-| 6 — Process content | **done** (`5eb7855`, 2026-07-24; Codex cross-review consensus in 4 rounds; task in `tasks/done/`). Shipped the approved copy verbatim + form intro + `footer.studio`/`INSTAGRAM_HANDLE`/metadata swaps. Owner verified the Prep/Aftercare links live. **CO-3 (artist's copy pass) open by design; CO-2's mobile-viewport half folds into the visual pass.** |
-| 7 — Location | **map half: done** (owner launched IMPL 2026-07-19 — verify it landed/committed); **photo half: pre-deploy swap** (placeholders stay). |
-| 8 — Preparation/Aftercare split | **done** (`5714233`). |
-| 9 — Reference-code format | **done + LIVE** (folded into Item 3) |
-| 10 — Abuse mitigation | **done + LIVE** (`d5e8ae3`, live-verified 2026-07-23, 3 cross-reviews to consensus; task in `tasks/done/`). Option B durable per-IP Upstash quota (60/IP/24h, fail-closed) + honeypot. **CO-4 (alert + WAF drill + spend caps) = owner pre-release debt** — launch blocker not fully closed until done. C (global breaker) deferred behind triggers. |
-| 11 — 404/error boundary | **done** (`e213268`) — verify. |
-| 12 — favicon/OG/SEO | **done** (`a37e7eb`, mechanism) — owner asset swaps + CO-5 remain (see debts). |
-| 13 — FS §6 acceptance sweep | not started; stage-closing gate. **Must fail while any `__asset_TODO` remains** (Item 16). |
-| 14 — Placement → free-text | **done** (`552c8af`) |
-| 15 — Prep/Aftercare discovery → Process | **done** (`da3000c`, 2026-07-24; Codex consensus in 4 rounds; task in `tasks/done/`). Footer links removed (footer = studio/address/Instagram/copyright); PRD §5 + FS §2 amended together to name the Process FAQ; discovery never hit zero (FAQ replacement was already live). |
-| 16 — Placeholder visual assets | **task ready** (`STAGE_6_TASK_16_placeholder_assets.md`) — **the next actionable item.** Favicon drawn in SVG (not generated); studio/Featured/OG images generated by the **owner in ChatGPT** from prompts the IMPL writes — a **loop** (prompt → owner generates → wire + mark), expect multiple rounds. All marked `__asset_TODO`; list recorded in PROJECT_PRODUCTION_READINESS.md (not the brief). |
-| 17 — Studio config extraction | **done** (`c7ba5e2`, 2026-07-24; task in `tasks/done/`). `src/config/` split into `env.ts` (server-only secrets) + `studio.ts` (client-safe identity) + `index.ts` barrel; handle duplication gone; combined placeholder-marker grep documented in PROJECT_PRODUCTION_READINESS.md. |
+Do not read item rows from here. **`STAGE_6_IMPLEMENTATION_PLAN.md` is the durable board** and was
+reconciled against git this session (Items 14/16/17 were stale there — `task ready`/`draft` for work
+that had shipped). Run `pnpm project:status` for live task state.
 
-(Some rows above advanced since the prior brief — Items 7/11/12 show recent commits in the log.
-**Re-verify each against `git log` / the board before acting.**)
+- **Done:** Items 1–12, 14, 15, 16, 17 — every task file in `tasks/done/`.
+- **Open, `ready`, in execution order:**
+  1. `tasks/TOOLING_TASK_02_playwright_screenshots.md`
+  2. `tasks/STAGE_6_TASK_18_visual_consistency.md` (two checkpointed blocks)
+- **Not cut yet:** Item 13 — deliberately last, see below.
 
-## Decided (2026-07-23 — content session)
+## Decided (2026-07-26 — this session)
 
-- **All public copy approved** (Home, Process, form intro, metadata) after a Codex research thread +
-  three owner review rounds. Verbatim text lives in the Item 6 / Item 5 task files; rationale per
-  phrase in `research/done/RESEARCH_2026-07-23_stage6-public-copy-positioning.md`.
-- **Age → 18+ only**, framed as studio policy (not a legal claim — the research found the Israeli
-  Ministry guidance and statute conflict). Fixes a live contradiction: the old copy advertised
-  "16–17 with parental consent" while the form accepts 18+ only. Minors are routed to Instagram DM.
-  **No product/form change.**
-- **Factual correction:** "20+ years in painting, calligraphy, and tattoo art" is **false** — 20+
-  applies to painting only (~6 years tattooing). New copy claims painting experience only and states
-  no tattooing year-count. The old `aboutLine1` must be deleted, not reworded.
-- **Owner facts captured** (multi-session deposit carries to the last sitting, no second deposit;
-  free in-person consultations; cash/Bit/bank transfer; Hebrew/English/Russian; no-show forfeits the
-  deposit, one free reschedule) — all folded into the approved Process copy.
-- **Featured Work ships with 4 images** (FS-allowed minimum) — visitors arrive from Instagram where
-  the portfolio already lives; the block confirms fit rather than serving as a gallery.
-- **Preparation/Aftercare discovery moves from the footer to the Process FAQ** (Item 15) — reverses
-  part of the 2026-07-14 decision; requires the PRD §5 + FS §2 amendment, ordered after Item 6.
+Both recorded in PROJECT_DECISIONS.md; not restated here.
 
-## Decided (2026-07-22, shipped 2026-07-23)
-
-- **Item 10 `/api/upload` = Option B** — a durable per-IP fixed-window Upstash quota (**60/IP/24h**,
-  named server constant), **fail-closed** (`503` on limiter-down, no write; `429`+`Retry-After` on
-  breach), replacing the per-instance in-memory limiter. Structured `console.warn` on every 429/503
-  (in-code) + a dashboard Firewall/Log alert (owner-debt) = how the owner learns it fired. **Option C
-  (global circuit-breaker)** — the only bound against a *distributed* caller — **deferred behind
-  triggers** (distributed spike / cost threshold / response-window loss / marketing reach / SaaS); B
-  is C's first layer, not a throwaway. Record: PROJECT_DECISIONS.md — "Stage 6 Item 10 — abuse
-  mitigation"; research `research/done/RESEARCH_2026-07-21_stage6-item10-abuse-mitigation.md`.
-- **The "KV vs Upstash forks on Pro" premise is dead** — Vercel KV no longer exists (migrated to
-  Upstash, Dec 2024); Pro is a **terms-only** decision (Hobby commercial restriction), not a limiter
-  dependency. Stale claims corrected across the five docs.
-- **Shipped 2026-07-23** — `d5e8ae3`, task now in `tasks/done/`. CO-1/2/3/5 discharged with live
-  evidence (forged IP headers mint no fresh bucket; 429 with a 24h window survived a redeploy; an
-  independent egress unaffected; limiter-down → 503 with no Storage write). **CO-4 (alert + WAF drill
-  + spend caps) deferred to pre-release owner-debt** — all three are Pro-gated, bundled with the Pro
-  decision.
+- **"Stage 6 / Stage 7 boundary — consistency vs visual design"** — the scope split above, plus the
+  two Stage 6 exit criteria that moved to Stage 7 because they were un-closeable as written.
+- **"Named browser capability for visual verification"** — `playwright` + `pnpm shot` at
+  320/375/768/1280. `pnpm qg` does not change; this is not automated e2e; it is not a physical
+  device.
 
 ## Open
 
-- **Nothing is content- or research-blocked any more.** Items 6/5/15 are `ready`, 16 is `draft`.
-  The remaining open items are all owner pre-release debts (below) plus the artist's own review of
-  the live copy once it ships (Item 6 CO-3).
-- **Studio photos** — real images for Item 7's photo half (pre-deploy swap).
-- **Vercel Pro decision** (PROJECT_PRODUCTION_READINESS.md) — still open, but **no longer an Item 10
-  gate** (terms-only; Item 10 is decided independently).
+- **Nothing is blocked.** Both open tasks are `ready` and executable now.
+- Owner pre-release debts are **not** listed here any more — they live in
+  **PROJECT_PRODUCTION_READINESS.md → "Owner Pre-Release Actions"**, which is their canonical home
+  as of this session. A brief is overwritten every session and the protocol rejects it as a work
+  item; two obligations (Items 7 and 10) had been parked here anyway, including the pointer for the
+  still-open launch blocker.
 
 ## Task files
 
-- Items 1/2/3/4/5/6/7/8/9/10/11/12/14/15/17 in `tasks/done/`.
-- **Open and `ready`:** `STAGE_6_TASK_16_placeholder_assets.md` — the only open Stage 6 task; the
-  next IMPL to launch.
-- Item 13 has no task file yet — it is the stage-closing sweep, cut it last (after the visual pass).
-- Non-Stage-6: `META_TASK_01_framework_consolidation.md` (framework dedup). Note `TOOLING_TASK_01`
-  shipped as `pnpm project:status` (`a915260`) — verify it moved to `done/`.
+- Open and `ready`: `TOOLING_TASK_02_playwright_screenshots.md`,
+  `STAGE_6_TASK_18_visual_consistency.md`.
+- Item 13 has no task file — **cut it after Item 18 lands, not before.** Its sweep must fail while
+  any `__asset_TODO` remains, and Item 18 deliberately adds a tenth (the Home hero), so a file cut
+  now would encode a marker count that is already wrong.
+- Non-Stage-6: `META_TASK_01_framework_consolidation.md` (`draft`, framework dedup).
 
 ## Open research threads (report these — anti-rot duty, AI_CROSS_REVIEW.md)
 
-- **None open.** `RESEARCH_2026-07-23_stage6-public-copy-positioning.md` closed 2026-07-23 (copy
-  evidence base — its Findings 1 and Outcome are the rationale behind every approved phrase, and the
-  Item 6/5 task files carry the resulting text). `RESEARCH_2026-07-21_stage6-item10-abuse-mitigation.md`
-  closed 2026-07-22. Both in `research/done/`.
+**None open.** `pnpm project:status` reports 0 research and 0 review threads.
 
 ## Next topic
 
-**All code is shipped. Remaining execution queue:**
+**Coordinate the remaining three, one at a time.** Never two sessions on the same files — Item 18's
+two blocks overlap each other and Item 13 reads the whole public surface (standing hazard: `df70cae`,
+and Item 8's `en.json` swept into `94ef19b`).
 
-1. **Item 16 (assets) — `ready`, the next IMPL to launch.** An owner-generation loop: the IMPL writes
-   image prompts, the owner generates them in ChatGPT and returns the files, the IMPL wires + marks
-   them (`__asset_TODO`). Favicon is drawn-in-SVG by the IMPL. Expect multiple prompt rounds.
-2. **Then the visual pass** (typography, spacing, consistency) — **no task file yet; cut it once the
-   assets are in** and it is visible what actually needs fixing. The mobile-viewport CO-2 tails of
-   Items 5/6 fold in here (PROJECT_BACKLOG.md).
-3. **Then Item 13** (FS §6 acceptance sweep + mobile QA) closes the stage — **its sweep must fail
-   while any `__asset_TODO` remains**, so real assets must be swapped in first (owner pre-deploy).
-### Pre-deploy swaps to track (assets, not tasks)
+1. **`TOOLING_TASK_02`** — small, Sonnet. First, because the other two cannot verify themselves
+   without it.
+2. **Item 18, Block A** (tokens + primitives — the risk nucleus), then **Block B** (pages + form +
+   hero). Two owner approvals, two cross-review threads; the **3-round review cap** applies to each.
+   Block A's handoff must say the site is expected to look *transitional* at that checkpoint.
+   **Owner action inside this task:** Block A's first deliverable is a ChatGPT prompt for the Home
+   hero background image — generate it while Block A runs, so Block B can wire it without waiting.
+3. **Item 13** — cut the task file, then run it. When cutting, fold in the two things already filed
+   as natural companions: the **Item 17 pre-release re-review** (its cross-review exited at 9 rounds
+   by owner decision, not on a clean round — PROJECT_BACKLOG.md) and confirmation that the
+   `__asset_TODO` sweep fails as designed while the ten placeholders remain.
 
-Real studio photos (Item 7 photo half); real favicon + OG image + final metadata copy + branded
-custom domain + `robots` noindex→index flip (Item 12, marker `__meta_TODO` —
-`grep -rn __meta_TODO app/ src/`). *(Resolved since: `__intro_TODO` replaced by Item 6;
-`INSTAGRAM_HANDLE` fixed by Item 17 — both no longer pending.)* The canonical combined marker grep
-now lives in **PROJECT_PRODUCTION_READINESS.md** (Item 17) — prefer it over this list.
-   - **Home Featured Work — 4 placeholder images** (Item 5, marker `__asset_TODO` —
-     `grep -rn __asset_TODO app/ src/` returns exactly **4** matches in
-     `app/[locale]/(public)/page.tsx`). Real curated work is an owner swap; Item 13's sweep must fail
-     while any remain. *(Filed here by the STRAT session, 2026-07-24 — Item 5's CO-3 originally asked
-     its IMPL session to write this entry, which the template forbids: the brief is STRAT-only. CO-3
-     was rewritten to cover the in-code marker only.)*
+### Pre-deploy swaps to track
 
-### Owner pre-deploy actions (debts carried by the owner, not IMPL work)
-
-Checkable actions the owner performs at/around deploy time; OUT of the IMPL tasks' scope. A STRAT
-session verifies these before the Item 13 acceptance sweep:
-
-- [ ] **Vercel Pro decision** — the staging/production plan question in PROJECT_PRODUCTION_READINESS.md
-  (likely needed for Hobby's commercial-use restriction). **No longer an Item 10 gate** (that fork was
-  based on the now-dead Vercel KV premise). **Owner decision 2026-07-23: bundle it with the Item 10
-  CO-4 items below and settle them together at pre-release** — Vercel alerts and WAF are Pro-gated, so
-  doing them before the Pro call means building throwaway workarounds.
-- [ ] **Item 10 CO-4 — abuse-control operational debt** (do together, right after the Pro decision;
-  source: `tasks/STAGE_6_TASK_10_upload_abuse_mitigation.md`, live-verified 2026-07-23):
-  - [ ] **Alert** on the `/api/upload` observability signal — the code already emits
-    `[upload] quota exceeded: category=upload source=… reason=quota` and the matching
-    `reason=unavailable` on 503. Configure a Vercel Firewall/Log alert with a **real recipient** and
-    **trigger it once** to prove delivery. (Deliberately NOT done pre-Pro: the only free substitute is
-    an external uptime monitor, which sees total outage but not a 429 spike — the actual abuse signal —
-    and would consume the quota itself.)
-  - [ ] **WAF deny drill** — method+path Deny on `POST /api/upload` via the dashboard (the real
-    kill-switch: no redeploy needed). Perform once so it is known to work under pressure.
-  - [ ] **Spend safeguards** — Vercel and Supabase spending caps/notifications configured. This is the
-    physical money bound; Option B limits one source, not the number of sources.
-  - [ ] **Env cleanup** — remove the unused Marketplace-created `KV_*` / `REDIS_URL` vars (confirm a
-    deploy still boots), and decide whether `UPSTASH_REDIS_REST_*` + `UPLOAD_TOKEN_SECRET` belong in
-    **Preview** (currently Production-only → any preview deploy 500s on `/api/upload`).
-  - Already done (2026-07-23): Upstash provisioning (Free, Frankfurt, eviction off), env vars in
-    Production, Vercel Function Region → `fra1`.
-- [ ] **Item 12 CO-5 — Vercel system-env + live OG origin.** Turn ON the Vercel project's "Enable
-  access to System Environment Variables" checkbox, then confirm the deployed `/en` renders an
-  `og:image` on a public `https://` origin returning 200. Then flip `robots` `index:false`→`true` at
-  launch. Source: `reviews/done/REVIEW_2026-07-20_stage6-item12-favicon-og-seo.md`; mechanism `a37e7eb`.
-- [ ] **Item 12 / Items 5–7 asset + copy swaps** — see "Pre-deploy swaps to track" above.
-
-After 5/6 land, 10 is **built** (task is cut + decided; implementation remains), and the pre-deploy
-swaps are in: **Item 13** (FS §6 acceptance sweep + manual mobile QA) closes the stage.
+**Moved out of this brief 2026-07-26.** The canonical list, the combined marker grep, and the owner
+checklist all live in **PROJECT_PRODUCTION_READINESS.md** ("Pre-Deploy Content Swaps" and "Owner
+Pre-Release Actions"). This section previously duplicated them and had gone stale — it still taught
+a superseded grep and referenced `INSTAGRAM_HANDLE`, a constant Item 17 deleted (PROJECT_BACKLOG.md
+recorded this as a live defect). It is now a pointer, per the brief-vs-durable-doc preference
+recorded in AI_FRAMEWORK_IDEAS.md (2026-07-24).
 
 ## Standing hazard (recurring — worth watching)
 
-The shared git index / shared PROJECT_* docs have caused commit misattributions this stage
-(`da6861f`; Item 8's en.json into `94ef19b`). It recurs whenever two sessions are live on overlapping
-files. **Do not run two sessions writing the same file at once — sequence them.**
+The shared git index and shared PROJECT_* docs have caused commit misattributions this stage
+(`da6861f`; Item 8's `en.json` into `94ef19b`). It recurs whenever two sessions are live on
+overlapping files. **Do not run two sessions writing the same file at once — sequence them.**
 
 Re-verify every assumption in this brief against the repo before acting on it.
-

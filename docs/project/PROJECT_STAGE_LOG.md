@@ -13,7 +13,11 @@ AI agents and developers working on the project.
 ## Current Stage
 
 Stage: Stage 6 — Product Experience Polish — current (planning documentation integrated
-2026-07-12; implementation not started). Stage 5 — Production Hardening — closed.
+2026-07-12; **all 17 originally-planned items done as of 2026-07-26**; two items remain: 18 —
+visual consistency, and 13 — the FS §6 acceptance sweep that closes the stage). Stage 5 —
+Production Hardening — closed. **Stage 7 — Visual Design created 2026-07-26** — visual identity,
+art direction and admin polish moved out of Stage 6; it runs before public launch and after real
+photography exists (PROJECT_DECISIONS.md — "Stage 6 / Stage 7 boundary").
 Status: Stage 4B — Admin Dashboard is closed (implementation-complete, 2026-07-04). Stage 5A —
 Security / Data-Boundary Planning is closed (completed 2026-07-05). **Stage 5B — Production
 Hardening Implementation is closed** — its core hardening scope (5B.1 `create_request` search_path
@@ -37,6 +41,54 @@ require updating them first. See PROJECT_DECISIONS.md — Stage 6 Product Docume
 
 Current focus:
 
+- **Stage 6 coordination — Stage 7 created, visual pass cut, board reconciled to zero integrity
+  errors (STRAT, 2026-07-26).** Picked up from `STAGE_6_STRAT_BRIEF.md`, which listed Item 16 as
+  the next actionable item; verified against git that Item 16 had shipped (`fad01c7`) and that the
+  stage had **no open task at all** — `pnpm project:status`: 17 tasks, 0 open. Four outcomes:
+  - **Stage 7 — Visual Design created** (PROJECT_IMPLEMENTATION_PLAN.md; decision recorded in
+    PROJECT_DECISIONS.md — "Stage 6 / Stage 7 boundary — consistency vs visual design"). The owner
+    challenged the premise of a Stage 6 visual pass; verification found that no Stage 7 existed
+    (`grep "Stage 7"` across `docs/` hit only a framework-template example) and that Stage 6's
+    scope line had absorbed both consistency work and full visual design. Stage 6 now keeps
+    **consistency only**; visual identity, art direction, admin polish and the physical-device
+    checks moved to Stage 7. Stage 6's two un-closeable exit criteria ("visual and interaction
+    quality is consistently high", "mobile experience is polished") moved with them verbatim and
+    were replaced with checkable ones. No PRD/FS amendment was needed — FS §1 already excluded
+    visual design from its scope, so this moved plan scope, not product behavior.
+  - **Item 18 — visual consistency pass cut** (`tasks/STAGE_6_TASK_18_visual_consistency.md`,
+    `ready`, two checkpointed blocks: A = tokens + primitives as the risk nucleus, B = pages +
+    form + hero). Repo-grounded scope, not a general polish brief: two unreconciled token systems
+    (`tokens.css` raw hex driving `@layer base` versus the shadcn/oklch `:root` set the components
+    consume — two greys, two borders, two link treatments), `Section`'s default overridden at
+    **30 of 36** call sites, three competing spacing mechanisms, verified-dead
+    `--chart-*`/`--sidebar-*`/`.text-small`/`.text-muted`, and **the Home hero, which renders
+    `bg-muted` + `bg-black/50` with white text and no image at all** — a grey box built for a
+    background that was never specified, carrying no `__asset_TODO`, so Item 13's sweep would not
+    have caught it. Owner decision: generate it as a placeholder like the other nine (it becomes
+    the tenth marker) and fix the failing contrast.
+  - **`TOOLING_TASK_02` cut** (`ready`) — `playwright` as a devDependency plus `pnpm shot`,
+    capturing the public routes at 320/375/768/1280. This ends the single cause behind three
+    consecutive undischargeable obligations (Items 5, 6 and 16 CO-2, each closed with the same "no
+    headless-browser tool exists in this environment" sentence) and satisfies the Item 13 plan
+    row's standing requirement to name a browser capability before that task is cut. Decision in
+    PROJECT_DECISIONS.md — "Named browser capability for visual verification"; `pnpm qg` explicitly
+    does not change.
+  - **Seven completion obligations behind six closed tasks re-routed to canonical work items** —
+    `pnpm project:status` went from **10 errors to 0** (the 4 remaining warnings are the tool's own
+    "legacy task predates the section", classified not-an-error). The mobile-viewport halves of
+    Items 5 and 6 now point at Item 18; Items 6/7/10/12/16's owner debts point at a new **Owner
+    Pre-Release Actions** section in PROJECT_PRODUCTION_READINESS.md; Task 03's CO-3 was confirmed
+    `None` against `src/config/env.ts` + `.env.example`. Items 7 and 10 had been tracking work in
+    `STAGE_6_STRAT_BRIEF.md`, which the protocol rejects because every strategic session overwrites
+    it — meaning the pointer for the still-open launch blocker had a lifetime of one session.
+  - **Boards reconciled:** `STAGE_6_IMPLEMENTATION_PLAN.md` Items 14/16/17 corrected from
+    `task ready`/`draft` to `done`; Item 18 added; Item 13's row updated with its now-named browser
+    capability and its dependency on 16 and 18. `STAGE_6_STRAT_BRIEF.md` rewritten, with its
+    "Pre-deploy swaps to track" section reduced to a pointer at PROJECT_PRODUCTION_READINESS.md
+    (closing the PROJECT_BACKLOG.md entry about the brief teaching a superseded marker grep).
+  - **Execution order for the rest of the stage:** `TOOLING_TASK_02` → Item 18 Block A → Item 18
+    Block B → cut and run Item 13. One at a time — Item 18's blocks touch the same files and
+    Item 13 reads the whole public surface.
 - **Stage 6 Item 16 — Placeholder visual assets — done, all 9 owner-generated placeholders wired
   (IMPL, 2026-07-25/26).** `tasks/done/STAGE_6_TASK_16_placeholder_assets.md`: this is an
   owner-in-the-loop, multi-round task (real photography/artwork is weeks out). Round 1 ships **no

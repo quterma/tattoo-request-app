@@ -244,6 +244,14 @@ in is this task's next round.
   it would present non-existent work as the artist's. Item 13's sweep must fail if any
   `__asset_TODO` remains at launch. Disposition: OPEN BY DESIGN — carried into Item 13 regardless of
   this task's completion; this is the permanent mitigation, not a to-do this task resolves.
+  **Given a resolvable target 2026-07-26 by STRAT.** "Carried into Item 13" was accurate but
+  pointed at an item with no task file, so the obligation resolved to nothing checkable. Item 13's
+  file is deliberately cut last (its sweep must fail while markers remain, and Item 18 adds a tenth
+  — the Home hero), so the canonical holder is the readiness document: its "Pre-Deploy Content
+  Swaps" section enumerates every marker and states that the sweep must fail while any remains.
+  This also makes the risk visible at the moment it matters — the launch checklist — rather than
+  only inside a closed task file.
+  tracked in: docs/project/PROJECT_PRODUCTION_READINESS.md
 ```
 
 ## Review Granularity

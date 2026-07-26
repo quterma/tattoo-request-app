@@ -195,8 +195,20 @@ Plus the existing primary CTA at the end of the page (Item 2's shared component)
   in this environment (no `chromium-cli`/Playwright), so this was a `curl`-against-dev-server HTML
   check, not a rendered-viewport screenshot — mobile-viewport truncation was not visually confirmed.
   Owner should do a quick visual pass on a phone before/at CO-3.
+  **Re-routed 2026-07-26 by STRAT.** The remaining half — an actually rendered mobile viewport —
+  now has both a capability and an owner: `TOOLING_TASK_02` adds `playwright` + `pnpm shot`, and
+  Item 18's CO-1 requires every public route, `/en/process` and `/en/request` included, captured
+  and checked at 320/375/768/1280. This obligation was one of three (Items 5, 6, 16) that closed
+  with the identical "no headless-browser tool exists here" sentence; that gap is what
+  `TOOLING_TASK_02` was created to end.
+  tracked in: docs/project/tasks/STAGE_6_TASK_18_visual_consistency.md
 - CO-3 — Owner + artist review of the shipped page (they will re-read the live copy; this task ships
   the approved text, it does not pre-empt their final wording pass). Disposition: OPEN — owner.
+  **Given a canonical home 2026-07-26 by STRAT:** this is a genuine owner action, not IMPL work, so
+  it cannot be discharged by any task file — but "OPEN — owner" alone pointed nowhere and would
+  have been lost at launch. It is now listed with the other owner pre-release debts, where a STRAT
+  session verifies it before the Item 13 acceptance sweep.
+  tracked in: docs/project/PROJECT_PRODUCTION_READINESS.md
 ```
 
 ## Review Granularity
