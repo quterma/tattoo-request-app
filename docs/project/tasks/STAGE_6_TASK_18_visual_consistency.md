@@ -2,7 +2,17 @@
 
 ## Status
 
-`ready` · created 2026-07-26 · done: <date · PROJECT_STAGE_LOG.md entry pointer>
+`in progress` · created 2026-07-26 · **Block A done 2026-07-26** (cross-review consensus at round 1;
+`reviews/done/REVIEW_2026-07-26_stage6-item18-blockA-tokens-primitives.md`) · **Block B open** ·
+done: <date · PROJECT_STAGE_LOG.md entry pointer>
+
+Corrected 2026-07-26 by STRAT: the file was left at `ready` after Block A shipped. Status is the
+canonical source of task state (AI_TASK_PROTOCOL.md — Session Duties), so `ready` told
+`pnpm project:status`, and any session running its Pre-task Sync, that no work had started — with
+Block A already committed and its review closed.
+
+**A session picking this up executes Block B only.** Block A is committed; do not re-plan it. Block
+B's first act is the flow-margin removal deferred from Block A (Scope item 5) — see its STATUS note.
 
 Blocks: Stage 6 Item 13 (FS §6 acceptance sweep — the stage-closing gate).
 Source: discharges the mobile-viewport completion obligations of Items 5 and 6.
@@ -123,6 +133,21 @@ Everything in Block B consumes this; it must be settled and reviewed before page
    together, plus orientation and size (wide, full-bleed, ~1920×1080 or wider). Hand it to the
    owner **at the start of Block A** so generation happens in parallel with the rest of Block A,
    not after it. The image itself is wired in Block B.
+   - **STATUS: NOT DONE IN BLOCK A — MOVED TO BLOCK B (corrected 2026-07-26 by STRAT, owner
+     confirmed the prompt was never received).** No prompt reached the owner and none was persisted:
+     unlike Item 16, which recorded its prompts in a `## Prompt Set` section of its own task file,
+     this file has no such section and Block A's stage-log entry does not mention one. Whatever may
+     have been said in chat is not a deliverable (AI_TASK_PROTOCOL.md — Session Duties: nothing
+     valuable stays chat-only).
+   - **Block B discharges it as its FIRST act**, before any page edit, so generation runs in
+     parallel with the flow-margin removal and the call-site migration rather than blocking them.
+     **Persist the prompt into a `## Prompt Set` section of this file** — Block B must verify the
+     returned image against a written spec (aspect ratio, no readable text or logos, no people,
+     palette consistent with the existing nine placeholders), exactly as Item 16 Round 2 did, and
+     that check is impossible against a prompt that exists only in a conversation.
+   - The hero is therefore wired **late** in Block B. If the owner's image has not arrived by the
+     time the rest of the block is green, say so and propose the commit without it rather than
+     stalling — the hero then becomes the block's single named completion obligation.
 
 ### Block B — apply to consumers
 
@@ -207,8 +232,11 @@ renders correctly at 320/375/768/1280.**
   must be discoverable by Item 13's sweep.
   - Required by: a contract the diff introduces (a new placeholder asset); PROJECT_DECISIONS.md §5
     (Item 16 — placeholder assets, owner-accepted risk), which binds every generated placeholder.
-  - Disposition: completed — <executor records: the `__asset_TODO` marker's location, and the
-    updated total in PROJECT_PRODUCTION_READINESS.md (nine → ten)>
+  - Disposition: **DONE (2026-07-26)**. Marker at `app/[locale]/(public)/page.tsx`, on the hero
+    `<section>`'s background wrapper: `__asset_TODO: Home hero background placeholder,
+    AI-generated — see TASK_18`. `grep -rn __asset_TODO app/ src/ public/` returns exactly **10**.
+    `PROJECT_PRODUCTION_READINESS.md` updated nine → ten, and additionally records that this
+    placeholder is 1672px wide so its real replacement is specified ≥1920px.
 - CO-3 — Any visible value that changed because the two token systems disagreed (greys, borders,
   link colour, heading sizes) is a deliberate, named change, not an accident.
   - Required by: Scope item 1; Acceptance Criterion 2.
@@ -291,6 +319,87 @@ PROJECT_BACKLOG.md, and this task file.
 - Set Status to `done` (date + stage-log pointer, no commit hash); move this file to
   `docs/project/tasks/done/`; propose each block's commit for owner approval separately, only after
   that block's cross-review thread reached consensus.
+
+## Prompt Set (handed to the owner, 2026-07-26)
+
+Written in Block A after the owner caught that scope item 6 had been skipped. Persisted here rather
+than left in chat so Block B can verify the returned image against a written spec (see the checklist
+below) — the Item 16 Round 2 pattern.
+
+Copy-paste into ChatGPT. Kept to one short paragraph per Item 16's established style.
+
+**Home hero background (×1)**
+
+> A wide, atmospheric tattoo studio interior in warm, dim, moody light — the same calm palette as a
+> quiet studio at night: charcoal and black surfaces, warm wood, soft pools of amber light, a little
+> greenery, deep shadows. Shoot it as a wide establishing view with the middle of the frame calm and
+> uncluttered — open floor, a wall, or soft falloff — so large white text can sit across the centre
+> and stay readable; keep the detail and interest toward the edges. No people, no faces, no readable
+> signage, lettering or logos anywhere in the image.
+> Landscape, very wide, 1920×1080 or larger (16:9 or wider).
+
+### Why these constraints (for Block B's verification, not for the owner)
+
+The hero renders as a **full-bleed background behind centred white text** — `<h1>` (studio name),
+two paragraphs, and the CTA — over a dark scrim. So the image is judged as a backdrop, not as a
+photograph:
+
+- **Calm centre** — the text block sits mid-frame. A busy centre survives no scrim opacity that also
+  keeps the image visible.
+- **Dark and warm** — the text is white over a scrim; a bright or cold image forces a heavier scrim
+  and kills the photo. Warm dim also matches the three existing `studio-*.jpg` placeholders, so the
+  page reads as one set.
+- **No text in the image** — the `<h1>` supplies the studio name; baked-in lettering would collide
+  and would also be wrong at every viewport width.
+- **No people** — consistent with the Item 16 rule for every placeholder in the tree.
+- **≥1920 wide, 16:9 or wider** — it spans `min-h-[80vh]` full-bleed up to a 1280px layout and
+  beyond; anything narrower upscales visibly.
+
+### Block B acceptance checklist for the returned image
+
+1. Landscape, ≥1920px wide, aspect 16:9 or wider.
+2. No people, no faces, no readable text, signage or logos.
+3. Centre region calm enough that white body copy stays legible over the scrim — verify by rendering,
+   not by eye on the raw file.
+4. Palette consistent with `public/images/studio-1..3.jpg` (warm, dim, charcoal/wood/amber).
+5. Saved as `public/images/hero.jpg`, wired via `next/image` with `fill` + `sizes`, distinct alt
+   text, and its own `__asset_TODO` marker — the **10th**; update the count in
+   `PROJECT_PRODUCTION_READINESS.md` (nine → ten).
+6. Contrast: `text-white/70` over the current scrim does **not** reach WCAG AA for body copy. Fixing
+   that is scope item 9 and is the executor's call (scrim opacity, gradient, or type colour).
+
+If the image has not arrived by the time the rest of Block B is green, propose the commit without it
+and carry the hero as that block's single named completion obligation.
+
+### Outcome (2026-07-26) — image received and wired
+
+The owner generated the image from the prompt above and it was wired the same session, **ahead of
+the rest of Block B** (owner's call, made after the prompt was written). So scope item 9 and CO-2 are
+discharged out of block order; the remaining Block B work (flow margins, call-site migration, form
+UI, CO-1 sweep, oversized-file copy) is untouched and still ahead.
+
+Checklist verdict against the six criteria above:
+
+1. **Deviation — 1672×941, below the ≥1920px asked for.** Aspect is 1.777 (16:9 to three decimals),
+   so only width is short. Accepted for a placeholder: at 1x there is no upscaling at any width
+   `pnpm shot` captures (320/375/768/1280) — it only begins on a 1920px monitor or at 2x DPR on
+   desktop — and it is a soft, dark backdrop under a scrim, the least revealing use. Recorded in
+   `PROJECT_PRODUCTION_READINESS.md` so the real replacement is specified ≥1920px.
+2. Pass — no people, no faces, no readable text, signage or logos.
+3. Pass — verified by rendering, not by eye on the raw file: the centre is an unlit wall and open
+   floor, and white copy over it is clean at all four widths.
+4. Pass — warm dim charcoal/wood/amber, consistent with `studio-1..3.jpg`; on the rendered Home page
+   the hero and the Featured Work tiles read as one set.
+5. Done — converted PNG→JPG (1.57 MB → 101 KB, in line with the other nine placeholders at
+   174–278 KB), saved as `public/images/hero.jpg`, wired via `next/image` with `fill` + `sizes="100vw"`
+   + `priority` (it is the LCP element), `t("heroImageAlt")` added to `en.json` (the one alt-text
+   change this task permits), and its own `__asset_TODO`. **`grep -rn __asset_TODO app/ src/ public/`
+   now returns exactly 10**; `PROJECT_PRODUCTION_READINESS.md` updated nine → ten.
+6. **No scrim change needed — measured, not assumed.** The task anticipated `text-white/70` failing
+   WCAG AA, but that was written against an unknown image. Against this one, computing the composite
+   over the image's brightest region under the existing `bg-black/50` gives **5.60:1**, above AA's
+   4.5:1 for body text (the `<h1>` and the CTA are far higher). The existing scrim is therefore kept
+   as-is and the reasoning is recorded in a comment at the call site.
 
 ## Execution Report (filled by the executor)
 

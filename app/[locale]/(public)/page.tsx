@@ -18,7 +18,19 @@ export default function Home() {
   return (
     <main className="min-h-screen">
       <section className="relative flex min-h-[80vh] items-center justify-center">
-        <div className="absolute inset-0 bg-muted" />
+        {/* __asset_TODO: Home hero background placeholder, AI-generated — see TASK_18 */}
+        <div className="absolute inset-0 bg-muted">
+          <Image
+            src="/images/hero.jpg"
+            alt={t("heroImageAlt")}
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+          />
+        </div>
+        {/* Scrim: white/70 body copy over the darkest-scrim result measures 5.60:1 at the
+            image's brightest region — above WCAG AA's 4.5:1 for body text. */}
         <div className="absolute inset-0 bg-black/50" />
 
         <Container className="relative z-10 py-16 text-center">

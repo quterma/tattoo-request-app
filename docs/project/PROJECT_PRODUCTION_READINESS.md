@@ -424,13 +424,18 @@ grep -rn "__meta_TODO\|__intro_TODO\|__asset_TODO" app/ src/ public/
   now, not an "interim mechanism" gap).
 - `__intro_TODO` — placeholder request-form introduction copy. (Discharged — no matches remain as
   of Stage 6 Item 6; kept here in case a future placeholder reuses the convention.)
-- `__asset_TODO` — placeholder visual assets, all owner-generated in ChatGPT and wired 2026-07-26
-  (Item 16 Round 2): 4 Home Featured Work images (`public/images/featured-*.jpg`), 3 Location
-  studio-interior images (`public/images/studio-*.jpg`), the favicon (`app/icon.svg`, hand-
-  vectorized from the generated concept, marker in the SVG itself), and the OG image
-  (`app/[locale]/opengraph-image.jpg` — the marker lives in `app/[locale]/layout.tsx` instead, since
-  a binary JPEG can't carry a comment). Nine markers total —
-  `grep -rn __asset_TODO app/ src/ public/` lists all of them. **CO-2 gap (Item 16):** the favicon's
+- `__asset_TODO` — placeholder visual assets, all owner-generated in ChatGPT: 4 Home Featured Work
+  images (`public/images/featured-*.jpg`), 3 Location studio-interior images
+  (`public/images/studio-*.jpg`), the favicon (`app/icon.svg`, hand-vectorized from the generated
+  concept, marker in the SVG itself), and the OG image (`app/[locale]/opengraph-image.jpg` — the
+  marker lives in `app/[locale]/layout.tsx` instead, since a binary JPEG can't carry a comment) —
+  nine wired 2026-07-26 by Item 16 Round 2 — **plus the Home hero background
+  (`public/images/hero.jpg`), wired 2026-07-26 by Item 18 (marker in
+  `app/[locale]/(public)/page.tsx`)**. **Ten markers total** —
+  `grep -rn __asset_TODO app/ src/ public/` lists all of them.
+  The hero is **1672×941**, below the ≥1920px width its own prompt spec asked for; accepted for a
+  placeholder because no upscaling occurs at 1x on any width `pnpm shot` captures (320/375/768/1280)
+  and it is a soft, dark backdrop under a scrim. The real replacement should be ≥1920px wide. **CO-2 gap (Item 16):** the favicon's
   real-browser-tab render (light and dark tab chrome) has not been physically verified. `pnpm shot`
   (`TOOLING_TASK_02`, 2026-07-26) cannot close this specific gap — it renders headless Chromium at
   fixed widths, not a real browser's tab chrome — so this remains a physical-device check. Verify

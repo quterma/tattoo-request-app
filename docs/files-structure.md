@@ -23,6 +23,8 @@ tattoo-request-app/
 │   └── settings.json
 ├── .husky/
 │   └── pre-commit
+├── "temp/
+│   └── ChatGPT Image 26 \320\270\321\216\320\273. 2026 \320\263., 18_07_20.png"
 ├── app/
 │   ├── globals.css
 │   ├── icon.svg
@@ -146,7 +148,6 @@ tattoo-request-app/
 │       │       └── RESEARCH_2026-07-25_review-round-economics.md
 │       ├── reviews/
 │       │   ├── .gitkeep
-│       │   ├── REVIEW_2026-07-26_stage6-item18-blockA-tokens-primitives.md
 │       │   └── done/
 │       │       ├── .gitkeep
 │       │       ├── REVIEW_2026-07-13_codex-delegation-invocation.md
@@ -177,6 +178,7 @@ tattoo-request-app/
 │       │       ├── REVIEW_2026-07-25_stage6-item16-round1-favicon-pivot-location-slots.md
 │       │       ├── REVIEW_2026-07-25_stage6-item17-studio-config-extraction.md
 │       │       ├── REVIEW_2026-07-26_stage6-item16-round2-image-wiring.md
+│       │       ├── REVIEW_2026-07-26_stage6-item18-blockA-tokens-primitives.md
 │       │       └── REVIEW_2026-07-26_tooling-task-02-playwright-screenshots.md
 │       └── tasks/
 │           ├── META_TASK_01_framework_consolidation.md
@@ -206,6 +208,7 @@ tattoo-request-app/
 │       ├── featured-2.jpg
 │       ├── featured-3.jpg
 │       ├── featured-4.jpg
+│       ├── hero.jpg
 │       ├── studio-1.jpg
 │       ├── studio-2.jpg
 │       └── studio-3.jpg

@@ -1034,6 +1034,30 @@ step at Tailwind's own `sm` (`@media (min-width: 40rem)`), which has no viewport
 scales to exactly 200% — and which, as a bonus, makes `.text-display` reproduce the outgoing hero
 type exactly at every width. Values at all four captured widths are unchanged by the fix.
 
+**Scope item 6 (the Home hero image prompt) was NOT delivered in Block A — executor miss.** It
+required handing the owner a prompt *at the start of* the block so generation ran in parallel; it was
+in the approved plan as step 2 and was simply never executed — no prompt reached the owner and none
+was persisted. It was the one Block A item that leaves no trace in a diff, so no gate, screenshot,
+Review Agent or cross-review could catch it, and the handoff did not mention it. The original
+Execution Report and this entry both listed what was done without recording the omission; the owner
+caught it after the commits. Corrected by STRAT in the task file, and the prompt has since been
+written and persisted to a `## Prompt Set` section there (with a written acceptance checklist, so
+Block B can verify the returned image against a spec rather than a conversation).
+
+**The owner then generated the image from that prompt the same session, and it was wired
+immediately** — so scope item 9 and CO-2 are discharged **out of block order**, ahead of the rest of
+Block B, on the owner's call. `public/images/hero.jpg` (converted PNG→JPG, 1.57 MB → 101 KB) replaces
+the grey `bg-muted` box, wired with `next/image` `fill` + `sizes="100vw"` + `priority`, a new
+`heroImageAlt` key (the one alt-text change this task permits), and the **10th** `__asset_TODO`;
+`PROJECT_PRODUCTION_READINESS.md` updated nine → ten. Two checklist outcomes worth recording: the
+image is **1672px wide, short of the ≥1920px its own spec asked for** — accepted for a placeholder
+because no upscaling occurs at 1x on any captured width, with the real replacement now specified
+≥1920px — and **the anticipated contrast fix proved unnecessary**: measured against this image,
+`text-white/70` over the existing `bg-black/50` is 5.60:1, above WCAG AA's 4.5:1, so the scrim was
+left alone rather than changed on the assumption in the task file. Gates green; Home re-captured at
+all four widths. The rest of Block B (flow margins, call-site migration, form UI, CO-1 sweep,
+oversized-file copy) is untouched and still ahead.
+
 **Carried forward:** flow-margin removal is Block B step 1, atomic with the 41 `mb-0`/`mb-1`
 counters. Two out-of-scope findings filed to PROJECT_BACKLOG.md — Geist is downloaded on every visit
 and never rendered (a real cost, needs `layout.tsx`, outside both blocks), and `app/not-found.tsx`'s
