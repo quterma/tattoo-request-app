@@ -431,9 +431,10 @@ grep -rn "__meta_TODO\|__intro_TODO\|__asset_TODO" app/ src/ public/
   (`app/[locale]/opengraph-image.jpg` — the marker lives in `app/[locale]/layout.tsx` instead, since
   a binary JPEG can't carry a comment). Nine markers total —
   `grep -rn __asset_TODO app/ src/ public/` lists all of them. **CO-2 gap (Item 16):** the favicon's
-  real-browser-tab render (light and dark tab chrome) has not been physically verified — no
-  headless-browser tool exists in this environment. Verify before public launch, alongside the
-  existing Item 4B mobile-device gap below.
+  real-browser-tab render (light and dark tab chrome) has not been physically verified. `pnpm shot`
+  (`TOOLING_TASK_02`, 2026-07-26) cannot close this specific gap — it renders headless Chromium at
+  fixed widths, not a real browser's tab chrome — so this remains a physical-device check. Verify
+  before public launch, alongside the existing Item 4B mobile-device gap below.
 
 The Item 13 stage-closing acceptance sweep must fail while any of the three markers remain.
 Renaming the three markers into one shared prefix was considered and rejected (Stage 6 Item 17) —

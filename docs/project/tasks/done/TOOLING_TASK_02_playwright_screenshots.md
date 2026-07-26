@@ -2,7 +2,8 @@
 
 ## Status
 
-`ready` · created 2026-07-26 · done: <date · PROJECT_STAGE_LOG.md entry pointer>
+`done` · created 2026-07-26 · done: 2026-07-26 · PROJECT_STAGE_LOG.md — "`TOOLING_TASK_02` —
+Playwright screenshot capability — done (IMPL, 2026-07-26)"
 
 Blocks: `docs/project/tasks/STAGE_6_TASK_18_visual_consistency.md` (Block B verification),
 Stage 6 Item 13 (manual mobile QA — its plan row requires the browser capability to be named
@@ -109,14 +110,28 @@ closed as gaps rather than as evidence.
 - CO-1 — The capability must be proven to actually work, not merely installed. A dependency in
   `package.json` is not evidence that a browser launches on this machine.
   - Required by: this task's whole purpose (Goal); Acceptance Criterion 1 below.
-  - Disposition: completed — <the executor records here: the exact command run, the server it ran
-    against, and the list of PNG files produced with their pixel dimensions>
+  - Disposition: completed — ran `pnpm build && pnpm start` (production server, port 3000), then
+    `pnpm shot` against `http://localhost:3000`. Final run (post Codex-fix, 2026-07-26) produced
+    24 files under `screenshots/`, all valid PNGs, none empty, widths confirmed via `IHDR` readback
+    against every requested width:
+    en-320.png 320x2082 (129633 bytes), en-375.png 375x2083 (159203 bytes),
+    en-768.png 768x1756 (192636 bytes), en-1280.png 1280x1772 (258323 bytes),
+    en-process-{320,375,768,1280}.png → 320x3399/375x2967/768x2239/1280x2119,
+    en-request-{320,375,768,1280}.png → 320x2402/375x2330/768x2194/1280x2194,
+    en-location-{320,375,768,1280}.png → 320x1394/375x1501/768x1276/1280x1372,
+    en-preparation-{320,375,768,1280}.png → 320x1001/375x1001/768x1001/1280x1001,
+    en-aftercare-{320,375,768,1280}.png → 320x1079/375x1001/768x1001/1280x1001.
+    No `OVERFLOW` flagged on any of the 24 scrollWidth-vs-viewport log lines. Also verified the
+    no-server failure path: with the port confirmed free, `pnpm shot` exited 1 with a readable
+    "Is the server running?" message, no hang, no raw stack trace (Acceptance Criterion 4).
 - CO-2 — The one-time `pnpm exec playwright install chromium` browser download (~150 MB) is a
   machine-local step that `pnpm install` does not perform. Any future session or machine hits a
   missing-browser error until it runs.
   - Required by: a contract the diff introduces (the script cannot work without it).
-  - Disposition: completed — <the executor records here: that the install was run, and that the
-    script's failure message names this command verbatim so the next session self-serves>
+  - Disposition: completed — ran `pnpm exec playwright install chromium` on this machine
+    (downloaded Chrome for Testing 151.0.7922.34 + headless shell, ~300 MB). The script's
+    `isMissingBrowserError` branch names the exact command verbatim in its failure message, so a
+    future session/machine that hits the missing-browser error self-serves without reading docs.
 ```
 
 ## Review Granularity
@@ -151,4 +166,39 @@ trigger. Record the actual measured surface here before the final review.
 
 ## Execution Report (filled by the executor)
 
-<what changed; gate results; unresolved items; out-of-scope findings>
+**What changed:** Added `playwright` (`^1.62.0`, core package) as a devDependency; added
+`scripts/screenshots.mjs` (new, plain ESM, follows `project-status.mjs`/`update-structure.mjs`
+conventions) and a `pnpm shot` script invoking it; added `/screenshots` to `.gitignore`. No file
+under `app/` or `src/` touched. `pnpm-lock.yaml` and `docs/files-structure.md` regenerated as
+side effects of `pnpm install` / `pnpm structure`.
+
+**Gate results:** `pnpm qg` green on the final (post-review-fix) tree — structure regenerated,
+lint 0 errors (1 pre-existing warning in an untouched test file), typecheck clean, 408/408 tests
+(33/33 files, same counts as before this task), build succeeded. `pnpm qg`'s script body is
+unchanged (still `structure && lint && typecheck && test && build`, 5 steps) — Acceptance
+Criterion 2 satisfied.
+
+**Cross-review:** `reviews/done/REVIEW_2026-07-26_tooling-task-02-playwright-screenshots.md`,
+2 rounds, `consensus`. Codex found 3 should-fix issues in the first Handoff, all accepted and
+fixed, re-verified in Round 2 with no new findings:
+1. Missing-browser detection (`isMissingBrowserError`) was over-broad enough (`browserType\.launch`)
+   to misclassify a sandbox/permission/crash launch failure as "Chromium not installed" — narrowed
+   to match only Playwright's actual "Executable doesn't exist" wording.
+2. Reachability detection's `Timeout.*exceeded` pattern could misclassify a timeout anywhere in the
+   capture (scrolling, evaluation, screenshot-writing) as "server unreachable" — scoped to the
+   `page.goto` call only via a dedicated `UnreachableServerError` wrapper.
+3. `routeSlug` only stripped `/` characters, so a custom route with a query string (e.g.
+   `/en/process?mode=compact`) or an absolute URL would leave Windows-invalid characters (`?`, `:`)
+   in the output filename — now derives the slug from the resolved URL's `pathname` only, sanitized
+   to `[A-Za-z0-9_-]` with a `root` fallback. Manually verified against a query-string route.
+
+**Unresolved items:** none from this task's scope. The pre-existing `pnpm lint` warning in
+`RequestImageViewer.test.tsx` is unrelated (untouched file, predates this task).
+
+**Out-of-scope findings:** none.
+
+**Deviation from the task file (owner-approved):** the script also logs
+`document.documentElement.scrollWidth` against the requested viewport width for every capture,
+flagging `OVERFLOW` when exceeded — not in the task's literal Scope section, but makes Item 18's
+horizontal-overflow check objective instead of eyeballed. No file surface, CO, or acceptance
+criterion added by this deviation.

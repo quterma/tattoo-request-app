@@ -175,7 +175,8 @@ tattoo-request-app/
 │       │       ├── REVIEW_2026-07-24_stage6-item6-process-content.md
 │       │       ├── REVIEW_2026-07-25_stage6-item16-round1-favicon-pivot-location-slots.md
 │       │       ├── REVIEW_2026-07-25_stage6-item17-studio-config-extraction.md
-│       │       └── REVIEW_2026-07-26_stage6-item16-round2-image-wiring.md
+│       │       ├── REVIEW_2026-07-26_stage6-item16-round2-image-wiring.md
+│       │       └── REVIEW_2026-07-26_tooling-task-02-playwright-screenshots.md
 │       └── tasks/
 │           ├── META_TASK_01_framework_consolidation.md
 │           ├── STAGE_6_STRAT_BRIEF.md
@@ -209,6 +210,7 @@ tattoo-request-app/
 │       └── studio-3.jpg
 ├── scripts/
 │   ├── project-status.mjs
+│   ├── screenshots.mjs
 │   ├── update-structure.mjs
 │   └── __tests__/
 │       └── project-status.test.ts

@@ -89,6 +89,27 @@ Current focus:
   - **Execution order for the rest of the stage:** `TOOLING_TASK_02` → Item 18 Block A → Item 18
     Block B → cut and run Item 13. One at a time — Item 18's blocks touch the same files and
     Item 13 reads the whole public surface.
+- **`TOOLING_TASK_02` — Playwright screenshot capability — done (IMPL, 2026-07-26).**
+  `tasks/done/TOOLING_TASK_02_playwright_screenshots.md`. Added `playwright` (core package) as a
+  devDependency and `scripts/screenshots.mjs` (`pnpm shot`), capturing the 6 public routes at
+  320/375/768/1280 as full-page PNGs to `screenshots/` (gitignored). Fresh
+  `browser.newContext({ viewport })` per width (not a resized single page — `next/image` picks its
+  source by viewport at load), `waitUntil: "load"` (not `networkidle`, per Item 16 Round 2
+  precedent), scroll-to-bottom-and-back before capture for lazy content/iframes, and a
+  scrollWidth-vs-viewport log per capture (owner-approved addition beyond the task's literal Scope,
+  making Item 18's overflow check objective). Verified against `pnpm build && pnpm start`: 24 valid
+  PNGs at exact requested widths, no overflow flagged; no-server run exits 1 with a readable
+  message; `pnpm qg` unchanged (408/408 tests, same 5 gate steps). No file under `app/` or `src/`
+  touched. **Codex cross-review** (`reviews/done/REVIEW_2026-07-26_tooling-task-02-playwright-screenshots.md`,
+  2 rounds, consensus): 3 should-fix findings, all accepted and fixed — missing-browser detection
+  narrowed to Playwright's actual "Executable doesn't exist" wording (was over-broad enough to
+  misclassify a sandbox/crash failure); reachability detection scoped to the `page.goto` call only
+  via a dedicated `UnreachableServerError` (was misclassifying any capture-stage timeout as "server
+  down"); route slug now derived from the resolved URL's `pathname` and sanitized to portable
+  filename characters (was leaving `?`/`:` from a custom route in the output path, invalid on
+  Windows). This ends the single cause behind three consecutive undischargeable completion
+  obligations (Items 5, 6, 16 CO-2). `PROJECT_PRODUCTION_READINESS.md` updated to name what the
+  capability covers and does not (headless Chromium render, not a physical-device check).
 - **Stage 6 Item 16 — Placeholder visual assets — done, all 9 owner-generated placeholders wired
   (IMPL, 2026-07-25/26).** `tasks/done/STAGE_6_TASK_16_placeholder_assets.md`: this is an
   owner-in-the-loop, multi-round task (real photography/artwork is weeks out). Round 1 ships **no

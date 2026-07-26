@@ -20,6 +20,7 @@
     "structure": "node scripts/update-structure.mjs",
     "project:status": "node scripts/project-status.mjs",
     "qg": "pnpm structure && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "shot": "node scripts/screenshots.mjs",
     "prepare": "husky"
   },
   "dependencies": {
@@ -62,6 +63,7 @@
     "eslint-plugin-import": "^2.32.0",
     "husky": "^9.1.7",
     "jsdom": "^28.0.0",
+    "playwright": "^1.62.0",
     "prettier": "^3.8.1",
     "shadcn": "^3.8.4",
     "supabase": "^2.107.0",
