@@ -2,22 +2,26 @@
 
 ## Status
 
-`in progress` · created 2026-07-26 · **Block A done 2026-07-26** (cross-review consensus at round 1;
-`reviews/done/REVIEW_2026-07-26_stage6-item18-blockA-tokens-primitives.md`) · **Block B open —
-scope item 9 (hero) already discharged out of order** · done: <date · PROJECT_STAGE_LOG.md pointer>
+`done` · created 2026-07-26 · done 2026-07-26 (PROJECT_STAGE_LOG.md — Current focus, the Item 18
+Block B entry) · **Block A** cross-review consensus at round 1
+(`reviews/done/REVIEW_2026-07-26_stage6-item18-blockA-tokens-primitives.md`) · **Block B**
+cross-review consensus at round 1, no findings
+(`reviews/done/REVIEW_2026-07-26_stage6-item18-blockB-pages-form-spacing.md`)
 
-**Block B's remaining work** (the hero was wired 2026-07-26 on the owner's call, ahead of the rest):
-scope items 5 (flow-margin removal + the 41 `mb-*` counters — **step 1**, and the reason item 5 is
-still open), 7 (call-site migration to the density variants), 8 (request-form UI), 10 (CO-1 sweep at
-four widths), 11 (oversized-file copy).
+**All scope items are implemented and all completion obligations are reconciled.** Block B's
+remainder (items 5, 7, 8, 10, 11) was executed 2026-07-26, after item 9 (hero) had been discharged
+out of order. Scope item 5 — the flow-margin removal that kept this task open — is **DONE**: every
+`Page`/`Section` `py-*` override is gone and all 41 `mb-0`/`mb-1` counters are removed. CO-1 is
+discharged (24 captures at 320/375/768/1280, measured not eyeballed); CO-2 and CO-3 were already
+DONE; CO-4 (physical device) is **not** discharged here by design and stays tracked in
+`PROJECT_PRODUCTION_READINESS.md`.
+
+This unblocks **Stage 6 Item 13** — the FS §6 acceptance sweep that closes the stage.
 
 Corrected 2026-07-26 by STRAT: the file was left at `ready` after Block A shipped. Status is the
 canonical source of task state (AI_TASK_PROTOCOL.md — Session Duties), so `ready` told
 `pnpm project:status`, and any session running its Pre-task Sync, that no work had started — with
 Block A already committed and its review closed.
-
-**A session picking this up executes Block B only.** Block A is committed; do not re-plan it. Block
-B's first act is the flow-margin removal deferred from Block A (Scope item 5) — see its STATUS note.
 
 Blocks: Stage 6 Item 13 (FS §6 acceptance sweep — the stage-closing gate).
 Source: discharges the mobile-viewport completion obligations of Items 5 and 6.
@@ -123,16 +127,17 @@ Everything in Block B consumes this; it must be settled and reviewed before page
 5. **Resolve the three stacked spacing mechanisms.** `@layer base` sets `p { margin: 0 0 1em }` and
    `h2 { margin: 0 0 0.5em }`; components then fight both with `mb-0` (24 occurrences) and `mb-1`,
    while `Stack gap-*` adds a third. Pick one mechanism and make the others unnecessary.
-   - **STATUS: PARTIALLY DONE — OPEN. Block A chose the mechanism; Block B must perform the
-     removal.** Chosen: `Stack gap-*` + the primitives' density variants; the `@layer base` flow
-     margins go. They were **deliberately retained** in Block A: it cannot edit call sites, so
-     removing them there collapses the 5 bare `<h1>` page titles and every `<p>` with no `mb-*`
-     counter — a visible regression on 5 of the 6 public routes, which Block A is forbidden to
-     repair. Block B step 1 removes `p { margin: 0 0 1em }` and the four `h1`–`h4` margins
-     **atomically with the 41 `mb-0`/`mb-1` counters**, under the CO-1 screenshot gate.
-   - The comment above those rules in `app/globals.css` is a pointer for the reader, **not** the
-     guarantee. **This scope item is the guarantee, and it stays open until Block B ships the
-     removal — the task may not go `done` while it reads PARTIALLY DONE.**
+   - **STATUS: DONE (2026-07-26, Block B step 1).** Chosen mechanism: `Stack gap-*` + the
+     primitives' density variants. `p { margin: 0 0 1em }` and the four `h1`–`h4` `margin: 0 0 0.5em`
+     rules were removed from `app/globals.css` **atomically with all 41 `mb-0`/`mb-1` counters**
+     across 7 files (process 20, Home 4, preparation 3, aftercare 3, location 2, SuccessView 6,
+     public-footer 3). `grep -rn "mb-0\|mb-1\b" app/ src/ --include=*.tsx` now returns **0**.
+     The handoff comment in `globals.css` was replaced with a rule-level note explaining why the
+     margins must not come back.
+   - Sites that genuinely relied on the removed margins were repaired in the same step: the five
+     bare `<h1>` page titles, the two uncountered `<p>` on Location, `SuccessView`'s `<h1>`, and
+     `RequestForm`'s contact-section `<div>`. Repairs use a `gap` on the containing element (owner's
+     call — no new `<Stack>` wrappers where a container gap suffices).
 6. **Write the Home hero image prompt** — one short paragraph, in the style Item 16 established
    (`tasks/done/STAGE_6_TASK_16_placeholder_assets.md` — `## Prompt Set`): subject/mood/palette
    together, plus orientation and size (wide, full-bleed, ~1920×1080 or wider). Hand it to the
@@ -231,8 +236,16 @@ renders correctly at 320/375/768/1280.**
   browser capability rather than deferred as a manual gap. This is the obligation Items 5, 6 and 16
   each failed to discharge; it is the reason TOOLING_TASK_02 exists.
   - Required by: Acceptance Criteria 5 and 6; discharges Item 5 CO-2 and Item 6 CO-2.
-  - Disposition: completed — <executor records: the command run, the routes and widths captured,
-    and what was found and fixed at each width>
+  - Disposition: **DONE (2026-07-26, Block B)**. Command: `pnpm build && pnpm start`, then
+    `pnpm shot` against the production build — 6 public routes × 4 widths = **24 captures**,
+    `scrollWidth === viewport` at **every** one, so no horizontal overflow at any width. Because the
+    `(public)` layout's `overflow-x-hidden` *hides* overflow, this was measured, not eyeballed.
+    Additionally verified by a temporary Playwright harness (removed after use): with each page
+    scrolled to the bottom, **no content element intersects the fixed bottom nav at any width** —
+    the nav is `position: fixed` only at 320/375 and static at 768/1280. The apparent nav-over-
+    content band in the fullPage PNGs is a capture artifact of a fixed element, not a real overlap.
+    Found and fixed at this gate: nothing overflowed, but the Review Agent caught three spacing
+    defects the overflow measurement could not see — see the Execution Report below.
 - CO-2 — The Home hero image is a generated placeholder that must not survive to public launch, and
   must be discoverable by Item 13's sweep.
   - Required by: a contract the diff introduces (a new placeholder asset); PROJECT_DECISIONS.md §5
@@ -245,8 +258,15 @@ renders correctly at 320/375/768/1280.**
 - CO-3 — Any visible value that changed because the two token systems disagreed (greys, borders,
   link colour, heading sizes) is a deliberate, named change, not an accident.
   - Required by: Scope item 1; Acceptance Criterion 2.
-  - Disposition: completed — <executor records: the list of changed rendered values, and that each
-    was named in the approved Block A plan>
+  - Disposition: **DONE (2026-07-26)**. CO-3 covers the **token-system divergence** — the greys,
+    borders, link colour and heading sizes reconciled in Block A, each named in that block's
+    approved plan and recorded in its Execution Report. Block B added exactly **one** row, and it is
+    a spacing value rather than a token: the two centred CTA sections (`process` and `location`)
+    carried `py-3 sm:py-3` and moved to `density="tight"` (`py-2 sm:py-3`) — **4px tighter at mobile
+    only**, pre-decided in Block A (`section.tsx:10-13`) rather than invented here.
+    Per the owner's 2026-07-26 scoping call, the rest of Block B's spacing changes are **not** CO-3
+    rows: they are documented as the step-1 repair list in the Execution Report plus the CO-1
+    captures.
 - CO-4 — Physical-device verification remains outstanding and is NOT discharged here. Headless
   Chromium at a 375px viewport is not an iPhone: it does not verify touch targets, real iOS/Android
   tab chrome, or the Item 4B admin image-viewer gestures.
@@ -283,6 +303,31 @@ src/shared/ui/page.tsx        | 26 ++++++--
 src/shared/ui/section.tsx     | 33 +++++++++--
 src/shared/ui/stack.tsx       | 15 ++++--
 ```
+
+**Block B — measured 2026-07-26 (`git diff --stat`): 12 execution-affecting files, +179 / −167.**
+
+```text
+app/[locale]/(public)/aftercare/page.tsx        | 16 ++---
+app/[locale]/(public)/location/page.tsx         | 86 +++++++++++-----------
+app/[locale]/(public)/page.tsx                  | 95 ++++++++++++++-----------
+app/[locale]/(public)/preparation/page.tsx      | 16 ++---
+app/[locale]/(public)/process/page.tsx          | 72 ++++++++++---------
+app/[locale]/(public)/request/page.tsx          | 10 ++-
+app/globals.css                                 | 20 ++----
+src/features/request/ui/RequestForm.tsx         |  4 +-
+src/features/request/ui/SuccessView.tsx         | 12 ++--
+src/features/request/ui/UploadCategoryInput.tsx |  7 +-
+src/shared/i18n/messages/en.json                |  2 +-
+src/shared/ui/public-footer.tsx                 |  6 +-
+```
+
+Under the 16-file trigger. Four files inside the Block B write surface needed **no** change and were
+left untouched: `success/page.tsx`, `error.tsx` and `(public)/layout.tsx` (their `Page`/`Section`
+were already bare, so they render the defaults, and they carried no counters), and the seven other
+`src/features/request/ui/*` files, which exploration confirmed already read only surviving oklch
+utilities — Block B's form work was confined to what the flow-margin removal disturbed.
+`src/shared/ui/public-footer.tsx` is formally Block A's surface; it is edited here under an
+owner-approved deviation, because 3 of the 41 counters live in it.
 
 Well under the 16-file checkpoint trigger, as the split intended. Four files inside the Block A
 write surface were verified to need **no** change and were left untouched — `container.tsx`,
@@ -490,3 +535,83 @@ CO-1 proper belongs to Block B, after the hero and the call-site migration.
   Stage 7 verifies the values rather than "fixing" them and breaking the Item 11 decision.
 - CO-2, CO-3 (final), CO-1 remain Block B's to discharge. CO-4 (physical device) is not discharged
   here by design.
+
+### Block B (remainder — scope items 5, 7, 8, 10, 11) — 2026-07-26 — implementation complete, awaiting cross-review
+
+Scope item 9 (hero) and CO-2 were discharged earlier, out of block order; this session executed the
+rest. Baseline verified: task file last touched at `bcad384`, write surface unmoved, tree clean at
+`d107de2` before work began.
+
+**Deviations from the task file** (both approved by the owner at plan time):
+
+1. `src/shared/ui/public-footer.tsx` — formally Block A's write surface, but it holds 3 of the 41
+   counters. Without it the acceptance grep cannot reach 0. Change limited to deleting 3 dead `mb-0`.
+2. `UploadCategoryInput.tsx` layout fix alongside the scope-item-11 copy change — the copy was the
+   *symptom*; the cause was `shrink-0` on the message span in a non-wrapping flex row. Lands inside
+   scope item 10 ("fix what clips, overflows, or wraps illegibly").
+
+A third proposed deviation (possibly restoring `gap-4` to `StackGap`) was **withdrawn** on the
+owner's ruling: no `gap-4` in the tree sits on a `<Stack>`, so `stack.tsx` was never opened and the
+union is exactly as Block A shipped it.
+
+**What changed**
+
+- `globals.css` — the four `h1`–`h4` `margin: 0 0 0.5em` and `p { margin: 0 0 1em }` removed; the
+  Block A handoff comment replaced by a rule-level note on why they must not return.
+- All **41** `mb-0`/`mb-1` counters deleted across 7 files. Home's `mb-3`/`mb-8` were **kept as real
+  spacing** (re-expressed as gaps), not mistaken for counters.
+- Every `Page`/`Section` `py-*` override replaced by `density` (`tight` on the 4 content pages,
+  `normal` on Home's 5 sections); `id`, `scroll-mt-20` and `text-center` preserved. The 3 bare
+  call sites (request, success, error) stay bare — they already render the defaults.
+- Home's hero moved to `.text-display` and a Stack-carried rhythm; the outer 32px stays a raw flex
+  container because 32px is not in `StackGap`.
+- `en.json` — `request.errors.uploadTooLarge` → **"Over 4 MB — use a smaller image."** (78 → 32
+  chars; the "a screenshot usually works" hint dropped per the owner's recorded leaning). The only
+  string changed anywhere: `git diff en.json` is 1 insertion / 1 deletion.
+
+**Gate results — all PASS** (re-run after the post-review fixes): `structure` PASS · `lint` PASS
+(0 errors; 1 warning, the pre-existing `no-img-element` in an admin test, untouched) · `typecheck`
+PASS · `test` PASS (33 files / 408 tests) · `build` PASS · `check:metadata` PASS. `pnpm qg` exit 0.
+
+**Test Agent:** no new tests. `PROJECT_TESTING_STRATEGY.md` — *What Should Not Be Tested* — names
+visual layout and styling details; a `toHaveClass("py-2")` assertion would pin the implementation
+this task is trying to unpin. The 408 existing tests were **actually run**, not assumed. Note
+`UploadCategoryInput.test.tsx:172-173` asserts on the error *key*, not the English string, so the
+copy change correctly breaks no test — verified rather than presumed.
+
+**Review Agent** (read-only, `Explore`) raised 5 findings; **4 accepted, all fixed, and each
+re-verified by measurement in a real browser** rather than by reading the diff:
+
+1. **Real defect, high.** `request/page.tsx` — the `<h1>` and `<RequestForm/>` were bare siblings in
+   a `Section`, so removing the `h1` flow margin left them with **no** spacing mechanism. Measured
+   at **0px**. This was the exact failure scope item 5 exists to prevent, on the primary conversion
+   route, and the CO-1 overflow sweep could not see it. Fixed with a `Stack gap-3` → **12px**.
+2. **Real, −4px.** Location's address → map-links gap: the outgoing render collapsed the paragraph's
+   1em with the grid's `mt-3` to **16px**; a `Stack gap-3` gave 12px. Fixed to `mt-4` → **16px**.
+   (Its sibling photos grid measured 12px before and after — correct, and left alone.)
+3. **Real, −4px.** Home's Featured Work "see more" link: one Stack cannot carry both the 12px
+   h2→grid gap and the link's 16px `mt-4`. Fixed with `gap-3 + mt-1` → **16px**.
+4. **Comment defect.** The `.text-display` comment claimed a "zero-pixel change"; font-size is
+   identical at both ends but line-height is not (2.5rem/1 → 1.1, ≈+4.8px on the single-line h1 at
+   ≥40rem). Comment corrected to state the real delta.
+5. **Partially accepted.** `min-w-0` on the `<li>` is inert there (it is a column-flex child) —
+   removed, and the comment rewritten to describe the mechanism that actually operates (a
+   shrinkable span + `ms-auto` on the remove control). The reviewer's touch-target note was
+   confirmed **pre-existing**, not introduced here, and is left to Stage 7.
+
+**Rendered verification (CO-1).** `pnpm shot` against a production build, 6 routes × 4 widths =
+**24 captures, `scrollWidth === viewport` at every one**. Screenshots inspected, not just the
+numbers: Home/Process/Location/Request at 320 and 375, Location at 375. A temporary Playwright
+harness (removed after use) additionally proved **zero content/fixed-nav overlap at any width with
+each page scrolled to the bottom** — the nav is fixed only at 320/375. The oversized-file row was
+exercised end-to-end by uploading a real 5 MB file at 320px: the new copy renders on one line and
+the `×` control sits **inside** the row edge (`removeRight == liRight == 304`, `rowOverflows: false`).
+
+**Unresolved / carried forward**
+
+- Nothing deferred from this block. Scope item 5 is now DONE, closing the reason the task could not
+  be set `done`.
+- CO-4 (physical-device verification) is still **not** discharged and is not discharged here by
+  design — headless Chromium at 375px is not an iPhone. Tracked in PROJECT_PRODUCTION_READINESS.md.
+- The `▯` glyph seen in place of the shekel sign in 320px captures is a headless-Chromium font
+  fallback, not a layout defect; the copy is FS-governed and out of scope.

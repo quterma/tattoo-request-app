@@ -18,15 +18,17 @@ export default function LocationPage() {
   const t = useTranslations("location")
 
   return (
-    <Page className="py-4 sm:py-8">
-      <Section className="py-2 sm:py-3">
+    <Page density="tight">
+      <Section density="tight">
         <h1>{t("title")}</h1>
       </Section>
 
-      <Section className="py-2 sm:py-3">
+      <Section density="tight">
         <p className="text-muted-foreground">{studio.address}</p>
 
-        <div className="mt-3 grid grid-cols-3 gap-2 sm:gap-3">
+        {/* `mt-4` (16px), not a Stack gap: the outgoing render collapsed the paragraph's 1em flow
+            margin with the grid's `mt-3` to 16px, and 16px is not in `StackGap`. */}
+        <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
           {MAP_LINKS.map(({ labelKey, href }) => (
             <a
               key={labelKey}
@@ -39,7 +41,7 @@ export default function LocationPage() {
         </div>
       </Section>
 
-      <Section className="py-2 sm:py-3">
+      <Section density="tight">
         <iframe
           src={`https://maps.google.com/maps?q=${addressQuery}&output=embed`}
           title={t("mapTitle")}
@@ -48,50 +50,52 @@ export default function LocationPage() {
         />
       </Section>
 
-      <Section className="py-2 sm:py-3">
+      <Section density="tight">
         <Stack gap="gap-1.5">
-          <h2 className="mb-1">{t("howToFindUs")}</h2>
+          <h2>{t("howToFindUs")}</h2>
           <p className="text-muted-foreground">{t("howToFindUsText")}</p>
         </Stack>
       </Section>
 
-      <Section className="py-2 sm:py-3">
-        <h2 className="mb-1">{t("studioPhotos")}</h2>
-        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {/* __asset_TODO: Studio interior placeholder 1 of 3, AI-generated — see TASK_16 */}
-          <div className="relative aspect-video overflow-hidden rounded-md bg-muted">
-            <Image
-              src="/images/studio-1.jpg"
-              alt={t("studioPhotoAlt1")}
-              fill
-              sizes="(min-width: 640px) 33vw, 100vw"
-              className="object-cover"
-            />
+      <Section density="tight">
+        <Stack gap="gap-3">
+          <h2>{t("studioPhotos")}</h2>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            {/* __asset_TODO: Studio interior placeholder 1 of 3, AI-generated — see TASK_16 */}
+            <div className="relative aspect-video overflow-hidden rounded-md bg-muted">
+              <Image
+                src="/images/studio-1.jpg"
+                alt={t("studioPhotoAlt1")}
+                fill
+                sizes="(min-width: 640px) 33vw, 100vw"
+                className="object-cover"
+              />
+            </div>
+            {/* __asset_TODO: Studio interior placeholder 2 of 3, AI-generated — see TASK_16 */}
+            <div className="relative aspect-video overflow-hidden rounded-md bg-muted">
+              <Image
+                src="/images/studio-2.jpg"
+                alt={t("studioPhotoAlt2")}
+                fill
+                sizes="(min-width: 640px) 33vw, 100vw"
+                className="object-cover"
+              />
+            </div>
+            {/* __asset_TODO: Studio interior placeholder 3 of 3, AI-generated — see TASK_16 */}
+            <div className="relative aspect-video overflow-hidden rounded-md bg-muted">
+              <Image
+                src="/images/studio-3.jpg"
+                alt={t("studioPhotoAlt3")}
+                fill
+                sizes="(min-width: 640px) 33vw, 100vw"
+                className="object-cover"
+              />
+            </div>
           </div>
-          {/* __asset_TODO: Studio interior placeholder 2 of 3, AI-generated — see TASK_16 */}
-          <div className="relative aspect-video overflow-hidden rounded-md bg-muted">
-            <Image
-              src="/images/studio-2.jpg"
-              alt={t("studioPhotoAlt2")}
-              fill
-              sizes="(min-width: 640px) 33vw, 100vw"
-              className="object-cover"
-            />
-          </div>
-          {/* __asset_TODO: Studio interior placeholder 3 of 3, AI-generated — see TASK_16 */}
-          <div className="relative aspect-video overflow-hidden rounded-md bg-muted">
-            <Image
-              src="/images/studio-3.jpg"
-              alt={t("studioPhotoAlt3")}
-              fill
-              sizes="(min-width: 640px) 33vw, 100vw"
-              className="object-cover"
-            />
-          </div>
-        </div>
+        </Stack>
       </Section>
 
-      <Section className="py-3 sm:py-3 text-center">
+      <Section density="tight" className="text-center">
         <CtaRequestButton />
       </Section>
     </Page>

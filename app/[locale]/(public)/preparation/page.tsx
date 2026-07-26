@@ -14,27 +14,27 @@ export default function PreparationPage() {
       ))
 
   return (
-    <Page className="py-4 sm:py-8">
-      <Section className="py-2 sm:py-3">
+    <Page density="tight">
+      <Section density="tight">
         <h1>{t("title")}</h1>
       </Section>
 
-      <Section className="py-2 sm:py-3">
-        <p className="mb-0 text-muted-foreground">{t("intro")}</p>
+      <Section density="tight">
+        <p className="text-muted-foreground">{t("intro")}</p>
       </Section>
 
-      <Section className="py-2 sm:py-3">
+      <Section density="tight">
         <Stack gap="gap-1.5">
-          <h2 className="mb-1">{t("beforeAppointment")}</h2>
+          <h2>{t("beforeAppointment")}</h2>
           <ul className="list-disc ps-5">
             {bullets("beforeAppointmentItems")}
           </ul>
         </Stack>
       </Section>
 
-      <Section className="py-2 sm:py-3">
+      <Section density="tight">
         <Stack gap="gap-1.5">
-          <h2 className="mb-1">{t("tattooDay")}</h2>
+          <h2>{t("tattooDay")}</h2>
           <ul className="list-disc ps-5">{bullets("tattooDayItems")}</ul>
         </Stack>
       </Section>

@@ -86,44 +86,32 @@
     background-color: var(--background);
   }
 
+  /* No flow margins on headings or paragraphs. Vertical rhythm is carried by `Stack gap-*` and the
+     `Page`/`Section` density variants — one mechanism, not three (TASK_18 scope item 5, closed in
+     Block B). Adding `margin-bottom` back here would resurrect the 41 `mb-0`/`mb-1` counters that
+     existed only to fight it. */
   h1 {
     font-size: var(--font-size-h1);
     font-weight: 700;
     line-height: 1.2;
-    margin: 0 0 0.5em;
   }
 
   h2 {
     font-size: var(--font-size-h2);
     font-weight: 600;
     line-height: 1.25;
-    margin: 0 0 0.5em;
   }
 
   h3 {
     font-size: var(--font-size-h3);
     font-weight: 600;
     line-height: 1.3;
-    margin: 0 0 0.5em;
   }
 
   h4 {
     font-size: var(--font-size-h4);
     font-weight: 600;
     line-height: 1.35;
-    margin: 0 0 0.5em;
-  }
-
-  /* The h1–h4 margins above and the p margin below are REMOVED AT THE START OF BLOCK B, together
-     with the 41 mb-0/mb-1 counters at call sites that exist only to fight them. Spacing is carried
-     by Stack gap-* and the primitives' density variants — see TASK_18 scope item 5.
-     They are NOT removed here: Block A cannot edit the call sites, so removing them now collapses
-     the 5 bare <h1> page titles and the paragraphs that have no mb-* counter, on 5 of the 6 public
-     routes — pages this block is not allowed to repair.
-     This comment is a pointer for the reader, NOT the guarantee. The obligation lives in the
-     task file, where scope item 5 stays open until Block B performs the removal. */
-  p {
-    margin: 0 0 1em;
   }
 
   a {

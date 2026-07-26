@@ -468,9 +468,9 @@ export function RequestForm() {
           error={err("clientName")}
           {...register("clientName")}
         />
-        <div>
+        <div className="flex flex-col gap-1">
           <p className="text-sm font-medium text-foreground">{t("contactSectionTitle")}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">{t("contactSectionHint")}</p>
+          <p className="text-xs text-muted-foreground">{t("contactSectionHint")}</p>
         </div>
         <SelectInput
           id="contactMethod"

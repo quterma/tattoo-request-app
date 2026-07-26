@@ -13,8 +13,9 @@ AI agents and developers working on the project.
 ## Current Stage
 
 Stage: Stage 6 — Product Experience Polish — current (planning documentation integrated
-2026-07-12; **all 17 originally-planned items done as of 2026-07-26**; two items remain: 18 —
-visual consistency, and 13 — the FS §6 acceptance sweep that closes the stage). Stage 5 —
+2026-07-12; **all 17 originally-planned items done as of 2026-07-26**; **Item 18 — visual
+consistency — done 2026-07-26**; **one item remains: 13 — the FS §6 acceptance sweep that closes
+the stage**). Stage 5 —
 Production Hardening — closed. **Stage 7 — Visual Design created 2026-07-26** — visual identity,
 art direction and admin polish moved out of Stage 6; it runs before public launch and after real
 photography exists (PROJECT_DECISIONS.md — "Stage 6 / Stage 7 boundary").
@@ -41,6 +42,54 @@ require updating them first. See PROJECT_DECISIONS.md — Stage 6 Product Docume
 
 Current focus:
 
+- **Stage 6 Item 18 — visual consistency pass — DONE (IMPL, 2026-07-26).**
+  `tasks/done/STAGE_6_TASK_18_visual_consistency.md`. Scope items 5, 7, 8, 10, 11 executed in one block
+  (item 9 — the hero — had already been discharged out of order). **12 execution-affecting files,
+  +179 / −167.** The nucleus was scope item 5, the reason the task could not close: the `@layer base`
+  flow margins (`p { margin: 0 0 1em }` and the four `h1`–`h4` `0.5em`) were removed **atomically
+  with all 41 `mb-0`/`mb-1` counters** that existed only to fight them — a split would have collapsed
+  five bare `<h1>` page titles or added 1em to 41 elements. `grep` for those counters now returns
+  **0**, as does the grep for `py-*` overrides on `Page`/`Section` (acceptance criterion 4): every
+  call site now uses `density`. Home's hero moved to `.text-display`, retiring Block A's last
+  supplier-without-consumer pair. One copy string changed, exactly as authorized —
+  `request.errors.uploadTooLarge` → "Over 4 MB — use a smaller image." (78 → 32 chars) — together
+  with the layout fix for the *cause* of that overflow (`shrink-0` on a message span in a
+  non-wrapping flex row), owner-approved as scope item 10 work.
+  **Two owner-approved deviations:** `public-footer.tsx` (formally Block A's surface, but it holds 3
+  of the 41 counters, so the acceptance grep cannot reach 0 without it); and the `UploadCategoryInput`
+  layout fix above. A third proposed deviation — widening `StackGap` with `gap-4` — was **withdrawn
+  on the owner's ruling**: no `gap-4` in the tree sits on a `<Stack>`, so `stack.tsx` was never
+  opened and Block A's union is intact.
+  **CO-1 discharged** — the obligation Items 5, 6 and 16 each failed: `pnpm shot` against a
+  production build, 6 routes × 4 widths = **24 captures, `scrollWidth === viewport` at every one**.
+  Because the `(public)` layout's `overflow-x-hidden` *hides* overflow, this was measured rather than
+  eyeballed, and a temporary Playwright harness additionally proved **zero content/fixed-nav overlap
+  at any width** with each page scrolled to the bottom (the nav is fixed only at 320/375). The
+  oversized-file row was exercised end-to-end with a real 5 MB upload at 320px.
+  **The Review Agent earned its keep**: it caught a defect the entire overflow sweep was blind to —
+  `request/page.tsx`'s `<h1>` and `<RequestForm/>` were bare siblings, so the flow-margin removal
+  left them with **no** spacing mechanism at all, measured at **0px**, on the primary conversion
+  route. Fixed to 12px, plus two −4px regressions where a single `Stack` gap had replaced a larger
+  collapsed margin (Location's address→map-links and Home's "see more" link, both restored to 16px).
+  Each fix was re-verified by measuring in a real browser, not by re-reading the diff. A stale
+  measurement almost hid this: the first re-measure returned byte-identical numbers because an old
+  server still held port 3000 — caught by the `EADDRINUSE` in the restart log.
+  `pnpm qg` exit 0 (structure · lint 0 errors · typecheck · 33 files/408 tests · build ·
+  check:metadata).
+  **Codex cross-review: consensus at round 1, NO findings**
+  (`reviews/done/REVIEW_2026-07-26_stage6-item18-blockB-pages-form-spacing.md`). It independently
+  verified the two classes this block's own evidence could not settle: the collapsed-margin
+  arithmetic (adjacent margins collapse to `max(a,b)`, flex gaps sum — no third −4px site beyond the
+  two the Review Agent caught), and the upload row in states never rendered here (transport failure
+  with its extra Retry control, uploading+progress). It also confirmed the 4 MB rejection still fires
+  before `xhrUpload`, so the block stayed presentation-only, and that `en.json` moved exactly one
+  string. Its gates matched. No code changed as a result of the thread, so the gate run above remains
+  valid for the committed tree.
+  **Item 18 is `done`**; task file moved to `tasks/done/`. All completion obligations reconciled:
+  CO-1 discharged here, CO-2/CO-3 already done, **CO-4 (physical-device verification) NOT discharged
+  by design** — headless Chromium at 375px is not an iPhone — and stays tracked in
+  `PROJECT_PRODUCTION_READINESS.md`. **This unblocks Item 13, the FS §6 acceptance sweep that closes
+  Stage 6** — now the stage's only remaining item.
 - **Stage 6 coordination — Stage 7 created, visual pass cut, board reconciled to zero integrity
   errors (STRAT, 2026-07-26).** Picked up from `STAGE_6_STRAT_BRIEF.md`, which listed Item 16 as
   the next actionable item; verified against git that Item 16 had shipped (`fad01c7`) and that the

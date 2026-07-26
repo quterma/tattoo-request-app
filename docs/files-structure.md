@@ -180,6 +180,7 @@ tattoo-request-app/
 │       │       ├── REVIEW_2026-07-26_og-image-build-fix.md
 │       │       ├── REVIEW_2026-07-26_stage6-item16-round2-image-wiring.md
 │       │       ├── REVIEW_2026-07-26_stage6-item18-blockA-tokens-primitives.md
+│       │       ├── REVIEW_2026-07-26_stage6-item18-blockB-pages-form-spacing.md
 │       │       └── REVIEW_2026-07-26_tooling-task-02-playwright-screenshots.md
 │       └── tasks/
 │           ├── META_TASK_01_framework_consolidation.md
@@ -201,6 +202,7 @@ tattoo-request-app/
 │               ├── STAGE_6_TASK_15_prep_aftercare_discovery.md
 │               ├── STAGE_6_TASK_16_placeholder_assets.md
 │               ├── STAGE_6_TASK_17_studio_config_extraction.md
+│               ├── STAGE_6_TASK_18_visual_consistency.md
 │               ├── TOOLING_TASK_01_project_status_command.md
 │               └── TOOLING_TASK_02_playwright_screenshots.md
 ├── public/

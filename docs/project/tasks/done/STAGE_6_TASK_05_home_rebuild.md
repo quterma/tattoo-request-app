@@ -181,7 +181,11 @@ Plus the shared primary CTA at page end (Item 2 component).
   original check lacked now has one too: `TOOLING_TASK_02` adds `playwright` + `pnpm shot`, and
   Item 18's CO-1 requires all six public routes captured at 320/375/768/1280. Home is covered
   there, so this is no longer a deferral with no owner.
-  tracked in: docs/project/tasks/STAGE_6_TASK_18_visual_consistency.md
+  **DISCHARGED 2026-07-26 by Item 18's CO-1.** `/en` was captured at 320/375/768/1280 against a
+  production build and inspected; `scrollWidth === viewport` at every width, and a Playwright
+  harness additionally confirmed no content is overlapped by the fixed bottom nav. Block order and
+  teaser links were verified unchanged. The obligation is complete, not merely re-routed.
+  tracked in: docs/project/tasks/done/STAGE_6_TASK_18_visual_consistency.md
 
 - CO-3 — Featured Work placeholders carry the `__asset_TODO` marker, discoverable via
   `grep -rn __asset_TODO app/ src/`.

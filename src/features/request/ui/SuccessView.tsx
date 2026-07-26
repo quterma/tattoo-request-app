@@ -81,28 +81,28 @@ export function SuccessView() {
       {/* 1. Confirmation — request received, no further action. */}
       <div className="flex flex-col gap-2">
         <h1>{t("success.confirmationTitle")}</h1>
-        <p className="mb-0 text-muted-foreground">{t("success.confirmationBody")}</p>
+        <p className="text-muted-foreground">{t("success.confirmationBody")}</p>
       </div>
 
       {/* 2. Reference code (§4.6). */}
-      <p className="mb-0 font-mono text-sm text-foreground">
+      <p className="font-mono text-sm text-foreground">
         {t("success.referenceCode", { referenceCode: payload.referenceCode })}
       </p>
 
       {/* 3. Response expectation — reply within 48 hours (PRD D5). */}
-      <p className="mb-0 text-foreground">{t("success.responseExpectation")}</p>
+      <p className="text-foreground">{t("success.responseExpectation")}</p>
 
       {/* 4. Reply channel echo — rendered from data (method label + value as entered, unmasked),
           method-agnostic so a future method needs no change here. 5. The A.2 channel note. */}
       <div className="flex flex-col gap-2">
-        <p className="mb-0 text-sm font-medium text-foreground">{t("success.contactEchoTitle")}</p>
+        <p className="text-sm font-medium text-foreground">{t("success.contactEchoTitle")}</p>
         <dl className="flex flex-col gap-1 text-sm">
           <div className="flex flex-wrap gap-x-2">
             <dt className="text-muted-foreground">{methodLabel}:</dt>
-            <dd className="mb-0 text-foreground">{payload.contactValue}</dd>
+            <dd className="text-foreground">{payload.contactValue}</dd>
           </div>
         </dl>
-        {channelNote && <p className="mb-0 text-sm text-muted-foreground">{channelNote}</p>}
+        {channelNote && <p className="text-sm text-muted-foreground">{channelNote}</p>}
       </div>
 
       {/* 6. Single primary CTA — Back to Home (FS §2). */}

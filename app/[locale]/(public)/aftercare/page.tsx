@@ -14,27 +14,27 @@ export default function AftercarePage() {
       ))
 
   return (
-    <Page className="py-4 sm:py-8">
-      <Section className="py-2 sm:py-3">
+    <Page density="tight">
+      <Section density="tight">
         <h1>{t("title")}</h1>
       </Section>
 
-      <Section className="py-2 sm:py-3">
-        <p className="mb-0 text-muted-foreground">{t("intro")}</p>
+      <Section density="tight">
+        <p className="text-muted-foreground">{t("intro")}</p>
       </Section>
 
-      <Section className="py-2 sm:py-3">
+      <Section density="tight">
         <Stack gap="gap-1.5">
-          <h2 className="mb-1">{t("aftercareInstructions")}</h2>
+          <h2>{t("aftercareInstructions")}</h2>
           <ul className="list-disc ps-5">
             {bullets("aftercareInstructionsItems")}
           </ul>
         </Stack>
       </Section>
 
-      <Section className="py-2 sm:py-3">
+      <Section density="tight">
         <Stack gap="gap-1.5">
-          <h2 className="mb-1">{t("healingTouchUps")}</h2>
+          <h2>{t("healingTouchUps")}</h2>
           <ul className="list-disc ps-5">{bullets("healingTouchUpsItems")}</ul>
         </Stack>
       </Section>

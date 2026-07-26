@@ -201,7 +201,11 @@ Plus the existing primary CTA at the end of the page (Item 2's shared component)
   and checked at 320/375/768/1280. This obligation was one of three (Items 5, 6, 16) that closed
   with the identical "no headless-browser tool exists here" sentence; that gap is what
   `TOOLING_TASK_02` was created to end.
-  tracked in: docs/project/tasks/STAGE_6_TASK_18_visual_consistency.md
+  **DISCHARGED 2026-07-26 by Item 18's CO-1.** `/en/process` and `/en/request` were captured at
+  320/375/768/1280 against a production build and inspected; `scrollWidth === viewport` at every
+  width — no mobile-viewport truncation — and no content is overlapped by the fixed bottom nav.
+  Disposition: completed. The obligation is complete, not merely re-routed.
+  tracked in: docs/project/tasks/done/STAGE_6_TASK_18_visual_consistency.md
 - CO-3 — Owner + artist review of the shipped page (they will re-read the live copy; this task ships
   the approved text, it does not pre-empt their final wording pass). Disposition: OPEN — owner.
   **Given a canonical home 2026-07-26 by STRAT:** this is a genuine owner action, not IMPL work, so

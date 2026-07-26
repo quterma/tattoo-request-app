@@ -263,7 +263,7 @@
       "instagramInvalid": "Please enter a valid Instagram handle (letters, numbers, dots, underscores)",
       "telegramInvalid": "Please enter a valid Telegram username (5–32 letters, numbers or underscores, not starting with a number)",
       "uploadTypeInvalid": "Only JPG, PNG, WEBP, HEIC/HEIF images are allowed",
-      "uploadTooLarge": "This image is over 4 MB. Please use a smaller one — a screenshot usually works.",
+      "uploadTooLarge": "Over 4 MB — use a smaller image.",
       "uploadTooMany": "Too many images. Please remove some and try again.",
       "uploadExpired": "Your images timed out while the form was open. Press Retry on each one, then send again — nothing else you typed was lost.",
       "uploadInvalid": "Your images could not be attached. Press Retry on each one, then send again — nothing else you typed was lost.",

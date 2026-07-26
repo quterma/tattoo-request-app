@@ -129,6 +129,9 @@ export function UploadCategoryInput({
     removeSlot(slot.slotId)
   }
 
+  /* The message span below is shrinkable (no `shrink-0`) and carries `min-w-0`, so a long error
+     wraps inside the row instead of pushing the remove control past the right edge on a narrow
+     screen; `ms-auto` keeps that control flush right regardless of the message's length. */
   const fileList =
     slots.length > 0 ? (
       <ul className="flex flex-col gap-2">
@@ -153,7 +156,7 @@ export function UploadCategoryInput({
             )}
             {slot.status === "failed" && (
               <>
-                <span className="shrink-0 text-destructive" role="alert">
+                <span className="min-w-0 text-destructive" role="alert">
                   {errorMessage(slot.errorKey ?? K.UPLOAD_INVALID)}
                 </span>
                 {/* Retry only for a transport failure (network/server) — a validation
@@ -174,7 +177,7 @@ export function UploadCategoryInput({
               type="button"
               onClick={() => handleRemove(slot)}
               aria-label={removeFileLabel(slot.fileName)}
-              className="shrink-0 text-destructive hover:underline"
+              className="ms-auto shrink-0 text-destructive hover:underline"
             >
               &times;
             </button>

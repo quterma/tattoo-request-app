@@ -93,6 +93,15 @@ latter case restoring the two links is a one-line change and needs no test.
   `tasks/STAGE_6_TASK_18_visual_consistency.md` and carries this as scope item 11 — the single copy
   change that task is permitted to make, pre-approved by this entry. The executor confirms the
   final wording with the owner at plan time.
+  **DISCHARGED 2026-07-26 (IMPL, Item 18 Block B).** Wording confirmed with the owner at plan time
+  and shipped: **"Over 4 MB — use a smaller image."** (78 → 32 chars). The "a screenshot usually
+  works" hint was dropped, per the leaning recorded above. Behavior untouched — the 4 MB rejection
+  is FS §4.3 and is unchanged. The *cause* of the overflow was also fixed, which this entry had
+  mis-attributed to copy length alone: the message span carried `shrink-0` inside a non-wrapping
+  flex row, so it could never wrap or compress at any width and pushed the remove control off-screen
+  regardless of string length. The span is now shrinkable and the remove control carries `ms-auto`.
+  Verified by rendering the real form at 320px with a 5 MB upload: the message fits on one line and
+  the `×` sits inside the row edge.
 
 ---
 
@@ -461,6 +470,14 @@ caused this gap in the first place is delivered by
 `tasks/TOOLING_TASK_02_playwright_screenshots.md` (`playwright` + `pnpm shot`). Item 6's identical
 CO-2 half is routed to the same place. This entry stays as the record of the gap; the work now
 lives on the task.
+
+**DISCHARGED 2026-07-26 (IMPL, Item 18 Block B — CO-1).** `/en` was captured and inspected at
+320/375/768/1280 along with the other five public routes (24 captures), against a production build.
+`scrollWidth === viewport` at every width — nothing clips or overflows — and a Playwright harness
+additionally confirmed no content is overlapped by the fixed bottom nav at any width. Block order
+and teaser links were unaffected by the block (no JSX reordering; verified in the diff). The
+headless-browser gap that produced this entry no longer exists. **Item 6's identical CO-2 half is
+discharged by the same sweep.** Kept as the historical record of the gap and how it closed.
 
 ---
 
