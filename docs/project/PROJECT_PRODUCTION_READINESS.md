@@ -427,7 +427,11 @@ grep -rn "__meta_TODO\|__intro_TODO\|__asset_TODO" app/ src/ public/
 - `__asset_TODO` — placeholder visual assets, all owner-generated in ChatGPT: 4 Home Featured Work
   images (`public/images/featured-*.jpg`), 3 Location studio-interior images
   (`public/images/studio-*.jpg`), the favicon (`app/icon.svg`, hand-vectorized from the generated
-  concept, marker in the SVG itself), and the OG image (`app/[locale]/opengraph-image.jpg` — the
+  concept, marker in the SVG itself), and the OG image (`app/opengraph-image.jpg` — **moved out of
+  `app/[locale]/` on 2026-07-26 to fix a Vercel build failure; see PROJECT_DECISIONS.md — "OG image
+  lives at the app root with an explicit descriptor". Its dimensions are now also declared
+  explicitly in `app/[locale]/layout.tsx`, so the pre-deploy swap must update that descriptor if the
+  replacement is not 1200×630** — the
   marker lives in `app/[locale]/layout.tsx` instead, since a binary JPEG can't carry a comment) —
   nine wired 2026-07-26 by Item 16 Round 2 — **plus the Home hero background
   (`public/images/hero.jpg`), wired 2026-07-26 by Item 18 (marker in

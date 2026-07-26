@@ -34,6 +34,89 @@ Status: effectively adopted in this project (PROJECT_STRUCTURE.md Dependency Dir
 `import/no-internal-modules` at error level) — candidate to formalize in the framework master
 copy.
 
+## Ban `git push` outright, and name push as a distinct permission from commit
+
+**Filed 2026-07-26 by the IMPL session for Stage 6 Item 18, against its own breach. Owner ruling
+already given — this entry exists to get it into the framework docs, not to re-open it.**
+
+### Title
+
+`git push` is owner-only and must be forbidden to every agent; CLAUDE.md must stop treating commit
+approval as covering it.
+
+### Description
+
+What happened: this session finished Item 18 Block A, committed with per-commit owner approval, then
+**offered to push and pushed after the owner said "да"**. The owner's ruling afterwards: pushing is
+theirs alone, and it is now prohibited outright. The push triggered a Vercel deployment, which
+failed — so the breach had an immediate external consequence.
+
+The documented gap, verified in the tree at the time of filing:
+
+- `grep -in "push" .claude/CLAUDE.md` → **zero matches.** CLAUDE.md's git rules are entirely about
+  commits: "Commits ONLY with explicit, manual owner approval", the do-not-stage-early rule, the
+  commit-only-your-own-paths rule. Nothing about publishing.
+- `grep -rin "push" docs/framework/*.md` → **zero matches.** No framework document mentions it
+  either.
+- `AGENTS.md:25` → "**Never run `git commit`, `git push`, or any state-changing git command**" —
+  binding on **Codex**.
+
+So the repository already forbids push to its *read-only reviewer*, and says nothing to the agent
+that actually commits. The stricter rule sits on the less privileged party.
+
+Proposed changes:
+
+1. **CLAUDE.md — a `Never push` rule, parallel to the commit rule and independent of it.** Explicitly:
+   no `git push` in any form (including `--force`, `--tags`, `-u`, or a push implied by another
+   command), in every session type, and **approval of a commit never implies approval to publish it**.
+2. **State the asymmetry as the reason**, so the rule survives paraphrase: a commit is local and
+   revisable (`reset`, `amend`, `rebase` before publishing); a push is **irreversible and outward-
+   facing** — it leaves the machine, reaches a remote others consume, and here it triggers a
+   deployment. The two are different acts with different blast radii and must not share one
+   permission.
+3. **A general principle worth extracting beyond git**: for an action that is irreversible or
+   outward-facing, **silence in the rules is not permission**. The failure here was not
+   "disobeyed a rule" — no rule existed — it was treating an unregulated, externally-visible action
+   as merely needing a question. Candidate home: AI_DEVELOPMENT_RULES.md or AI_TASK_PROTOCOL.md.
+4. **Consider whether the agent may offer to push at all.** This breach began as *the agent's own
+   suggestion*, which the owner then approved. A rule the agent can route around by proposing the
+   action makes the owner the backstop instead of the decider. Cleanest form: the agent may
+   **report** that the branch is ahead of its remote, and must not offer to close that gap.
+
+### Motivation
+
+- The rule that was missing is the one guarding the **only irreversible git action available**.
+  Everything CLAUDE.md carefully protects — staging discipline, per-commit approval, no `git add -A`
+  — governs work that stays local and can be redone. Push cannot.
+- **It fired on the first occasion it could have.** This is not a hypothetical.
+- The **real-world cost landed immediately**: a failed Vercel deploy the owner now has to
+  investigate, caused by a publish they had not initiated.
+- The **Codex asymmetry is evidence the omission was accidental, not deliberate**: nobody decided
+  Claude Code may push; the prohibition was simply written in the document that happens to govern the
+  other agent.
+- The general principle in (3) likely has siblings this session did not hit — anything that leaves
+  the machine (opening a PR, publishing a package, calling an external API that writes, triggering a
+  deploy) sits in the same category and is equally unregulated today.
+
+### Possible risks or trade-offs
+
+- **A blanket ban makes the owner the only route to the remote.** That is exactly the owner's
+  stated intent, and the cost is real but small at this project's cadence: work accumulates locally
+  until the owner publishes it. The mitigation is (4)'s reporting duty — the agent says the branch is
+  N commits ahead so the gap is never invisible, without offering to close it.
+- **Risk of the rule being read too narrowly.** A ban phrased as "do not run `git push`" invites
+  literal compliance via a wrapper script, an alias, a `gh` command, or a CI trigger. It should be
+  phrased by *effect* — do not cause local commits to reach a remote by any means — not by command
+  name.
+- **(3) is broader than this incident and should not be smuggled in.** Extracting a general
+  "silence ≠ permission for irreversible actions" principle is a genuine framework change with wide
+  reach; it deserves its own META judgment rather than riding along with a specific git ban. (1) and
+  (2) are narrow, immediate, and independently justified — they can land first.
+- **Discoverability of the reason matters more than the rule.** The reason this was violable is that
+  CLAUDE.md's git section reads as being *about commits*, so an agent reasoning by analogy concludes
+  push is an unlisted neighbour rather than a separate, harder-line act. The fix must break that
+  reading explicitly, not merely append a bullet to the same list.
+
 ## Implementation plans as executable step sequences
 
 Description: implementation plans must be executable step sequences, not descriptive documents.

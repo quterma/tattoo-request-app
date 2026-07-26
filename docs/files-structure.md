@@ -23,17 +23,14 @@ tattoo-request-app/
 │   └── settings.json
 ├── .husky/
 │   └── pre-commit
-├── "temp/
-│   └── ChatGPT Image 26 \320\270\321\216\320\273. 2026 \320\263., 18_07_20.png"
 ├── app/
 │   ├── globals.css
 │   ├── icon.svg
 │   ├── layout.tsx
 │   ├── not-found.tsx
+│   ├── opengraph-image.jpg
 │   ├── [locale]/
 │   │   ├── layout.tsx
-│   │   ├── opengraph-image.alt.txt
-│   │   ├── opengraph-image.jpg
 │   │   ├── (admin)/
 │   │   │   └── admin/
 │   │   │       ├── (protected)/
@@ -135,6 +132,9 @@ tattoo-request-app/
 │       ├── STAGE_6_PRODUCT_DEFINITION.md
 │       ├── research/
 │       │   ├── .gitkeep
+│       │   ├── RESEARCH_2026-07-26_vercel-og-image-invariant.answer.md
+│       │   ├── RESEARCH_2026-07-26_vercel-og-image-invariant.md
+│       │   ├── RESEARCH_2026-07-26_vercel-og-image-invariant.request.md
 │       │   └── done/
 │       │       ├── .gitkeep
 │       │       ├── RESEARCH_2026-07-14_deferred-actions-and-review-granularity.md
@@ -213,6 +213,7 @@ tattoo-request-app/
 │       ├── studio-2.jpg
 │       └── studio-3.jpg
 ├── scripts/
+│   ├── check-metadata-routes.mjs
 │   ├── project-status.mjs
 │   ├── screenshots.mjs
 │   ├── update-structure.mjs

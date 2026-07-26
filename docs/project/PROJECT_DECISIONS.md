@@ -2635,6 +2635,84 @@ Fixing it requires either a font change (out of Item 18's scope) or an edit to
 
 ---
 
+# OG image lives at the app root with an explicit descriptor — decided 2026-07-26
+
+## The problem
+
+The first deployment of `main` after Item 18 failed at build:
+
+```
+Invariant: failed to find source route /[locale]/opengraph-image.jpg
+  for prerender /[locale]/opengraph-image.jpg
+```
+
+`app/[locale]/opengraph-image.jpg` — a file-based **static** metadata asset — sat inside the
+**dynamic `[locale]` segment**. Next could not resolve the segment for a build-time prerender, so it
+registered the route unresolved, printed it as `/-/opengraph-image.jpg`, and omitted it from the
+prerender manifest. Vercel's build adapter then failed on the missing parent route (`E777`).
+
+**The defect was present locally and silent.** `pnpm build` exited 0; the only symptom was the
+literal `-` in the route table. The error lives in `next/dist/build/adapter/build-complete.js` — the
+adapter Vercel runs *after* `next build` — which local builds never invoke. `pnpm qg` was green on a
+tree that could not deploy.
+
+## The decision
+
+**Keep static metadata assets at the app root, and declare `openGraph.images` explicitly.**
+
+- `app/opengraph-image.jpg` (moved out of `[locale]`).
+- An explicit `images` descriptor in `app/[locale]/layout.tsx`'s `generateMetadata` — url, type,
+  width, height, alt — with the alt text in `en.json` as `app.ogImageAlt`.
+- `opengraph-image.alt.txt` deleted: verified redundant once `images` is explicit.
+
+## Why explicit `images` is required, not optional
+
+Moving the file alone **fixes the build and breaks the tag.** Next's `mergeStaticMetadata` injects a
+file-based OG image only at the metadata level whose `openGraph` does not already own an `images`
+property — and the `[locale]` layout supplies its own `openGraph` object, which replaces the root's
+as a unit rather than deep-merging. So with the file at the root and no explicit descriptor, `/en`
+emits **no `og:image` at all**. Measured, not assumed.
+
+The explicit descriptor turned out to be **strictly better than the convention it replaces**:
+
+| tag | file under `[locale]` | root + explicit descriptor |
+| --- | --- | --- |
+| `og:image` / `:type` / `:width` | present | present |
+| `og:image:height` | **absent** | 630 |
+| `og:image:alt` | **absent** | present |
+
+Cost, accepted: the values are now duplicated in source and must be kept in sync when the asset is
+replaced (it is an `__asset_TODO` placeholder). The pre-deploy swap must update the descriptor if
+dimensions change.
+
+## The guard that makes this stick
+
+`scripts/check-metadata-routes.mjs`, wired into `pnpm qg` as `pnpm check:metadata` after `build`.
+It reads build output only — no server, no browser, no network — so `pnpm qg` stays headless-free
+per the "Named browser capability" decision. It asserts that every required static metadata route is
+in the prerender manifest, has its `.body` artifact, and that no manifest entry carries the `/-/`
+placeholder.
+
+**Verified by reintroducing the bug**: with the JPEG moved back under `[locale]`, `next build` exits
+**0** and the gate exits **1**. That negative test is the point — the failure class here was
+precisely that a green local build certified an undeployable tree.
+
+## Constraint for the future
+
+This **routes around** a Next 16.2.10 defect rather than repairing it; the exact internal point
+where the locale param is lost was not identified. Consequences:
+
+- **If a second locale is ever added**, one root-level OG image stops being correct and this
+  arrangement must be revisited — not extended.
+- The same structural risk applies to every physical static metadata asset: `icon`, `apple-icon`,
+  `twitter-image`, `robots.txt`, `sitemap.xml`, `manifest.webmanifest`. Keep them at the app root
+  unless a build **and** deploy proof exists. `app/icon.svg` is already correct.
+
+Full investigation, including the three fixes that did not work:
+`docs/project/research/done/RESEARCH_2026-07-26_vercel-og-image-invariant.md`.
+
+---
+
 # Rule for Future Changes
 
 All architectural, product, or behavioral decisions MUST be recorded in this document.

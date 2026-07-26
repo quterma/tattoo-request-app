@@ -46,6 +46,15 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: studio.name,
       type: "website",
       locale: "en_US",
+      images: [
+        {
+          url: "/opengraph-image.jpg",
+          type: "image/jpeg",
+          width: 1200,
+          height: 630,
+          alt: t("ogImageAlt"),
+        },
+      ],
     },
     // INTERIM __meta_TODO: noindex until public launch. The app IS deployed for controlled
     // verification (PROJECT_DECISIONS.md §C — deployed, not publicly launched), but Home
