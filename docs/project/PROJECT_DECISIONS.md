@@ -2697,6 +2697,13 @@ placeholder.
 **0** and the gate exits **1**. That negative test is the point — the failure class here was
 precisely that a green local build certified an undeployable tree.
 
+**What this evidence does and does not establish.** The failing component is Vercel's
+post-`next build` adapter, and it cannot be run here. Everything above verifies the **manifest
+precondition** the adapter reads — resolved route, prerender-manifest membership, `.body` artifact,
+no `/-/` placeholder — not the adapter's own success. So this is a repo-verified fix for the known
+precondition, **not proof that the external build passes**. The next real Vercel deployment is the
+required closure evidence (cross-review 2026-07-26, finding 2).
+
 ## Constraint for the future
 
 This **routes around** a Next 16.2.10 defect rather than repairing it; the exact internal point
@@ -2709,7 +2716,8 @@ where the locale param is lost was not identified. Consequences:
   unless a build **and** deploy proof exists. `app/icon.svg` is already correct.
 
 Full investigation, including the three fixes that did not work:
-`docs/project/research/done/RESEARCH_2026-07-26_vercel-og-image-invariant.md`.
+`docs/project/research/RESEARCH_2026-07-26_vercel-og-image-invariant.md` (moves to
+`research/done/` when the thread closes).
 
 ---
 

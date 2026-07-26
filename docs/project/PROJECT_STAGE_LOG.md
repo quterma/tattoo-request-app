@@ -1015,6 +1015,11 @@ reintroducing the bug**: `next build` exits 0, the gate exits 1. Every claim fro
 was re-verified locally before acting — the thread's own warning was that a plausible-but-wrong
 mechanism had already cost three failed fixes.
 
+**Status of the fix is "repo-verified", not "deploy-verified".** Vercel's adapter cannot be run
+here, so what is proven is the manifest precondition it reads, not the adapter's success. **The next
+real deployment is the required closure evidence** — until it passes, the fix should not be
+described as confirmed (cross-review 2026-07-26, finding 2).
+
 **Carried forward:** this routes around a Next 16.2.10 defect rather than repairing it; the exact
 internal point where the locale param is lost is unidentified. If a second locale is ever added, one
 root-level OG image stops being correct and the arrangement must be revisited. The same structural

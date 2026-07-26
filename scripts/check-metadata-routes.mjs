@@ -14,7 +14,7 @@ import { fileURLToPath } from "node:url"
  * `Invariant: failed to find source route ... (E777)`.
  *
  * This happened on 2026-07-26 and broke a deploy. See
- * `docs/project/research/done/RESEARCH_2026-07-26_vercel-og-image-invariant.md`.
+ * `docs/project/research/RESEARCH_2026-07-26_vercel-og-image-invariant.md`.
  *
  * The check reads only build output — no browser, no server, no network — so it stays inside
  * `pnpm qg`'s headless-free contract.
@@ -100,7 +100,7 @@ function main() {
     }
     console.error(
       "\nThis tree builds locally but will fail to deploy. See " +
-        "docs/project/research/done/RESEARCH_2026-07-26_vercel-og-image-invariant.md",
+        "docs/project/research/RESEARCH_2026-07-26_vercel-og-image-invariant.md",
     )
     process.exit(1)
   }

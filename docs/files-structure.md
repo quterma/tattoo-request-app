@@ -148,6 +148,7 @@ tattoo-request-app/
 │       │       └── RESEARCH_2026-07-25_review-round-economics.md
 │       ├── reviews/
 │       │   ├── .gitkeep
+│       │   ├── REVIEW_2026-07-26_og-image-build-fix.md
 │       │   └── done/
 │       │       ├── .gitkeep
 │       │       ├── REVIEW_2026-07-13_codex-delegation-invocation.md
