@@ -950,26 +950,54 @@ Post-Launch Roadmap, and its scope had absorbed both consistency work and visual
 them lets Stage 6 close on objectively checkable criteria while the design work waits for the
 input it actually needs.
 
-Stage 7 begins only after Stage 6 closes (FS §6 acceptance sweep, Item 13) **and** the owner's
-real photography and curated portfolio work exist. Designing against the AI placeholders currently
-in the tree would have to be redone once real images land — that is the whole reason this stage is
-separate.
+**Entry condition amended 2026-07-27 (owner decision), and the stage split in two.** The original
+condition — "begins only after real photography exists" — was written on the assumption that
+designing against placeholders means redoing the work. That is true of **art direction** and false
+of the **visual system**: a palette, a type scale, a spacing rhythm, tap-target sizes and the
+layout language do not depend on which photograph sits in a slot. Blocking all of it on a
+photoshoot that is weeks out would idle the stage for no benefit.
+
+- **Stage 7A — Visual system. Starts now**, against the existing placeholders. Everything that a
+  later image swap cannot invalidate.
+- **Stage 7B — Art direction on real content.** Starts when the owner's real photography and
+  curated portfolio work exist. Everything whose correctness depends on the actual images.
+
+The placeholders are already built to be swapped: all 10 carry an `__asset_TODO` marker and the
+slots are fixed (aspect ratio, `sizes`, `fill`), so 7B replaces files inside a settled layout
+rather than redesigning around them. **Stage 7 closes when 7B closes** — 7A alone does not close
+the stage, because the `__asset_TODO` exit criterion below is 7B's.
 
 **Scope confirmed and widened by owner decision 2026-07-27**, at Stage 6 closure: everything visual
 lands here, and everything about servers, deployment and release moves to the new **Stage 8** below.
 The two lists were previously entangled under "pre-launch".
 
-Scope:
+Scope (each item tagged **[7A]** = runs now, or **[7B]** = waits for real images):
 
-- **Real photography and curated portfolio work replace all 10 `__asset_TODO` placeholders** —
+- **[7B] Real photography and curated portfolio work replace all 10 `__asset_TODO` placeholders** —
   4 Home Featured Work, 3 Location studio interiors, the favicon, the OG image, the Home hero.
   Owner decision 2026-07-27: this is **visual work, not a deploy chore**, so it belongs here rather
   than in the release stage. It also discharges Item 16's accepted risk — AI-generated
   "tattoo-like" artwork must never reach public launch, where it would present non-existent work as
   the artist's. Marker inventory and the canonical grep: PROJECT_PRODUCTION_READINESS.md —
   Pre-Deploy Content Swaps.
-- visual identity: colour palette, typography (the site currently ships the system font stack),
+- **[7A]** visual identity: colour palette, typography (the site currently ships the system font stack),
   and the layout language across the public website
+  - **Two Stage 6 values are load-bearing accessibility constraints, not aesthetic leftovers. A new
+    palette or type scale must clear both, and neither may be "simplified away" without replacing
+    the property it holds.** Full record: PROJECT_DECISIONS.md — "Two values deliberately NOT
+    converged" and the Item 18 Block A entry. Stated here, not only there, because a planner
+    reading this section alone would otherwise not know they exist — the exact failure mode of the
+    Item 13 C10 episode, where an interpretation living only in the decision log let a later reader
+    derive a false conclusion from the spec.
+    - **Link and focus are `#2563eb`, and that is the site's *only* focus indicator** — no
+      `focus-visible:` class exists in any TSX. The shadcn palette is achromatic, so converging on
+      it means a grey ring at **2.32:1** on white, below WCAG 2.2 SC 1.4.11's 3:1 minimum; the blue
+      is 5.17:1. A new palette may change the hue, but must keep a focus indicator at ≥3:1 against
+      every background it appears on.
+    - **The heading scale is a rem-breakpoint step, not `clamp()`.** A `vw` term shrinks as the
+      layout viewport shrinks under browser zoom, so `clamp()`-sized text reached only ~186% at 200%
+      zoom (WCAG SC 1.4.4). Any new type scale must still resize to 200%; verify it rather than
+      assume, since this was caught only by measurement.
   - **Geist is downloaded on every visit and never rendered** (found 2026-07-26, Item 18 Block A):
     `next/font/google` loads it and `@theme` maps `--font-sans`, but `body` uses the system stack
     and `font-sans` appears nowhere in the TSX. Either adopt it or remove the download — leaving it
@@ -983,12 +1011,12 @@ Scope:
     that a typography pass naturally absorbs: extracting `SectionTitle`/`SectionText`/`BulletList`,
     and replacing `split("\n")` in i18n with string arrays. Neither is required; both are cheapest
     to do while the same files are open.
-- art direction for real photography and curated portfolio work, including whether desktop needs
+- **[7B]** art direction for real photography and curated portfolio work, including whether desktop needs
   different treatment from the mobile-first single-image-per-slot approach Item 16 shipped
   (PROJECT_BACKLOG.md — "Desktop art direction for placeholder images")
-- admin interface polish, including mobile polish (spacing, touch targets, scroll behavior) and the
+- **[7A]** admin interface polish, including mobile polish (spacing, touch targets, scroll behavior) and the
   two-column card grid candidate noted 2026-07-03 — carried here from Stage 6
-- **public-site tap-target heights — measured 2026-07-27 by Item 13's mobile QA**, so Stage 7 starts
+- **[7A] public-site tap-target heights — measured 2026-07-27 by Item 13's mobile QA**, so Stage 7 starts
   from numbers rather than an impression. Every interactive element is ≥44px **wide**, but several
   fall short in **height** at all four widths (320/375/768/1280): **primary nav links 28px** — the
   fixed bottom bar on mobile, i.e. the main navigation on the primary surface; Process FAQ's
@@ -996,15 +1024,15 @@ Scope:
   Location/Preparation/Aftercare **16×16px**; `<select>` controls on `/request` **39px**. None of this
   blocked Stage 6 — no FS §6 criterion mentions tap-target size — and headless Chromium measures CSS
   boxes, not fingers, so the physical-device check remains the instrument that settles it.
-- accessibility beyond the contrast/readability fixes Stage 6 Item 18 makes
-- **physical mobile-device verification** — the checks no tool in this repository can perform, since
+- **[7A]** accessibility beyond the contrast/readability fixes Stage 6 Item 18 makes
+- **[7B] physical mobile-device verification** — deliberately 7B: running it on placeholders and again on real content is the same check twice, and only the second one counts. These are the checks no tool in this repository can perform, since
   headless Chromium measures CSS boxes, not fingers: the Stage 4B.5.1 admin image-viewer gestures
   (pinch zoom, pan, double tap, swipe, backdrop tap, rotation — also gating
   `controller.closeOnPullDown`), the favicon in a real browser tab (light and dark chrome, Item 16
   CO-2), and the tap-target findings above on an actual phone.
-- **Show/Hide password toggle** on the admin login/reset forms (PROJECT_BACKLOG.md) — admin UI
+- **[7A] Show/Hide password toggle** on the admin login/reset forms (PROJECT_BACKLOG.md) — admin UI
   polish, folded in with the admin surfaces above rather than kept as a floating item.
-- **The artist's own copy pass over the live site** (Stage 6 Item 6, CO-3 — open by design since
+- **[7A] The artist's own copy pass over the live site** (Stage 6 Item 6, CO-3 — open by design since
   2026-07-24). The shipped copy is research-derived and owner-approved, but never read by the artist
   herself. Routed here by owner decision 2026-07-27 rather than to Stage 8: she is already looking
   at the site during this stage for photography and art direction, and **a copy change alters text
@@ -1018,12 +1046,20 @@ is FS-governed and settled in Stage 6. A Stage 7 change that alters behavior nee
 amendment first (PRD §9 Change Control), exactly as in Stage 6. **Servers, deployment, CI/CD,
 security review and the release itself are Stage 8**, not here.
 
-Exit Criteria:
+Exit Criteria (all four close **Stage 7**; 7A alone does not close it):
 
-- visual and interaction quality is consistently high across all surfaces
-- mobile experience is polished, verified on at least one physical iOS and one physical Android device
-- no `__asset_TODO` placeholder remains — `grep -rn "__asset_TODO" app/ src/ public/` returns zero
-- no regressions in core flows
+- visual and interaction quality is consistently high across all surfaces — **7A**
+- no regressions in core flows — **7A**
+- no `__asset_TODO` placeholder remains — `grep -rn "__asset_TODO" app/ src/ public/` returns zero — **7B**
+- mobile experience is polished, verified on at least one physical iOS and one physical Android
+  device, on final content — **7B**
+
+**Stage 7A needs a recorded design direction before any item can be cut.** Stage 6 had a PRD and an
+FS; Stage 7 has neither, and "visual quality is consistently high" is not a criterion an executing
+session can check itself against. Without a written direction — the palette, the type scale, the
+spacing rhythm, the tap-target floor — every IMPL session re-litigates taste, and every review
+becomes an argument rather than a check. Producing that document, with the owner, is the first
+STRAT session's job; it is Stage 7's equivalent of the FS, not a formality.
 
 Result:
 

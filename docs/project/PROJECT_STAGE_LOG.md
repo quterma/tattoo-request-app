@@ -16,9 +16,12 @@ Stage: **Stage 6 — Product Experience Polish is CLOSED (2026-07-27, owner deci
 done; FS §6 verifies 13/13 on Item 13's acceptance sweep, whose verdict reached consensus on a clean
 round 6 of an independent cross-review. Stage 5 — Production Hardening — closed.
 
-**Next: Stage 7 — Visual Design** (real photography and portfolio work replacing all 10
-`__asset_TODO` placeholders, visual identity, the measured tap-target heights, admin polish,
-physical-device verification, the artist's own copy pass), then **Stage 8 — Pre-Release and Launch**
+**Current: Stage 7 — Visual Design, phase 7A** (started 2026-07-27). **Split 7A/7B by owner decision
+2026-07-27**, reversing the entry condition written the day before: the stage no longer waits for
+real photography. A palette, type scale, spacing rhythm and tap-target sizes do not depend on which
+image sits in a slot, so **7A (the visual system) runs now against the placeholders**; **7B (art
+direction on real content, the 10 `__asset_TODO` swaps, physical-device verification) waits for the
+photoshoot**. Stage 7 closes when 7B closes. Then **Stage 8 — Pre-Release and Launch**
 (platform/environment decisions, the Item 10 CO-4 operational blocker, security review, CI/CD — and
 the release itself as its final step). Both are **scope lists, not plans**: each needs its own STRAT
 planning pass before execution, exactly as Stage 6 did. See PROJECT_IMPLEMENTATION_PLAN.md and
