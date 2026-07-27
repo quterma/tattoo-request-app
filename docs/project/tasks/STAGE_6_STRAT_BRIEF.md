@@ -88,12 +88,11 @@ that had shipped). Run `pnpm project:status` for live task state.
 
 - **Done:** Items 1–12, 14, 15, 16, 17 — every task file in `tasks/done/`. Plus
   `TOOLING_TASK_02` (`599069f`).
-- **Open:** `tasks/STAGE_6_TASK_18_visual_consistency.md` — `in progress`. Block A committed; the
-  hero (scope item 9) shipped out of order. **Block B's remainder is the next executable work:**
-  scope item **5** (flow-margin removal + the 41 `mb-*` counters — **must be step 1**, and the
-  reason the task cannot close), **7** (call-site migration to the density variants), **8**
-  (request-form UI), **10** (the CO-1 sweep at four widths), **11** (oversized-file copy).
-  Do not re-plan Block A or the hero.
+- **Item 18 done** (`43aa0da` Block A, `5a406bd` hero, `4a60585` Block B). Verified against the
+  tree, not the report: 41 `mb-*` counters → **0**, flow margins → **0**, `py-*` overrides on
+  `Page`/`Section` in `(public)/` → **0**, `__asset_TODO` → **10**, exactly one copy string changed.
+- **Open:** `tasks/STAGE_6_TASK_13_acceptance_sweep.md` — `ready`, cut 2026-07-27. **The only open
+  task in the project, and it closes the stage.**
 - **Not cut yet:** Item 13 — deliberately last, see below.
 
 ## Decided (2026-07-26 — this session)
@@ -130,20 +129,26 @@ Both recorded in PROJECT_DECISIONS.md; not restated here.
 
 ## Next topic
 
-**Coordinate the remaining three, one at a time.** Never two sessions on the same files — Item 18's
-two blocks overlap each other and Item 13 reads the whole public surface (standing hazard: `df70cae`,
-and Item 8's `en.json` swept into `94ef19b`).
+**One task left in the whole project: run Item 13.** It is cut, `ready`, and closes the stage.
 
 1. ~~`TOOLING_TASK_02`~~ — **done** (`599069f`).
-2. ~~Item 18, Block A~~ — **done** (`43aa0da`). ~~Hero~~ — **done** (`5a406bd`). **Block B's
-   remainder** is next: scope items 5, 7, 8, 10, 11 (list above). Step 1 is the flow-margin removal
-   Block A deliberately deferred — it must be atomic with the 41 `mb-*` counters, because removing
-   the base rules alone collapses spacing on 5 of 6 public routes ("broken", not "transitional").
-   One owner approval, one cross-review thread, **3-round cap**. No owner asset action pending.
-3. **Item 13** — cut the task file, then run it. When cutting, fold in the two things already filed
-   as natural companions: the **Item 17 pre-release re-review** (its cross-review exited at 9 rounds
-   by owner decision, not on a clean round — PROJECT_BACKLOG.md) and confirmation that the
-   `__asset_TODO` sweep fails as designed while the ten placeholders remain.
+2. ~~Item 18~~ — **done** in full (`43aa0da`, `5a406bd`, `4a60585`), both blocks at consensus in
+   one round each.
+3. **Item 13** (`tasks/STAGE_6_TASK_13_acceptance_sweep.md`) — Opus, Plan mode. It folds in the
+   **Item 17 pre-release re-review** (PROJECT_BACKLOG.md — its cross-review exited at 9 rounds by
+   owner decision, not on a clean round) and verifies that the `__asset_TODO` sweep fails as
+   designed while the ten placeholders remain.
+
+**The one thing a reader of this brief must not get wrong** (recorded in the task file, repeated
+here because the older framing is still quoted in several places): the placeholder sweep is a
+**launch** gate, **not** a stage-closure gate. None of FS §6's thirteen criteria mentions assets,
+and making real photography a closure condition would deadlock Stage 6 against Stage 7 — which
+runs *after* Stage 6 closes and *against* that same photography. Item 16's accepted risk (generated
+artwork must never reach launch) is protected where launch gates live:
+PROJECT_PRODUCTION_READINESS.md — Owner Pre-Release Actions.
+
+**After Item 13:** the owner closes Stage 6 (the task recommends, it does not close), then the
+pre-release debts and Stage 7.
 
 ### Pre-deploy swaps to track
 
