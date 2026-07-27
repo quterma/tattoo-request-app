@@ -43,6 +43,12 @@ file may contradict these without first escalating a PRD/FS/blueprint change.
 
 ## Items
 
+> **STAGE 6 CLOSED 2026-07-27 — all 19 items done.** This document is now history: a record of what
+> was built and why, not a live board. FS §6 verified 13/13 (Item 13's sweep, cross-review consensus
+> on a clean round 6). Remaining work lives in **Stage 7 — Visual Design** and **Stage 8 —
+> Pre-Release and Launch** (PROJECT_IMPLEMENTATION_PLAN.md); each will get its own plan document
+> when its first STRAT session runs. Closing this stage is **not** a launch-readiness claim.
+
 | # | Item | Depends on | Status | Blueprint ref |
 | --- | --- | --- | --- | --- |
 | 1 | Upload-flow architecture (endpoint/auth model, opaque client handle + `clientSubmissionId` lifecycle, 3-category DB/Storage/admin representation, per-file retry/remove/progress, atomic adopt-at-submit, cleanup/idempotency) | — | **done** (`STAGE_6_TASK_01_upload_flow_architecture.md`, moved to `tasks/done/`) | PROJECT_DECISIONS.md — "Stage 6 Upload-Flow Architecture" |

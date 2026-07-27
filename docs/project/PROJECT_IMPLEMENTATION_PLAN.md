@@ -823,12 +823,25 @@ Result:
 
 ---
 
-# Stage 6 — Product Experience Polish
+# Stage 6 — Product Experience Polish — CLOSED 2026-07-27
 
 Goal: elevate UI/UX and product quality of the public website and polish the admin experience.
 
 Stage 6 begins only after Stage 5D's audit/fix pass is closed (see Stage 5D above) — it builds
 on a reviewed, documented baseline, not on unreviewed accumulated debt.
+
+**CLOSED 2026-07-27 by owner decision**, on the evidence of Item 13's acceptance sweep
+(`tasks/done/STAGE_6_TASK_13_acceptance_sweep.md`), whose verdict reached consensus on a clean
+round 6 of an independent cross-review. All 19 items are done. All three exit criteria are met:
+FS §6 verifies 13/13 (8 measured in a browser against a production build, 6 read from code by a
+delegated independent session, and C5's persistence half closed by one live production submit —
+reference code `PK79WU`); the site is internally consistent (Item 18); `pnpm qg` exits 0 with no
+regressions.
+
+**Closing Stage 6 is not a launch-readiness claim.** Ten `__asset_TODO` placeholders, the visual
+identity, and every deployment/operational item remain open by design — they are **Stage 7** and
+**Stage 8** below, which is the whole point of the 2026-07-27 split (PROJECT_DECISIONS.md —
+"Stage 8 — Pre-Release and Launch created; the three-way split of 'pre-launch'").
 
 ## Source of Truth (2026-07-12 — see PROJECT_DECISIONS.md, Stage 6 Product Documentation Authority)
 
@@ -942,10 +955,34 @@ real photography and curated portfolio work exist. Designing against the AI plac
 in the tree would have to be redone once real images land — that is the whole reason this stage is
 separate.
 
+**Scope confirmed and widened by owner decision 2026-07-27**, at Stage 6 closure: everything visual
+lands here, and everything about servers, deployment and release moves to the new **Stage 8** below.
+The two lists were previously entangled under "pre-launch".
+
 Scope:
 
+- **Real photography and curated portfolio work replace all 10 `__asset_TODO` placeholders** —
+  4 Home Featured Work, 3 Location studio interiors, the favicon, the OG image, the Home hero.
+  Owner decision 2026-07-27: this is **visual work, not a deploy chore**, so it belongs here rather
+  than in the release stage. It also discharges Item 16's accepted risk — AI-generated
+  "tattoo-like" artwork must never reach public launch, where it would present non-existent work as
+  the artist's. Marker inventory and the canonical grep: PROJECT_PRODUCTION_READINESS.md —
+  Pre-Deploy Content Swaps.
 - visual identity: colour palette, typography (the site currently ships the system font stack),
   and the layout language across the public website
+  - **Geist is downloaded on every visit and never rendered** (found 2026-07-26, Item 18 Block A):
+    `next/font/google` loads it and `@theme` maps `--font-sans`, but `body` uses the system stack
+    and `font-sans` appears nowhere in the TSX. Either adopt it or remove the download — leaving it
+    is the only option that costs bandwidth for nothing. PROJECT_BACKLOG.md — Frontend Improvements.
+  - **`app/not-found.tsx` is a third styling system by construction** — it renders its own
+    `<html>`/`<body>` outside the `[locale]` tree, and `globals.css` is imported only in
+    `app/[locale]/layout.tsx`, so it has no stylesheet at all and hardcodes inline values. This is
+    deliberate (Item 11), not drift. If Stage 7 changes the palette, this page will not follow —
+    decide whether that matters.
+  - PROJECT_BACKLOG.md — Frontend Improvements also holds two long-standing refactor candidates
+    that a typography pass naturally absorbs: extracting `SectionTitle`/`SectionText`/`BulletList`,
+    and replacing `split("\n")` in i18n with string arrays. Neither is required; both are cheapest
+    to do while the same files are open.
 - art direction for real photography and curated portfolio work, including whether desktop needs
   different treatment from the mobile-first single-image-per-slot approach Item 16 shipped
   (PROJECT_BACKLOG.md — "Desktop art direction for placeholder images")
@@ -960,36 +997,178 @@ Scope:
   blocked Stage 6 — no FS §6 criterion mentions tap-target size — and headless Chromium measures CSS
   boxes, not fingers, so the physical-device check remains the instrument that settles it.
 - accessibility beyond the contrast/readability fixes Stage 6 Item 18 makes
-- physical mobile-device verification deferred from Stage 4B.5.1 (admin image viewer gestures) and
-  the favicon real-browser-tab check from Item 16 — the checks headless Chromium cannot perform.
-  See PROJECT_PRODUCTION_READINESS.md; some of these are also pre-launch items and may be
-  discharged before Stage 7 runs.
+- **physical mobile-device verification** — the checks no tool in this repository can perform, since
+  headless Chromium measures CSS boxes, not fingers: the Stage 4B.5.1 admin image-viewer gestures
+  (pinch zoom, pan, double tap, swipe, backdrop tap, rotation — also gating
+  `controller.closeOnPullDown`), the favicon in a real browser tab (light and dark chrome, Item 16
+  CO-2), and the tap-target findings above on an actual phone.
+- **Show/Hide password toggle** on the admin login/reset forms (PROJECT_BACKLOG.md) — admin UI
+  polish, folded in with the admin surfaces above rather than kept as a floating item.
+- **The artist's own copy pass over the live site** (Stage 6 Item 6, CO-3 — open by design since
+  2026-07-24). The shipped copy is research-derived and owner-approved, but never read by the artist
+  herself. Routed here by owner decision 2026-07-27 rather than to Stage 8: she is already looking
+  at the site during this stage for photography and art direction, and **a copy change alters text
+  length, which moves layout** — doing it inside the stage that owns layout costs one pass instead
+  of a redo after Stage 7 has closed. Source:
+  `tasks/done/STAGE_6_TASK_06_process_content.md` CO-3; tracked meanwhile in
+  PROJECT_PRODUCTION_READINESS.md — Owner Pre-Release Actions.
 
 Not in scope: product behavior, content, navigation or the request-flow field model — all of that
 is FS-governed and settled in Stage 6. A Stage 7 change that alters behavior needs a PRD/FS
-amendment first (PRD §9 Change Control), exactly as in Stage 6.
+amendment first (PRD §9 Change Control), exactly as in Stage 6. **Servers, deployment, CI/CD,
+security review and the release itself are Stage 8**, not here.
 
 Exit Criteria:
 
 - visual and interaction quality is consistently high across all surfaces
-- mobile experience is polished
+- mobile experience is polished, verified on at least one physical iOS and one physical Android device
+- no `__asset_TODO` placeholder remains — `grep -rn "__asset_TODO" app/ src/ public/` returns zero
 - no regressions in core flows
 
 Result:
 
-- refined product experience ready for growth
+- a product that looks finished, on real content, ready to be prepared for release
+
+---
+
+# Stage 8 — Pre-Release and Launch
+
+Goal: make the application actually deployable, operable and safe to run in public — then release it.
+
+Created 2026-07-27 by owner decision, at Stage 6 closure. Everything about servers, deployment,
+CI/CD and security had accumulated across PROJECT_PRODUCTION_READINESS.md, PROJECT_BACKLOG.md and
+five different tasks' completion obligations, tracked as "pre-launch" but owned by no stage. Stage 8
+is that owner. **Its final step is the release.**
+
+Stage 8 begins after Stage 7 closes. Individual items may be pulled forward when convenient (the
+Vercel Pro decision in particular gates several others), but the stage is not "in progress" until
+Stage 7 is done.
+
+**This stage needs its own planning pass before execution** — the list below is scope, not a
+sequenced plan, exactly as Stage 7's list was on the day it was created. A STRAT session cuts it
+into ordered items with task files.
+
+## Scope
+
+### A. Platform and environment decisions
+
+- **Vercel Pro decision** — the Hobby plan's commercial-use restriction makes this a terms question,
+  not a technical one; it also gates alerts and WAF below. Owner decision 2026-07-23: settle it
+  together with the Item 10 operational debt, since doing those first means building throwaway
+  workarounds. PROJECT_PRODUCTION_READINESS.md — Production Environment Setup.
+- **Environment separation** — separate Supabase staging and production projects, separate Vercel
+  environment values, per-environment Auth Site URL / Redirect URLs / OAuth config, and a written
+  migration promotion process. Decided in principle 2026-07-08 (the current controlled-test project
+  becomes **staging**; a clean **production** project is created); **none of it built yet**.
+  One-project/multiple-schema separation is explicitly not an approved option.
+- **Custom domain** and the `robots` `noindex` → `index` flip at launch (marker `__meta_TODO`).
+- **Item 12 CO-5** — enable Vercel's "System Environment Variables" access, then confirm the
+  deployed `/en` renders an `og:image` on a public `https://` origin returning 200. Without it
+  `metadataBase` silently falls back to `http://localhost:3000`.
+
+### B. Operational safety (Item 10 CO-4 — the open launch blocker)
+
+The durable per-IP upload quota is shipped and live-verified; what remains is how the owner *learns
+it fired* and what stops the bill. **The PROJECT_PRODUCTION_READINESS launch blocker is not closed
+until all four are done.**
+
+- Firewall/Log alert on the `/api/upload` signal, with a real recipient, **triggered once** to prove
+  delivery. The code already emits the structured `console.warn` it keys on.
+- WAF method+path Deny drill on `POST /api/upload` — the real kill-switch, no redeploy needed.
+- Vercel + Supabase spend caps and notifications. Option B bounds one source, not the number of them.
+- Env cleanup: remove the unused Marketplace-created `KV_*` / `REDIS_URL` vars, and decide whether
+  `UPSTASH_REDIS_REST_*` + `UPLOAD_TOKEN_SECRET` belong in **Preview** — see the dev/preview gap in
+  section D, which is the same missing credential seen from the developer's side.
+
+### C. Security review and hardening
+
+- Complete the Security Review Checklist in PROJECT_PRODUCTION_READINESS.md (RLS, storage
+  permissions, env vars/secrets, upload boundary, API validation boundary — several already
+  verified live in Stage 5A, the checklist records which).
+- **Custom SMTP** in Supabase Auth + email deliverability (SPF/DKIM). The built-in provider is
+  ~2 emails/hour and cannot be raised without it — a real constraint on password reset.
+- **Supabase auth hardening** — leaked-password protection and auth rate limits (carried open from
+  the Stage 5B task list).
+- **Password policy** — define one project-wide and apply it to reset-password and any future
+  password forms; today only Supabase's default minimum applies (PROJECT_BACKLOG.md).
+- **OAuth locale-query redirect allowlist** — the working Stage 5C workaround needs one allowlist
+  entry per locale query value. Redesign before public launch or before any `ru`/`he` expansion,
+  whichever comes first (PROJECT_BACKLOG.md).
+- `pnpm audit` and resolve/document high and critical findings (PROJECT_PRODUCTION_READINESS.md —
+  Dependency Security).
+- **Backup posture** — DB dump, Storage backup, PITR retention. Deliberately deferred until real
+  data exists; that condition is met at launch, so it is settled here, not claimed as done.
+
+### D. Developer and CI infrastructure
+
+- **CI/CD** — none exists. PROJECT_PRODUCTION_READINESS.md — CI/CD records the decision and trigger.
+- **The dev/preview environment cannot exercise image uploads at all.** `.env.local` carries a
+  placeholder Upstash URL, so `checkUploadQuota` hits its fail-closed deadline and `/api/upload`
+  returns 503 locally, every time. Failing closed is correct and production is unaffected — but a
+  developer cannot test the app's most failure-prone surface, and **any preview deploy has the same
+  hole** because `UPSTASH_REDIS_REST_*` and `UPLOAD_TOKEN_SECRET` are Production-only. Options and
+  the trade-offs are recorded in PROJECT_BACKLOG.md — "FOR STRAT — dev environment cannot exercise
+  image uploads"; note that a dev-only in-memory fallback puts an `if (dev)` branch inside a
+  security control and needs a hard guarantee it cannot activate in production.
+- **Automated end-to-end / integration coverage** — no test today touches a real database or
+  storage layer. The uncovered flows are enumerated in PROJECT_BACKLOG.md — "Automated E2E /
+  Integration Tests", including the Success-page gate and bfcache behaviour in a real browser.
+- **Auth callback route edge-branch tests** — missing `code`, unsupported `locale`, and
+  `exchangeCodeForSession` failure are untested; the pattern for mocking `next/headers` now exists
+  (PROJECT_BACKLOG.md).
+- **Supabase generated database types** — adopt (`supabase gen types typescript`) or explicitly
+  reject with rationale; a pre-launch owner decision left open since Stage 5D (PROJECT_BACKLOG.md).
+
+### E. Content and copy verification that only the real world settles
+
+- **The `/api/upload` 503 copy is not actionable.** When the limiter is unavailable the visitor sees
+  a hard error that **omits the one thing that matters — the request can be submitted without
+  images** (FS §4.5). Confirmed live by the owner on 2026-07-27, who hit the path and had no
+  indication he could simply send the request. Rare, but when it fires it hits every visitor at
+  once. Fix the copy against FS §4.5 and verify it on a **real** server failure, not a
+  browser-simulated one — Item 13's sweep aborted the request in the browser, which exercises a
+  different branch of `src/features/request/lib/upload.ts`, and so could not have caught this.
+- **Performance validation** before release (PROJECT_PRODUCTION_READINESS.md).
+
+### F. Release
+
+The final step of this stage and of the pre-launch programme: flip `robots` to `index`, point the
+domain, and go live — with the Owner Pre-Release Actions checklist in
+PROJECT_PRODUCTION_READINESS.md verified clear, not assumed.
+
+## Not in scope
+
+Post-launch features (Telegram notifications, calendar, payments, chat, analytics — see the
+Post-Launch Roadmap below) and anything visual (Stage 7). Operational items explicitly accepted as
+post-launch — orphaned-storage reconciliation, the file-upload duplicate-selection heuristic, the
+`required_error`/`null` FormData parsing nit, client-side image compression, API route constants —
+stay in PROJECT_BACKLOG.md and are not Stage 8 work unless promoted deliberately.
+
+Exit Criteria:
+
+- staging and production are separate, and production has never held test data
+- the Owner Pre-Release Actions checklist in PROJECT_PRODUCTION_READINESS.md is fully checked
+- the Item 10 CO-4 launch blocker is closed — alert delivered once, WAF drill performed, spend caps set
+- a request submitted by a real visitor on the production domain persists, is visible in admin, and
+  the artist is able to answer it
+- the site is publicly indexable and reachable at the branded domain
+
+Result:
+
+- a released product, operable and monitored
 
 ---
 
 # Post-Launch Roadmap
 
-These features are out of scope for the initial production release (Stages 0–7).
+These features are out of scope for the initial production release (Stages 0–8).
 Each item requires a dedicated planning and decision phase before implementation.
 
-(Updated 2026-07-26: Stage 7 — Visual Design was created above and sits **before** public launch,
-not after it. Item 16's own accepted risk requires it — AI-generated "tattoo-like" artwork must not
-survive to launch, so the stage that replaces the placeholders with real work is a pre-launch
-stage. The roadmap below is unchanged in content.)
+(Updated 2026-07-27: **Stage 7 — Visual Design** and **Stage 8 — Pre-Release and Launch** were both
+created above, and both sit **before** public launch — the release is Stage 8's final step, not a
+separate event after this roadmap. Item 16's accepted risk is what puts the asset work pre-launch:
+AI-generated "tattoo-like" artwork must not survive to launch. The roadmap below is unchanged in
+content.)
 
 Immediately after release: a feedback / bugfix stabilization loop with the real artist user comes
 first, before any item below is scheduled. Items in this roadmap are candidates for what follows

@@ -354,6 +354,13 @@ Finding something during an audit does not authorize refactoring it. Each fix re
 
 # Owner Pre-Release Actions
 
+**Execution moved to Stage 8 — 2026-07-27.** This list stays the **checklist**; the work of clearing
+it is now owned by **Stage 8 — Pre-Release and Launch** (PROJECT_IMPLEMENTATION_PLAN.md, sections
+A–F), and the artist copy pass by **Stage 7**. That split exists because this document says of
+itself that it is "not an implementation task list", while several items below are implementation —
+which is why some have stood open since Stage 5B, restated in three documents and executed by
+nobody. Keep verifying here; build there.
+
 **Canonical home for every completion obligation that a closed task could not discharge itself.**
 Established 2026-07-26 by a STRAT session: five obligations across Items 6, 7, 10, 12 and 16 had
 been parked in `STAGE_6_STRAT_BRIEF.md`, which AI_TASK_PROTOCOL.md — Completion Obligations

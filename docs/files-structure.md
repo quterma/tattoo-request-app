@@ -189,9 +189,8 @@ tattoo-request-app/
 │       │       └── REVIEW_2026-07-27_stage6-item13-acceptance-sweep-verdict.md
 │       └── tasks/
 │           ├── META_TASK_01_framework_consolidation.md
-│           ├── STAGE_6_STRAT_BRIEF.md
-│           ├── STAGE_6_TASK_13_acceptance_sweep.md
 │           └── done/
+│               ├── STAGE_6_STRAT_BRIEF.md
 │               ├── STAGE_6_TASK_01_upload_flow_architecture.md
 │               ├── STAGE_6_TASK_02_site_wide_shell.md
 │               ├── STAGE_6_TASK_03_request_form_rebuild.md

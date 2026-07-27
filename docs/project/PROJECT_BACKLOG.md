@@ -729,6 +729,14 @@ Related: `PROJECT_PRODUCTION_READINESS.md` — Owner Pre-Release Actions already
 `UPSTASH_REDIS_REST_*` and `UPLOAD_TOKEN_SECRET` are **Production-only**, so any *preview* deploy
 also 500s/503s on `/api/upload`. Whatever STRAT decides should cover preview, not just local.
 
+**ROUTED 2026-07-27 (STRAT) → Stage 8, section D** (PROJECT_IMPLEMENTATION_PLAN.md — Developer and
+CI infrastructure). It sits beside the Item 10 CO-4 env cleanup, which is the *same missing
+credential seen from the operator's side* — deciding them together is the point. The three options
+above travel with it undecided; the STRAT session that cuts Stage 8 picks one. Recorded preference,
+not a decision: option 2 (a dev-only in-memory fallback) puts an `if (dev)` branch inside a security
+control, and would need a guarantee it cannot activate in production before it is even comparable
+to the other two.
+
 ## FOR STRAT — the sweep could not have caught the 503, and the error copy is unverified (2026-07-27)
 
 **A gap in Item 13's own method, disclosed rather than buried.** The acceptance sweep tested per-file
@@ -747,3 +755,15 @@ message "reads as a hard error and omits the one thing that matters: the request
 without images (FS §4.5)". The owner's report is live confirmation of that entry: after the failure he
 had no indication he could simply send the request without pictures. STRAT should decide whether that
 copy fix is pre-launch or Stage 7, and whether it is bundled with the dev-environment decision above.
+
+**ROUTED 2026-07-27 (STRAT), split in two — the entry raised a product bug and a process question,
+and they belong in different places:**
+
+- **The copy fix → Stage 8, section E** (PROJECT_IMPLEMENTATION_PLAN.md). Not Stage 7: nothing about
+  it is visual. It is bundled with the dev-environment decision above, because verifying the fixed
+  copy requires *producing a real 503* — which is exactly the capability that entry is about.
+- **The method question → META**, filed as "A verification pass must cross at least one real
+  boundary, not only simulate it" (`docs/framework/AI_FRAMEWORK_IDEAS.md`), owner decision
+  2026-07-27. It is a framework rule, not product work, and the motivating evidence is stronger than
+  this one entry: the *same* substitution-of-simulation-for-reality also produced the mocked-submit
+  contradiction that cross-review round 1 blocked on, inside the same task.

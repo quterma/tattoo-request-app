@@ -1,3 +1,12 @@
+> **STAGE 6 IS CLOSED (2026-07-27). This brief is retired — moved to `tasks/done/` per
+> AI_TASK_PROTOCOL.md ("when the stage's strategic work is genuinely finished, move the brief to
+> `docs/project/tasks/done/`"). It is history, not a pickup point.**
+>
+> **Do not act on anything below.** Every item it names is either done or has moved to a stage:
+> Stage 7 — Visual Design, or Stage 8 — Pre-Release and Launch
+> (PROJECT_IMPLEMENTATION_PLAN.md). The next STRAT session is Stage 7's first, and it starts from
+> that plan plus PROJECT_STAGE_LOG.md — not from here. Stage 7 will write its own brief.
+
 Purpose
 STRAT Next-Session Brief for Stage 6 — the pickup point for the next STRAT session on this
 stage. See docs/framework/AI_TASK_PROTOCOL.md — STRAT Next-Session Brief for the convention

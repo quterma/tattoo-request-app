@@ -24,6 +24,38 @@ Possible risks or trade-offs
 
 # Ideas
 
+## A verification pass must cross at least one real boundary, not only simulate it
+
+Description: when a task's job is to *verify* something, require that at least one check crosses the
+real boundary — a real server response, a real database write — rather than accepting only
+browser-level or in-process simulation. Simulation stays legitimate for breadth; the rule is that it
+may not be the *only* evidence for a criterion that names a real-world effect.
+
+Motivation: the same failure appeared twice inside one task (Stage 6 Item 13, 2026-07-27), and both
+times the simulation looked correct while proving nothing about the path that actually runs.
+
+1. The sweep verified criterion C5 with a **mocked** `POST /api/request`, then recommended
+   `STAGE 6 READY TO CLOSE` while its own table read `NOT VERIFIABLE HERE (persistence)`.
+   Cross-review round 1 blocked it, with the argument that generalizes: *a constraint does not
+   change what a criterion requires.* The owner then chose one live production submit
+   (`PK79WU`) — the criterion verified, and the alternative would have been shipping a stage
+   closure on a self-contradiction.
+2. The same sweep tested per-file upload failure with a **browser-level** `route.abort()`, never a
+   real `503`. Those are different branches of `src/features/request/lib/upload.ts`, so the copy a
+   visitor actually sees on server failure was never seen. The owner hit that exact path within
+   minutes of live testing — and found the message omits the one thing that matters (the request
+   can be submitted without images, FS §4.5).
+
+Risks/trade-offs: crossing a real boundary is not free — the live submit wrote an undeletable row to
+the production database (the service-role key has no DELETE grant on `requests`). So the rule must
+say *at least one*, not *always*, and must name who pays: test rows, test emails, a burned quota
+slot. There is also a scope question — this may belong to task-cutting (STRAT names the boundary a
+verification task must cross) rather than to a blanket rule on every task.
+
+Status: **open — filed for META by the STRAT session closing Stage 6, on owner decision 2026-07-27.**
+Related product-side follow-ups are already routed to Stage 8 (the `/api/upload` 503 copy, and the
+dev/preview environment that cannot exercise uploads at all).
+
 ## Explicit dependency direction in project structure
 
 Description: PROJECT_STRUCTURE-type documents must define dependency direction explicitly

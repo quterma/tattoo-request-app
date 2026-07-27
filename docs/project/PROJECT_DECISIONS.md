@@ -2743,6 +2743,54 @@ Full investigation, including the three fixes that did not work:
 
 ---
 
+# Stage 8 — Pre-Release and Launch created; the three-way split of "pre-launch" — decided 2026-07-27
+
+## The problem
+
+At Stage 6's closure the word "pre-launch" covered three unrelated kinds of work, tracked in
+different documents and owned by no stage:
+
+- **visual** — real photography, tap-target heights, palette and typography;
+- **operational** — Vercel Pro, alerts, WAF, spend caps, staging/production separation, CI/CD,
+  SMTP, backups, security review;
+- **the release itself**, which appeared in no plan at all.
+
+They accumulated across PROJECT_PRODUCTION_READINESS.md, PROJECT_BACKLOG.md, and the completion
+obligations of five closed tasks. Nothing was lost, but nothing was *scheduled* either: each item
+was reachable only by whoever happened to read the right document.
+
+## The decision (owner, 2026-07-27)
+
+**Split them three ways, and give each an owner.**
+
+- **Stage 7 — Visual Design** takes everything visual, and its scope was widened to include the
+  **real photography and portfolio work** that replaces all 10 `__asset_TODO` placeholders. That
+  was previously filed as a "pre-deploy swap", i.e. a deploy chore; it is design work, and it runs
+  in the stage that owns design.
+- **Stage 8 — Pre-Release and Launch** (new) takes servers, deployment, CI/CD, security review and
+  operational safety — **and its final step is the release**. Scope: PROJECT_IMPLEMENTATION_PLAN.md
+  — Stage 8, sections A–F.
+- **Post-Launch Roadmap** is unchanged and now sits after Stage 8.
+
+Sequence: Stage 6 closes → a short META pass → Stage 7 → Stage 8 → release.
+
+## Why the release needed a stage rather than a checklist
+
+PROJECT_PRODUCTION_READINESS.md is a **verification checkpoint list**, by its own header — "not an
+implementation task list". Much of what stands between here and launch is implementation: creating a
+production Supabase project, building CI/CD, configuring SMTP, writing the integration coverage that
+does not exist. A checklist cannot carry that, and the evidence is that it did not: several items
+have been open since Stage 5B, restated in three documents, and executed by nobody. The readiness
+document remains the checklist; Stage 8 is the work.
+
+## Consequence for Stage 6's closure
+
+Stage 6 closes on its own criteria (FS §6, verified by Item 13) and **is not a launch-readiness
+claim** — that was already true, and the split now makes it structurally obvious rather than a
+caveat someone has to remember to read.
+
+---
+
 # Rule for Future Changes
 
 All architectural, product, or behavioral decisions MUST be recorded in this document.

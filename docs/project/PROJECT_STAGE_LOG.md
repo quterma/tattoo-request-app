@@ -12,13 +12,22 @@ AI agents and developers working on the project.
 
 ## Current Stage
 
-Stage: Stage 6 — Product Experience Polish — current (planning documentation integrated
-2026-07-12; **all 17 originally-planned items done as of 2026-07-26**; **Item 18 — visual
-consistency — done 2026-07-26**; **one item remains: 13 — the FS §6 acceptance sweep that closes
-the stage**). Stage 5 —
-Production Hardening — closed. **Stage 7 — Visual Design created 2026-07-26** — visual identity,
-art direction and admin polish moved out of Stage 6; it runs before public launch and after real
-photography exists (PROJECT_DECISIONS.md — "Stage 6 / Stage 7 boundary").
+Stage: **Stage 6 — Product Experience Polish is CLOSED (2026-07-27, owner decision).** All 19 items
+done; FS §6 verifies 13/13 on Item 13's acceptance sweep, whose verdict reached consensus on a clean
+round 6 of an independent cross-review. Stage 5 — Production Hardening — closed.
+
+**Next: Stage 7 — Visual Design** (real photography and portfolio work replacing all 10
+`__asset_TODO` placeholders, visual identity, the measured tap-target heights, admin polish,
+physical-device verification, the artist's own copy pass), then **Stage 8 — Pre-Release and Launch**
+(platform/environment decisions, the Item 10 CO-4 operational blocker, security review, CI/CD — and
+the release itself as its final step). Both are **scope lists, not plans**: each needs its own STRAT
+planning pass before execution, exactly as Stage 6 did. See PROJECT_IMPLEMENTATION_PLAN.md and
+PROJECT_DECISIONS.md — "Stage 8 — Pre-Release and Launch created; the three-way split of
+'pre-launch'" (2026-07-27).
+
+**Closing Stage 6 is not a launch-readiness claim.** That is now structural rather than a caveat
+someone must remember: everything standing between here and launch belongs to a named stage with an
+owner.
 Status: Stage 4B — Admin Dashboard is closed (implementation-complete, 2026-07-04). Stage 5A —
 Security / Data-Boundary Planning is closed (completed 2026-07-05). **Stage 5B — Production
 Hardening Implementation is closed** — its core hardening scope (5B.1 `create_request` search_path
