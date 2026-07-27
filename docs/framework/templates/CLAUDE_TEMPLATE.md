@@ -67,6 +67,14 @@ If improvement is possible:
 - Run Review Pipeline (see AI_REVIEW_PIPELINE.md)
 - Propose commit only after pipeline status is READY FOR DEVELOPER REVIEW
 - Create commit after developer approval
+- **NEVER publish. Publishing is the owner's alone, and no approval delegates it.** Do not cause
+  this repository's commits, branches or tags to reach — or change — a remote by any means:
+  `git push` in any form (`--force`, `--tags`, `-u`, a configured upstream, `--delete`), a wrapper
+  script or alias, a `gh` command, or triggering anything that publishes on your behalf. Stated by
+  **effect, not by command name**. Approving a commit never approves publishing it: a commit is
+  local and revisable, a push is irreversible, reaches a remote others consume, and may trigger a
+  deployment. Do not offer to push either — you may *report* that the branch is N commits ahead,
+  but never propose closing that gap.
 
 ---
 

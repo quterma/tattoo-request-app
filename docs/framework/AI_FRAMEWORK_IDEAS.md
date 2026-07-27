@@ -71,6 +71,35 @@ copy.
 **Filed 2026-07-26 by the IMPL session for Stage 6 Item 18, against its own breach. Owner ruling
 already given — this entry exists to get it into the framework docs, not to re-open it.**
 
+> **LANDED 2026-07-27** (META, cross-reviewed to consensus —
+> `reviews/done/REVIEW_2026-07-27_push-ban-rule.md`). Proposals (1) and (2) are in
+> `.claude/CLAUDE.md` — Workflow, and mirrored into `docs/framework/templates/CLAUDE_TEMPLATE.md`
+> so a new project does not recreate the gap; proposal (4) landed as the do-not-offer duty. The
+> harness was tightened too: `.claude/settings.json` moves the four `git push` patterns from `ask`
+> to `deny` (owner decision) — a common-path guard only, since literal patterns cannot enforce a
+> by-effect rule. Proposal (3) — the general "silence is not permission" principle — remains
+> **open** and deliberately unwritten; see the sibling-inventory entry below for its evidence base.
+> One wording correction from the review is worth keeping visible: the first draft forbade anything
+> that made "work leave this machine", which would have banned the owner-carried external
+> review/research flows AI_CROSS_REVIEW.md prescribes. The rule is now scoped to this repository's
+> commits/branches/tags reaching **or changing** a remote.
+
+- 2026-07-27 — **Inventory: the push ban is a one-off, and every sibling action is unregulated.**
+  Produced by Codex during the push-rule review (`reviews/done/REVIEW_2026-07-27_push-ban-rule.md`,
+  Q2 — a full sweep of CLAUDE.md, AGENTS.md, `docs/framework/*`, the templates, `package.json` and
+  `.claude/settings.json`). **No rule today** for: opening a PR or any other `gh` write; publishing
+  a package; triggering a deployment by a non-push route (provider API/CLI/dashboard/workflow
+  dispatch); writing to an external API or service; mutating a remote/production database, applying
+  a migration, changing RLS or setting a hosted secret; sending mail; destructive small deletes or
+  force-overwrites (only *large* removals are covered, AI_DEVELOPMENT_RULES.md); and local history
+  rewriting. Codex is bounded on all of these by its read-only/write-surface rules — **the gap is
+  Claude-side only**, exactly the asymmetry that produced the push breach. — open: **owner decision
+  is to file, not legislate** (2026-07-27) — none of these has produced a live defect, and writing
+  ~10 pre-emptive rules is the accretion pattern measured two days earlier
+  (`research/done/RESEARCH_2026-07-25_framework-accretion-remeasure.md`). The counter-argument is
+  recorded so a future META weighs it fairly: push "fired on the first occasion it could", and the
+  same may hold for the others. Revisit on the first live case, or at the post-MVP rule ablation.
+
 ### Title
 
 `git push` is owner-only and must be forbidden to every agent; CLAUDE.md must stop treating commit

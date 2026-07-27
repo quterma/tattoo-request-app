@@ -106,6 +106,29 @@ If improvement is possible:
   the index: unstage it first (`git restore --staged <path>`) or ask the owner. Beware that
   `git add` auto-detects renames, so adding your own file can silently pull in another session's
   rename pair — check `git diff --cached --stat` after staging and before committing, every time.
+- **NEVER publish. Publishing is the owner's alone, and no approval delegates it.**
+  Do not cause local commits to reach a remote **by any means** — `git push` in any form
+  (`--force`, `--tags`, `-u`, a configured upstream, a push implied by another command), a wrapper
+  script or alias, a `gh` command, or triggering anything that publishes on your behalf. The rule
+  is stated by **effect, not by command name**: if the result is that this repository's commits,
+  branches or tags reach — or change — a remote, it is forbidden regardless of how it was invoked
+  (deleting a remote branch or tag counts, though it publishes nothing). Scope note: this governs
+  **publishing repository state**, nothing wider. It does not touch the owner-carried external
+  review/research flows that AI_CROSS_REVIEW.md prescribes; whether other outward-facing actions
+  need a rule is an open question (AI_FRAMEWORK_IDEAS.md), deliberately not decided here.
+  - **Approving a commit never approves publishing it.** They are different acts with different
+    blast radii: a commit is local and revisable (`reset`, `amend`, `rebase` before it is
+    published); a push is irreversible, reaches a remote others consume, and in this project
+    triggers a deployment.
+  - **Do not offer to push, either.** You may *report* that the branch is N commits ahead of its
+    remote, so the gap is never invisible — but never propose closing it, and never treat an
+    owner's "yes" to something else as covering it. A rule the agent can route around by
+    proposing the action makes the owner the backstop instead of the decider.
+  - (Real case, 2026-07-26: a session finished Item 18 Block A, committed with approval, then
+    offered to push and did so on a "да" — triggering a failed Vercel deploy the owner had not
+    initiated. No rule existed at the time: `push` appeared nowhere in CLAUDE.md or
+    `docs/framework/*`, while AGENTS.md already forbade it to Codex — the stricter rule sat on the
+    less privileged agent. Filed in AI_FRAMEWORK_IDEAS.md the same day.)
 
 ---
 

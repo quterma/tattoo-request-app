@@ -186,6 +186,7 @@ tattoo-request-app/
 │       │       ├── REVIEW_2026-07-26_stage6-item18-blockA-tokens-primitives.md
 │       │       ├── REVIEW_2026-07-26_stage6-item18-blockB-pages-form-spacing.md
 │       │       ├── REVIEW_2026-07-26_tooling-task-02-playwright-screenshots.md
+│       │       ├── REVIEW_2026-07-27_push-ban-rule.md
 │       │       └── REVIEW_2026-07-27_stage6-item13-acceptance-sweep-verdict.md
 │       └── tasks/
 │           ├── META_TASK_01_framework_consolidation.md
