@@ -892,6 +892,25 @@ Exit Criteria:
   per-page spacing overrides, and no viewport at which a page clips or overflows
 - no regressions in core flows
 
+**All three exit criteria are met as of 2026-07-27 — Stage 6 is READY TO CLOSE, awaiting the owner's
+closure.** Established by Item 13's acceptance sweep (`tasks/done/STAGE_6_TASK_13_acceptance_sweep.md`),
+whose verdict reached **consensus on a clean round 6** of an independent cross-review
+(`reviews/done/REVIEW_2026-07-27_stage6-item13-acceptance-sweep-verdict.md`, 7 findings, all accepted).
+
+- **FS §6 — 13/13 verify.** 8 criteria measured in a browser against a production build, 6 read from
+  code by a delegated independent session, and **C5's persistence half closed by one live production
+  submit (`PK79WU`)** — the owner chose to satisfy the criterion rather than waive it after round 1
+  rejected deferring that evidence to launch.
+- **Consistency** — discharged by Item 18 (24 captures, `scrollWidth === viewport` at 6 routes × 4
+  widths; `mb-*` counters and `py-*` overrides grep to 0) and re-confirmed by Item 13's mobile QA.
+- **No regressions** — `pnpm qg` exit 0 (33 files / 408 tests) on the final tree.
+
+**Not closed by this, and deliberately outside the gate:** the 10 `__asset_TODO` placeholders (a
+**launch** gate — no FS §6 criterion mentions assets, and requiring real photography here would
+deadlock Stage 6 against the stage that follows it), physical-device verification, tap-target heights
+(→ Stage 7), and the owner pre-release debts in PROJECT_PRODUCTION_READINESS.md. **Stage 6 closing is
+not a launch-readiness claim.**
+
 **Removed from Stage 6's exit criteria 2026-07-26** (moved to Stage 7): "visual and interaction
 quality is consistently high across all surfaces" and "mobile experience is polished". Both are
 retained verbatim as Stage 7 exit criteria. The reason is recorded in the decision above: as
@@ -932,6 +951,14 @@ Scope:
   (PROJECT_BACKLOG.md — "Desktop art direction for placeholder images")
 - admin interface polish, including mobile polish (spacing, touch targets, scroll behavior) and the
   two-column card grid candidate noted 2026-07-03 — carried here from Stage 6
+- **public-site tap-target heights — measured 2026-07-27 by Item 13's mobile QA**, so Stage 7 starts
+  from numbers rather than an impression. Every interactive element is ≥44px **wide**, but several
+  fall short in **height** at all four widths (320/375/768/1280): **primary nav links 28px** — the
+  fixed bottom bar on mobile, i.e. the main navigation on the primary surface; Process FAQ's
+  Preparation/Aftercare links **21px**; Location's map links **36px**; the Instagram icon links on
+  Location/Preparation/Aftercare **16×16px**; `<select>` controls on `/request` **39px**. None of this
+  blocked Stage 6 — no FS §6 criterion mentions tap-target size — and headless Chromium measures CSS
+  boxes, not fingers, so the physical-device check remains the instrument that settles it.
 - accessibility beyond the contrast/readability fixes Stage 6 Item 18 makes
 - physical mobile-device verification deferred from Stage 4B.5.1 (admin image viewer gestures) and
   the favicon real-browser-tab check from Item 16 — the checks headless Chromium cannot perform.

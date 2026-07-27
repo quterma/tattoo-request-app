@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl"
+import { Link } from "@/shared/i18n"
 import { Page, Section, Stack } from "@/shared/ui"
 
 export default function PreparationPage() {
@@ -36,6 +37,14 @@ export default function PreparationPage() {
         <Stack gap="gap-1.5">
           <h2>{t("tattooDay")}</h2>
           <ul className="list-disc ps-5">{bullets("tattooDayItems")}</ul>
+          {/* Continues the last bullet's "explain next steps" into the page that owns them.
+              Preparation stays appointment-prep only (FS §3.6): this carries no aftercare
+              content, it points at it. */}
+          <p className="text-muted-foreground">
+            {t.rich("aftercareLink", {
+              aftercare: (chunks) => <Link href="/aftercare">{chunks}</Link>,
+            })}
+          </p>
         </Stack>
       </Section>
     </Page>

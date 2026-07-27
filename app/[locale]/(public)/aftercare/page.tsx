@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl"
+import { Link } from "@/shared/i18n"
 import { Page, Section, Stack } from "@/shared/ui"
 
 export default function AftercarePage() {
@@ -36,6 +37,14 @@ export default function AftercarePage() {
         <Stack gap="gap-1.5">
           <h2>{t("healingTouchUps")}</h2>
           <ul className="list-disc ps-5">{bullets("healingTouchUpsItems")}</ul>
+          {/* Pointer only — the touch-up terms and pricing live exclusively on Process
+              (FS §5 canonical ownership; PROJECT_DECISIONS.md — "Content boundary for
+              Healing & touch-ups"). This link must never restate policy content. */}
+          <p className="text-muted-foreground">
+            {t.rich("touchUpsPolicyLink", {
+              touchups: (chunks) => <Link href="/process#touch-ups">{chunks}</Link>,
+            })}
+          </p>
         </Stack>
       </Section>
     </Page>

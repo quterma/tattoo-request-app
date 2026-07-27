@@ -368,7 +368,21 @@ task, not a hotfix. Scope: one i18n key (both locales) plus whichever branch of
 
 ---
 
-## Re-review Item 17 before release — cross-review loop exited without consensus (Stage 6 Item 17, 2026-07-25)
+## Re-review Item 17 before release — cross-review loop exited without consensus (Stage 6 Item 17, 2026-07-25) — **CLOSED 2026-07-27**
+
+**CLOSED 2026-07-27 by Stage 6 Item 13's acceptance sweep (CO-3).** The re-review was performed by a
+Codex session with no exposure to the original 9-round loop, briefed to report **code findings only**
+so the documentation churn that killed that thread could not repeat. **Verdict: no follow-up work
+needed before release — no production-code finding.** Verified: every runtime secret consumer
+deep-imports `@/config/env` rather than the client-safe barrel; public consumers import identity from
+the barrel; no duplicate raw address, Instagram URL or handle remains outside `studio.ts`; the
+remaining "Masha Karda" literals are composed owner-authored SEO sentences, not competing identity
+fields. The **partial** config boundary (studio identity in `src/config/`, request-behavior settings in
+`src/features/request/config/form.ts`) was judged **coherent** — making the extraction total would
+weaken feature ownership without improving secret/client separation. Thread:
+`research/RESEARCH_2026-07-27_item13-static-criteria-and-item17-rereview.md`, Part B.
+
+*Original entry kept below for the record.*
 
 **For STRAT.** Item 17's Codex cross-review ran **9 rounds** and was ended by owner decision, not
 by a clean round. Rounds 1–3 found real defects (a CO-1 gap: two bare studio-name literals still
@@ -678,3 +692,58 @@ notes the question "recurs either way" once real photography lands — that is p
 waits: Stage 7 runs *after* real photography exists, so it gets answered once, against the images
 that will actually ship, instead of twice. Stage 6's Item 18 is explicitly forbidden from touching
 it.
+
+---
+
+## FOR STRAT — dev environment cannot exercise image uploads (found in live testing, 2026-07-27)
+
+**Raised by the owner during the Item 13 live submit; owner asked STRAT to decide the shape of the
+fix rather than have IMPL pick one.**
+
+**Symptom.** Uploading an image on `localhost` shows a thumbnail, then flips to *"Your images could
+not be attached. Press Retry on each one, then send again…"*. Console: `503 (Service Unavailable)`
+on `POST /api/upload`. Reproducible every time.
+
+**Cause — not a defect.** `.env.local` holds `UPSTASH_REDIS_REST_URL=https://placeholder.upstash.io`.
+That host does not resolve, so `checkUploadQuota` (`src/bff/uploadQuota.ts:76-92`) hits its 3s
+fail-**closed** deadline and the route returns 503 (`app/api/upload/route.ts:61-68`). Failing closed
+is deliberate and correct: an unreachable quota store must never silently admit uploads, or the abuse
+control is bypassed by turning Redis off. **Production is unaffected** — real Upstash credentials
+have been configured since 2026-07-23, and uploads work there.
+
+The thumbnail-then-error sequence is also correct: the preview renders locally before the server
+answers, and the 503 arrives ~0.3s later.
+
+**The question for STRAT.** A developer currently cannot exercise the upload flow at all locally,
+which is a meaningful gap for the app's most failure-prone surface. Options, none obviously right:
+
+1. **A second free Upstash database for dev** — realistic, costs a signup, adds a credential to
+   distribute and rotate.
+2. **A dev-only in-memory quota fallback** — convenient, but it puts an `if (dev)` branch inside a
+   security control, which is exactly where such branches are most dangerous. Would need a hard
+   guarantee it cannot activate in production.
+3. **Leave as-is and document it** — cheapest; developers test uploads only against a deployed
+   preview. Requires saying so somewhere a developer will actually read.
+
+Related: `PROJECT_PRODUCTION_READINESS.md` — Owner Pre-Release Actions already flags that
+`UPSTASH_REDIS_REST_*` and `UPLOAD_TOKEN_SECRET` are **Production-only**, so any *preview* deploy
+also 500s/503s on `/api/upload`. Whatever STRAT decides should cover preview, not just local.
+
+## FOR STRAT — the sweep could not have caught the 503, and the error copy is unverified (2026-07-27)
+
+**A gap in Item 13's own method, disclosed rather than buried.** The acceptance sweep tested per-file
+upload failure by aborting the request **in the browser** (`route.abort("failed")`), never by taking a
+real 503 from the server. Client behaviour looks similar, but the two paths map to different branches
+in `src/features/request/lib/upload.ts`, so **the copy a real visitor sees on a genuine server failure
+was never verified in this sweep.** The owner hit that exact path within minutes of live testing.
+
+This matters beyond the one message: it is the difference between simulating a boundary and crossing
+it — the same class as the mocked-vs-live submit that cross-review round 1 blocked on. Worth STRAT
+deciding whether the standing verification method should require at least one real server-error path,
+not only browser-level simulation.
+
+`PROJECT_BACKLOG.md` already carries an entry (upload `503` / `upload_invalid` copy) noting the
+message "reads as a hard error and omits the one thing that matters: the request can be submitted
+without images (FS §4.5)". The owner's report is live confirmation of that entry: after the failure he
+had no indication he could simply send the request without pictures. STRAT should decide whether that
+copy fix is pre-launch or Stage 7, and whether it is bundled with the dev-environment decision above.

@@ -1427,7 +1427,8 @@ rationale addition). Nothing required a PRD/FS escalation.
   at the end of the Hero block, for visitors who are ready to act immediately. The CTA never
   competes with the nav bar — nav is site navigation, CTA is an in-content action.
 - **Interpretation of "one primary CTA per page" (FS §2, acceptance criterion 10) for the Home
-  double instance.** "Exactly one primary CTA" governs the primary *action* a page offers, not the
+  double instance.** **FOLDED INTO THE FS 2026-07-27 — see the note at the end of this bullet.**
+  "Exactly one primary CTA" governs the primary *action* a page offers, not the
   literal count of button instances on screen. Two instances of the identical "Start Your Request"
   action (Hero + end of page) are the same action repeated for scroll convenience on a long
   mobile page, not two competing CTAs — a *different* action (e.g. a second, distinct CTA) would
@@ -1435,6 +1436,20 @@ rationale addition). Nothing required a PRD/FS escalation.
   explicitly here, as a UX-review pass (2026-07-13, cross-checked against another AI reviewer)
   flagged it as the one point in this batch with a plausible literal-reading conflict, i.e. a
   "decision by silence" the blueprint should not leave implicit.
+  **Folded into FS §2 and criterion 10 on 2026-07-27 (owner-approved, PRD §9), and the reason is
+  worth recording.** The 2026-07-13 review pass predicted that a later reader of the FS alone would
+  read the cardinality sentence literally and call the Home double instance a defect. That is
+  precisely what happened during Stage 6 Item 13's acceptance sweep: the executing session read it
+  literally and proposed a weak pass ("the same CTA does not *compete*"); its delegated reviewer,
+  briefed on the FS but **not** on this document, correctly overturned that on the FS's own text and
+  returned `FAILS`; only the owner's recollection of this decision surfaced it. A re-review with this
+  document in hand ruled `VERIFIES` and added the decisive argument: **the literal reading is
+  self-defeating**, because it would make the Hero placement mandated by the bullet above impossible
+  to satisfy. Cost of the desync: one full review round-trip on the stage-closing gate. The
+  interpretation now lives in the Source of Truth, so a reader of the FS alone reaches the right
+  answer. Threads: `research/RESEARCH_2026-07-27_item13-static-criteria-and-item17-rereview.md`
+  (the `FAILS`), `research/RESEARCH_2026-07-27_c10-decision-conflict-and-c11-fix.md` (the overturn
+  and the amendment wording).
 - **Global footer (Codex review — the blueprint had ignored an existing site-wide action
   surface).** Every public page renders `PublicFooter` (`app/[locale]/(public)/layout.tsx`),
   which today exposes studio name, address, email (`mailto:`), phone (`tel:`), Instagram, and
@@ -1734,6 +1749,13 @@ Mirror of Preparation (same split, same rules).
   here, and FS §5's canonical-ownership table places booking rules on Process alone. This line is
   drawn now because touch-ups are the one aftercare topic that naturally drifts toward booking
   language.
+  **The predicted drift happened, and was corrected 2026-07-27.** Item 13's acceptance sweep found
+  Aftercare stating the policy in full ("free within 3 months" / "after 3 months, charged"),
+  duplicating Process — exactly the drift this boundary was written to prevent, which is the strongest
+  available evidence that writing it down was worth doing. Fix: the two policy bullets were replaced
+  with one that says *when* a touch-up is appropriate (which this boundary expressly permits, and the
+  old copy never actually provided), plus a **link-only pointer** to `/process#touch-ups`. Verified in
+  a browser: the policy text now appears on exactly one public route.
 - **Tone requirement carried from FS §3.7:** the copy is "written as the artist's own
   instructions" — owner-authored content; per FS §3, missing content blocks implementation, it is
   not improvised by engineering.

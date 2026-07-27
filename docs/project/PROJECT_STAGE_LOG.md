@@ -42,6 +42,146 @@ require updating them first. See PROJECT_DECISIONS.md — Stage 6 Product Docume
 
 Current focus:
 
+- **Stage 6 Item 13 — FS §6 acceptance sweep — DONE (IMPL, 2026-07-27); recommends `STAGE 6 READY TO
+  CLOSE`, pending the owner's stage closure.** `tasks/done/STAGE_6_TASK_13_acceptance_sweep.md` holds the
+  full report (now `tasks/done/`). **Independent cross-review reached CONSENSUS 2026-07-27 on a clean
+  round 6** — `reviews/done/REVIEW_2026-07-27_stage6-item13-acceptance-sweep-verdict.md`: six rounds,
+  **seven findings, all accepted, none rejected, none deferred**. Acceptance Criterion 9 satisfied.
+  **Every one of the seven was caught by the independent reviewer, none by self-check** — two of them
+  changed the verdict itself. Rounds 1–2 overturned the closure claim; 3–5 each found stale
+  dispositions surviving in documents the previous fix had missed; 6 was clean.
+  **Measured execution-affecting surface: four files** (`en.json`, `aftercare/page.tsx`,
+  `preparation/page.tsx`, `process/page.tsx`) against an **expected zero** — an owner-directed
+  deviation logged in the task's Review Granularity section, taken after the verification half was
+  recorded. *(This opening previously read "Zero execution-affecting files — a verification pass, as
+  scoped", which stopped being true when the owner directed the C11 fix into this session; caught by
+  cross-review round 4.)*
+  The sweep's own harness (throwaway Playwright, scratchpad, not committed) drove a **production
+  build** with a **mocked** `POST /api/request` — accurate history: the mock is why C5's persistence
+  half was initially unverifiable, and the owner later closed it with one real submit (below).
+  **Seven criteria verify on fresh evidence — C1, C2, C3, C4, C6, C7 (first half), C8 (second half)** —
+  each measured in this session, none accepted on the strength of "Item N implemented it". Highlights:
+  invalid submit focuses the first invalid field and renders **7** inline messages with **0** toast-like
+  nodes; the Instagram fallback is **absent after failure 1 and present after failure 2**, rendering
+  Appendix A.4 verbatim; all five contact methods reveal exactly one value field, with **Telegram's
+  rules confirmed distinct from Instagram's** (`"1abc"` and 4-char `"abcd"` both rejected); the Success
+  guard redirects to `/en` on both reload and direct visit; FS §4.3's retry rule holds in **both**
+  directions — Retry on transport failure, remove-only ("Over 4 MB — use a smaller image.") on
+  validation rejection.
+  **The delegated half returned 2026-07-27 and found TWO FAILURES** — the thread reached `consensus`
+  (`research/RESEARCH_2026-07-27_item13-static-criteria-and-item17-rereview.md`). C9, C12, C13, C7b and
+  C8a verify. **C10 and C11 FAIL:**
+  - **C10 — `FAILS` OVERTURNED to `VERIFIES` on re-review (2026-07-27).** Home renders the primary CTA
+    twice (`page.tsx:55`, `:172`) — **which is what the owner decided.**
+    `PROJECT_DECISIONS.md:1429-1437` (STRAT, 2026-07-13) interprets FS §2's exact sentence: cardinality
+    governs the primary **action**, not the count of button instances; `:1425-1428` *mandates* the Hero
+    instance. The first `FAILS` was sound within the brief it got — **my brief omitted
+    PROJECT_DECISIONS.md.** The owner recalled the decision from memory; it checked out. On re-review
+    Codex ruled `VERIFIES` and added the argument neither of us had: **the literal reading is
+    self-defeating**, since it would make the separately-mandated Hero placement impossible to satisfy.
+    Residual defect was a **doc desync, not code** — the interpretation lived only in the decision log,
+    so every fresh reader re-derived the false failure. **FIXED 2026-07-27, owner-approved (PRD §9):**
+    FS §2's cardinality sentence now governs the primary *action*, with a dated action-vs-instance
+    clarification paragraph and the mandated Hero instance stated; criterion 10 permits repeated
+    instances of the same action; `PROJECT_DECISIONS.md`'s 2026-07-13 bullet now points at the FS.
+    Descriptive only — no behavior changed, no code touched.
+  - **C11** — the touch-up policy is stated in full on **two** pages with no cross-link: Process
+    `en.json:45` and Aftercare `en.json:98`. FS §5 makes Process canonical for booking policy with the
+    teaser column `—`, and FS §3.7 scopes Aftercare to healing only. Touch-up *pricing* is booking
+    policy.
+
+  C11 additionally violates an explicit decision — `PROJECT_DECISIONS.md:1731-1736` (2026-07-13) puts
+  touch-up booking terms and pricing **exclusively** on Process, drawn *because* "touch-ups are the one
+  aftercare topic that naturally drifts toward booking language". The drift was predicted, the line
+  drawn, and the copy crossed it. Clean asymmetry: **C10's implementation matches its decision; C11's
+  contradicts its own.** A second Codex pass re-checked Preparation and found no other §5 duplication.
+  Both filed to **`tasks/STAGE_6_TASK_19_fs6_c10_c11_fixes.md`** (`draft`, rescoped): C10 becomes an FS
+  amendment, C11 keeps its copy fix. **The sweep did not fix either, by design** — a session that both
+  finds and fixes a defect loses the independence that makes its other twelve verdicts worth anything.
+  **The FS §2/criterion-10 amendment was approved and applied 2026-07-27** — TASK_19's C10 half is
+  complete. **One owner decision remains:** for C11, delete the two Aftercare policy bullets (compliant
+  today, no amendment) or keep a link-only pointer behind a narrow FS §5 footnote (executor recommends
+  this — the Aftercare reader is a booked client mid-healing, and two copies of a pricing policy
+  will diverge). Note Process's touch-up section has **no anchor** today, so a precise pointer needs one.
+  **Item 17's re-review (CO-3) is DISCHARGED** — "no follow-up work needed before release, no
+  production-code finding", by a reader with no exposure to its 9-round loop; every secret consumer
+  deep-imports `@/config/env`, no duplicate identity literals remain, and the partial config boundary
+  was judged coherent. Closes the PROJECT_BACKLOG.md entry.
+  **Honeypot sized (external research, carried by the owner):** *effectively unreachable for a normal
+  visitor*, with one narrow qualification kept — an explicitly-invoked 1Password Identity fill. Ordinary
+  page load, autofill and login-credential fill are unreachable. **Closed inside the stage gate** by
+  the live submit below — a real visitor's submission was not silently discarded.
+  **Criterion 5 was split at first, not simply "inherited".** `git log --since=2026-07-17` over the
+  server path returns three commits, so it did not stand still since Item 3's live submit: the
+  five-method model (`0b38243`, same day) is covered, but **free-text placement** (`552c8af`, 18.07)
+  and — more importantly — **the submit honeypot + per-IP quota** (`d5e8ae3`, 22.07) had no live
+  evidence. A honeypot trip returns a real-shaped 6-char code and persists nothing, which a mocked
+  submit cannot see. Also recorded: **the FS §4.6 code format is asserted by no test** in the
+  408-test suite. **All three segments were closed INSIDE the stage gate by the live production
+  submit `PK79WU` (2026-07-27) — not deferred to launch.** *(This sentence previously read "closed at
+  launch by a new owner pre-release item, not by holding the stage" — the disposition cross-review
+  round 1 rejected. It survived the round-2 reconciliation and was caught by round 3.)*
+  **Mobile QA, 6 routes × 4 widths:** no overflow anywhere; **0px** nav/content occlusion at every
+  width with each page scrolled to the bottom; the 320px form sound. One real finding — **tap-target
+  heights** (nav links **28px**, FAQ links 21px, map links 36px, Instagram icons 16×16). Outside FS §6,
+  so it blocks nothing; filed into **Stage 7** with the measurements.
+  **Placeholder sweep: 10 `__asset_TODO` / 3 `__meta_TODO` / 0 `__intro_TODO`**, matching the readiness
+  inventory. It **fails as expected and does not block stage closure** — the gate's own self-test
+  passing. PROJECT_PRODUCTION_READINESS.md's two "the sweep must fail" lines, which stated it as a
+  *stage-closure* condition, were **corrected to launch-gate wording** (owner-approved); Item 16 CO-3's
+  prohibition is unchanged.
+  `pnpm qg` exit 0 (structure · lint 0 errors · typecheck · 33 files/408 tests · build ·
+  check:metadata); `pnpm project:status` 0 integrity errors.
+  **Final recommendation: `STAGE 6 READY TO CLOSE` — all 13 FS §6 criteria verify.** (The owner closes
+  the stage; this task only recommends.) The path there is the evidence that the gate worked:
+  the sweep first recommended `READY TO CLOSE` while its own C5 row read
+  `NOT VERIFIABLE HERE (persistence)` — a self-contradiction in one document. **Cross-review round 1
+  blocked on it**, correctly, with the point I had missed: C5 was never *intrinsically* unverifiable,
+  it was made unavailable by the no-live-submit constraint, and **a constraint does not change what a
+  criterion requires**. The owner then chose the option that keeps the gate intact instead of softening
+  it: **one live end-to-end submit on production, reference code `PK79WU`** — the request persisted and
+  the code matches FS §4.6 exactly (6 chars, no `O`/`0`/`I`/`1`). That single submit closed all three
+  unverified server segments: persistence, the §4.6 format (**asserted by no test in the suite** — this
+  is its first evidence from outside a mock), and the honeypot/quota path added by `d5e8ae3`, which had
+  post-dated every prior live submit. **The row is permanent test data** — no DELETE grant on
+  `requests` (CO-5). **Cross-review round 2** then caught that the round-1 correction had been applied
+  to the headline but not to five other operative passages here and in this log; reconciled 2026-07-27.
+  **A pattern worth keeping, now three-for-three:** "the same CTA isn't a *competing* CTA", "a pointer
+  isn't a *teaser*", and now letting "the owner told me not to" stand in for "the criterion is
+  satisfied". Each time: reaching for a framing that makes an inconvenient rule not apply instead of
+  naming the gap and escalating. All three were caught by independent review, none by self-check.
+  **Both failures were fixed in-session on owner instruction (2026-07-27).** C11: Aftercare's two
+  policy bullets replaced by one "when a touch-up is appropriate" line (which the recorded boundary
+  expressly permits, and the old copy never provided) plus a link-only pointer to
+  `/process#touch-ups`; a `touch-ups` anchor was added to Process, which had none. Live-verified
+  across all six public routes — **the policy text now appears on exactly one**, the anchor lands on
+  the heading, no overflow at 320. C10: resolved by FS amendment, no code.
+  **Owner also requested an addition no criterion required:** Preparation now ends with a soft pointer
+  into the Aftercare guide, continuing its own last line ("…explain next steps"). Preparation was a
+  dead end; both pages serve the same booked client at consecutive moments. FS §3.6 amended to record
+  that a link-only pointer is permitted there.
+  **Scope deviation logged honestly: the sweep changed 4 execution-affecting files**, against an
+  expectation of zero. Owner-directed after the verification half was complete. Mitigation: twelve of
+  thirteen verdicts were recorded before any source changed, and C11's post-fix verdict is a
+  repeatable browser measurement, not the fixer's self-assessment.
+  **A stale-server trap nearly produced a false pass.** The first post-fix verification returned "no
+  links, no anchor, policy still present" — the running server was the pre-edit build. Caught because
+  the result contradicted the diff; fixed by killing the port, confirming it dead, rebuilding, and
+  checking the startup log for `EADDRINUSE`. Same class as Item 18's trap.
+  Not blockers: the placeholder sweep (launch gate), tap targets (Stage 7), physical-device checks
+  (pre-launch). **C5's server segments are NOT among these** — they were closed *inside* the stage
+  gate by the live submit, not deferred to launch.
+  *(Both sentences above previously said C5 closes at launch and gave a TASK_19 → 13/13 sequence.
+  Cross-review round 2 flagged that a session reading this entry would receive two contradictory
+  instructions — corrected 2026-07-27. TASK_19 is `superseded`; the cross-review has run.)*
+  **Three process notes worth keeping.** (1) A delegated reviewer is only as good as the document set
+  it is handed — the C10 round-trip was caused by my incomplete brief, not by Codex, whose reasoning
+  was sound within it. (2) **Twice** in this sweep I reached for a definitional distinction to make an
+  inconvenient rule not apply — "the same CTA isn't a *competing* CTA", then "a pointer isn't a
+  *teaser*"; both were rejected on re-review, correctly. The tell is reaching for terminology to bypass
+  a rule instead of naming the rule as unclear and escalating it. (3) The FS-vs-decision-log desync is
+  a live trap that has now cost one full round-trip, and it will recur on every future sweep until the
+  interpretation is folded into the FS.
 - **Stage 6 Item 18 — visual consistency pass — DONE (IMPL, 2026-07-26).**
   `tasks/done/STAGE_6_TASK_18_visual_consistency.md`. Scope items 5, 7, 8, 10, 11 executed in one block
   (item 9 — the hero — had already been discharged out of order). **12 execution-affecting files,

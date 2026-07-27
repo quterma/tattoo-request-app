@@ -22,7 +22,9 @@ Not defined here: visual design, styling, component architecture, implementation
 
 Primary navigation, identical and persistent on all public pages: **Home, Process, Request, Location** (PRD D9). No secondary navigation hierarchy. Preparation and Aftercare are not in the primary navigation; they are reached by the artist-sent direct URL (primary path) and by links inside the Process page's FAQ as in-product fallback discovery (PRD §5). The FAQ links do not make these pages part of the primary navigation and do not appear as a fifth/sixth nav item.
 
-Every page has exactly one primary CTA. Secondary contextual links are allowed only when they help complete the current task and must never compete with it.
+Every page has exactly one primary CTA action. The same action may be repeated on a page for scroll convenience; a different or competing primary action is not allowed. Secondary contextual links are allowed only when they help complete the current task and must never compete with it.
+
+**Action-vs-instance clarification (owner decision 2026-07-13, folded into this section 2026-07-27).** The cardinality rule above governs the primary *action* a page offers, not the literal count of button instances on screen. Two instances of the identical "Start Your Request" action (Home's Hero and page end) are the same action repeated for scroll convenience on a long mobile page, not two competing CTAs; a *different* primary action would violate the rule, a repeated instance of the *same* one does not. Home's double instance is required, not merely tolerated: the primary CTA block appears once at the end of every content page, and **on Home an additional CTA appears at the end of the Hero block**, for visitors ready to act immediately. Full record incl. rationale: PROJECT_DECISIONS.md — "Interpretation of 'one primary CTA per page'". This paragraph is **descriptive**: it changes no behavior and was added because the interpretation previously lived only in the decision log, so a reader of this document alone re-derived a false acceptance failure (Item 13's sweep did exactly that, twice).
 
 | Page | Primary CTA |
 | --- | --- |
@@ -79,6 +81,8 @@ Purpose: minimize arrival friction. Must contain: address, map, studio photos, t
 ### 3.6 Preparation
 
 Purpose: reduce repetitive pre-session questions; audience is booked clients (PRD §5). Scope: appointment preparation only. No pricing or booking content.
+
+**Closing pointer to Aftercare (owner decision 2026-07-27).** Preparation ends with a link-only pointer to the Aftercare guide, continuing its own last line ("…I'll apply aftercare protection and explain next steps") into the page that owns those steps. It carries **no aftercare content** — the scope rule above is unchanged; it routes a reader whose next question is answered on the next page. Same rule as §5's link-only pointers. Rationale: both pages serve the same booked client at consecutive moments, and Preparation was otherwise a dead end.
 
 ### 3.7 Aftercare
 
@@ -238,6 +242,8 @@ Concise statement adjacent to the Submit control (§A.3).
 
 FAQ exists once, on Process. Preparation/Aftercare may use question-style sections, but any question belonging to those topics lives only there.
 
+**Link-only pointers (owner decision 2026-07-27).** A page may carry a **link-only pointer** to a topic's canonical page even where the table's "Teaser allowed on" column is `—`, provided it **restates no content of that topic** — no terms, figures, or conditions. A pointer is not a teaser: a teaser summarizes, a pointer only routes. This is licensed because the `—` was written to prevent duplication, and a pointer is the opposite of duplication — it is the mechanism that lets a topic keep exactly one instance while remaining reachable from the page where a reader's question actually arises. Concretely: **Aftercare may link to the canonical touch-up policy on Process** without restating any policy terms. Prompted by Item 13's sweep, which found the touch-up policy stated in full on both pages (acceptance criterion 11).
+
 **Hierarchy and length.** Every page: primary task → supporting information → CTA. Short paragraphs; expandable details where appropriate; no large uninterrupted text blocks; no unrelated content.
 
 ---
@@ -255,7 +261,7 @@ Stage 6 public website is complete when every statement verifies true:
 7. Submission is impossible without the eligibility checkbox; the rendered age threshold matches the owner-configured value.
 8. Each upload category displays its motivation card per §4.4; per-file failures never block submission.
 9. Primary navigation on every public page is exactly Home / Process / Request / Location; Preparation and Aftercare are absent from it but reachable at stable URLs.
-10. Every page presents exactly the primary CTA from §2 and no competing CTA.
+10. Every page presents exactly the primary CTA action from §2 and no competing primary action; repeated instances of that same action are permitted (§2, action-vs-instance clarification).
 11. Each topic in §5's table has exactly one long-form instance site-wide; Home contains only teasers for Pricing, Good Fit, and Process.
 12. All visitor-facing copy is English only (PRD D10).
 13. The public site exposes no booking, payment, account, chat, or lookup functionality (PRD §4).

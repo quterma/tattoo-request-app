@@ -390,13 +390,50 @@ verifies them before the Item 13 acceptance sweep, and none of them gates any ta
   the item above; marker `__meta_TODO` (see Pre-Deploy Content Swaps below).
 - [ ] **Item 16 CO-3 — no generated artwork survives to launch.** The accepted risk behind every
   placeholder: AI-generated "tattoo-like" images would present non-existent work as the artist's.
-  The mechanism is the marker sweep below, and **Item 13's acceptance sweep must fail while any
-  `__asset_TODO` remains**. Source: `tasks/done/STAGE_6_TASK_16_placeholder_assets.md`, CO-3.
+  The mechanism is the marker sweep below: **no public launch while any `__asset_TODO` remains.**
+  Source: `tasks/done/STAGE_6_TASK_16_placeholder_assets.md`, CO-3.
+  **This is a LAUNCH gate, not a stage-closure gate** (STRAT decision 2026-07-27, applied by Item 13).
+  The earlier wording — "Item 13's acceptance sweep must fail while any `__asset_TODO` remains" —
+  conflated the two. None of FS §6's thirteen acceptance criteria mentions images, assets, or
+  placeholders, and Stage 6's exit criterion is that those criteria verify true; requiring real
+  photography to close Stage 6 would deadlock it against Stage 7, which runs *after* Stage 6 closes
+  and *against* that photography. The prohibition on shipping generated artwork is unchanged and
+  fully in force — it simply gates launch, which is where it always belonged.
 - [ ] **Item 7 CO-3 — real studio photos** replace the three `__asset_TODO` Location interiors.
   Source: `tasks/done/STAGE_6_TASK_07_location_map_embed.md`, CO-3.
 - [ ] **Item 6 CO-3 — artist's own copy pass** over the shipped public text. The copy was research-
   derived and owner-approved, not artist-authored; this is the artist re-reading it live. Source:
   `tasks/done/STAGE_6_TASK_06_process_content.md`, CO-3.
+- [x] **One live end-to-end submit — DONE 2026-07-27, reference code `PK79WU`.** Added by Item 13's
+  acceptance sweep as a pre-release action, then **performed during the sweep's cross-review** after
+  round 1 rejected deferring C5's persistence evidence to launch. The request persisted and the code
+  matches `^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{6}$` — the first evidence of the real reference-code
+  format from outside a mock. Closed all three segments below. **The row is permanent test data** (no
+  DELETE grant on `requests`); do not mistake it for a client request.
+  *Residual launch-time check, much narrower than the original item:* re-run one submit **after** the
+  production env changes still pending above (Item 12 CO-5's system-env flip, the Item 10 CO-4 env
+  cleanup), since those alter the deployed runtime `PK79WU` was verified against.
+  Original scope, kept because it explains what the submit established:
+  Item 13 verified the submit flow with a **mocked** `POST /api/request` — an owner decision, to avoid
+  writing undeletable rows to the production database — so three segments of the real path carry no
+  live evidence. `git log --since=2026-07-17` over `src/bff/`, `supabase/migrations/`,
+  `src/services/requests.ts` and `app/api/request/` shows the server path did **not** stand still
+  since the last live submit (Item 3, 2026-07-17):
+  - **Free-text placement** (`552c8af`, 2026-07-18) has never been driven end-to-end to the database.
+    It touched no server-path file, so the risk is validation/serialization, not untested server code.
+  - **The submit honeypot and per-IP quota** (`d5e8ae3`, 2026-07-22) post-date every live submit. On a
+    honeypot trip `app/api/request/route.ts:67-71` returns a **real-shaped 6-char reference code and
+    persists nothing** — correct anti-bot behavior, but a false positive on a real visitor would be
+    indistinguishable from success and silently lose the request.
+  - **The FS §4.6 reference-code format** is enforced by
+    `supabase/migrations/20260716184220_stage6_contact_model.sql` and asserted by **no test** in the
+    suite; every `referenceCode` in tests is a fixture.
+
+  One real submit — with free-text placement, through the deployed site — closes all three at once, at
+  the moment a test row costs nothing. Confirm: a row lands, its `reference_code` matches
+  `^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{6}$`, the placement text persists verbatim, and the honeypot did
+  not trip. Note the service-role key has no DELETE grant on `requests` (Item 3 CO-1), so the row stays
+  as test data.
 - [ ] **Physical-device verification** — the checks no tool in this repository can perform. Note
   that `pnpm shot` (headless Chromium, added by `TOOLING_TASK_02`) covers rendered layout at named
   viewport widths but is **not** a device: it does not verify touch targets, real iOS/Android tab
@@ -445,7 +482,11 @@ grep -rn "__meta_TODO\|__intro_TODO\|__asset_TODO" app/ src/ public/
   fixed widths, not a real browser's tab chrome — so this remains a physical-device check. Verify
   before public launch, alongside the existing Item 4B mobile-device gap below.
 
-The Item 13 stage-closing acceptance sweep must fail while any of the three markers remain.
+**No public launch while any of the three markers remain.** (Corrected 2026-07-27 by Item 13: this
+previously read "the Item 13 stage-closing acceptance sweep must fail while any of the three markers
+remain", which made a launch protection into a stage-closure condition — see Item 16 CO-3 above for
+why the two are different. Item 13 ran the sweep, recorded **10 `__asset_TODO` / 3 `__meta_TODO` /
+0 `__intro_TODO`**, and reported it as a launch blocker.)
 Renaming the three markers into one shared prefix was considered and rejected (Stage 6 Item 17) —
 they are embedded across many done tasks/reviews and the combined grep already gives one-step
 discovery without that churn.

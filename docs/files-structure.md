@@ -145,7 +145,11 @@ tattoo-request-app/
 │       │       ├── RESEARCH_2026-07-25_review-round-economics.md
 │       │       ├── RESEARCH_2026-07-26_vercel-og-image-invariant.answer.md
 │       │       ├── RESEARCH_2026-07-26_vercel-og-image-invariant.md
-│       │       └── RESEARCH_2026-07-26_vercel-og-image-invariant.request.md
+│       │       ├── RESEARCH_2026-07-26_vercel-og-image-invariant.request.md
+│       │       ├── RESEARCH_2026-07-27_c10-decision-conflict-and-c11-fix.md
+│       │       ├── RESEARCH_2026-07-27_item13-honeypot-autofill.answer.md
+│       │       ├── RESEARCH_2026-07-27_item13-honeypot-autofill.request.md
+│       │       └── RESEARCH_2026-07-27_item13-static-criteria-and-item17-rereview.md
 │       ├── reviews/
 │       │   ├── .gitkeep
 │       │   └── done/
@@ -181,7 +185,8 @@ tattoo-request-app/
 │       │       ├── REVIEW_2026-07-26_stage6-item16-round2-image-wiring.md
 │       │       ├── REVIEW_2026-07-26_stage6-item18-blockA-tokens-primitives.md
 │       │       ├── REVIEW_2026-07-26_stage6-item18-blockB-pages-form-spacing.md
-│       │       └── REVIEW_2026-07-26_tooling-task-02-playwright-screenshots.md
+│       │       ├── REVIEW_2026-07-26_tooling-task-02-playwright-screenshots.md
+│       │       └── REVIEW_2026-07-27_stage6-item13-acceptance-sweep-verdict.md
 │       └── tasks/
 │           ├── META_TASK_01_framework_consolidation.md
 │           ├── STAGE_6_STRAT_BRIEF.md
@@ -199,10 +204,12 @@ tattoo-request-app/
 │               ├── STAGE_6_TASK_10_upload_abuse_mitigation.md
 │               ├── STAGE_6_TASK_11_public_error_404.md
 │               ├── STAGE_6_TASK_12_favicon_og_seo.md
+│               ├── STAGE_6_TASK_13_acceptance_sweep.md
 │               ├── STAGE_6_TASK_15_prep_aftercare_discovery.md
 │               ├── STAGE_6_TASK_16_placeholder_assets.md
 │               ├── STAGE_6_TASK_17_studio_config_extraction.md
 │               ├── STAGE_6_TASK_18_visual_consistency.md
+│               ├── STAGE_6_TASK_19_fs6_c10_c11_fixes.md
 │               ├── TOOLING_TASK_01_project_status_command.md
 │               └── TOOLING_TASK_02_playwright_screenshots.md
 ├── public/

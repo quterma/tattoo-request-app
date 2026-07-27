@@ -55,7 +55,7 @@ export default function ProcessPage() {
         </Stack>
       </Section>
 
-      <Section density="tight">
+      <Section id="touch-ups" density="tight" className="scroll-mt-20">
         <Stack gap="gap-1.5">
           <h2>{t("touchUps")}</h2>
           <p className="whitespace-pre-line text-muted-foreground">
