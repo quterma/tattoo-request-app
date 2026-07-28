@@ -187,9 +187,12 @@ tattoo-request-app/
 │       │       ├── REVIEW_2026-07-26_stage6-item18-blockB-pages-form-spacing.md
 │       │       ├── REVIEW_2026-07-26_tooling-task-02-playwright-screenshots.md
 │       │       ├── REVIEW_2026-07-27_push-ban-rule.md
-│       │       └── REVIEW_2026-07-27_stage6-item13-acceptance-sweep-verdict.md
+│       │       ├── REVIEW_2026-07-27_stage6-item13-acceptance-sweep-verdict.md
+│       │       └── REVIEW_2026-07-28_stage7-concept-generation-constraints.md
 │       └── tasks/
 │           ├── META_TASK_01_framework_consolidation.md
+│           ├── STAGE_7_STRAT_BRIEF.md
+│           ├── STAGE_7_TASK_01_visual_concept.md
 │           └── done/
 │               ├── STAGE_6_STRAT_BRIEF.md
 │               ├── STAGE_6_TASK_01_upload_flow_architecture.md

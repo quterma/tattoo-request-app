@@ -2791,6 +2791,93 @@ caveat someone has to remember to read.
 
 ---
 
+# Stage 7A visual direction and the theming boundary — decided 2026-07-28
+
+## The direction
+
+**Cyberpunk — neon on dark**, across the public site and the admin surfaces. Chosen by the owner
+after four directions (cyberpunk, Japanese calligraphic, editorial/gallery, minimal) were costed
+against the four surfaces the concept has to survive: the Home hero, a content page, `/request` at
+375px in its seven-error state, and the admin request list.
+
+**The session deliberately recommended none of them.** The owner had named cyberpunk before any
+analysis existed and identified the anchoring risk himself — a session that simply formalizes the
+named option never examines the alternative, and nobody notices. A recommendation from the agent
+would have reproduced that failure with the agent's taste instead of the owner's.
+
+## One theme ships; the architecture admits more
+
+The MVP ships **one** theme. The architecture must nonetheless allow a second to be added without
+touching layout — switched by a **build-time config constant**, changed by commit, with theme
+values living in one compact place rather than spread across the site.
+
+- **The artist switches it, not the visitor.** A visitor-facing switcher would need state,
+  persistence and no-flash handling, none of which the product asks for.
+- Uses the owner named for later, none of them committed to here: an admin-selected theme for the
+  visitor-facing page, A/B testing one aesthetic against another, and a per-client design were this
+  ever to become a SaaS.
+- **A UI handle for switching is an open question, deliberately not decided.**
+
+## What a theme may vary — stated as a property, not a list
+
+**A theme varies how a surface looks. A theme never varies where anything sits or how much space it
+occupies.** Colour, typeface, surface treatment and decorative imagery are appearance. Composition,
+block order, the page set, the navigation and `--nav-height` are position, and are fixed.
+
+The list form is a *consequence* of that property, not a second rule: heading sizes, spacing between
+blocks, corner radius, border width and interactive target size are **single site-wide values**.
+Stage 7A may retune each of them **once** (owner ruling, 2026-07-28, after cross-review found the
+generation prompt had frozen two dimensions `PROJECT_IMPLEMENTATION_PLAN.md:956-957` assigns to 7A);
+every theme then shares the result. None of them is ever a per-theme value.
+
+Stating the boundary as a property is deliberate: a list of values would need amending the first
+time a concept proposes different headings, and an amendment nobody remembers to make is how a
+specification silently stops describing the system.
+
+### Narrow cases, named because they look like appearance and are not
+
+- **A typeface moves layout even at a fixed scale.** Different families have different x-heights and
+  metrics, so the same `1.75rem` renders at a different apparent size and wraps differently.
+- **Border width grows inward.** Tailwind sets `box-sizing: border-box`, so a 2px border does not
+  change an element's outer size but does shrink its content area — visible on a 320px input.
+- **Uppercase and letter-spacing change line width**, hence wrapping, hence page height. Both are
+  standard cyberpunk heading treatments.
+- **"Imagery" is two different things.** Real photography of tattoos and the studio is shot once in
+  7B and is not themeable in practice; decorative chrome (hero treatment, textures, favicon, OG) is.
+
+### Re-verification attaches to the second theme, not to now
+
+Overflow (`pnpm shot`, 6 routes × 4 widths) and 200% resize must be re-measured **when a second
+theme is added** — not as a standing rule while one theme exists. With nothing to compare against,
+a standing obligation has no subject, and an obligation with no subject is exactly what left Stage 6
+carrying three undischargeable "manual browser check" items.
+
+## The tap-target floor: 44 × 44 CSS px
+
+With the WCAG 2.2 SC 2.5.8 exception for **links inline in a sentence**, which must not be enlarged
+— enlarging them breaks the paragraph.
+
+- Four of the five heights measured by Item 13 are in scope: navigation links (28px), map links
+  (36px), Instagram icon links (16×16) and the `/request` selects (39px). The fifth — Process's
+  Preparation/Aftercare links at 21px — is exempt: they are rendered by `t.rich` inside a `<p>`
+  (`app/[locale]/(public)/process/page.tsx:101-106`).
+- **`--nav-height` stays 3.5rem.** 44 fits the existing 56px bar with 6px of clearance, so the link
+  box grows inside the bar and nothing below it moves. 48 (Material) would leave 4px and no room for
+  the theme's own padding or glow.
+- Decided **before** mockup generation, not after. The floor does not depend on the mockups, but the
+  mockups depend on the floor: deferring it would have let a generator faithfully reproduce a 28px
+  navigation link, and the gap would have surfaced only at specification time — after the comparison
+  round the owner paid for.
+
+## Not decided here
+
+The UI theme switcher; the two-column admin card grid
+(`PROJECT_IMPLEMENTATION_PLAN.md:1017-1018`, still open, with its own authorization); any change to
+composition or the page set (none in 7A); and every token value, which is derived from the chosen
+concept in the specification that follows, never invented ahead of it.
+
+---
+
 # Rule for Future Changes
 
 All architectural, product, or behavioral decisions MUST be recorded in this document.

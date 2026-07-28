@@ -28,6 +28,43 @@ planning pass before execution, exactly as Stage 6 did. See PROJECT_IMPLEMENTATI
 PROJECT_DECISIONS.md — "Stage 8 — Pre-Release and Launch created; the three-way split of
 'pre-launch'" (2026-07-27).
 
+**Stage 7A — first STRAT session, 2026-07-28.** Direction decided: **cyberpunk, neon on dark**, one
+theme shipping with an architecture that admits a second without touching layout; the theming
+boundary stated as a property (*a theme varies how a surface looks, never where anything sits*); the
+tap-target floor set at **44 × 44** with the inline-in-prose exception. Full record:
+PROJECT_DECISIONS.md — "Stage 7A visual direction and the theming boundary".
+
+**The source-of-truth gap that PROJECT_IMPLEMENTATION_PLAN.md:1057-1062 names is still open, and
+that is the plan, not a slip.** The specification is written *after* the owner's mockups exist, so
+its token values are derived from a chosen concept rather than invented before one. Order:
+concept → specification → item cut. Next action is the **owner's** — generate mockups against
+`tasks/STAGE_7_TASK_01_visual_concept.md` (`ready`), whose constraint list and six deliverables
+reached consensus in `reviews/done/REVIEW_2026-07-28_stage7-concept-generation-constraints.md`
+(2 rounds, **6 findings, all accepted, none rejected, none deferred** — every one raised by the
+independent reviewer, none by self-check).
+
+Three things from that session worth carrying, because each cost something real:
+
+- **The session's first plan was rejected by the owner, for ordering.** It asked him to approve the
+  theme architecture and the constraint table before anyone had discussed the visual concept —
+  agreeing the container without the contents. It also walked toward formalizing cyberpunk because
+  he had named it, which is the anchoring risk he flagged himself.
+- **Two of the six findings were the same defect class: a constraint the requested output could
+  satisfy while providing zero evidence for it.** The focus-ring rule (no requested screen showed a
+  focused control, and a static generator renders default states) and the tap-target floor (absent
+  from an enumeration that read as closed, so a generator could faithfully redraw a 28px navigation
+  link). Both would have surfaced only at specification time — after the comparison round the owner
+  paid for.
+- **A dependency was stated backwards and had to be corrected to the owner.** This session told him
+  the tap-target floor does not depend on the mockups and could wait for its own item. True — but
+  the *mockups depend on the floor*, so it had to be decided first. The correction reversed what he
+  had already been told.
+
+One correction ran toward the reviewer: Codex asked for all five measured tap-target shortfalls to
+be visibly resolved; four is right, because Process's Preparation/Aftercare links sit inline in a
+sentence and WCAG 2.2 SC 2.5.8 exempts exactly that. That correction was made by Claude and was
+**not itself re-reviewed** — recorded so its provenance is not mistaken for a two-sided check.
+
 **Closing Stage 6 is not a launch-readiness claim.** That is now structural rather than a caveat
 someone must remember: everything standing between here and launch belongs to a named stage with an
 owner.
